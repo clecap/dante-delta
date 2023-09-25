@@ -2,19 +2,17 @@
 # This is the .gitignore file inside of wiki-dir
 #
 # It is connected with repository dante-delta 
-  
 
+#
+# no apple artefacts
+#
 .DS_Store
 deprecated/
-*.zip
-mupdf-1.20.3-source/
-mupdf-1.20.3-source.tar
 
-vendor/
+# no installable stuff
+annos/node_modules
 
-#
-# private configuration data
-#
+# no private configuration data
 customize-PRIVATE.sh
 localhost-key.pem
 localhost.pem
@@ -26,14 +24,25 @@ mediawiki-PRIVATE.php
 AWS-PRIVATE.txt
 images/ssh-copy/bin/ssh_host_rsa_key.pub
 
+# no stuff we might produce ourselves
+log/mylog
+log/errors
+LOGFILE
+ERRORLOG
+
 # the content directories in volumes are generated locally
+
+##
+## IMPORTANT
+##
+#
+#  We have to exclude everything from Mediawiki
+#  and we have to include all deltas which must end up in dante-delta
+#
 
 cache/
 docs/**
 extensions/**
-
-
-
 external-services/**
 includes/**
 images/**
@@ -44,14 +53,19 @@ resources/**
 skins/**
 tests/**
 vendor/**
-
 parsifal-cache/
 
 .git/
 
 *
 
+##
+## When we change this here we must also change git-files-EDIT-THIS-FILE.sh
+##
+
+
 ### Files which we must include
+
 
 !README-dantepatch.md
 !includes/import/WikiImporter.php
