@@ -7,12 +7,9 @@ require_once ("DantePolyfill.php");                          // fill in some com
 require_once ("DanteSettings-development.php");
 #require_once ("DanteSettings-production.php");
 
-
-
 require ("mediawiki-PRIVATE.php");
 
-
-$wgLocaltimezone = 'UTC';  // wiki local time zone always is UTC; individual user may define his offset
+date_default_timezone_set( $wgLocaltimezone );
 
 // protocol specifiers which are accepted for external links
 // adjusted, since we want to have javascript: included for activating scripts
