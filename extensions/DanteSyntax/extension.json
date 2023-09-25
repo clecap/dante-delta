@@ -1,0 +1,14 @@
+{
+	"name":                 "DanteSyntax",
+	"author":               ["Clemens H. Cap"],
+	"url":                  "https://github.com/clecap",
+	"description":          "Improves some aspects of Mediawiki syntax",
+	"license-name":         "GPL-2.0-or-later",
+	"requires":             {"MediaWiki": ">= 1.35.6"},
+	"type":                 "other",
+  "AutoloadClasses":      {"DanteSyntax": "DanteSyntax.php"},
+  "Hooks": {
+    "ParserBeforeInternalParse": "DanteSyntax::onParserBeforeInternalParse"
+  },
+	"manifest_version": 2   
+}

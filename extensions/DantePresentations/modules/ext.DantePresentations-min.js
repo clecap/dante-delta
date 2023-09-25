@@ -1,0 +1,1 @@
+(()=>{window.present=function(n){!function(n){let e=n+"/extensions/DantePresentations/controller.html?presentation="+encodeURIComponent(window.location.href);console.log("Controller window for "+e),o=window.open(e,"controlWindow"),console.log("Controller window ",o)}(n)},window.show=function(o){window.open(o,"_top")};var o})();

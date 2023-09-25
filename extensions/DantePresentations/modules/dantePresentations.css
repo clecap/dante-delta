@@ -1,0 +1,20 @@
+
+
+/* some tests */
+aside {color:red; float:right;}
+
+/* standard styling of the preview mechanism */
+.previewFrameClass             {border:3px solid lightgray; box-sizing:border-box;}
+.previewFrameClass.hasFocus    {border:3px solid blue; border-radius:5px;}
+
+
+#inline-edit-preview-container                      {border: 5px solid lightgrey;}
+body.xhrPending #inline-edit-preview-container      {border: 5px solid red;}
+body.inputChanged  #inline-edit-preview-container   {border: 5px solid gold;}
+
+/* remove the "your edit has been saved" notification */
+.postedit {display: none;}
+
+
+
+

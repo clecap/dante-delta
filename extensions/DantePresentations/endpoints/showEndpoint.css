@@ -1,0 +1,41 @@
+
+
+/* styling to be applied to the inside of the preview frame */
+
+/* NOTE: This is included as preview-min.css */
+
+
+
+body {background-color: white;}
+
+body {margin: 0pt 10pt 0pt 10pt;}
+
+
+h1, h2, h3, h4, h5, h6 {display:none;}
+
+/* class seHide is showendpoint hidden */
+.seHidden {display:none;}
+
+
+
+html.sizeLimit  .parsifalContainer {max-width: none !important;}
+
+
+
+/* adaptations for projection and casting */
+.vector-body {font-size:40pt;}
+ul {list-style-image:none;}
+
+/* Have a bit more separation in showendpoint and allow growth of the diagrams
+  to full breadth of the window
+*/
+img.drawioShowendpoint {
+  max-width:5000px !important;
+  margin:20px 20px 20px 20px;
+}
+
+/* have a bit more separation */
+.parsifalContainer {
+  margin:40px 0px 40px 0px;
+  border: 1px dotted grey;
+}

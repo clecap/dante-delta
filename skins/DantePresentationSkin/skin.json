@@ -1,0 +1,53 @@
+{
+  "name":            "dantepresentationskin",
+  "version":         "1.0.0",
+  "author":          ["Clemens H. Cap"],
+	"url":             "https://github.com/clecap",
+	"descriptionmsg":  "dante-skin-name-desc",
+	"namemsg":         "dante-skin-name-name",
+	"license-name":    "GPL-3.0-or-later",
+	"type": "skin",
+	"requires": {"MediaWiki": ">= 1.38.0"},
+	 "AutoloadClasses": {
+		  "DantePresentationSkin":       "DantePresentationSkin.php",
+			"DantePresentationSkinHooks":  "DantePresentationSkinHooks.php"
+	 },
+	"ValidSkinNames": {  
+		"dantepresentationskin": {
+			"class": "DantePresentationSkin",
+			"args": [
+				{
+					"name": "dantepresentationskin",
+					"responsive": true,
+					"messages": ["example-no-categories", "sitetitle", "search", "otherlanguages", "tagline", "navigation-heading"],
+					"styles": [ "mediawiki.ui.icon", "mediawiki.ui.button", "skins.example.styles"],
+					"scripts": ["skins.example"]
+				}
+			]
+		}
+	},
+	"MessagesDirs": {"DantePresentationSkin": ["i18n"]},
+	"ResourceModules": {
+		"skins.example.styles": {
+			"class":     "ResourceLoaderSkinModule",
+			"features":  {"normalize": true, "elements": true, "content-tables": true, "content-links": false, "content-media": false, "content-links-external": false, "interface-message-box": true, "interface-category": false, "toc": true},
+			"targets": ["desktop", "mobile"],
+			"styles": ["TAKETHISOXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXUTresources/skin.less", "danteReveal.css"]
+		},
+		"skins.example": {
+			"targets": ["desktop", "mobile"],
+			"packageFiles": ["resources/skin.js"]
+		}
+	},
+  "ResourceFileModulePaths": { "localBasePath": "", "remoteSkinPath": "Example"},
+	"ResourceModuleSkinStyles": {"example": { "+ext.echo.styles.badge": "resources/extensions/echo.styles.badge.less" }
+  },
+	"Hooks": {
+		 "BeforePageDisplay":                 "DantePresentationSkinHooks::onBeforePageDisplay", 
+	   "OutputPageAfterGetHeadLinksArray":  "DantePresentationSkinHooks::onOutputPageAfterGetHeadLinksArray",
+		 "GetPreferences":                    "DantePresentationSkinHooks::onGetPreferences",
+		 "UserSaveSettings":                  "DantePresentationSkinHooks::onUserSaveSettings"
+		},
+		"DefaultUserOptions": {"presentation-theme": "black"},
+  "manifest_version": 2
+}

@@ -1,0 +1,9 @@
+
+
+
+.htmlform-tip {font-size: 0.92857143em; position:relative; top:-8px;}
+
+
+/* necessary to get a reasonable file length displayed in the file selector in special dante restore */
+.fileselector {width:600px; min-width:600px;}
+

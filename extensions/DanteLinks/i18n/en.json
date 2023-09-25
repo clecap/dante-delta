@@ -1,0 +1,7 @@
+{
+  "@metadata": {
+    "authors": ["Clemens H. Cap"]
+  },
+  "dantelinks-extensionname": "DanteLinks",
+  "dantelinks-desc": "Amends the piped link syntax"
+}

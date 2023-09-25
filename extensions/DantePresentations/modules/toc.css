@@ -1,0 +1,42 @@
+/***********************/
+/** TABLE OF CONTENTS **/
+/***********************/
+
+
+#toc         {float:right;position:fixed;right:-1px; top:59pt;width:30%;  overflow-y:scroll;   display:none; max-height: calc(100vh - 120px); }
+       
+/* adjust size */
+
+/* needed so that the ToC remains clickable and is not covered by some parsifal container */
+#toc {z-index:60000;}
+
+
+#toc{border:1px solid #a7d7f9}
+
+/* remove stupid architectural part from mediawiki */
+.toctogglespan {display:none;}
+
+div.toctitle    {user-select: none; cursor:pointer;}
+
+/* hovering over the "Contents" title of the ToC */
+div.toctitle:hover {background:lightblue;}
+
+/* the look and feel of the entire TOC */
+/* direction: rtl ensures that the resize handle is on the left, where there is space for the resize */
+/* display: none:  prevents displaying toc before we have resized it to dynamic size - this is done in helper.js */
+
+/* background-color:   #ffee99 */
+
+#toc         {width:550px; margin: 0px 0px 160px 0px; background-color:#ffee98; resize:horizontal; direction: rtl; display:none;}  
+
+/* not compensate again to have the correct place for the numbering */
+#toc > * {direction: ltr;}
+
+ /* ensure initial invisibility without flicker */
+#toc > ul    {display:none;}
+
+#toc.showtoc > ul {display:block;}
+
+.toclevel-1 > a {color:red !important; font-weight:bold;}
+.toclevel-2 > a {color:green !important; font-weight:bold;}
+.toclevel-3 > a {}

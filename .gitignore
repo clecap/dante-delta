@@ -1,0 +1,76 @@
+#
+# This is the .gitignore file inside of wiki-dir
+#
+# It is connected with repository dante-delta 
+  
+
+.DS_Store
+deprecated/
+*.zip
+mupdf-1.20.3-source/
+mupdf-1.20.3-source.tar
+
+vendor/
+
+#
+# private configuration data
+#
+customize-PRIVATE.sh
+localhost-key.pem
+localhost.pem
+login-key
+login-key.pub
+server.key
+server.pem
+mediawiki-PRIVATE.php
+AWS-PRIVATE.txt
+images/ssh-copy/bin/ssh_host_rsa_key.pub
+
+# the content directories in volumes are generated locally
+
+cache/
+docs/**
+extensions/**
+
+
+
+external-services/**
+includes/**
+images/**
+languages/**
+maintenance/**
+mw-config/**
+resources/**
+skins/**
+tests/**
+vendor/**
+
+parsifal-cache/
+
+.git/
+
+*
+
+### Files which we must include
+
+!README-dantepatch.md
+!includes/import/WikiImporter.php
+!DantePolyfill.php
+!DanteSettings.php
+!DanteSettings-production.php
+!DanteSettings-development.php
+!README-dante-delta.md
+!.gitignore
+
+### Directories which we want to include
+!extensions/DanteSynch
+!extensions/DanteHideSection
+!extensions/DanteBread
+!extensions/DanteLinks
+!extensions/DanteSnippets
+!extensions/DanteTree
+!extensions/DantePresentations
+!extensions/DanteBackup
+!extensions/DanteSyntax
+!skins/skinny
+!skins/DantePresentationSkin

@@ -1,0 +1,1 @@
+aside{color:red;float:right;}#previewFrame{border:1px solid lightgray;box-sizing:border-box;}#previewFrame.hasFocus{border:1px solid blue;border-radius:5px;}#inline-edit-preview-container{border:1px solid black;}body.xhrPending #inline-edit-preview-container{border:1px solid red;}

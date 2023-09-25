@@ -1,0 +1,94 @@
+/* Common styling for the Example skin */
+
+
+@import 'variables.less';
+@import 'mediawiki.mixins.less';
+
+
+* {font-family:Georgia;}
+
+
+/* chc */
+
+/* makes construction more specific and thus allows override of many defaults without using important  */
+body.skin-skinny {
+  h1  {color: green;}
+	h2  {color: blue;}
+
+
+	#mw-wrapper {max-width:95%;}
+
+}
+
+/* the title heading */
+#firstHeading {color:red;}
+.firstHeading {margin-top: 0;}
+
+
+
+html, body {margin:0px; padding:0px; border:0px;}
+
+
+
+html, body {overflow-x:hidden;}
+
+body {
+  transform-origin: 0 0;
+  // add prefixed versions too.
+}
+
+
+/*
+html, body {height: 100vh; width: 100vw; min-height: 100vh; min-width:100vw;}
+*/
+
+
+// Page layout
+
+#mw-wrapper {max-width: @width; margin: 0 auto; position: relative; padding: 1em;}
+
+
+#p-logo {display: none}
+
+.mw-body {position: relative; word-wrap: break-word;}
+
+
+.mw-indicators {float: right; margin: 1.5em 0 0 1em;}
+
+pre {overflow: auto; white-space: pre-wrap;}
+
+.center, .center * {margin: auto; text-align: center;}
+
+// Footer
+.mw-footer {
+	border-top: 1px solid @border;
+	// stylelint-disable-next-line no-descending-specificity
+	ul {
+		margin-top: 1em;
+	}
+}
+
+
+
+
+/* hide patrollnk */
+.patrollink {display:none;}
+.mw-editsection {display:none;}
+#mw-navigation {display:none;}
+#footer-icons {display:none;}
+
+#page-tools {display:none;}
+#p-personal {display:none;}
+
+
+// hidden stuff
+#page-tools h3,
+#p-search h3,
+#p-personal h3 {.mixin-screen-reader-text;}
+
+// user tools
+#user-tools {margin-top: 10px;}
+#p-user-interface-preferences,
+#p-notifications,
+#p-user-page {display: inline-block; vertical-align: middle;}
+#p-user-page a:before {content: '👤'; display: inline-block; padding-right: 10px;}

@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": ["Clemens H. Cap"]
+	},
+	"prefs-presentation": "Theme for slide presentation",
+	"prefs-presentation-theme-label" : "Theme for slis",
+	"prefs-dante": "Dantewiki",
+	"descriptionmsg":  "dante-skin-name-desc",
+	"namemsg":         "dante-skin-name-name",
+	"dante-skin-name-desc": "Skin for slide presentations in the DanteWiki",
+ "dante-skin-name-name" : "Beatrice"
+}

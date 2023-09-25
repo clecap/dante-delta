@@ -1,0 +1,329 @@
+<html>
+<head>
+
+<script src="multiScreen.js"></script>
+
+<script>
+var presentationURL;
+
+window.place = function place () {
+  let mainUrl = location.origin + location.pathname.replace("controller.html","external.html");
+  url = mainUrl + "?presentation="+presentationURL;
+  let subWindow = window.open (url, "_blank", "left=0,top=0,width=700,height=700");
+}
+
+
+window.openOnExternal = function (num, targetUrl) {
+  console.log ("opening on screen with number: " + num);
+  let mainUrl = location.origin + location.pathname.replace("controller.html","external.html");
+  url = mainUrl + "?presentation="+presentationURL;
+
+//  var screen = SCREENCONFIG.getScreenByNumber (num);
+
+var screen = {left:-200, top:0, width:800, height:800};
+
+  let subWindow = window.open (url, "monitor-"+num, `left=${screen.left},top=${screen.top},width=${screen.width},height=${screen.height}`,);
+
+  subWindow.postMessage("msg", {targetOrigin: "https://localhost",  delegate: "fullscreen"}); /////////////////////////////////////////////////////////////////// targetOrigin
+}
+
+
+ // below works, but we do not want to put *THIS* controller onto the other screen but the freshly generated window !!
+  /*
+  try {await document.getElementById("ifra1").requestFullscreen({ screen });} catch (err) {console.error(err.name, err.message);}
+*/
+
+  // geht ebenso, but opens as popup and not as fullscreen on the other window
+ // var mywin = window.open (url, "monitor-"+num, `left=${obj.left},top=${obj.top},width=${obj.width},height=${obj.height}`,);
+
+
+
+// takes a url, parses it and adds in the search parameters contained in obj
+// obj for example:   {useskin: "dantepresentationskin"}
+// it does a urlencoding of the values to be injected
+const addSearch = (url, obj) => {
+  // console.log ("entered addSearch: ", url, obj);
+  var nurl = new URL (url);
+  // console.log (nurl.search, nurl.search.length);
+  let separator = (nurl.search.length > 0 ? "&" : "?");
+  let add = "";
+  for (var key in obj) {
+    // console.log ("key: ", key);
+     add += (separator + key + "=" + encodeURIComponent (obj[key]));
+     separator = "&";    // independently of the initial value of the separator, from now on it will be "&"
+    }
+  var ret = nurl.origin + nurl.pathname + nurl.search + add + nurl.hash;
+  // console.log ("leave ", ret);
+  return ret;
+}
+
+
+// initialize display of the presentation the controller shall control in a controller-local iframe
+window.initFrames = function initFrames () {
+  let params = new URLSearchParams(document.location.search);
+  let basis  = params.get("presentation");
+
+  presentationURL = basis;
+  if (basis) {
+    document.getElementById ("ifra1").setAttribute ("src", addSearch (basis, {useskin:"dantepresentationskin"} ) );
+  //  document.getElementById ("ifra2").setAttribute ("src", addSearch (basis, {useskin:"dantepresentationskin", details:"notes"} ) );
+  //  document.getElementById ("ifra3").setAttribute ("src", addSearch (basis, {useskin:"dantepresentationskin"} ) );
+
+  //  document.getElementById ("ifra2").setAttribute ("src", addSearch (basis, {useskin:"dantepresentationskin", details:"notes"} ) );
+  //  document.getElementById ("ifra3").setAttribute ("src", addSearch (basis, {useskin:"dantepresentationskin", details:"overview"} ) );
+  }
+}
+
+
+function adjustIframeSize (frame, w, h) {
+  const presRatio = w / h;                                                    // ratio of the presentation; this is what we need
+  const iw = document.body.clientWidth, ih = document.body.clientHeight;      // size of the 
+  const iwScaled = Math.floor (presRatio * ih);                               // iframe width we would need when we kept the height at ih
+  const ihScaled = Math.floor ((1/presRatio) * iw);                           // iframe height we would need when we kept the width at iw
+  Object.assign (frame.style, {width: iw + "px" , height:ihScaled + "px" });
+
+  // Object.assign (ifra.style, {width: iwScaled + "px" , height:ih + "px" });  // good coding alternative
+}
+
+function showIframeSize () {  /** returns string describing size parameters of iframe  and enclosing body */
+  var obj = document.getElementById ("ifra1");
+  var out = "<table><tr>td>iFrameClientWidth</td><td>" + obj.clientWidth + "</td></tr><tr><td>iFrameClientHeight</td><td>" + obj.clientHeight + "</td></tr>" +
+    "<tr><td>bodyClientWidth</td><td>" + document.body.clientWidth + "</td></tr><tr><td>bodyClientHeight</td><td>" + document.body.clientHeight + "</td></tr></table>";
+  document.getElementById ("ifraDetails").innerHTML = out;
+}
+
+
+function gotMessageFromPresentation (ev) { /** receive information from screen presentation about its size */
+  // console.log ("Got message from presentation", ev.data);
+  var obj;
+  try { obj = JSON.parse (ev.data);} catch (x) { out = "Error parsing message received in controller.html"; console.error (out);   document.getElementById ("presDetails").innerHTML = out; return;}
+  obj = obj.param;
+  var out = "<table>";
+  for (var x in obj) {out += "<tr><td>" + x + "</td><td>" + obj[x] + "</td></tr>";}
+  out += "</table>";
+  document.getElementById ("presDetails").innerHTML = out;
+
+  adjustIframeSize (document.getElementById ("ifra1"), obj.bodyClientWidth, obj.bodyClientHeight);
+  adjustIframeSize (document.getElementById ("ifra2"), obj.bodyClientWidth, obj.bodyClientHeight);
+  adjustIframeSize (document.getElementById ("ifra3"), obj.bodyClientWidth, obj.bodyClientHeight);
+  showIframeSize ();
+
+}
+
+
+// var presentationConnection;
+
+/** start a presentation on an external monitor */
+window.startPresentationExternal =
+async function startPresentationExternal (path) {
+
+  let params = new URLSearchParams(document.location.search);
+  let basis  = params.get("presentation"); 
+  let url    = basis + "?useskin=dantepresentationskin";
+  const presentationRequest = new PresentationRequest([url]);
+  presentationRequest.start()
+    .then  ( 
+      connection => { 
+        window.presentationConnection = connection; 
+        console.log (' Connected to ' + connection.url + ', id: ' + connection.id, connection);
+        console.log (' window.access: ' , window.presentationConnection);       
+
+        window.onpagehide = () => { window.presentationConnection.terminate(); };
+        presentationConnection.addEventListener ("message", gotMessageFromPresentation);
+      })
+    .catch ( error      => { console.log ( error ); });
+
+}
+
+
+window.wireUp = function wireUp () { /** connect UI buttons with functions */
+  document.getElementById ("place1").onclick = () => {place();}
+  document.getElementById ("place2").onclick = () => {place();}  
+  document.getElementById ("place3").onclick = () => {place();}
+
+  // NOTE: presentationConnection does not accept objects
+  document.getElementById ("btnNext").onclick     = () => { presentationConnection.send ( JSON.stringify ( {command:"next"} ) );} ;  
+  document.getElementById ("btnPrevious").onclick = () => { presentationConnection.send ( JSON.stringify ( {command:"previous"} ) );} ; 
+  document.getElementById ("btnFirst").onclick    = () => { presentationConnection.send ( JSON.stringify ( {command:"first"} ) );} ; 
+  document.getElementById ("btnLast").onclick     = () => { presentationConnection.send ( JSON.stringify ( {command:"last"} ) );} ; 
+  document.getElementById ("btnBlank").onclick    = () => { presentationConnection.send ( JSON.stringify ( {command:"blank"} ) );} ; 
+
+  document.getElementById ("btnURL").onclick    = () => { 
+    console.log ("newone");
+    const newOne = new PresentationRequest(["https://blog.fefe.de"]); 
+    newOne.start();
+    
+    ;} ; 
+
+
+  // every time the iframe loads a fresh document, this fresh document is instrumented with handlers of those events which we want to send to the external screen presentation
+  document.getElementById ("ifra1").addEventListener ("load", () => {
+    const ifra = document.getElementById ("ifra1");
+    ifra.contentWindow.document.onmousemove =  (e) => {  // console.log ("mousemove", e.pageX, e.pageY); 
+      const partX = e.pageX / ifra.clientWidth;
+      const partY = e.pageY / ifra.clientHeight;
+      if (window.top.presentationConnection) {window.top.presentationConnection.send ( JSON.stringify ( {command:"pointer", param: { pageX: e.pageX, pageY: e.pageY, partX, partY}}));} }
+  
+    document.getElementById ("ifra1").contentWindow.document.addEventListener ("click", (e) => { console.log ("click");} );
+  
+  } );
+  // console.log ("wiredup");
+
+
+
+
+}
+
+
+
+
+
+</script>
+
+
+<style id="belongs-to-screenconfig">
+
+#container {width: 100%;}
+.status {}
+
+.positive {color:green;}
+.negative {color:red;}
+
+div.negative > div.negative , div.positive > div.positive {display:block;}
+div.positive > div.negative, div.negative > div.positive  {display:none;}
+
+#screenConfiguration {font-family:monospace;}
+
+table {padding:14px;margin:10px 10px 10px 0px; border: 1px solid black; border-collapse:collapse;}
+td {border:1px solid black; padding:6px;}
+.colZero {font-weight:bold; text-align:left;}
+.colNext {text-align:right;}
+
+details {padding:20px;margin:10px 10px 10px 30px; user-select:none;}
+summary {padding:20px;  user-select:none; font-family:arial;}
+</style>
+
+
+<style>
+html, body {border:0px; margin: 0px; padding:0px; width: 100%; height:100%;}
+
+#ifra1, #ifra2, #ifra3 {width:480px; height:350px}
+
+#cont1, #cont2, #cont3 {resize:horizontal; border:1px solid red; display:inline-block; overflow:hidden;}
+
+.warpper {display:block;}
+.wrapper iframe {display:block;}
+
+
+
+</style>
+
+</head>
+<body>
+
+<div id="container">
+  <div id="cont1">
+    <div class="wrapper">
+      <iframe id="ifra1"></iframe>
+      <button id="place1" title="Generate window with this content for placement to secondary monitors">Place</button>            
+    </div>
+  </div>
+  <div id="cont2">
+    <div class="wrapper">
+      <iframe id="ifra2"></iframe>
+      <button id="place2" title="Generate window with this content for placement to secondary monitors">Place</button>           
+    </div>
+    </div>
+  <div id="cont3">
+    <div class="wrapper">
+      <iframe id="ifra3"></iframe>
+      <button id="place3" title="Generate window with this content for placement to secondary monitors">Place</button>           
+    </div>
+  </div>
+</div>
+
+
+<button id="" onclick="startPresentationExternal()">Presentation on External Screen</button>
+
+<button id="btnFirst">First</button>
+<button id="btnPrevious">Previous</button>
+<button id="btnNext">Next</button>
+<button id="btnLast">Last</button>
+
+<button id="btnBlank">Blank</button>
+
+<button id="btnURL">URL (by entry)</button>
+<button id="">URL (by click)</button>
+
+<button id="">Highlighter</button>
+
+<p>
+This window controls a presentation in Dante Presentations.
+</p>
+
+<details>
+  <summary>Screen and Presentation Configuration</summary>
+<div id="screenConfiguration">
+  <div id="multiscreenAPI"  class="status">
+    <div class="positive">This browser supports the multi-screen API</div>
+    <div class="negative">This browser does not support the multi-screen API</div>
+  </div>  
+  <div id="presentationAPI"  class="status">
+    <div class="positive">This browser supports the presentation API</div>
+    <div class="negative">This browser does not support the presentation API</div>
+  </div>  
+  <div id="isExtended"  class="status">
+    <div class="negative">Currently there is only one screen connected to this computer</div>
+    <div class="positive">Currently there are several screens connected to this computer</div>
+  </div>
+  <div id="isPermitted"  class="status">
+    <div class="negative">You did not give permission to access the API</div>
+    <div class="positive">You gave the browser the permission to access the API</div>
+  </div>
+  <div id="details" class="status details"></div>
+  <div id="presDetails" class="status"></div>
+  <div id="ifraDetails" class="status"></div>
+</div>
+</details>
+
+<script>
+
+// ui function which fills in dynamically the UI with screen detail infos
+async function update (screenDetails) {
+    var text = "", ele = document.getElementById("multiscreenAPI").classList;
+  
+    multiScreenInfo ( [document.getElementById ("selector1"), document.getElementById ("selector2"), document.getElementById ("selector3")] );  // get the multiscreen info NOW
+    screenDetails.addEventListener('screenschange', (event) => {multiScreenInfo ( [document.getElementById ("selector1"), document.getElementById ("selector2"), document.getElementById ("selector3")])}); // and schedule to get them when config changes
+
+    ele = document.getElementById ("presentationAPI").classList;
+    if (window.screen.isExtended) {ele.add ("positive"); ele.remove("negative"); }  else  {ele.add("negative"); ele.remove("positive");}
+  
+    ele = document.getElementById ("isExtended").classList;
+    if (window.screen.isExtended) {ele.add ("positive"); ele.remove("negative"); }  else  {ele.add("negative"); ele.remove("positive");}
+  
+    let granted = false;
+    try {
+      const { state } = await navigator.permissions.query({ name: 'window-placement' });
+      console.log ("Permission API returned ", state);
+      granted = state === 'granted';} 
+    catch (ex) {console.error ("Exception quering permission API", ex);}
+    ele = document.getElementById ("isPermitted").classList;
+    if (granted) {ele.add ("positive"); ele.remove("negative"); }  else  {ele.add("negative"); ele.remove("positive");}
+  }
+  
+window.initFrames();
+
+window.wireUp();
+
+/* DELEGATIOn WOULD WORK LIKE THIS - KEEP CODE
+document.getElementById ("now").onclick = () => {
+  MYSUBWINDOW.postMessage("msg", {targetOrigin: "https://localhost", delegate: "fullscreen"}); /////////////////////////////////////////////////////////////////// targetOrigin
+  console.log ("did delegate");
+};
+
+*/
+
+</script>
+
+</body>
+</html>

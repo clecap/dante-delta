@@ -1,0 +1,19 @@
+<div id="mw-wrapper">
+  <div class="mw-body" id="content" role="main">
+    <div class="mw-indicators mw-body-content">
+		{{#array-indicators}}
+		<div id="{{id}}" class="{{class}}">{{{html}}}</div>
+		{{/array-indicators}}
+		</div>
+      <!-- html-title-heading -->
+			{{{html-title-heading}}} <!-- html-title-heading-END -->
+		TAGLINE:   {{html-hello}}  <div id="siteSub">{{msg-tagline}}</div>
+		<div class="mw-body-content">
+			<div id="contentSub">
+				SUBTITLE: {{{html-subtitle}}}
+			</div>
+			{{{html-body-content}}}
+		</div>
+		{{{html-after-content}}}
+	</div>
+</div>

@@ -1,0 +1,1560 @@
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpcGLAJi
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpcGLAJi
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpcGLAJi  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpcGLAJi 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpcGLAJi 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpcGLAJi 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpmIjpCm
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpmIjpCm
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpmIjpCm  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpmIjpCm 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpmIjpCm 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpmIjpCm 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpaKbcHj
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpaKbcHj
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpaKbcHj  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpaKbcHj 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpaKbcHj 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpaKbcHj 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpnmPbEl
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpnmPbEl
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpnmPbEl  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpnmPbEl 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpnmPbEl 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpnmPbEl 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpmmjdON
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpmmjdON
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpmmjdON  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpmmjdON 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpmmjdON 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpmmjdON 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpeMcFEi
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpeMcFEi
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpeMcFEi  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpeMcFEi 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpeMcFEi 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpeMcFEi 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpLNabJM
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpLNabJM
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpLNabJM  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpLNabJM 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpLNabJM 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpLNabJM 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpojaEJg
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpojaEJg
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpojaEJg  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpojaEJg 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpojaEJg 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpojaEJg 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpnjhdpk
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpnjhdpk
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpnjhdpk  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpnjhdpk 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpnjhdpk 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpnjhdpk 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpLkkbdE
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpLkkbdE
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpLkkbdE  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpLkkbdE 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpLkkbdE 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpLkkbdE 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpLipjNL
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpLipjNL
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpLipjNL  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpLipjNL 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpLipjNL 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpLipjNL 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpaaoEMI
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpaaoEMI
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpaaoEMI  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpaaoEMI 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpaaoEMI 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpaaoEMI 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpnDDlBE
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpnDDlBE
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpnDDlBE  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpnDDlBE 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpnDDlBE 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpnDDlBE 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpCLDfoI
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpCLDfoI
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpCLDfoI  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpCLDfoI 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpCLDfoI 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpCLDfoI 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpepBFff
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpepBFff
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpepBFff  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpepBFff 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpepBFff 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpepBFff 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpOjbDcF
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpOjbDcF
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpOjbDcF  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpOjbDcF 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpOjbDcF 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpOjbDcF 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpLDjbiG
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpLDjbiG
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpLDjbiG  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpLDjbiG 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpLDjbiG 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpLDjbiG 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpMoffAO
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpMoffAO
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpMoffAO  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpMoffAO 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpMoffAO 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpMoffAO 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpGeJFDg
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpGeJFDg
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpGeJFDg  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpGeJFDg 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpGeJFDg 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpGeJFDg 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpBdjhmo
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpBdjhmo
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpBdjhmo  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpBdjhmo 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpBdjhmo 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpBdjhmo 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpmFFMNP
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpmFFMNP
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpmFFMNP  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpmFFMNP 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpmFFMNP 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpmFFMNP 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpLNMEjO
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpLNMEjO
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpLNMEjO  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpLNMEjO 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpLNMEjO 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpLNMEjO 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpniMHdd
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpniMHdd
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpniMHdd  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpniMHdd 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpniMHdd ; rm -Rf /tmp
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpniMHdd 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phppoEeBe
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phppoEeBe
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phppoEeBe  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phppoEeBe 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phppoEeBe ; rm -Rf /tmp/*
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phppoEeBe 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpnBpAmF
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpnBpAmF
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpnBpAmF  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpnBpAmF 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpnBpAmF 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpnBpAmF 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpCKCfoo
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpCKCfoo
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpCKCfoo  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpCKCfoo 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpCKCfoo 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpCKCfoo 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpiAdkIa
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpiAdkIa
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpiAdkIa  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpiAdkIa 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpiAdkIa 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpiAdkIa 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpfbMkCb
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpfbMkCb
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpfbMkCb  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpfbMkCb 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpfbMkCb 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpfbMkCb 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phplHcGJn
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phplHcGJn
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phplHcGJn  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phplHcGJn 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phplHcGJn 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phplHcGJn 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpieCeoD
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpieCeoD
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpieCeoD  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpieCeoD 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpieCeoD 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpieCeoD 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phphBPiIh
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phphBPiIh
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phphBPiIh  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phphBPiIh 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phphBPiIh 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phphBPiIh 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpFIBCJN
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpFIBCJN
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpFIBCJN  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpFIBCJN 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpFIBCJN 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpFIBCJN 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpFGAMnF
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpFGAMnF
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpFGAMnF  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpFGAMnF 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpFGAMnF 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpFGAMnF 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpncldgB
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpncldgB
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpncldgB  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpncldgB 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpncldgB 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpncldgB 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpPopgPl
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpPopgPl
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpPopgPl  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpPopgPl 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpPopgPl 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpPopgPl 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpLjHCaN
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpLjHCaN
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpLjHCaN  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpLjHCaN 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpLjHCaN 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpLjHCaN 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpipKDGP
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpipKDGP
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpipKDGP  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpipKDGP 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpipKDGP 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpipKDGP 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpeEmAdJ
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpeEmAdJ
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpeEmAdJ  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpeEmAdJ 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpeEmAdJ 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpeEmAdJ 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpFGCgGA
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpFGCgGA
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpFGCgGA  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpFGCgGA 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpFGCgGA 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpFGCgGA 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phplCPMlD
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phplCPMlD
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phplCPMlD  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phplCPMlD 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phplCPMlD 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phplCPMlD 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phphcbNCN
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phphcbNCN
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phphcbNCN  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phphcbNCN 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phphcbNCN 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phphcbNCN 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpcodIif
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpcodIif
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpcodIif  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpcodIif 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpcodIif 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpcodIif 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpBBfPGC
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpBBfPGC
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpBBfPGC  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpBBfPGC 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpBBfPGC 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpBBfPGC 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpDjAjGd
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpDjAjGd
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpDjAjGd  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpDjAjGd 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpDjAjGd 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpDjAjGd 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpHdGEaB
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpHdGEaB
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpHdGEaB  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpHdGEaB 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpHdGEaB 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpHdGEaB 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phphdFglc
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phphdFglc
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phphdFglc  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phphdFglc 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phphdFglc 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phphdFglc 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpMnojCo
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpMnojCo
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpMnojCo  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpMnojCo 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpMnojCo 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpMnojCo 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpfAEbNd
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpfAEbNd
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpfAEbNd  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpfAEbNd 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpfAEbNd 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpfAEbNd 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpkKeOch
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpkKeOch
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpkKeOch  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpkKeOch 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpkKeOch 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpkKeOch 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpmoHGbb
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpmoHGbb
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpmoHGbb  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpmoHGbb 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpmoHGbb 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpmoHGbb 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpBlbGNl
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpBlbGNl
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpBlbGNl  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpBlbGNl 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpBlbGNl 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpBlbGNl 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpEpoIGi
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpEpoIGi
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpEpoIGi  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpEpoIGi 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpEpoIGi 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpEpoIGi 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpHjhajB
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpHjhajB
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpHjhajB  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpHjhajB 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpHjhajB 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpHjhajB 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpEKfgiF
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpEKfgiF
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpEKfgiF  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpEKfgiF 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpEKfgiF 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpEKfgiF 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpCdnDmC
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpCdnDmC
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpCdnDmC  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpCdnDmC 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpCdnDmC 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpCdnDmC 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpmdGAHG
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpmdGAHG
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpmdGAHG  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpmdGAHG 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpmdGAHG 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpmdGAHG 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phphfFaGh
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phphfFaGh
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phphfFaGh  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phphfFaGh 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phphfFaGh 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phphfFaGh 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpiCcpDH
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpiCcpDH
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpiCcpDH  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpiCcpDH 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpiCcpDH 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpiCcpDH 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpMeMpLc
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpMeMpLc
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpMeMpLc  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpMeMpLc 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpMeMpLc 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpMeMpLc 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 
+sourcename: upload 
+ALL: Array
+(
+    [xmlimport] => Array
+        (
+            [name] => initial-contents.xml
+            [type] => text/xml
+            [tmp_name] => /tmp/phpoIkgkk
+            [error] => 0
+            [size] => 143052
+        )
+
+)
+
+name initial-contents.xml
+mime: text/xml
+size 143052
+tmp name /tmp/phpoIkgkk
+error 0
+full path 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '8' --debug /tmp/phpoIkgkk  
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --namespaces '10' --debug /tmp/phpoIkgkk 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --debug /tmp/phpoIkgkk 
+CMD1:  php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug /tmp/phpoIkgkk 
+CMD1: php /var/www/html/wiki-dir/maintenance/rebuildrecentchanges.php
+CMD1: php maintenance/initSiteStats.php --update 

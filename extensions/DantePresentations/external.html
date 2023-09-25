@@ -1,0 +1,107 @@
+<html>
+<head>
+<script src="multiscreen.js"></script>
+<script>
+
+
+
+
+///////// PROBABLY THIS FILE IS OBSOLETE
+
+
+
+
+
+// every message we get leads to a fullscreen
+// WHY????
+/*
+window.onmessage = (event) => {
+  console.warn ("got message", event);
+  document.body.requestFullscreen();
+}
+*/
+
+
+// parses the <url> and adds as search parameters the key, value pairs conatined in obj
+// obj for example:   {useskin: "dantepresentationskin"}
+// it does a urlencoding of the values to be injected
+const addSearch = (url, obj) => {
+  // console.log ("addSearch: ", url, obj);
+  var nurl = new URL (url);
+  let separator = (nurl.search.length > 0 ? "&" : "?");
+  let add = "";
+  for (var key in obj) {
+     add += separator + key + "=" + encodeURIComponent (obj[key]);
+     separator = "&";    // independently of the initial value of the separator, from now on it will be "&"
+    }
+  var ret = nurl.origin + nurl.pathname + nurl.search + add + nurl.hash
+  return ret;
+}
+
+
+window.initIframe = function initIframe () {
+  let params = new URLSearchParams(document.location.search);
+  let basis  = params.get("presentation");
+  if (basis) {
+   //  let url    = addSearch (basis, { useskin: "dantepresentationskin" } );
+   let url    = addSearch (basis, {  } );
+     document.getElementById ("ifra").setAttribute ("src", url);}  // only when a parameter is given
+}
+
+// UI asks us to got fullscreen on a specific monitor
+// caller: button in the UI
+window.placeFrame = function placeFrame (num) {
+  console.log ("placeFrame called with num= " + num);
+  console.log ("document is ", (document.fullscreenelement ? "FULLSCREEN" : "NOT fullscreen" ));
+  if (num < 0) {return;}
+  document.body.requestFullscreen ( {screen: SCREENCONFIG.getScreenByNumber (num)} )
+    .then  ( xxx => {console.log   ("Fullscreen", xxx); } )
+    .catch ( err => {console.error ("Fullscreen error", err);});
+}
+
+// when we come back from fullscreen, adjust a class and redo the initialization since we might have new monitors
+document.onfullscreenchange = (event) => {
+  if (document.fullscreenElement)  { document.body.classList.add("fullscreen"); }
+  else                             { document.body.classList.remove ("fullscreen"); initialize(); }
+}
+
+</script>
+
+<style>
+html, body {height:100%; width:100%; border:0px; margin:0px; padding:0px;}
+
+iframe {height:90%; width:90%}
+
+body.fullscreen iframe {height:100%; width:100%;}
+body.fullscreen select {display:none;}
+
+select {font-size:20pt;}
+
+</style>
+
+
+</head>
+<body>
+  <iframe id="ifra"></iframe>
+  <select id="mySelector" class="monitorSelector" disable>
+    <option class="none" value="-1">Select monitor to place window</option>
+  </select>
+
+<script>
+
+async function initialize () {
+  window.initIframe ();
+  let sel = document.getElementById ("mySelector");  
+  sel.setAttribute ("disabled", "true");
+  await SCREENCONFIG.init();                         // wait for info on the screen configuration
+  sel.onchange = (event) => {                        // do it as assignment since otherwise we might get multiple attached handlers due to re-initialization when going fullscreen
+    console.log ("change event", event, "change event target ", event.target, "change event target value " + event.target.value);
+    window.placeFrame (event.target.value);};
+  sel.removeAttribute ("disabled");
+}
+
+initialize();
+
+</script>
+</body>
+</html>

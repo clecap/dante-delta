@@ -1,0 +1,19 @@
+{
+  "name":              "DanteLinks",
+  "author":            ["Clemens H. Cap"],  
+  "descriptionmsg":    "dantelinks-desc",
+  "url":               "http://github.com/clecap/dante-delta",
+  "namemsg":           "dantelinks-extensionname",
+  "license-name":      "AGPL-3.0-only",
+  "type":              "other",
+  "MessagesDirs":      {"DanteLinks": ["i18n"]},  
+  "requires": { "MediaWiki": ">= 1.34", "platform": {"php": ">= 7.2"} },
+   "Hooks": {
+      "LinkerMakeExternalLink":            "DanteLinks::onLinkerMakeExternalLink",
+      "HtmlPageLinkRendererEnd":           "DanteLinks::onHtmlPageLinkRendererEnd"
+   },
+  "AutoloadClasses": {
+     "DanteLinks":         "DanteLinks.php"
+   },
+  "manifest_version": 2
+}

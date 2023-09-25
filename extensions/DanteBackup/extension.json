@@ -1,0 +1,33 @@
+{
+	"name":                 "DanteBackup",
+  "version":              "1.0", 
+	"author":               ["Clemens H. Cap"],
+	"url":                  "https://github.com/clecap",
+	"description":          "Dumping pages and MySQL/Maria database via Special Pages to local files or Amazon AWS S3 buckets",
+	"license-name":         "GPL-2.0-or-later",
+	"requires":             {"MediaWiki": ">= 1.35.6"},
+	"type":                 "other",
+  "AutoloadClasses":      {
+    "DanteDump":                "DanteDump.php",
+    "DanteRestore":             "DanteRestore.php",
+    "DanteDBDump":              "DanteDBDump.php",
+    "DanteDBRestore":           "DanteDBRestore.php",
+    "DanteListBackups":         "DanteListBackups.php",
+    "DanteBackupPreferences":   "DanteBackupPreferences.php"
+  },
+  "SpecialPages": {
+    "DanteDump":          { "class": "DanteDump"  },
+    "DanteRestore":       { "class": "DanteRestore"  },
+    "DanteDBDump":        { "class": "DanteDBDump"  },
+    "DanteDBRestore":     { "class": "DanteDBRestore"  },
+    "DanteListBackups":   { "class": "DanteListBackups"}
+  },
+  "ExtensionMessagesFiles": {"DanteDumpAlias": "DanteDumpAlias.i18n.alias.php"},
+  "Hooks": {
+	  "GetPreferences":      "DanteBackupPreferences::onGetPreferences",
+		 "UserSaveSettings":   "DanteBackupPreferences::onUserSaveSettings"
+  },
+  "AvailableRights": ["dante-dump", "dante-restore", "dante-dbdump", "dante-dbrestore"],
+  "MessagesDirs":           { "DanteDiv": ["i18n"] },
+	"manifest_version": 2
+}

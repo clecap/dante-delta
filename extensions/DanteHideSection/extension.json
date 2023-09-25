@@ -1,0 +1,22 @@
+{
+  "name":     "DanteHideSection",
+  "version":  "3.0",
+  "author":   "Brent Laabs and Clemens H. Cap",
+  "url": "//mediawiki.org/wiki/Extension:HideSection",
+  "descriptionmsg": "hidesection-desc",
+  "MessagesDirs": {"DanteHideSection": ["i18n"]},
+  "AutoloadClasses": {"DanteHideSectionHooks": "DanteHideSection.hooks.php"},
+  "Hooks": {
+    "BeforePageDisplay": ["DanteHideSectionHooks::onBeforePageDisplay"],
+    "SkinEditSectionLinks": ["DanteHideSectionHooks::onSkinEditSectionLinks"],
+    "SkinTemplateOutputPageBeforeExec": ["DanteHideSectionHooks::onSkinTemplateOutputPageBeforeExec"]
+  },
+  "ResourceModules": {
+    "ext.dantehideSection": {
+      "scripts": ["ext.dantehidesection.js"],
+      "styles": ["ext.dantehidesection.css"]
+    }
+  },
+  "ResourceFileModulePaths": {"localBasePath": "resources", "removeExtPath": "DanteHideSection/resources"},
+	"manifest_version": 1
+}

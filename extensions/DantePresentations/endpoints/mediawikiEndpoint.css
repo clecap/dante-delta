@@ -1,0 +1,20 @@
+
+
+/* styling to be applied to the inside of the preview frame */
+
+/* NOTE: This is included as preview-min.css */
+
+
+/*
+* {color:red;}
+*/
+
+body {background-color: white;}
+
+body {padding: 10pt 10pt 10pt 10pt; box-sizing:border-box;}
+
+/* correcting for styles we get from vector skin but which are unwanted in the preview situation */
+.mw-body {padding: 10pt 10pt 10pt 10pt; margin-left:0px; border:0px;}
+
+
+/* body {height:10vh; width:100vh;} */

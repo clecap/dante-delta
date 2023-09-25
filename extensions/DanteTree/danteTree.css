@@ -1,0 +1,34 @@
+
+
+/*************/
+/** SIDEBAR **/
+/*************/
+
+/*
+#p-logo                {width:inherit; height:0px; z-index:0;}   
+*/
+
+/* do not display the site logo */
+#p-logo {display:none;} 
+
+
+#p-logo + .mw-portlet .vector-menu-heading {display:block;}   /* override some unwanted thing from vector ?!?!?! */
+
+
+#footer-poweredbyico { display: none; }
+
+
+.vector-menu-portal .vector-menu-heading { color: green; font-size: 1.00em; background-image:none; font-weight:bold;}
+
+/* enforce that in the sidebar the new, non-existant links, also show up red */
+a.new {color:#ba0000 !important;}
+
+
+.dexternal {
+    background-image: url(../../skins/Vector/resources/common/images/link-external-small-ltr-progressive.svg?30a3a);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: 0.857em;
+    padding-left: 0.2em;
+    padding-right: 1em;
+}

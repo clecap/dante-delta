@@ -1,0 +1,22 @@
+
+
+
+
+Skind Development data entities are doumented at : https://www.mediawiki.org/wiki/Manual:SkinMustache.php
+
+
+
+CSS Notes:
+
+The styling here imports from
+
+in screen-common-less from: 
+  mediawiki.mixins.less
+
+
+
+== Passing more template data ==
+* Override the Mustache skin class
+
+
+If we want to change contents in the head element of html we should not do this using skins but using extensions.
