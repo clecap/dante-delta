@@ -1051,8 +1051,7 @@ class WikiImporter {
 			MainConfigNames::MaxArticleSize );
 
 		if ( !isset( $contentInfo['text'] ) ) {
-			$contentInfo['text'] = "";
-			//throw new MWException( 'Missing text field in import.' );
+			throw new MWException( 'Missing text field in import.' );
 		}
 
 		// Make sure revisions won't violate $wgMaxArticleSize, which could lead to
@@ -1148,8 +1147,6 @@ class WikiImporter {
 		$this->debug( "Enter upload handler" );
 		$uploadInfo = [];
 
-//$chcfilename="";
-
 		$normalFields = [ 'timestamp', 'comment', 'filename', 'text',
 			'src', 'size', 'sha1base36', 'archivename', 'rel' ];
 
@@ -1182,10 +1179,6 @@ class WikiImporter {
 			}
 		}
 
-	//	echo "\n***handleUpload: ".file_exists ($uploadInfo['fileSrc']). " for ".$uploadInfo['fileSrc'];
-  
-
-
 		if ( $this->mImageBasePath && isset( $uploadInfo['rel'] ) ) {
 			$path = "{$this->mImageBasePath}/{$uploadInfo['rel']}";
 			if ( file_exists( $path ) ) {
@@ -1193,8 +1186,6 @@ class WikiImporter {
 				$uploadInfo['isTempSrc'] = false;
 			}
 		}
-
-	//	echo "\n***beforecallingprocessupload: ".file_exists ($uploadInfo['fileSrc']). " for ".$uploadInfo['fileSrc'];
 
 		if ( $this->mImportUploads ) {
 			return $this->processUpload( $pageInfo, $uploadInfo );
@@ -1207,10 +1198,7 @@ class WikiImporter {
 	 */
 	private function dumpTemp( $contents ) {
 		$filename = tempnam( wfTempDir(), 'importupload' );
-	//	echo "-CHC-"; echo "\n ********* Wikiimpporter now Dumping to $filename\n";
-		$retVal = file_put_contents( $filename, $contents );
-	//	echo "\n**** returnvalue is $retVal for dumpint to $filename \n";
-	//	echo "\n***dumpTemp: ".file_exists ($filename). " for ".$filename;
+		file_put_contents( $filename, $contents );
 		return $filename;
 	}
 
@@ -1220,14 +1208,6 @@ class WikiImporter {
 	 * @return mixed
 	 */
 	private function processUpload( $pageInfo, $uploadInfo ) {
-
-   // echo "-CHC- Wikiimporter.php\n";
-	//	echo "processUpload: pageInfo: ". print_r ($pageInfo);
-	//	echo "processUpload: uploadInfo: ". print_r ($uploadInfo);
-
-
-	echo "\n*** IN processupload: ".file_exists ($uploadInfo['fileSrc']). " for ".$uploadInfo['fileSrc'];
-
 		$revision = new WikiRevision( $this->config );
 		$revId = $pageInfo['id'];
 		$title = $pageInfo['_title'];
@@ -1262,10 +1242,6 @@ class WikiImporter {
 		}
 		$revision->setNoUpdates( $this->mNoUpdates );
 
-
-		echo "\n*** before leaving processupload: ".file_exists ($uploadInfo['fileSrc']). " for ".$uploadInfo['fileSrc'];
-
-		//echo "\n FUNCT: " . print_r ($this->mUploadCallback, true);
 		return call_user_func( $this->mUploadCallback, $revision );
 	}
 
