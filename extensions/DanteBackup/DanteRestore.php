@@ -95,6 +95,8 @@ class DanteRestore extends SpecialPage {
   public static function getCommandFile ( $name, $zip, $enc ) {
     global $IP; 
     
+  $cmdStart = " echo '<h2>Do not reload or close window until we tell you so</h2>' ";
+
     $cmd0 = " cp $name /tmp/keepme.xml";
 
     $cmd1 = " php $IP/maintenance/importDump.php --namespaces '8' --debug $name  "; 
@@ -122,9 +124,9 @@ class DanteRestore extends SpecialPage {
  
     $refresh = "php $IP/maintenance/refreshFileHeaders.php --verbose";
 
-    return array ($cmd4);
+   // return array ($cmd4);
 
-//    return array ($cmd0, $cmd1, $cmd2, $cmd4, $rebuild, $initStats, $rebuildImages, $rebuildAll, $checkImages, $refresh);
+    return array ($cmdStart, $cmd0, $cmd1, $cmd2, $cmd4, $rebuild, $initStats, $rebuildImages, $rebuildAll, $checkImages, $refresh);
   }
 
 
@@ -138,7 +140,7 @@ class DanteRestore extends SpecialPage {
   private function doImport ($fileName) {
     global $wgServer, $wgScript;
     $arr =self::getCommandFile ( $fileName, false, false);
-    Executor::liveExecuteX ($arr, "<br><br><a href='".$wgServer.$wgScript."?Main_Page'>Main Page</a>");
+    Executor::liveExecuteX ($arr, "<h2>You now can leave the page</h2><br><br><a href='".$wgServer.$wgScript."?Main_Page'>Main Page</a>");
  // putenv ("AWS_ACCESS_KEY_ID=A"); putenv ("AWS_SECRET_ACCESS_KEY=A");
  return true;
 
