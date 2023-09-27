@@ -96,3 +96,8 @@ ERRORLOG
 
 !skins/DantePresentationSkin
 !skins/DantePresentationSkin/*
+
+## however we still have to forbid again the following:
+extensions/DantePresentations/LOGFILE
+skins/DantePresentationSkin/LOGFILE
+extensions/DanteLinks/DANTELINKS-LOGFILE
