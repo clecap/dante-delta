@@ -87,7 +87,7 @@ class Executor {
         echo "[".date("H:i:s")."] ".$htmlInfo.'<br>';flush();ob_flush();} 
       }
   }
-  echo "<br><br><a href='../index.php/Main_Page'>Main Page</a>"; flush(); ob_flush();
+  echo "<br><br><a href='./index.php/Main_Page'>Main Page</a>"; flush(); ob_flush();
 
     exit ();
 
