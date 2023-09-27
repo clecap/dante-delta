@@ -33,7 +33,7 @@ class DanteRestore extends SpecialPage {
       danteLog ("DanteBackup", "size " . $_FILES['xmlimport']['size'] . "\n"); 
       danteLog ("DanteBackup", "tmp name " . $_FILES['xmlimport']['tmp_name'] . "\n");      
       danteLog ("DanteBackup", "error " . $_FILES['xmlimport']['error'] . "\n");
-      danteLog ("DanteBackup", "full path " . $_FILES['xmlimport']['full_path'] . "\n");
+      // danteLog ("DanteBackup", "full path " . $_FILES['xmlimport']['full_path'] . "\n");  // produces PHP  NOTICE: undefined index.
 
 			$this->doImport ($_FILES['xmlimport']['tmp_name']);
 
