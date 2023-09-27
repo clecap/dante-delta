@@ -75,6 +75,7 @@ class SVGReader {
 			}
 			$this->reader->XML( $contents, null, LIBXML_NOERROR | LIBXML_NOWARNING );
 		} else {
+      libxml_disable_entity_loader (false);  // CHC DANTE PATCH
 			$this->reader->open( $source, null, LIBXML_NOERROR | LIBXML_NOWARNING );
 		}
 
