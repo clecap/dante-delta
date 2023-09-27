@@ -1051,7 +1051,8 @@ class WikiImporter {
 			MainConfigNames::MaxArticleSize );
 
 		if ( !isset( $contentInfo['text'] ) ) {
-			throw new MWException( 'Missing text field in import.' );
+			//throw new MWException( 'Missing text field in import.' );  CHC DANTE PATCH
+      $contentInfo['text'] = "NO-TEXT-SUPPLIED";  // CHC DANTE PATCH
 		}
 
 		// Make sure revisions won't violate $wgMaxArticleSize, which could lead to
