@@ -136,9 +136,9 @@ class DanteRestore extends SpecialPage {
 
 
   private function doImport ($fileName) {
-
-   $arr =self::getCommandFile ( $fileName, false, false);
-  Executor::liveExecuteX ($arr, "<br><br><a href='../index.php/Main_Page'>Main Page</a>");
+    global $wgServer, $wgScript;
+    $arr =self::getCommandFile ( $fileName, false, false);
+    Executor::liveExecuteX ($arr, "<br><br><a href='".$wgServer.$wgScript."?Main_Page'>Main Page</a>");
  // putenv ("AWS_ACCESS_KEY_ID=A"); putenv ("AWS_SECRET_ACCESS_KEY=A");
  return true;
 

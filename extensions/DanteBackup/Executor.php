@@ -71,7 +71,7 @@ class Executor {
   // called with an array of shell functions which produce output
   // pipes the output, as it comes up, to the web page
   public static function liveExecute ( $arr ) {
-  global $wgServer, $wgScriptPath;
+  global $wgServer, $wgScript;
    // $proc = popen("ping -c 5 google.com", 'r');
    // while (!feof($proc)) {echo "[".date("i:s")."] ".fread($proc, 4096).'<br>';flush();ob_flush();}
 
@@ -88,7 +88,7 @@ class Executor {
         echo "[".date("H:i:s")."] ".$htmlInfo.'<br>';flush();ob_flush();} 
       }
   }
-  echo "<br><br><a href='".$wgServer.$wgScriptPath."/index.php/Main_Page'>Main Page</a>"; flush(); ob_flush();
+  echo "<br><br><a href='".$wgServer.$wgScript."/index.php?Main_Page'>Main Page</a>"; flush(); ob_flush();
 
     exit ();
 
