@@ -46,15 +46,11 @@ ERRORLOG
 
 !extensions/
 
-  
-
-
 ##
 ## When we change this here we must also change git-files-EDIT-THIS-FILE.sh
 ##
 
 ### Files which we must include
-
 
 !README-dantepatch.md
 !includes/import/WikiImporter.php
