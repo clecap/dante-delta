@@ -4,7 +4,7 @@
  *  \author   Clemens H. Cap
  *  \brief    Bundle the static and job specific functionalities. Represent a Job for storing a Snippet in NS_SNIP
  */
-
+    
 
 /**
  * With require WebStart.php (MW_INSTALL_PATH may need to be set beforehand, see Manual:$IP), 
