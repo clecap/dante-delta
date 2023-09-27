@@ -36,28 +36,18 @@ ERRORLOG
 ## IMPORTANT
 ##
 #
-#  We have to exclude everything from Mediawiki
+#  We have to exclude everything from Mediawiki 
 #  and we have to include all deltas which must end up in dante-delta
 #
-
-cache/
-docs/**
-extensions/**
-external-services/**
-includes/**
-images/**
-languages/**
-maintenance/**
-mw-config/**
-resources/**
-skins/**
-tests/**
-vendor/**
-parsifal-cache/
 
 .git/
 
 *
+
+!extensions/
+
+
+
 
 ##
 ## When we change this here we must also change git-files-EDIT-THIS-FILE.sh
