@@ -208,8 +208,7 @@ class DanteEndpoint {
  */
 public function parseText ( $text, $hiding, $section = NULL ) {
 
-   EndpointLog ("DanteEndpoint: parseText entered, local variable hiding is " . ($hiding ? "true" : "false") . "\n");
-
+  EndpointLog ("DanteEndpoint: parseText entered, local variable hiding is " . ($hiding ? "true" : "false") . "\n");
   $userId = $this->getUserIdentity();
   EndpointLog ("DanteEndpoint: parseText got userId: " . print_r ($userId, true) . "\n");  // print_r of $options leads to memory exhaustion.
   $options = new ParserOptions ( $userId );        // let the parent class provide a user identity
@@ -235,45 +234,32 @@ public function parseText ( $text, $hiding, $section = NULL ) {
 
   EndpointLog ("DanteEndpoint: parseText: text=" . $text. "\n");
 
+  $parserOutput = NULL;  // must define this outside of the try block
+  $parsedText   = NULL;  // must define this outside of the try block
+
   try { 
 //    $parser->setHook ( "hide", [ "HideRenderer", ($hiding ? 'renderHidden' : 'renderProminent') ] );        
-
     if ($hiding) { $parser->setHook ( "hide", [ "HideRenderer", 'renderHidden'    ] ); }
     else         { $parser->setHook ( "hide", [ "HideRenderer", 'renderProminent' ] ); }
 
-
     EndpointLog ("DanteEndpoint: Will start to parse now\n");
-
     EndpointLog ("DanteEndpoint: Sees the section: " . $section . "\n");
     EndpointLog ("DanteEndpoint: Sees the section type: " . gettype ($section) . "\n");
-
 
   if ( strcmp (gettype ($section), "integer") == 0  ) { 
     EndpointLog ("DanteEndpoint: In restricted section parsing");
     $text = $parser->getSection ($text, $section, "NOT FOUND - see danteEndpoint.php"); 
   }
 
-    $parserOutput  = $parser->parse ( $text, $pageRef, $options, $lineStart, $clearState, $revid); 
-
-
-    EndpointLog ("\nDanteEndpoint: Test has been parsed\n");
-  }
-  catch (\Exception $e) {
-    EndpointLog ("***** DanteEndpoint: Parser: Caught exception:\n" );
-  }
-  catch(Throwable $t){  EndpointLog ("***** DanteEndpoint: Parser: Caught Throwable:\n" );
-    EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");
-  }
-  finally { EndpointLog ("DanteEndpoint: in finally block\n");}
-  EndpointLog ("DanteEndpoint: after finally block\n");
+  $parserOutput  = $parser->parse ( $text, $pageRef, $options, $lineStart, $clearState, $revid); 
+  EndpointLog ("\nDanteEndpoint: Test has been parsed\n");
 
   // use a specific skin object for post treatment (requires internal skin name to be used)    TODO: make this selectable  // does thois have an effect ???? TODO
  // $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("cologneblue");
 
-   EndpointLog ("DanteEndpoint: parseText: will generate skin object\n");
+  EndpointLog ("DanteEndpoint: parseText: will generate skin object\n");
   $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("vector");
-   EndpointLog ("DanteEndpoint: parseText: did generate skin object\n");
-
+  EndpointLog ("DanteEndpoint: parseText: did generate skin object\n");
 
   $parsedText =  $parserOutput->getText ( array ( 
      "allowTOC"               => false, 
@@ -282,7 +268,14 @@ public function parseText ( $text, $hiding, $section = NULL ) {
      "skin"                   =>  $skinObject ,  // skin object for transforming section edit links
      "unwrap"                 => true,  "wrapperDivClass" => "classname", "absoluteURLs" => true, "includeDebugInfo" => false ) ); 
 
+  }
+     catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: Parser: Caught exception:\n" );    $parsedText = "EXCEPTION: " . $e->__toString(); }
+     catch(Throwable $t)   { EndpointLog ("***** DanteEndpoint: Parser: Caught Throwable:\n" );
+                             EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  }
+     finally               { EndpointLog ("DanteEndpoint: in finally block\n");                     }
+
   EndpointLog ("DanteEndpoint: parseTexte will leave now\n");
+
   return $parsedText;
 }
 
