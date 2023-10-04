@@ -1,10 +1,4 @@
-
-
-/* styling to be applied to the inside of the preview frame */
-
-/* NOTE: This is included as preview-min.css */
-
-
+/* style file for inclusion by showEndpoint.php */
 
 body {background-color: white;}
 
@@ -16,26 +10,25 @@ h1, h2, h3, h4, h5, h6 {display:none;}
 /* class seHide is showendpoint hidden */
 .seHidden {display:none;}
 
-
-
+/* remove size limitation in showEndpoint */
 html.sizeLimit  .parsifalContainer {max-width: none !important;}
-
 
 
 /* adaptations for projection and casting */
 .vector-body {font-size:40pt;}
-ul {list-style-image:none;}
+ul           {list-style-image:none;}
 
-/* Have a bit more separation in showendpoint and allow growth of the diagrams
-  to full breadth of the window
-*/
+/* Have a bit more separation in showendpoint and allow growth of the diagrams to full breadth of the window */
 img.drawioShowendpoint {
   max-width:5000px !important;
   margin:20px 20px 20px 20px;
 }
 
-/* have a bit more separation */
+/* have a bit more separation between parsifal containers*/
 .parsifalContainer {
   margin:40px 0px 40px 0px;
   border: 1px dotted grey;
 }
+
+/* do not show handle to error messages in showEndpoint */
+.errorWrap {display:none;}

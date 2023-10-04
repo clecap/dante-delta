@@ -10,9 +10,11 @@ $wgShowSQLErrors           = true;
 $wgDebugToolbar            = true;
 #$wgShowDebug               = true;
 $wgDevelopmentWarnings     = true;
+
+
 $wgParserCacheType         = CACHE_NONE;
 $wgCachePages              = false;
-
+## $wgMainCache
 
 error_reporting( -1 );
 ini_set( 'display_errors', 1 );

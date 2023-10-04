@@ -44,13 +44,18 @@ const next = () => {
 };
 
 
-const wire = () => {
+const wire = () => {  // wire up the user interface
+  console.error ("wire called");
   document.addEventListener ("keydown", next);
-
   let ifra = document.getElementById ("ifra");
   ifra.onload = () => {  // instrument only after document has loaded 
       ifra.contentDocument.addEventListener ("keydown", next);
   };
+   
+  document.getElementById ("goFullscreen").onclick = () => { 
+    console.log ("user requested fullscreen");
+    ifra.requestFullscreen();};
+  console.log ("wire completed");
 
 };
 
@@ -62,9 +67,8 @@ danteBC.onmessage = (e) => {
   console.log ( "externalMonitor.html: Broadcast channel received message: " + JSON.stringify(e.data) ); 
 
   if (e.data.reloadIframe)       { reloadIframe (e);      }
-  if (e.data.positionAtSection)  { positionAtSection (e); }
-
-
+  if (e.data.positionAtSection)  { positionAtSection (e); }                 // sent by dantepresentations.js and .php
+  if (e.data.positionAtId)       {  positionAtId (e.data.positionAtId); }   ///// sent by parsifal runtime
 };
 
 
@@ -84,14 +88,14 @@ const positionAtSection = (e) => {
 };
 
 
+
+
+
+
 const reloadIframe = (e) => {
   let ifra = document.getElementById ("ifra");
   ifra.contentWindow.location.reload ();
 };
-
-
-
-
 
 
 return {scrollTo, switchTo, wire};
@@ -133,7 +137,7 @@ document.onfullscreenchange = (event) => {
 <style>
 html, body {height:100%; width:100%; border:0px; margin:0px; padding:0px;}
 
-iframe {height:90%; width:90%}
+iframe {height:90%; width:100%}
 
 body.fullscreen iframe {height:100%; width:100%;}
 body.fullscreen select {display:none;}
@@ -149,6 +153,9 @@ select {font-size:20pt;}
   <select id="mySelector" class="monitorSelector" disable>
     <option class="none" value="-1">Select monitor to place window</option>
   </select>
+  <button id="goFullscreen">Go Fullscreen</button>
+
+
 
 <script>
 
@@ -156,15 +163,15 @@ async function initialize () {
   window.initIframe ();
   let sel = document.getElementById ("mySelector");  
   sel.setAttribute ("disabled", "true");
-  await SCREENCONFIG.init();                         // wait for info on the screen configuration
+  try {
+    await SCREENCONFIG.init();                         // wait for info on the screen configuration
+  } catch (x) {console.error (x);}
   sel.onchange = (event) => {                        // do it as assignment since otherwise we might get multiple attached handlers due to re-initialization when going fullscreen
     console.log ("change event", event, "change event target ", event.target, "change event target value " + event.target.value);
     window.placeFrame (event.target.value);};
   sel.removeAttribute ("disabled");
 
-
   window.NAV.wire();
-
 
 }
 

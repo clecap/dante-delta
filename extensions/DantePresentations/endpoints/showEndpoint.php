@@ -4,22 +4,15 @@
  * This endpoint provides existing content from the Mediawiki in a custom skinned form.
  */
 
-
-/**
- *   NOTE: Debugging this: Apache log has error messages if we get no result by direct call to endpoint
- */
-
+//   NOTE: Debugging this: Apache log has error messages if we get no result by direct call to endpoint
 
 // need the following two lines to obtain reasonable errors from the endpoint instead of only 500 er status from webserver
+
 
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
 require_once ("danteEndpoint.php");
-
-/**
- *
- */
 
 class ShowEndpoint extends DanteEndpoint {
 
@@ -44,7 +37,6 @@ public function getContent ( ) {
   // $this->stringContent = "= HIHI = \n  '''qwe''' [[Main]]"; return 1;   // NOTE: For debugging / testing: Uncomment this for testing purposes, then call endpoint directly in browser
 
   $text = $this->getInput();
-
   $raw = "<pre> length of text=" .strlen ($text). " dbkey=" . $this->dbkey. "pagename=".$this->pageName. "  titleText=".$this->titleText."  ns=". $this->ns ." nsName=" .$this->nsName. "</pre>";
 
   EndpointLog ("\n showEndpoint: getContent: section is " . $this->sect. "\n");
@@ -66,8 +58,6 @@ public function getContent ( ) {
   //$cssPath = "load.php?lang=en&modules=skins.vector.styles.legacy&only=styles&skin=vector";
 
   $cssPath2 = "showEndpoint.css";
-
-
 
   $drawIOSizePatch = <<<EOD
 <script>
@@ -119,15 +109,3 @@ EOD;
 
 $point = new ShowEndpoint ();
 $point->execute();
-
-
-
-
-
-
-
-
-
-
-
-

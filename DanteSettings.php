@@ -4,8 +4,10 @@ require_once ("DantePolyfill.php");                          // fill in some com
 
 
 
-require_once ("DanteSettings-development.php");
+#require_once ("DanteSettings-development.php");
 #require_once ("DanteSettings-production.php");
+
+require_once ("DanteSettings-used.php");
 
 require ("mediawiki-PRIVATE.php");
 

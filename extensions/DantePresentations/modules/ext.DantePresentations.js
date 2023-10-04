@@ -186,11 +186,11 @@ function dantePositionAtSection ( e ) {
   e.preventDefault();
   console.info ("dantePositionAtSection called - ext.DantePresentations.js: ", e.target);
 
-  let node = e.target.parentNode.previousSibling;
-  let idVal = node.id;
-  console.info ("Id in dantePositionAtSecion is: " + idVal);
+  let dataSection       = e.target.dataset.section;
+  let dataSectionMarker = e.target.dataset.sectionMarker;
+  console.info ("Id in dantePositionAtSecion is: ", {dataSection, dataSectionMarker});
   
-  danteBC.postMessage ( {"positionAtSection": idVal} );
+  danteBC.postMessage ( {"positionAtSection": {dataSection, dataSectionMarker}} );
 };
 
    
