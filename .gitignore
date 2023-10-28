@@ -82,6 +82,7 @@ ERRORLOG
 
 !extensions/DanteTree
 !extensions/DanteTree/*
+extensions/DanteTree/.DS_Store
 
 !extensions/DantePresentations
 !extensions/DantePresentations/*
