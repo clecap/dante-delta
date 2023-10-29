@@ -6,6 +6,7 @@
 
 
 ## DEBUG messages
+$wgDanteOperatingMode      = "Production";
 $wgShowExceptionDetails  = false;
 $wgShowDBErrorBacktrace  = false;
 $wgShowSQLErrors         = false;

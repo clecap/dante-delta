@@ -4,6 +4,7 @@
 # System internal parameters to be used in development
 #
 
+$wgDanteOperatingMode      = "Development";
 $wgShowExceptionDetails    = true;
 $wgShowDBErrorBacktrace    = true;
 $wgShowSQLErrors           = true;

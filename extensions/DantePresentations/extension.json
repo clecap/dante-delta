@@ -15,7 +15,8 @@
     "EditPage::showEditForm:initial":     "DantePresentations::onEditPageshowEditForminitial",
     "OutputPageAfterGetHeadLinksArray":   "DantePresentations::onOutputPageAfterGetHeadLinksArray",
     "SkinEditSectionLinks":               "DantePresentations::onSkinEditSectionLinks",
-    "ParserAfterParse":                   "DantePresentations::onParserAfterParse"
+    "ParserAfterParse":                   "DantePresentations::onParserAfterParse",
+    "SkinAddFooterLinks":                 "DantePresentations::onSkinAddFooterLinks"
   },
   "ResourceModules": {
     "ext.DantePresentations": {
