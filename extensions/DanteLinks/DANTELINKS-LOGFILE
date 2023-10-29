@@ -1,0 +1,4344 @@
+LinkRendererEnd:
+  text    =File:Compiler-und-interpreter.svg
+  target  =File:Compiler-und-interpreter.svg
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/File:Compiler-und-interpreter.svg
+    [class] => 
+    [title] => File:Compiler-und-interpreter.svg
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =File:Compiler-abstraktion.svg
+  target  =File:Compiler-abstraktion.svg
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/File:Compiler-abstraktion.svg
+    [class] => 
+    [title] => File:Compiler-abstraktion.svg
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =https://orcid.org
+  text     =[1]
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external autonumber
+)
+
+  linktype =autonumber
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external autonumber
+)
+
+onLinkerMakeExternalLink
+  url      =https://scholar.google.de
+  text     =Scholar
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =https://orcid.org
+  text     =[1]
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external autonumber
+)
+
+  linktype =autonumber
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external autonumber
+)
+
+onLinkerMakeExternalLink
+  url      =https://scholar.google.de
+  text     =Scholar
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Template:Snippet:Snip
+  target  =Template:Snippet:Snip
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Template:Snippet:Snip&action=edit&redlink=1
+    [class] => new
+    [title] => Template:Snippet:Snip (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    =Test/Syntax Highlights
+  target  =Test/Syntax Highlights
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Test/Syntax_Highlights
+    [class] => 
+    [title] => Test/Syntax Highlights
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =MediaWiki:Sidebar
+  target  =MediaWiki:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:Sidebar
+    [class] => 
+    [title] => MediaWiki:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =MediaWiki:Sidebar/Areas
+  target  =MediaWiki:Sidebar/Areas
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:Sidebar/Areas
+    [class] => 
+    [title] => MediaWiki:Sidebar/Areas
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =MediaWiki:Sidebar/Social
+  target  =MediaWiki:Sidebar/Social
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:Sidebar/Social
+    [class] => 
+    [title] => MediaWiki:Sidebar/Social
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =MediaWiki:Sidebar/Categories
+  target  =MediaWiki:Sidebar/Categories
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:Sidebar/Categories
+    [class] => 
+    [title] => MediaWiki:Sidebar/Categories
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =https://blog.fefe.de
+  text     =Fefe ¦ style=color:green;
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+    [style] => color:green;
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://blog.fefe.de
+  text     =Fefe ¦ target=_blank 
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+    [target] => _blank
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://blog.fefe.de
+  text     =[1]
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external autonumber
+)
+
+  linktype =autonumber
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external autonumber
+)
+
+onLinkerMakeExternalLink
+  url      =https://blog.fefe.de
+  text     =Fefe
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    =Main Page ¦ style=color:green;
+  target  =Main Page ¦ style=color:green;
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Main_Page_%C2%A6_style%3Dcolor:green;&action=edit&redlink=1
+    [class] => new
+    [title] => Main Page ¦ style=color:green; (page does not exist)
+)
+
+  ret     =
+
+  isKnown =1   (after correction)
+  did find some attributes
+
+
+  Writing for KNOWN page
+  Supposed link is: <a href='Main Page ' title='Main Page'  style='color:green;'  >Main Page</a>
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Hauptseite
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Main Pages
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Halomi
+  target  =Halomi
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Halomi&action=edit&redlink=1
+    [class] => new
+    [title] => Halomi (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    =Help:Demo for DanteLinks ¦ style=color:green;
+  target  =Help:Demo for DanteLinks ¦ style=color:green;
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Help:Demo_for_DanteLinks_%C2%A6_style%3Dcolor:green;&action=edit&redlink=1
+    [class] => new
+    [title] => Help:Demo for DanteLinks ¦ style=color:green; (page does not exist)
+)
+
+  ret     =
+
+  isKnown =1   (after correction)
+  did find some attributes
+
+
+  Writing for KNOWN page
+  Supposed link is: <a href='Help:Demo for DanteLinks ' title='Help:Demo for DanteLinks'  style='color:green;'  >Help:Demo for DanteLinks</a>
+LinkRendererEnd:
+  text    =Category:Root
+  target  =Category:Root
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Category:Root&action=edit&redlink=1
+    [class] => new
+    [title] => Category:Root (page does not exist)
+)
+
+  ret     =
+
+onLinkerMakeExternalLink
+  url      =https://www.mediawiki.org/
+  text     =olgana ¦ target=_blank 
+  link     =
+  attribs  =Array
+(
+    [rel] => 
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => 
+    [class] => external text
+    [target] => _blank
+)
+
+** external link is modified
+
+
+LinkRendererEnd:
+  text    =Main Page ¦ style=color:green;
+  target  =Main Page ¦ style=color:green;
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Main_Page_%C2%A6_style%3Dcolor:green;&action=edit&redlink=1
+    [class] => new
+    [title] => Main Page ¦ style=color:green; (page does not exist)
+)
+
+  ret     =
+
+  isKnown =1   (after correction)
+  did find some attributes
+
+
+  Writing for KNOWN page
+  Supposed link is: <a href='Main Page ' title='Main Page'  style='color:green;'  >Main Page</a>
+LinkRendererEnd:
+  text    =Help:Transclusion Test
+  target  =Help:Transclusion Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Transclusion_Test
+    [class] => 
+    [title] => Help:Transclusion Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Notes
+  target  =Notes
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Notes
+    [class] => 
+    [title] => Notes
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Notes
+  target  =Notes
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Notes
+    [class] => 
+    [title] => Notes
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Create Page
+  target  =MediaWiki:CreatePage
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:CreatePage
+    [class] => 
+    [title] => MediaWiki:CreatePage
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Main_Page
+  text     =Main Page
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Special:RecentChanges
+  text     =Recent Changes
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://help.fandom.com/wiki/Extension:DPL3/Manual
+  text     =DPL3 ¦ class=dexternal
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text dexternal
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://www.mediawiki.org/wiki/Help:Links
+  text     =Links WP ¦ class=dexternal
+  link     =
+  attribs  =Array
+(
+    [rel] => 
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => 
+    [class] => external text dexternal
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar&action=edit
+  text     =Full Sidebar
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Areas&action=edit
+  text     =Areas
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Categories&action=edit
+  text     =Categories
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&action=edit
+  text     =Navigation
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/UI&action=edit
+  text     =UI
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=8
+  text     =MediaWiki
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=14
+  text     =Category
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=10
+  text     =Template
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=2
+  text     =User
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=12
+  text     =Help
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=4
+  text     =Project
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Special:ListFiles
+  text     =Files
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://github.com/clecap/dante-delta/issues
+  text     =Dante Issues
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://github.com/clecap/Parsifal/issues
+  text     =Parsifal Issues
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:window.DANTE.testConsole()
+  text     =window.DANTE.testConsole()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testConsoleZwei()
+  text     =Dante.testConsoleZwei()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testConsoleDrei()
+  text     =Dante.testConsoleDrei()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante.testConsoleDrei);
+  text     =testprintfc
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante);
+  text     =Log Dante object
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante.testDump);
+  text     =Log Dante.testDump
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testDump();
+  text     =Dante.testDump
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(true)
+  text     =Limit Size ON
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(false)
+  text     =Limit Size OFF
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    = Sidebar
+  target  =Help:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Sidebar
+    [class] => 
+    [title] => Help:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal Cheat
+  target  =Help:Parsifal Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Cheat
+    [class] => 
+    [title] => Help:Parsifal Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Dante Cheat
+  target  =Help:Dante Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Dante_Cheat
+    [class] => 
+    [title] => Help:Dante Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Links Cheat
+  target  =Help:Links
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Help:Links&action=edit&redlink=1
+    [class] => new
+    [title] => Help:Links (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    = Dante-Links
+  target  =Help:Demo for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_DanteLinks
+    [class] => 
+    [title] => Help:Demo for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal
+  target  =Help:Demo for Parsifal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_Parsifal
+    [class] => 
+    [title] => Help:Demo for Parsifal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Tests
+  target  =Help:Diverse Tests
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Diverse_Tests
+    [class] => 
+    [title] => Help:Diverse Tests
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Drawio
+  target  =Help:Tests for Drawio
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Tests_for_Drawio
+    [class] => 
+    [title] => Help:Tests for Drawio
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Parsifal
+  target  =Help:Parsifal Diverse Demo
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Diverse_Demo
+    [class] => 
+    [title] => Help:Parsifal Diverse Demo
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =DanteLinks
+  target  =Help:Test for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Test_for_DanteLinks
+    [class] => 
+    [title] => Help:Test for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal General Tests
+  target  =Help:Parsifal Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Test
+    [class] => 
+    [title] => Help:Parsifal Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Raw Tests
+  target  =Help:Parsifal Raw Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Raw_Test
+    [class] => 
+    [title] => Help:Parsifal Raw Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Page Width
+  target  =Help:Parsifal Page Width
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Page_Width
+    [class] => 
+    [title] => Help:Parsifal Page Width
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Slides Reveal
+  target  =Help:Slides Test Reveal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Slides_Test_Reveal
+    [class] => 
+    [title] => Help:Slides Test Reveal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Sidebar
+  target  =Help:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Sidebar
+    [class] => 
+    [title] => Help:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal Cheat
+  target  =Help:Parsifal Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Cheat
+    [class] => 
+    [title] => Help:Parsifal Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Dante Cheat
+  target  =Help:Dante Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Dante_Cheat
+    [class] => 
+    [title] => Help:Dante Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Links Cheat
+  target  =Help:Links
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Help:Links&action=edit&redlink=1
+    [class] => new
+    [title] => Help:Links (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    = Dante-Links
+  target  =Help:Demo for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_DanteLinks
+    [class] => 
+    [title] => Help:Demo for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal
+  target  =Help:Demo for Parsifal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_Parsifal
+    [class] => 
+    [title] => Help:Demo for Parsifal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Tests
+  target  =Help:Diverse Tests
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Diverse_Tests
+    [class] => 
+    [title] => Help:Diverse Tests
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Drawio
+  target  =Help:Tests for Drawio
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Tests_for_Drawio
+    [class] => 
+    [title] => Help:Tests for Drawio
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Parsifal
+  target  =Help:Parsifal Diverse Demo
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Diverse_Demo
+    [class] => 
+    [title] => Help:Parsifal Diverse Demo
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =DanteLinks
+  target  =Help:Test for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Test_for_DanteLinks
+    [class] => 
+    [title] => Help:Test for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal General Tests
+  target  =Help:Parsifal Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Test
+    [class] => 
+    [title] => Help:Parsifal Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Raw Tests
+  target  =Help:Parsifal Raw Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Raw_Test
+    [class] => 
+    [title] => Help:Parsifal Raw Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Page Width
+  target  =Help:Parsifal Page Width
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Page_Width
+    [class] => 
+    [title] => Help:Parsifal Page Width
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Slides Reveal
+  target  =Help:Slides Test Reveal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Slides_Test_Reveal
+    [class] => 
+    [title] => Help:Slides Test Reveal
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(true)
+  text     =Limit Size ON
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(false)
+  text     =Limit Size OFF
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:window.persistCatWindow()
+  text     =Persist Cat Window
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    =MediaWiki:Sidebar
+  target  =MediaWiki:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:Sidebar
+    [class] => 
+    [title] => MediaWiki:Sidebar
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =https://translatewiki.net/
+  text     =translatewiki.net
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    =Users
+  target  =Wiki for Hot Development:Users
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Wiki_for_Hot_Development:Users&action=edit&redlink=1
+    [class] => new
+    [title] => Wiki for Hot Development:Users (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    =MediaWiki:Sidebar
+  target  =MediaWiki:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:Sidebar
+    [class] => 
+    [title] => MediaWiki:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Notes
+  target  =Notes
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Notes
+    [class] => 
+    [title] => Notes
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Notes
+  target  =Notes
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Notes
+    [class] => 
+    [title] => Notes
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Create Page
+  target  =MediaWiki:CreatePage
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:CreatePage
+    [class] => 
+    [title] => MediaWiki:CreatePage
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Main_Page
+  text     =Main Page
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Special:RecentChanges
+  text     =Recent Changes
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://help.fandom.com/wiki/Extension:DPL3/Manual
+  text     =DPL3 ¦ class=dexternal
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text dexternal
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://www.mediawiki.org/wiki/Help:Links
+  text     =Links WP ¦ class=dexternal
+  link     =
+  attribs  =Array
+(
+    [rel] => 
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => 
+    [class] => external text dexternal
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar&action=edit
+  text     =Full Sidebar
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Areas&action=edit
+  text     =Areas
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Categories&action=edit
+  text     =Categories
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&action=edit
+  text     =Navigation
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/UI&action=edit
+  text     =UI
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=8
+  text     =MediaWiki
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=14
+  text     =Category
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=10
+  text     =Template
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=2
+  text     =User
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=12
+  text     =Help
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=4
+  text     =Project
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Special:ListFiles
+  text     =Files
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://github.com/clecap/dante-delta/issues
+  text     =Dante Issues
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://github.com/clecap/Parsifal/issues
+  text     =Parsifal Issues
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:window.DANTE.testConsole()
+  text     =window.DANTE.testConsole()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testConsoleZwei()
+  text     =Dante.testConsoleZwei()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testConsoleDrei()
+  text     =Dante.testConsoleDrei()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante.testConsoleDrei);
+  text     =testprintfc
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante);
+  text     =Log Dante object
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante.testDump);
+  text     =Log Dante.testDump
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testDump();
+  text     =Dante.testDump
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(true)
+  text     =Limit Size ON
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(false)
+  text     =Limit Size OFF
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    = Sidebar
+  target  =Help:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Sidebar
+    [class] => 
+    [title] => Help:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal Cheat
+  target  =Help:Parsifal Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Cheat
+    [class] => 
+    [title] => Help:Parsifal Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Dante Cheat
+  target  =Help:Dante Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Dante_Cheat
+    [class] => 
+    [title] => Help:Dante Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Links Cheat
+  target  =Help:Links
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Help:Links&action=edit&redlink=1
+    [class] => new
+    [title] => Help:Links (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    = Dante-Links
+  target  =Help:Demo for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_DanteLinks
+    [class] => 
+    [title] => Help:Demo for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal
+  target  =Help:Demo for Parsifal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_Parsifal
+    [class] => 
+    [title] => Help:Demo for Parsifal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Tests
+  target  =Help:Diverse Tests
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Diverse_Tests
+    [class] => 
+    [title] => Help:Diverse Tests
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Drawio
+  target  =Help:Tests for Drawio
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Tests_for_Drawio
+    [class] => 
+    [title] => Help:Tests for Drawio
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Parsifal
+  target  =Help:Parsifal Diverse Demo
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Diverse_Demo
+    [class] => 
+    [title] => Help:Parsifal Diverse Demo
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =DanteLinks
+  target  =Help:Test for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Test_for_DanteLinks
+    [class] => 
+    [title] => Help:Test for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal General Tests
+  target  =Help:Parsifal Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Test
+    [class] => 
+    [title] => Help:Parsifal Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Raw Tests
+  target  =Help:Parsifal Raw Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Raw_Test
+    [class] => 
+    [title] => Help:Parsifal Raw Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Page Width
+  target  =Help:Parsifal Page Width
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Page_Width
+    [class] => 
+    [title] => Help:Parsifal Page Width
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Slides Reveal
+  target  =Help:Slides Test Reveal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Slides_Test_Reveal
+    [class] => 
+    [title] => Help:Slides Test Reveal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Sidebar
+  target  =Help:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Sidebar
+    [class] => 
+    [title] => Help:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal Cheat
+  target  =Help:Parsifal Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Cheat
+    [class] => 
+    [title] => Help:Parsifal Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Dante Cheat
+  target  =Help:Dante Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Dante_Cheat
+    [class] => 
+    [title] => Help:Dante Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Links Cheat
+  target  =Help:Links
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Help:Links&action=edit&redlink=1
+    [class] => new
+    [title] => Help:Links (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    = Dante-Links
+  target  =Help:Demo for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_DanteLinks
+    [class] => 
+    [title] => Help:Demo for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal
+  target  =Help:Demo for Parsifal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_Parsifal
+    [class] => 
+    [title] => Help:Demo for Parsifal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Tests
+  target  =Help:Diverse Tests
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Diverse_Tests
+    [class] => 
+    [title] => Help:Diverse Tests
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Drawio
+  target  =Help:Tests for Drawio
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Tests_for_Drawio
+    [class] => 
+    [title] => Help:Tests for Drawio
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Parsifal
+  target  =Help:Parsifal Diverse Demo
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Diverse_Demo
+    [class] => 
+    [title] => Help:Parsifal Diverse Demo
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =DanteLinks
+  target  =Help:Test for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Test_for_DanteLinks
+    [class] => 
+    [title] => Help:Test for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal General Tests
+  target  =Help:Parsifal Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Test
+    [class] => 
+    [title] => Help:Parsifal Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Raw Tests
+  target  =Help:Parsifal Raw Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Raw_Test
+    [class] => 
+    [title] => Help:Parsifal Raw Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Page Width
+  target  =Help:Parsifal Page Width
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Page_Width
+    [class] => 
+    [title] => Help:Parsifal Page Width
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Slides Reveal
+  target  =Help:Slides Test Reveal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Slides_Test_Reveal
+    [class] => 
+    [title] => Help:Slides Test Reveal
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(true)
+  text     =Limit Size ON
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(false)
+  text     =Limit Size OFF
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:window.persistCatWindow()
+  text     =Persist Cat Window
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    =Compiler/Stoffgliederung
+  target  =Compiler/Stoffgliederung
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Compiler/Stoffgliederung
+    [class] => 
+    [title] => Compiler/Stoffgliederung
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Compilerbau/Einführung
+  target  =Compilerbau/Einführung
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Compilerbau/Einf%C3%BChrung
+    [class] => 
+    [title] => Compilerbau/Einführung
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Compilerbau/Literaturliste
+  target  =Compilerbau/Literaturliste
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Compilerbau/Literaturliste
+    [class] => 
+    [title] => Compilerbau/Literaturliste
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Compilerbau/Semesterplan
+  target  =Compilerbau/Semesterplan
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Compilerbau/Semesterplan
+    [class] => 
+    [title] => Compilerbau/Semesterplan
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Help:Transclusion Test
+  target  =Help:Transclusion Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Transclusion_Test
+    [class] => 
+    [title] => Help:Transclusion Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Notes
+  target  =Notes
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Notes
+    [class] => 
+    [title] => Notes
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Notes
+  target  =Notes
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Notes
+    [class] => 
+    [title] => Notes
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Create Page
+  target  =MediaWiki:CreatePage
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:CreatePage
+    [class] => 
+    [title] => MediaWiki:CreatePage
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Main_Page
+  text     =Main Page
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Special:RecentChanges
+  text     =Recent Changes
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://help.fandom.com/wiki/Extension:DPL3/Manual
+  text     =DPL3 ¦ class=dexternal
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text dexternal
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://www.mediawiki.org/wiki/Help:Links
+  text     =Links WP ¦ class=dexternal
+  link     =
+  attribs  =Array
+(
+    [rel] => 
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => 
+    [class] => external text dexternal
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar&action=edit
+  text     =Full Sidebar
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Areas&action=edit
+  text     =Areas
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Categories&action=edit
+  text     =Categories
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&action=edit
+  text     =Navigation
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/UI&action=edit
+  text     =UI
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=8
+  text     =MediaWiki
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=14
+  text     =Category
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=10
+  text     =Template
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=2
+  text     =User
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=12
+  text     =Help
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=4
+  text     =Project
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Special:ListFiles
+  text     =Files
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://github.com/clecap/dante-delta/issues
+  text     =Dante Issues
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://github.com/clecap/Parsifal/issues
+  text     =Parsifal Issues
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:window.DANTE.testConsole()
+  text     =window.DANTE.testConsole()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testConsoleZwei()
+  text     =Dante.testConsoleZwei()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testConsoleDrei()
+  text     =Dante.testConsoleDrei()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante.testConsoleDrei);
+  text     =testprintfc
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante);
+  text     =Log Dante object
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante.testDump);
+  text     =Log Dante.testDump
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testDump();
+  text     =Dante.testDump
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(true)
+  text     =Limit Size ON
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(false)
+  text     =Limit Size OFF
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    = Sidebar
+  target  =Help:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Sidebar
+    [class] => 
+    [title] => Help:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal Cheat
+  target  =Help:Parsifal Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Cheat
+    [class] => 
+    [title] => Help:Parsifal Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Dante Cheat
+  target  =Help:Dante Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Dante_Cheat
+    [class] => 
+    [title] => Help:Dante Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Links Cheat
+  target  =Help:Links
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Help:Links&action=edit&redlink=1
+    [class] => new
+    [title] => Help:Links (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    = Dante-Links
+  target  =Help:Demo for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_DanteLinks
+    [class] => 
+    [title] => Help:Demo for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal
+  target  =Help:Demo for Parsifal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_Parsifal
+    [class] => 
+    [title] => Help:Demo for Parsifal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Tests
+  target  =Help:Diverse Tests
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Diverse_Tests
+    [class] => 
+    [title] => Help:Diverse Tests
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Drawio
+  target  =Help:Tests for Drawio
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Tests_for_Drawio
+    [class] => 
+    [title] => Help:Tests for Drawio
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Parsifal
+  target  =Help:Parsifal Diverse Demo
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Diverse_Demo
+    [class] => 
+    [title] => Help:Parsifal Diverse Demo
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =DanteLinks
+  target  =Help:Test for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Test_for_DanteLinks
+    [class] => 
+    [title] => Help:Test for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal General Tests
+  target  =Help:Parsifal Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Test
+    [class] => 
+    [title] => Help:Parsifal Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Raw Tests
+  target  =Help:Parsifal Raw Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Raw_Test
+    [class] => 
+    [title] => Help:Parsifal Raw Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Page Width
+  target  =Help:Parsifal Page Width
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Page_Width
+    [class] => 
+    [title] => Help:Parsifal Page Width
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Slides Reveal
+  target  =Help:Slides Test Reveal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Slides_Test_Reveal
+    [class] => 
+    [title] => Help:Slides Test Reveal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Sidebar
+  target  =Help:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Sidebar
+    [class] => 
+    [title] => Help:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal Cheat
+  target  =Help:Parsifal Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Cheat
+    [class] => 
+    [title] => Help:Parsifal Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Dante Cheat
+  target  =Help:Dante Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Dante_Cheat
+    [class] => 
+    [title] => Help:Dante Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Links Cheat
+  target  =Help:Links
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Help:Links&action=edit&redlink=1
+    [class] => new
+    [title] => Help:Links (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    = Dante-Links
+  target  =Help:Demo for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_DanteLinks
+    [class] => 
+    [title] => Help:Demo for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal
+  target  =Help:Demo for Parsifal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_Parsifal
+    [class] => 
+    [title] => Help:Demo for Parsifal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Tests
+  target  =Help:Diverse Tests
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Diverse_Tests
+    [class] => 
+    [title] => Help:Diverse Tests
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Drawio
+  target  =Help:Tests for Drawio
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Tests_for_Drawio
+    [class] => 
+    [title] => Help:Tests for Drawio
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Parsifal
+  target  =Help:Parsifal Diverse Demo
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Diverse_Demo
+    [class] => 
+    [title] => Help:Parsifal Diverse Demo
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =DanteLinks
+  target  =Help:Test for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Test_for_DanteLinks
+    [class] => 
+    [title] => Help:Test for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal General Tests
+  target  =Help:Parsifal Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Test
+    [class] => 
+    [title] => Help:Parsifal Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Raw Tests
+  target  =Help:Parsifal Raw Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Raw_Test
+    [class] => 
+    [title] => Help:Parsifal Raw Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Page Width
+  target  =Help:Parsifal Page Width
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Page_Width
+    [class] => 
+    [title] => Help:Parsifal Page Width
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Slides Reveal
+  target  =Help:Slides Test Reveal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Slides_Test_Reveal
+    [class] => 
+    [title] => Help:Slides Test Reveal
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(true)
+  text     =Limit Size ON
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(false)
+  text     =Limit Size OFF
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:window.persistCatWindow()
+  text     =Persist Cat Window
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Notes
+  target  =Notes
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Notes
+    [class] => 
+    [title] => Notes
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Main Page
+  target  =Main Page
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Main_Page
+    [class] => 
+    [title] => Main Page
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Notes
+  target  =Notes
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Notes
+    [class] => 
+    [title] => Notes
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Create Page
+  target  =MediaWiki:CreatePage
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/MediaWiki:CreatePage
+    [class] => 
+    [title] => MediaWiki:CreatePage
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Main_Page
+  text     =Main Page
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Special:RecentChanges
+  text     =Recent Changes
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://help.fandom.com/wiki/Extension:DPL3/Manual
+  text     =DPL3 ¦ class=dexternal
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text dexternal
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://www.mediawiki.org/wiki/Help:Links
+  text     =Links WP ¦ class=dexternal
+  link     =
+  attribs  =Array
+(
+    [rel] => 
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => 
+    [class] => external text dexternal
+)
+
+** external link is modified
+
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar&action=edit
+  text     =Full Sidebar
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Areas&action=edit
+  text     =Areas
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Categories&action=edit
+  text     =Categories
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&action=edit
+  text     =Navigation
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/UI&action=edit
+  text     =UI
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=8
+  text     =MediaWiki
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=14
+  text     =Category
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=10
+  text     =Template
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=2
+  text     =User
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=12
+  text     =Help
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=4
+  text     =Project
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://localhost:4443/wiki-dir/index.php/Special:ListFiles
+  text     =Files
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://github.com/clecap/dante-delta/issues
+  text     =Dante Issues
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =https://github.com/clecap/Parsifal/issues
+  text     =Parsifal Issues
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:window.DANTE.testConsole()
+  text     =window.DANTE.testConsole()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testConsoleZwei()
+  text     =Dante.testConsoleZwei()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testConsoleDrei()
+  text     =Dante.testConsoleDrei()
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante.testConsoleDrei);
+  text     =testprintfc
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante);
+  text     =Log Dante object
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:console.log(Dante.testDump);
+  text     =Log Dante.testDump
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:Dante.testDump();
+  text     =Dante.testDump
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(true)
+  text     =Limit Size ON
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(false)
+  text     =Limit Size OFF
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+LinkRendererEnd:
+  text    = Sidebar
+  target  =Help:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Sidebar
+    [class] => 
+    [title] => Help:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal Cheat
+  target  =Help:Parsifal Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Cheat
+    [class] => 
+    [title] => Help:Parsifal Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Dante Cheat
+  target  =Help:Dante Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Dante_Cheat
+    [class] => 
+    [title] => Help:Dante Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Links Cheat
+  target  =Help:Links
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Help:Links&action=edit&redlink=1
+    [class] => new
+    [title] => Help:Links (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    = Dante-Links
+  target  =Help:Demo for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_DanteLinks
+    [class] => 
+    [title] => Help:Demo for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal
+  target  =Help:Demo for Parsifal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_Parsifal
+    [class] => 
+    [title] => Help:Demo for Parsifal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Tests
+  target  =Help:Diverse Tests
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Diverse_Tests
+    [class] => 
+    [title] => Help:Diverse Tests
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Drawio
+  target  =Help:Tests for Drawio
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Tests_for_Drawio
+    [class] => 
+    [title] => Help:Tests for Drawio
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Parsifal
+  target  =Help:Parsifal Diverse Demo
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Diverse_Demo
+    [class] => 
+    [title] => Help:Parsifal Diverse Demo
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =DanteLinks
+  target  =Help:Test for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Test_for_DanteLinks
+    [class] => 
+    [title] => Help:Test for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal General Tests
+  target  =Help:Parsifal Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Test
+    [class] => 
+    [title] => Help:Parsifal Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Raw Tests
+  target  =Help:Parsifal Raw Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Raw_Test
+    [class] => 
+    [title] => Help:Parsifal Raw Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Page Width
+  target  =Help:Parsifal Page Width
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Page_Width
+    [class] => 
+    [title] => Help:Parsifal Page Width
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Slides Reveal
+  target  =Help:Slides Test Reveal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Slides_Test_Reveal
+    [class] => 
+    [title] => Help:Slides Test Reveal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Sidebar
+  target  =Help:Sidebar
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Sidebar
+    [class] => 
+    [title] => Help:Sidebar
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal Cheat
+  target  =Help:Parsifal Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Cheat
+    [class] => 
+    [title] => Help:Parsifal Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Dante Cheat
+  target  =Help:Dante Cheat
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Dante_Cheat
+    [class] => 
+    [title] => Help:Dante Cheat
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Links Cheat
+  target  =Help:Links
+  isKnown =
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php?title=Help:Links&action=edit&redlink=1
+    [class] => new
+    [title] => Help:Links (page does not exist)
+)
+
+  ret     =
+
+LinkRendererEnd:
+  text    = Dante-Links
+  target  =Help:Demo for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_DanteLinks
+    [class] => 
+    [title] => Help:Demo for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    = Parsifal
+  target  =Help:Demo for Parsifal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Demo_for_Parsifal
+    [class] => 
+    [title] => Help:Demo for Parsifal
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Tests
+  target  =Help:Diverse Tests
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Diverse_Tests
+    [class] => 
+    [title] => Help:Diverse Tests
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Drawio
+  target  =Help:Tests for Drawio
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Tests_for_Drawio
+    [class] => 
+    [title] => Help:Tests for Drawio
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Diverse Parsifal
+  target  =Help:Parsifal Diverse Demo
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Diverse_Demo
+    [class] => 
+    [title] => Help:Parsifal Diverse Demo
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =DanteLinks
+  target  =Help:Test for DanteLinks
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Test_for_DanteLinks
+    [class] => 
+    [title] => Help:Test for DanteLinks
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal General Tests
+  target  =Help:Parsifal Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Test
+    [class] => 
+    [title] => Help:Parsifal Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Raw Tests
+  target  =Help:Parsifal Raw Test
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Raw_Test
+    [class] => 
+    [title] => Help:Parsifal Raw Test
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Parsifal Page Width
+  target  =Help:Parsifal Page Width
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Parsifal_Page_Width
+    [class] => 
+    [title] => Help:Parsifal Page Width
+)
+
+  ret     =1
+
+LinkRendererEnd:
+  text    =Slides Reveal
+  target  =Help:Slides Test Reveal
+  isKnown =1
+  attribs =Array
+(
+    [href] => /wiki-dir/index.php/Help:Slides_Test_Reveal
+    [class] => 
+    [title] => Help:Slides Test Reveal
+)
+
+  ret     =1
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(true)
+  text     =Limit Size ON
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:PRT.limitSize(false)
+  text     =Limit Size OFF
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+onLinkerMakeExternalLink
+  url      =javascript:window.persistCatWindow()
+  text     =Persist Cat Window
+  link     =
+  attribs  =Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
+  linktype =text
+MakeExt: AFTER attributes=Array
+(
+    [rel] => nofollow
+    [class] => external text
+)
+
