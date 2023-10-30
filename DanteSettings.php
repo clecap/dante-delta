@@ -38,6 +38,24 @@ $wgJobRunRate = 10;             ## Job queue run rate
 
 
 
+// DantePresentations - SubTranslate.php settings
+// see https://www.mediawiki.org/wiki/Extension:SubTranslate
+
+// MAIN must allow namespaces or no translation will work
+$wgNamespacesWithSubpages[NS_MAIN] = true;
+
+/* if you use DeepL API Free plan */
+$wgSubTranslateAPIKey['api-free.deepl.com'] = $DEEPL_API_KEY;
+/* if you use DeepL API Pro plan */
+// $wgSubTranslateAPIKey['api.deepl.com'] = "<your auth-key here>";
+
+$wgSubTranslateCaching = true;
+$wgSubTranslateCachingTime = 604800;	/* 60(s) * 60(m) * 24(h) * 7 days */
+$wgSubTranslateRobotPolicy = "noindex,nofollow";
+
+
+
+
 
 
 $wgGroupPermissions['*']['edit'] = false;         # No anonymous editing

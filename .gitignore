@@ -76,6 +76,7 @@ ERRORLOG
 
 !extensions/DanteLinks
 !extensions/DanteLinks/*
+extensions/DanteLinks/DANTELINKS-LOGFILE
 
 !extensions/DanteSnippets
 !extensions/DanteSnippets/*
@@ -86,9 +87,11 @@ extensions/DanteTree/.DS_Store
 
 !extensions/DantePresentations
 !extensions/DantePresentations/*
+extensions/DantePresentations/LOGFILE
 
 !extensions/DanteBackup
 !extensions/DanteBackup/*
+extensions/DanteBackup/LOGFILE
 
 !extensions/DanteSyntax
 !extensions/DanteSyntax/*
@@ -98,9 +101,9 @@ extensions/DanteTree/.DS_Store
 
 !skins/DantePresentationSkin
 !skins/DantePresentationSkin/*
+skins/DantePresentationSkin/LOGFILE
 
 ## however we still have to forbid again the following:
-extensions/DantePresentations/LOGFILE
-skins/DantePresentationSkin/LOGFILE
-extensions/DanteLinks/DANTELINKS-LOGFILE
-extensions/DanteBackup/LOGFILE
+
+
+
