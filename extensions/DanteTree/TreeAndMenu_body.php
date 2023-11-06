@@ -21,13 +21,21 @@ static function debugLog ($text) {
 
 public static function onSkinBuildSidebar ($skin, &$bar ) {
   global $wgOut;
+  global $wgServer, $wgScriptPath;
   $VERBOSE = false;
-  // self::debugLog ("onSkinBuildSidebar called\n");
   // self::debugLog ("onSkinBuildSidebar called \nsees bar=".print_r ($bar, true)."\n");
   $arrKeys = array_keys ($bar);
   
+  //$bar = array_diff ($bar, array ("TOOLBOX"));
+   //  echo print_r ($bar, true);
+
   foreach ($arrKeys as $key) {
-    if (in_array ( $key,  array ("SEARCH", "TOOLBOX", "LANGUAGES") ) )  { continue; }  // ignore these standard sidebar items 
+
+    
+  //  $bar["TOOLBOX"] = "";
+    if (in_array ( $key,  array ("SEARCH", "TOOLBOX", "LANGUAGES") ) )  { 
+ 
+      continue; }  // ignore these standard sidebar items 
 
     // the category tree is specified as an array of objects of which there are two variants    {tree: CatName, depth:4}   or   {name: CatName}
     // every object may also have an additional   className   and an additional  style  attribute  to be used for styling the entry
@@ -51,8 +59,35 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
       }
       $cHtml .= "</ul>";
       if ($VERBOSE) {elf::debugLog ("The cHtml generated is: " .$cHtml);}
+
  //     $html  =    "<div class=\"fancytree todo\" id=\"sidebar-cattree\" style=\"display:none;\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
      $html  =    "<div class=\"fancytree todo\" style=\"display:none;\" id=\"sidebar-cattree\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
+     
+
+
+// [[Special:Categories|All Categories]]
+
+// https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=14
+
+  $add = <<<HERE
+   <div style="margin-left:4px; margin-top:6px;line-height:20px;font-size:12pt;">
+  <a href="$wgServer/$wgScriptPath/index.php/Special:Categories" class="dicon" title="Paged list of all categories">&forall;</a>
+  <a href="$wgServer/$wgScriptPath/index.php/MediaWiki:CategoryTree"  class="dicon" title="Category tree">&#x1F332;</a>
+  <a href=""  class="dicon" title="Category cloud">&#9729;</a>
+  <a href="$wgServer/$wgScriptPath/index.php/Special:UncategorizedPages"  class="dicon" title="List of pages without category">&empty;</a>
+  <a href="$wgServer/$wgScriptPath/index.php/Special:UncategorizedCategories" 
+  style="color:red;"
+ class="dicon" title="List of categories without category">&empty;</a>
+  <a href="$wgServer/$wgScriptPath/index.php?title=Special:AllPages&from=&to=&namespace=14"  class="dicon" title="Query page">?</a>
+</div>
+HERE;
+
+
+
+  $html = $html . $add;
+
+//    $html .= "<div class=\"fancytree todo\"><ul><li>asd</li></ul><div>";
+  //   $html .= "<a>qwe</a>";
      $bar[ 'catus' ] = [ [ 'html' =>  $html ]];
     }
 
@@ -118,11 +153,36 @@ private static function getCatConfig () {
 }
 
 
+
+
+
+
 public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
   //self::debugLog ("onBeforePageDisplay called\n");
   global $wgExtensionAssetsPath;
-  $out->addHeadItem("earlyIcons", "<link rel='preload' as='image' href='../extensions/DanteTree/fancytree/icons.gif'>");  // preload the DanteTree images (does work on Chrome)
-  
+  $out->addHeadItem("earlyIcons",    "<link rel='preload' as='image' href='../extensions/DanteTree/fancytree/icons.gif'>");  // preload the DanteTree images (does work on Chrome)
+
+  $out->addHeadItem ("sidebarstyle", <<<EOT
+<script data-src="TreeAndMenu_body.php">
+  let pers = window.localStorage.getItem ("sidebar-width");
+  if (pers) {
+    let style = `<style>+
+      `#mw-panel {width: \${pers} ; height: 100%;}
+      #content   {margin-left: \${pers};}
+      #left-navigation  {margin-left: \${pers};}
+      #footer {margin-left: \${pers};}
+    </style>`;
+    document.write (style);
+  }
+</script>        
+EOT);
+
+
+
+
+
+
+
   $out->addModules('ext.fancytree');                                                         // scripts may load via ressource loader
   $out->addStyle("../extensions/DanteTree/danteTree.css");                                   // style is added directly since the loader would result in a FOUC
   $out->addStyle("../extensions/DanteTree/fancytree/fancytree.css"); 

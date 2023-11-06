@@ -20,9 +20,10 @@ div.portal div.body    {margin: 0 0 0 0 !important;}         /* no additional sp
 div.portal h3          {color: black !important; font-weight:bold !important; padding: 0.25em 0 0.25em 0 !important}  /* better visibility for sidebar headers */
 div.portal-sidebar h3          {color: black !important; font-weight:bold !important; padding: 0.25em 0 0.25em 0 !important}  /* better visibility for sidebar headers */
 
-div#mw-panel           {height:100%; overflow-y:scroll;}
 
-div#mw-panel           {padding-left:0px; width:11em;}
+div#mw-panel           {height:100%; overflow-y:scroll; overflow-x:hidden;}
+div#mw-panel           {padding-left:0px;}
+
 
 .portlet               {width:156px;margin:0pt 0pt 0pt 0pt;}
 
@@ -79,9 +80,10 @@ span.fancytree-checkbox {cursor:pointer;}
 #mw-panel .portal-sidebar-tree h3 {font-size: 1.00em; margin: 0.5em 0 0 0.6666667em; cursor:pointer; border: 0;}
 
 #mw-panel h3.vector-menu-heading         {font-weight:bold; color:black;}
-#mw-panel h3.vector-menu-heading:hover   { text-decoration:underline; }
 #mw-panel .portal h3                     {font-size: 1.00em;}
-#mw-panel .portal h3                     {cursor:pointer;}
+
+#mw-panel h3.vector-menu-heading span:hover   { text-decoration:underline; }
+#mw-panel .portal h3 span                     {cursor:pointer;}
 
 
 /* prevent the "active" nodes, whatever they are, from showing what fanytree.css below asks them to be */

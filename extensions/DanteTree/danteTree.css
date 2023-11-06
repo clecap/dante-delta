@@ -1,15 +1,13 @@
-
-
 /*************/
 /** SIDEBAR **/
 /*************/
 
-/*
-#p-logo                {width:inherit; height:0px; z-index:0;}   
-*/
 
 /* do not display the site logo */
 #p-logo {display:none;} 
+
+
+.ui-resizable-e   {width:20px !important;}
 
 
 #p-logo + .mw-portlet .vector-menu-heading {display:block;}   /* override some unwanted thing from vector ?!?!?! */
@@ -24,7 +22,10 @@
 a.new {color:#ba0000 !important;}
 
 
-.dexternal {
+/* we want to force the external links to the same layout style the skin has in external links
+   this is necessary for a.external as the sidebar does not contain those prescriptions
+   and  .dexternal  is our own dante class */
+a.external, .dexternal {
     background-image: url(../../skins/Vector/resources/common/images/link-external-small-ltr-progressive.svg?30a3a);
     background-position: center right;
     background-repeat: no-repeat;
@@ -32,3 +33,18 @@ a.new {color:#ba0000 !important;}
     padding-left: 0.2em;
     padding-right: 1em;
 }
+
+/* however, inside of the fancy tree we want external links to be exactly aligned so we rest that to zero: */
+div.fancytree a.external {padding-left:0.0cm;}
+
+
+.dicon {border-radius:4px; border:1px solid #0b008020; padding:0px 1px 0px 1px; 
+ background-color: #0b008006;min-height:12px;
+width:15px; display:inline-block; text-align:center;
+}
+
+#mp-catus-label .mw-list-item {margin-bottom:5px;}
+
+/* hide the TOOLS section in the sidebar */
+#p-tb {display:none;}
+

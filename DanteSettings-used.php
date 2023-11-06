@@ -12,7 +12,6 @@ $wgDebugToolbar            = true;
 #$wgShowDebug               = true;
 $wgDevelopmentWarnings     = true;
 
-
 $wgParserCacheType         = CACHE_NONE;
 $wgCachePages              = false;
 ## $wgMainCache

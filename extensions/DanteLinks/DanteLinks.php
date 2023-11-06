@@ -69,29 +69,53 @@ public static function onSkinAfterPortlet ( $skin, $portlet, &$html ) {
 
 */
 
+
+
+
+
+
+
+
+// &$url: The URL of the external link
+// &$text: The link text that would normally be displayed on the page
+// &$link: The link HTML if you choose to override the default.
+// &$attribs: Link attributes (added in MediaWiki 1.15, r48223)
+// $linktype: Type of external link, e.g. 'free', 'text', 'autonumber'. Gets added to the css classes. (added in MediaWiki 1.15, r48226)
 public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attribs, $linktype ) {
-  self::debugLog ("onLinkerMakeExternalLink\n");
-  self::debugLog ("  url      =" . $url ."\n"); 
-  self::debugLog ("  text     =" . HtmlArmor::getHtml ($text) ."\n"); 
-  self::debugLog ("  link     =" . $link ."\n");     
-  self::debugLog ("  attribs  =" . print_r ($attribs, true) ."\n");  
-  self::debugLog ("  linktype =" . $linktype ."\n");  
+  global $wgServer, $wgScriptPath;
+    self::debugLog ("onLinkerMakeExternalLink called, parameters seen are: \n");
+    self::debugLog ("  url      =" . $url ."\n"); 
+    self::debugLog ("  text     =" . HtmlArmor::getHtml ($text) ."\n"); 
+    self::debugLog ("  link     =" . $link ."\n");     
+    self::debugLog ("  attribs  =" . print_r ($attribs, true) ."\n");  
+    self::debugLog ("  linktype =" . $linktype ."\n\n\n");  
+
+    // some links might have looked like external hmlt links to the mediawiki parser, since they started as a normal URL
+    // however, we do not want them to display the markup used for external links (ie the specific icon for it)
+    if ( str_starts_with ($url, $wgServer.$wgScriptPath."/" ) ||
+         str_starts_with ($url, "javascript:")
+    ) { $attribs["class"] = str_replace ("external", "", $attribs["class"]); }
+
+  if ( str_ends_with ($text, "\w")) { $attribs["target"] = "_window"; $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
+  if ( str_ends_with ($text, "\s")) { $attribs["target"] = "_side";   $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
+  if ( str_ends_with ($text, "\S")) { $attribs["target"] = "_Side";   $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
+
+
+  $text = str_replace ("\\|", "¦", $text);  //    \| is treated the same as a broken pipe symbol
 
   $flag = self::extractAttributes ($text, $attribs);      // implements the neccessary modifications in $text and $attribs
-
-  self::debugLog ("MakeExt: AFTER attributes=" . print_r ($attribs, true) ."\n");  
+  // self::debugLog ("MakeExt: AFTER attributes=" . print_r ($attribs, true) ."\n");  
 
   if ($flag) {
-    self::debugLog ("** external link is modified\n\n\n");
     $aText ="";
     foreach ($attribs as $key => $value) {  $aText .= $key."='".$value."'";}
     $link="<a href='$link' " .$aText. ">$text</a>  ";
   return false;                                    // modify the link
 }
-   else {return true;}  // do not modify the link
+   else {return true;}                             // do not modify the link
 }
 
-
+// Called when generating internal and interwiki links in LinkRenderer
 // $text        what Mediawiki believes should be shown as text inside of the anchor
 // $target      what Mediawiki believes should be the target of the link
 // Samples:  [[target]]  make $target and $text equal to  target
@@ -101,14 +125,19 @@ public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attrib
 public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
   global $wgScript;
 
-  self::debugLog ("LinkRendererEnd:\n");
+  self::debugLog ("HtmlPageLinkRendererEnd: (internal and interwiki links)\n");
   self::debugLog ("  text    =" . HtmlArmor::getHtml ($text) ."\n");  
   self::debugLog ("  target  =" . $target ."\n");   
   self::debugLog ("  isKnown =" . $isKnown ."\n");
   self::debugLog ("  attribs =" . print_r ($attribs, true) ."\n");
-  self::debugLog ("  ret     =" . $isKnown ."\n\n");
+  self::debugLog ("  ret     =" . $isKnown ."\n\n\n");
 
-  $myText = HtmlArmor::getHtml($text);  // the text  
+
+
+//  return true;  // Do not modify
+
+
+  $myText = HtmlArmor::getHtml($text);     // the text  
   $endPos = strpos ( $myText, "¦");
   if ( $endPos === false ) {return true;}  // text contains no broken pipe: keep anchor as it is
 
@@ -134,7 +163,6 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
     $title = $target;      // what we want to show as title in the 
     $anchorText = substr ( $myText, 0, $endPos );         // what we want to show as anchor(text) portion inside of the <a> link.
     $anchorText = trim ( $anchorText );
-    // self::debugLog ("EEEEEEEEEE: ".$anchorText."\n  AND NUMBER IS " .$endPos. "\n");
 
     foreach ($attribs as $key => $value) {
       // self::debugLog ("Attrib: " . $key. " IS: " . $value ."\n\n");
@@ -150,13 +178,10 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
       $ret = "<a href='".$text."' title='". $myTarget ."' " . $attribText. " >".$anchorText."</a>"; }
     
     self::debugLog ("  Supposed link is: ".$ret."\n");
-
-
-
     return false;           // false: use our new, dante-patched link
   }
   else { 
-        self::debugLog ("  did NOT find any attributes\n\n\n");
+    self::debugLog ("  did NOT find any attributes\n\n\n");
     return true; }     // true: keep the original anchor as it is 
 }
 
@@ -190,5 +215,15 @@ private static function extractAttributes ( &$text, &$attribs ) {
   }
   return true;
 }
+
+
+
+
+
+public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) { 
+  global $wgServer, $wgScriptPath;
+  $out->addHeadItem ("dantelink", "<style>a.windowlink {background-image: url(${wgServer}${wgScriptPath}/skins/Vector/resources/common/images/link-external-small-rtl-progressive.svg?30a3a) !important;}</style>");
+}
+
 
 }

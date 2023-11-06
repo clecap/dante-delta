@@ -93,7 +93,6 @@ wfLoadExtension ('DynamicPageList3');
 
 
 
-
 ## configure drwaio
 
 $wgDrawioEditorBackendUrl=$wgServer.$wgScriptPath. "/external-services/draw-io/drawio-dev/src/main/webapp/index.html";

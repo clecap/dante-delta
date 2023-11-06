@@ -332,9 +332,21 @@ const installPortletToggle = () => {
   };
 
   $(".img-switcher").click(  (e) => {toggleSidebar (e.target.id); e.stopPropagation();});  // clicks on the plus/minus sign toggles the visibility of a sidebar portlet
-  $(".img-switcher").parents(".vector-menu-heading").click(  (e) => {                      // clicks on the label of the sidebar portlet toggle the visibility of the sidebar portlet
-      var name = e.currentTarget.id; 
-      toggleSidebar ("switcher-"+name); e.stopPropagation();
+  $(".img-switcher").parents(".vector-menu-heading-label").click(  (e) => {                      // clicks on the label of the sidebar portlet toggle the visibility of the sidebar portlet
+      
+      if (e.shiftKey) {
+        console.log (e.target.textContent);
+       let url = mw.config.get("wgServer") + mw.config.get( 'wgScript')+"?title=MediaWiki:Sidebar/"+e.target.textContent+"&action=edit";
+        console.log ( url );
+        window.open ("https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/"+e.target.textContent+"&action=edit", "_self");
+        e.preventDefault(); e.stopPropagation();
+
+     } else {
+      var name = e.currentTarget.parentNode.id;   // was without parnetNode
+      console.log ("name: " + name);
+      toggleSidebar ("switcher-"+name); }
+      e.stopPropagation();
+
   }); 
   
 };
@@ -390,13 +402,16 @@ const logoPatcher = () => {
 })();
 
 
-
-// TODO: not yet working
 // patch headers or the portlets in the sidebar so that they show an open/close icon next to their label
 const patchPortletHeaders = () => {
   $("#mw-panel").find(".vector-menu-heading-label").each ( (idx, ele) =>   {  // was: only label
-    // console.log ("TreeAndMenu: patchPortletHeaders: ", ele.parentNode.id);  
-    $(ele).prepend ("<span class='img-switcher' id='switcher-"+ele.parentNode.id+"'></span>")  }  
+    // console.log ("TreeAndMenu: patchPortletHeaders: ", ele.parentNode.id);
+     console.log ("OO:" + ele.textContent);
+      //$(ele).attr(  "data-sidebar-src", ele.textContent);
+    $(ele).prepend ("<span class='img-switcher' id='switcher-"+ele.parentNode.id+"'></span>");
+  if (ele.textContent == "Tools") {} else {ele.setAttribute ("title", "shift.click to edit tree contents");}
+
+    }  
   );      
 };
 
@@ -471,3 +486,48 @@ function patchSidebar () {
 // the load sequence due to mediawiki js asynchronous loading is not completely clear; $(document).ready comes quite late and executing it here directly may be too early: do it twice and ensure the function i idempotent
 patchSidebar ();
 $(document).ready( patchSidebar );
+
+// implement the resizing of the sidebar
+$( function() {
+    $( "#mw-panel" ).resizable({ghost:false, handles: "e", minWidth: 20,  maxWidth: 400,
+  resize: function (ev, ui)  {
+    let ele =  document.getElementById ("content");
+    let dist =   ( ui.size.width) + "px";
+    Object.assign (document.getElementById ("content").style,          {"margin-left":  dist  } );
+    Object.assign (document.getElementById ("left-navigation").style,  {"margin-left":  dist  } );
+    Object.assign (document.getElementById ("footer").style,           {"margin-left":  dist  } );
+    Object.assign (document.getElementById ("mw-panel").style,           {"height": "100%"  } );   // needed due to a bug somewhere we do not know
+    window.localStorage.setItem ("sidebar-width", dist);
+  }
+  });
+
+   // console.error ("fancytree.js: mw-panel made resizable");
+  } );
+
+
+
+// implement opening some toolbox links which depend on the specific page on which we are to do so
+$(  function() {
+
+$("a[href$='/Dummy:WhatLinksHere']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "/Special:WhatLinksHere/"  + mw.config.get('wgPageName') );
+
+$("a[href$='/Dummy:PageInfo']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title="  + mw.config.get('wgPageName') +"&action=info" );
+$("a[href$='/Dummy:RelatedChanges']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "/Special:RecentChangesLinked/"  + mw.config.get('wgPageName') );
+$("a[href$='/Dummy:PermaLink']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title=" + mw.config.get('wgPageName') +"&oldid=" + mw.config.get ("wgRevisionId"));
+$("a[href$='/Dummy:CiteThisPage']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title=Special:CiteThisPage&page=" + mw.config.get('wgPageName') +"&id=" + mw.config.get ("wgRevisionId") + "&wpFormIdentifier=titleform");
+
+
+// https://localhost:4443/wiki-dir/index.php?title=Special:CiteThisPage&page=Main_Page&id=108&wpFormIdentifier=titleform
+
+// https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&oldid=126
+
+//https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&action=info
+
+}
+);
+
+
+
+
+
+
