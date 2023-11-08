@@ -1,12 +1,9 @@
 <?php
 
-require_once ("DantePolyfill.php");                          // fill in some common functions to keep config file clean from function definitions.
-
-
+require_once ("DantePolyfill.php");                          // fill in some common functions for Dante and otherwise to keep config file clean from common function definitions.
 
 #require_once ("DanteSettings-development.php");
 #require_once ("DanteSettings-production.php");
-
 require_once ("DanteSettings-used.php");
 
 require ("mediawiki-PRIVATE.php");
@@ -25,13 +22,10 @@ $wgUrlProtocols = [
 ];
 
 
-
 $wgEnableUploads         = true;                     // allow uploads
-$wgMaxUploadSize         = 100 * 1024 * 1024;        // allow large uploads
-$wgAllowExternalImages   = true;                     // allow extenal images
-
-$wgFileExtensions[] = 'svg';   // add svg to list of permitted file types
-
+$wgMaxUploadSize         = 100 * 1024 * 1024;        // allow large uploads of up to 100 MB
+$wgAllowExternalImages   = true;                     // allow extenal images to be used 
+$wgFileExtensions[] = 'svg';                         // add svg to list of permitted file types
 
 
 $wgJobRunRate = 10;             ## Job queue run rate
@@ -49,11 +43,9 @@ $wgSubTranslateAPIKey['api-free.deepl.com'] = $DEEPL_API_KEY;
 /* if you use DeepL API Pro plan */
 // $wgSubTranslateAPIKey['api.deepl.com'] = "<your auth-key here>";
 
-$wgSubTranslateCaching = true;
-$wgSubTranslateCachingTime = 604800;	/* 60(s) * 60(m) * 24(h) * 7 days */
-$wgSubTranslateRobotPolicy = "noindex,nofollow";
-
-
+$wgSubTranslateCaching      = true;
+$wgSubTranslateCachingTime  = 604800;	/* 60(s) * 60(m) * 24(h) * 7 days */
+$wgSubTranslateRobotPolicy  = "noindex,nofollow";
 
 
 
