@@ -3,6 +3,8 @@
 class DanteLinks {
 
 static function debugLog ($text) {
+  global $wgAllowVerbose;
+  if (!$wgAllowVerbose) {return;}
   if($tmpFile = fopen( __DIR__."/DANTELINKS-LOGFILE", 'a')) {fwrite($tmpFile, $text);  fclose($tmpFile); }    // __DIR__ is important so this works for Dante-ndpoints and mediawiki calls
   else {throw new Exception ("debugLog could not log");}
   
@@ -83,6 +85,8 @@ public static function onSkinAfterPortlet ( $skin, $portlet, &$html ) {
 // $linktype: Type of external link, e.g. 'free', 'text', 'autonumber'. Gets added to the css classes. (added in MediaWiki 1.15, r48226)
 public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attribs, $linktype ) {
   global $wgServer, $wgScriptPath;
+  global $wgAllowVerbose; $VERBOSE = true && $wgAllowVerbose;
+
     self::debugLog ("onLinkerMakeExternalLink called, parameters seen are: \n");
     self::debugLog ("  url      =" . $url ."\n"); 
     self::debugLog ("  text     =" . HtmlArmor::getHtml ($text) ."\n"); 

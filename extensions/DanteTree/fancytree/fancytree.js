@@ -406,7 +406,7 @@ const logoPatcher = () => {
 const patchPortletHeaders = () => {
   $("#mw-panel").find(".vector-menu-heading-label").each ( (idx, ele) =>   {  // was: only label
     // console.log ("TreeAndMenu: patchPortletHeaders: ", ele.parentNode.id);
-     console.log ("OO:" + ele.textContent);
+    // console.log ("OO:" + ele.textContent);
       //$(ele).attr(  "data-sidebar-src", ele.textContent);
     $(ele).prepend ("<span class='img-switcher' id='switcher-"+ele.parentNode.id+"'></span>");
   if (ele.textContent == "Tools") {} else {ele.setAttribute ("title", "shift.click to edit tree contents");}

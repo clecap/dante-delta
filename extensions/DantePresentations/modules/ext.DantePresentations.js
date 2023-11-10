@@ -206,9 +206,6 @@ function dantePositionAtSection ( e ) {
 
   const danteAnnotationAtSection = (e) => {
 
-
- 
-
   };
 
 
@@ -222,7 +219,7 @@ function dantePositionAtSection ( e ) {
 
 
 
-  mw.hook( 'postEdit' ).add ( () => { console.warn ("ext.DantePresentations.js: we now are postedit");
+  mw.hook( 'postEdit' ).add ( () => { // console.warn ("ext.DantePresentations.js: we now are postedit");
     danteBC.postMessage ( {reloadIframe:"true"} );  // request all externalMonitor pages to reload with the new content - needed for live editing stuff
 } );
 
@@ -257,7 +254,7 @@ function initializeToc () {  // initialize TOC functions - called by initialize 
   //window.addEventListener('DOMContentLoaded', (event) => { });
 
   function instrumentalize () {
-    console.log ("--------------------DOMContentLoaded");
+    // console.log ("--------------------DOMContentLoaded");
     var toc = document.getElementById ("toc");
     if (!toc) {return;}   // bail out: there are some situations where we have no toc
     initTocSize ();
@@ -269,15 +266,12 @@ function initializeToc () {  // initialize TOC functions - called by initialize 
     if (ele) {
       ele.addEventListener ("click", toggleMyToc); 
       ele.setAttribute ("title", "Click to toggle visibility of table of contents"); 
-      console.log (".toctitle instrumented");
+      // console.log (".toctitle instrumented");
     }
     else {console.error ("no toctitle found");}
   };
 
   instrumentalize();
-
-  //console.error ("toc initialized");
-
 }
 
 initializeToc ();

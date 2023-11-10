@@ -3,7 +3,7 @@
 use MediaWiki\MediaWikiServices;
 
 class TreeAndMenu {
-  const TREE = 1;
+  const TREE = 1; 
   const MENU = 2;
 
 public static function onParserFirstCallInit (Parser $parser) {                 // set the parser functions for  #tree   and  #menu
@@ -14,6 +14,8 @@ public static function onParserFirstCallInit (Parser $parser) {                 
 }
 
 static function debugLog ($text) {
+  global $wgAllowVerbose;
+  if (!$wgAllowVerbose) {return;}
   if($tmpFile = fopen( "extensions/DanteTree/LOGFILE", 'a')) {fwrite($tmpFile, $text);  fclose($tmpFile);} 
   else {throw new Exception ("debugLog could not log"); }
 }
@@ -21,18 +23,25 @@ static function debugLog ($text) {
 
 public static function onSkinBuildSidebar ($skin, &$bar ) {
   global $wgOut;
+  global $IP;
   global $wgServer, $wgScriptPath;
-  $VERBOSE = false;
+  global $wgAllowVerbose; $VERBOSE = false && $wgAllowVerbose;
   // self::debugLog ("onSkinBuildSidebar called \nsees bar=".print_r ($bar, true)."\n");
   $arrKeys = array_keys ($bar);
-  
-  //$bar = array_diff ($bar, array ("TOOLBOX"));
-   //  echo print_r ($bar, true);
+
+  $entryTime = hrtime(true);
+
+  // when served from the cache on MacPro this takes less than 1 ms, when served by generating it may take some 60 ms. Thus a cache here is helpful.
+  if (file_exists ( $IP . "/sidebarcache" )) {
+    $stored = file_get_contents ( $IP. "/sidebarcache" );
+    $bar = unserialize ($stored); 
+    // echo "" . (hrtime(true)-$entryTime)/1000 . " mu-sec";   // development: measuring cache hit time
+    return true;
+  }
+
 
   foreach ($arrKeys as $key) {
 
-    
-  //  $bar["TOOLBOX"] = "";
     if (in_array ( $key,  array ("SEARCH", "TOOLBOX", "LANGUAGES") ) )  { 
  
       continue; }  // ignore these standard sidebar items 
@@ -64,11 +73,6 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
      $html  =    "<div class=\"fancytree todo\" style=\"display:none;\" id=\"sidebar-cattree\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
      
 
-
-// [[Special:Categories|All Categories]]
-
-// https://localhost:4443/wiki-dir/index.php?title=Special:AllPages&from=&to=&namespace=14
-
   $add = <<<HERE
    <div style="margin-left:4px; margin-top:6px;line-height:20px;font-size:12pt;">
   <a href="$wgServer/$wgScriptPath/index.php/Special:Categories" class="dicon" title="Paged list of all categories">&forall;</a>
@@ -82,12 +86,8 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
 </div>
 HERE;
 
-
-
   $html = $html . $add;
 
-//    $html .= "<div class=\"fancytree todo\"><ul><li>asd</li></ul><div>";
-  //   $html .= "<a>qwe</a>";
      $bar[ 'catus' ] = [ [ 'html' =>  $html ]];
     }
 
@@ -99,9 +99,29 @@ HERE;
     if ($override) {$bar[$key] = [ ['html' => $override ]];}
 
   }  // end FOR loop
+
+  file_put_contents ( $IP. "/sidebarcache", serialize ($bar), LOCK_EX );
+  // echo "" . (hrtime(true)-$entryTime)/1000 . " mu-sec";  // development: measuring cache miss time
   return true;
 }
 
+
+
+// this hook is used to ensure that after editing a sidebar relevant page in the MediaWiki namespace, the sidebar cache is deleted
+public static function onEditPageattemptSaveafter( EditPage $editPage, Status $status, $details ) {
+  global $IP;
+  if ( $editPage->getTitle()->getNamespace() == NS_MEDIAWIKI) {            // only if the edit takes place in the MediaWiki namespace
+    $titleText = $editPage->getTitle()->getText();
+    if ( str_starts_with($titleText, "Sidebar") ) { $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); } }
+    }  
+}  // end function afterAttemptSave
+
+
+// changing category membership requires redoing the sidebar
+public static function onCategoryAfterPageRemoved( $category, $wikiPage, $id ) { global $IP; $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); } }
+
+// changing category membership requires redoing the sidebar
+public static function onCategoryAfterPageAdded( $category, $wikiPage ) {  global $IP; $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); } }
 
 
 
@@ -127,7 +147,7 @@ private static function overrideSidebar ($name) {
 
 // get the JSON config object for categories
 private static function getCatConfig () {
-  $VERBOSE = false;
+  global $wgAllowVerbose; $VERBOSE = false && $wgAllowVerbose;
   $configPage = "Sidebar/Categories";                                                         // name of the MediaWiki:Sidebar$name configuration page of this treelet
   $title      = Title::newFromText( $configPage, NS_MEDIAWIKI );                              // build title object for MediaWiki:SidebarTree
   $wikipage   = new WikiPage ($title);                                                        // get the WikiPage for that title
@@ -153,12 +173,7 @@ private static function getCatConfig () {
 }
 
 
-
-
-
-
 public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
-  //self::debugLog ("onBeforePageDisplay called\n");
   global $wgExtensionAssetsPath;
   $out->addHeadItem("earlyIcons",    "<link rel='preload' as='image' href='../extensions/DanteTree/fancytree/icons.gif'>");  // preload the DanteTree images (does work on Chrome)
 
@@ -166,7 +181,7 @@ public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
 <script data-src="TreeAndMenu_body.php">
   let pers = window.localStorage.getItem ("sidebar-width");
   if (pers) {
-    let style = `<style>+
+    let style = `<style>`+
       `#mw-panel {width: \${pers} ; height: 100%;}
       #content   {margin-left: \${pers};}
       #left-navigation  {margin-left: \${pers};}
@@ -176,9 +191,6 @@ public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
   }
 </script>        
 EOT);
-
-
-
 
 
 

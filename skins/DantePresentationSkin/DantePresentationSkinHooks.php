@@ -33,10 +33,14 @@ public static function onBeforePageDisplay ( OutputPage $out, Skin $skin ) {
   }
 }
 
+
+
 // NOTE: this injects directly into the header and leads to an immediate loading
 public static function onOutputPageAfterGetHeadLinksArray ( $tags, OutputPage $out ) { 
   global $wgScriptPath;
-  $out->addHeadItem("immediate", "<script src='$wgScriptPath/skins/DantePresentationSkin/resources/immediate.js'></script>");
+ // $out->addHeadItem("immediate", "<script src='$wgScriptPath/skins/DantePresentationSkin/resources/immediate.js'></script>");
+ // TODO: currently not used.  ok ?
+
 }
 
 

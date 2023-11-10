@@ -66,7 +66,7 @@ private function DOMinnerHTML(DOMNode $element) {
  * @return string
  */
 private function convert () {
-  $VERBOSE = false;
+  global $wgAllowVerbose; $VERBOSE = false && $wgAllowVerbose;
   $html = $this->myGetArticle()->getParserOutput()->getText( array ( "allowTOC" => false, "enableSectionEditLinks" => false ) );  // get the html text of this article
 
   $doc = new DOMDocument();                              // prepare an instance of an HTML parser

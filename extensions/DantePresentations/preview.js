@@ -24,15 +24,21 @@ const PROCESS = (() => {  // OPEN local scope for local variables
   const MAX_EVENT_WAIT = 1000;
   const MAX_FALLBACK   = 1100;
 
-  const VERBOSE = false;
-  let queueing = false;  // we have at least one preview request which has not yet been served
-  let timeout  = null;   // a scheduled task to run the processing at any cost
-  let fct;               // function to be called for execution
+  const VERBOSE = true;
+  let queueing = false;    // we have at least one preview request which has not yet been served
+  let timeout  = null;     // a scheduled task to run the processing at any cost
+  let fct;                 // the payload function to be called for execution
   let oldestUnservedTS;
+
+  let immediate = false;  // if true: service always immediately without waiting
+
+  let setImmediate = ( flag ) => { immediate = flag; };
+  let getImmediate = () => immediate;
+  let toggleImmediate = () => {immediate = !immediate;}
 
   let setFct = (f) => { fct = f; };  // setter for fct
 
-  let process = ( eventObject ) => { // the fraw function as it is called from the outside
+  let process = ( eventObject ) => { // the raw service function as it is called from the outside
 
     if (VERBOSE) {
       if      ( eventObject == "INIT"   )           { console.info  ("preview.js: process called at initialization ");}
@@ -43,14 +49,24 @@ const PROCESS = (() => {  // OPEN local scope for local variables
 
     // CASE 1: There are some scenarios where we want a preview immediately
     const IMMEDIATELY = ["insertFromDrop", "insertFromPaste", "insertFromPasteAsQuotation", "deleteByDrag", "deleteByCut", "historyUndo", "historyRedo"];
-    if ( eventObject == "INIT" || eventObject == "RESIZE" || IMMEDIATELY.includes (eventObject.inputType) )     
-      { if (VERBOSE) {console.info ("CASE 1: Special request with immediate processing: " + (typeof eventObject == "string" ? eventObject : eventObject.inputType ) );}   fct(); return; }
+
+    if ( immediate || eventObject == "INIT" || eventObject == "RESIZE" || IMMEDIATELY.includes (eventObject.inputType) )     
+      { if (VERBOSE) {console.info ("CASE 1: Special request with immediate processing: " + (typeof eventObject == "string" ? eventObject : eventObject.inputType ) );}   
+//        fct(); 
+         window.setTimeout (fct, 0);
+        return; }
 
     // CASE 2: When the oldest inputevent which has not yet been served is longer ago than MAX_EVENT_WAIT [ms]
 
     if (queueing) {  // in case we are already in queueing mode
-      if ( eventObject.timeStamp - oldestUnservedTS > MAX_EVENT_WAIT ) { console.info (`CASE 2: ${eventObject.timeStamp} ${oldestUnservedTS}`); if (timeout) {window.clearTimeout (timeout); timeout= null;} queueing = false; fct();  return;}
-      else { if (VERBOSE) {console.info (`CASE 2-: Not yet time to execute a call: current=${eventObject.timeStamp} oldestUnserved=${oldestUnservedTS}  diff=${eventObject.timeStamp - oldestUnservedTS }`);} }
+      if ( eventObject.timeStamp - oldestUnservedTS > MAX_EVENT_WAIT ) { 
+        console.info (`CASE 2: ${eventObject.timeStamp} ${oldestUnservedTS}`); 
+        if (timeout) {window.clearTimeout (timeout); timeout= null;} 
+        queueing = false; 
+        fct(); 
+        return;}
+      else { 
+        if (VERBOSE) {console.info (`CASE 2-: Not yet time to execute a call: current=${eventObject.timeStamp} oldestUnserved=${oldestUnservedTS}  diff=${eventObject.timeStamp - oldestUnservedTS }`);} }
     } 
     else {  // in case we are not yet in queueing mode we enter queueing mode but at most for MAX_FALLBACK
       queueing = true;
@@ -60,7 +76,7 @@ const PROCESS = (() => {  // OPEN local scope for local variables
     }
   }; 
 
-  return {process, setFct};
+  return {process, setFct, setImmediate, getImmediate, toggleImmediate};
 
 })();  // CLOSE local scope
 
@@ -77,10 +93,9 @@ const DPRES = (() => {
 function receivedEndpointResponse(e) {
   const VERBOSE = true; 
 
-//  const myNow = Date.now();
-//  if (V_TIME) {console.warn (`Request was made at ${e.target.timeRequestMade}, now is ${myNow} and duration ${myNow - e.target.timeRequestMade}`);}
+  let arrived = Date.now();
 
-  if (e.target.status != 200) { 
+  if (e.target.status != 200) {
     console.warn (`DantePresentations: preview: Received an ERROR message from an endpoint. Status Code=${e.target.status} Status Text=${e.target.statusText});`);
     if (confirm (`Server Error: Status Code ${e.target.status} ${e.target.statusText} \nURL: ${e.target.responseURL}\nConfirm to open more detailed error window`)) {
       window.open ( e.target.responseURL, "_blank");
@@ -99,16 +114,16 @@ function receivedEndpointResponse(e) {
     }
     else {console.warn ("  The XHR object had no timestamp, this is a protocol error!");}
   }
+
+  let roundTrip = Date.now() - e.target.timeRequestMade;
+  var sum = document.body.querySelector ("label[for=wpSummary]");
+  sum.innerHTML = "Status: " + e.target.status + " Roundtrip: " + roundTrip + "[ms]" + (PROCESS.getImmediate() ? " immediate " : " delayed " ) + "(change with Alt) ";
 }
-
-
 
 // double buffered preview frame prevents flickering and ensures faster and smoother UI reaction
 let previewFrames = [];
 let currentFrame = 0;
 let currentZoom = 1;
-
-
 
 // this is the old function without double buffer which is eventually TODO: deprecated
 function displayEndpointResponseSingleBuffer (e) {
@@ -127,7 +142,9 @@ function displayEndpointResponseSingleBuffer (e) {
   QUEUE.currentTimestamp = e.target.timeRequestMade;                                      // update time stamp of the content currently on display
   QUEUE.remove (e.target);                                                                // remove the response just received so the topmost queue element is the most recent invocation we are waiting for 
   QUEUE.nonCancelable ();                                                                 // make most recent nonCancelable and cancel all others
-  if (QUEUE.getLen () == 0) {document.body.classList.remove ("xhrPending", "inputChanged");}              // show by decoration of frame whether we still are awaiting responses
+  if (QUEUE.getLen () == 0) {
+    console.info ("removing pending");
+    document.body.classList.remove ("xhrPending", "inputChanged");}              // show by decoration of frame whether we still are awaiting responses
 
   // we want azoom change inside of only the iframe with the preview content alone
 // TODO:  for some stupid reason this does not work.  srcdoc ??  maybe other reason.
@@ -199,7 +216,9 @@ function displayEndpointResponseDoubleBuffer (e) {
 
     newFrame.style.visibility = "visible";               // new frame becomes visible
 
-    if (QUEUE.getLen () == 0) {document.body.classList.remove ("xhrPending", "inputChanged");}              // show by decoration of frame whether we still are awaiting responses
+    if (QUEUE.getLen () == 0) {
+      console.log ("removing pending");
+      document.body.classList.remove ("xhrPending", "inputChanged");}              // show by decoration of frame whether we still are awaiting responses
     currentFrame = (currentFrame == 0 ? 1 : 0);          // adjust the pointer
   }
 
@@ -224,7 +243,7 @@ function processAll() {
   xhr.setRequestHeader ("Wiki-wgTitle",               RLCONF.wgTitle);                        // includes blanks, no underscores, no namespace
   xhr.setRequestHeader ("Wiki-wpPageContentLanguage", RLCONF.wgPageContentLanguage);
 
-  // header and xhr object gets a timestamp when the request was issued
+  // header and xhr object gets a timestamp when the request was made and sent to the server
   xhr.timeRequestMade = Date.now();
   xhr.setRequestHeader ("X-Dante-ClientRequestTime", xhr.timeRequestMade);
   xhr.onload = (e) => {receivedEndpointResponse (e);};
@@ -232,6 +251,7 @@ function processAll() {
   QUEUE.submit ( xhr );
   document.body.classList.remove ("inputChanged");
   document.body.classList.add ("xhrPending");
+  console.info ("switched to pending: " + document.body.classList);
   xhr.send ( body );
 }
 
@@ -239,22 +259,10 @@ function processAll() {
 
 
 
-
-
-
-
-
-
-
-
 // Apply path to the edit page of Mediawiki. Called by <script> tag injected in DantePresentations.php:onEditPageshowEditForminitial
 function initializeTextarea() { 
-  // console.warn ("DantePresentations:preview.js: initializeTextarea");
-
   var storeResize = true;                                   // shall the resize observer store the resize values?
-
-  // pick up the textarea
-  var textarea = document.getElementById ( "wpTextbox1" );  
+  var textarea = document.getElementById ( "wpTextbox1" );   // pick up the textarea
 
   const wasResized = () => {
     const VERBOSE = true;
@@ -278,10 +286,6 @@ function initializeTextarea() {
 
   textarea.myFontSize = 14; textarea.style.fontSize = textarea.myFontSize + "pt";
 
-  // keyboard based resizing inside of textarea only resizes the textarea font size itself
-  textarea.addEventListener ("keydown", (e) => { // console.log ("Key pressed: ", e.key);
-    if (e.metaKey && (e.key=="+" || e.key=="-") ) {e.preventDefault (); e.stopPropagation(); textarea.myFontSize += ( e.key=="+" ? 2 : -2 ); textarea.style.fontSize = textarea.myFontSize + "pt"; }  });
-  
   var newEditContainer = document.createElement ("div");   // container of (textarea for editing) and (preview area)
   newEditContainer.id  = "new-edit-container";
   Object.assign (newEditContainer.style, {display: "flex", height: "calc(100vh - 540px)"} ); 
@@ -301,24 +305,32 @@ function initializeTextarea() {
   previewFrames[0].classList.add ("previewFrameClass");
   previewFrames[1].classList.add ("previewFrameClass");
 
-
-  //var previewFrame = document.createElement ("iframe");  previewFrame.id = "previewFrame";  Object.assign (previewFrame.style, {width:"100%", height:"100%", position:"absolute", left:"0px", top:"0px"} );
-  
-// previewImage.style.visibility = previewFrame.style.visibility = "hidden";
-
- // previewContainer.appendChild ( previewImage );
-//  previewContainer.appendChild ( previewFrame );
   previewContainer.appendChild (previewFrames[0]);   previewContainer.appendChild (previewFrames[1]);
-
   newEditContainer.appendChild (previewContainer);
   
   let editform = document.getElementById ("editform"); 
 
   PROCESS.setFct ( processAll );                                       // define which function to use for processing for previewing
+
   editform.addEventListener ("input", PROCESS.process );               // install an event listener for changes in the textarea
   window.setTimeout ( () => { PROCESS.process ( "INIT" );} , 0);       // kick off display of first preview
 
   editform.addEventListener ("input", () => {document.body.classList.add ("inputChanged");});  
+
+ // keyboard based resizing inside of textarea only resizes the textarea font size itself
+  textarea.addEventListener ("keydown", (e) => { // console.log ("Key pressed: ", e.key);
+    if (e.metaKey && (e.key=="+" || e.key=="-") ) {e.preventDefault (); e.stopPropagation(); textarea.myFontSize += ( e.key=="+" ? 2 : -2 ); textarea.style.fontSize = textarea.myFontSize + "pt"; return;} 
+    switch (e.key) {
+      case "Escape":   console.log ("removing input listener");  editform.removeEventListener ("input", PROCESS.process );  break;
+      case "Control":  console.log ("re-adding input listener"); editform.addEventListener ("input", PROCESS.process);  PROCESS.process ( "INIT" );   break;
+      case "Alt":      console.log ("immediate processing");  PROCESS.toggleImmediate ();  PROCESS.process ( "INIT" );   break;
+    }
+
+   });
+
+
+
+
 }
 
 

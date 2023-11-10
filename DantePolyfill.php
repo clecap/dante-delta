@@ -24,8 +24,12 @@ function danteLog ($extension, $text) {
   $fileName = dirname(__FILE__) . "/extensions/".$extension."/LOGFILE";
   if($tmpFile = fopen( $fileName , 'a')) {fwrite($tmpFile, $text);  fclose($tmpFile);}  
   else {throw new Exception ("DanteSettings.php: debugLog could not log to $fileName for extension $extension"); }
-}
 
+  $fileSize = filesize ($fileName);
+  if ($fileSize == false) { return; }
+  if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
+
+}
 
 
 

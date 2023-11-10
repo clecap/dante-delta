@@ -25,8 +25,15 @@ require_once ("../renderers/hideRenderer.php");
 
 
 function EndpointLog ($text) {
-  if($tmpFile = fopen( "ENDPOINT_LOG", 'a')) {fwrite($tmpFile, $text);  fclose($tmpFile);}  // NOTE: close immediatley after writing to ensure proper flush
+  global $wgAllowVerbose;
+  if (!$wgAllowVerbose) {return;}
+  $fileName = "ENDPOINT_LOG";
+  if($tmpFile = fopen( $fileName, 'a')) {fwrite($tmpFile, $text);  fclose($tmpFile);}  // NOTE: close immediatley after writing to ensure proper flush
   else {throw new Exception ("debugLog in danteEndpoint.php could not log"); }
+
+  $fileSize = filesize ($fileName);
+  if ($fileSize == false) { return; }
+  if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
   }
 
 

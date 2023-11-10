@@ -21,6 +21,8 @@ $wgMainCacheType         = CACHE_ACCEL;
 
 $wgEnableSidebarCache    = false;    # we must not cache sidebar since we often change the sidebar, even dynamically
 
+$wgAllowVerbose            = false;
+
 # we need to invalidate cache when a configuration is changed or when Parsifal cache is cleared.
 # setting this variable ensures this since Parsifal cache clearing special page will touch LocalSettings.php
 $wgInvalidateCacheOnLocalSettingsChange=true;
