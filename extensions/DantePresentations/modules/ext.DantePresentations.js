@@ -1,8 +1,5 @@
 /* This module loads all functionality required in DantePresentations */
 
-
-
-
 // TODO: check if we can use a global object kind of namespace in javascript: handlers 
 
 (() => {  // scope protection
@@ -40,11 +37,6 @@ window.show = function show (path) {
 
 */
 }
-
-
-
-
-
 
 
 /** MAIN ENTRY POINT called by UI
@@ -234,10 +226,6 @@ function dantePositionAtSection ( e ) {
 
 
 
-
-
-
-
 // function for persisting the resize of the table of contents in localstore
 function initializeToc () {  // initialize TOC functions - called by initialize in here
   const toggleMyToc = () => { 
@@ -246,7 +234,10 @@ function initializeToc () {  // initialize TOC functions - called by initialize 
   const initTocSize = () => { 
     const toc = document.getElementById ("toc");
     var width = parseInt (localStorage.getItem ("tocWidth"));
-    if (width) {toc.style.width = width + "px";}
+    console.log ("tocWidth found in localStorage is: " + width);
+    if (width !== null) {
+      if (width <=18) {width = 0;}          // correct for the browser not really properly reacting with Resize Observer for small sizes
+      toc.style.width = width + "px";}
     toc.style.display = "block";
   };
   
@@ -254,18 +245,18 @@ function initializeToc () {  // initialize TOC functions - called by initialize 
   //window.addEventListener('DOMContentLoaded', (event) => { });
 
   function instrumentalize () {
-    // console.log ("--------------------DOMContentLoaded");
     var toc = document.getElementById ("toc");
-    if (!toc) {return;}   // bail out: there are some situations where we have no toc
+    if (!toc) {return;}                          // bail out: there are some situations where we have no toc
     initTocSize ();
     new ResizeObserver( () => {
+      console.log ("ext.dantePresentations.js: storing toc width: " + toc.style.width + " clientWidth:" + toc.clientWidth);
       localStorage.setItem ("tocWidth", parseInt (toc.style.width));
     } ).observe(toc);
     
     var ele = document.querySelector (".toctitle");
     if (ele) {
       ele.addEventListener ("click", toggleMyToc); 
-      ele.setAttribute ("title", "Click to toggle visibility of table of contents"); 
+      ele.setAttribute ("title", "Click to toggle visibility of a large table of contents"); 
       // console.log (".toctitle instrumented");
     }
     else {console.error ("no toctitle found");}

@@ -3,13 +3,16 @@
 /***********************/
 
 
-#toc         {float:right;position:fixed;right:-1px; top:59pt;width:30%;  overflow-y:scroll;   display:none; max-height: calc(100vh - 120px); }
+#toc         {float:right;position:fixed;right:-1px; top:59pt;width:30%;  overflow-y:scroll;  
+  overflow-x:hidden;
+  max-height: calc(100vh - 120px); }
        
+
+
 /* adjust size */
 
 /* needed so that the ToC remains clickable and is not covered by some parsifal container */
 #toc {z-index:60000;}
-
 
 #toc{border:1px solid #a7d7f9}
 
@@ -27,7 +30,7 @@ div.toctitle:hover {background:lightblue;}
 
 /* background-color:   #ffee99 */
 
-#toc         {width:550px; margin: 0px 0px 160px 0px; background-color:#ffee98; resize:horizontal; direction: rtl; display:none;}  
+#toc         {width:550px; margin: 0px 0px 160px 0px; background-color:#ffee98; resize:horizontal; direction: rtl;}  
 
 /* not compensate again to have the correct place for the numbering */
 #toc > * {direction: ltr;}
@@ -40,3 +43,15 @@ div.toctitle:hover {background:lightblue;}
 .toclevel-1 > a {color:red !important; font-weight:bold;}
 .toclevel-2 > a {color:green !important; font-weight:bold;}
 .toclevel-3 > a {}
+
+
+/* correct the print view for the changes we made for the sidebar and the table of contents */
+@media print {
+  #toc { display:none !important;}
+  #mw-panel {display:none !important;}
+  #content {margin-left:0px !important;}
+}
+
+
+
+

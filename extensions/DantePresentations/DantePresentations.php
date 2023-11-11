@@ -119,6 +119,7 @@ $hint = "";
   // NOTE: this injects directly into the header and leads to an immediate loading - necessary since we must intercept the display of the regular TOC
   // If we do not do this like that, we first see the regular TOC, then a load.php style sheets loads and removes it, and as soon as it is completely patched, we show it again
   public static function onOutputPageAfterGetHeadLinksArray ( $tags, OutputPage $out ) { 
+     global $wgServer, $wgScriptPath;
      $out->addHeadItem("tocstyle", "<style data-src='DantePresentations.php'>#toc {display:none;}</style>");
   }
 
