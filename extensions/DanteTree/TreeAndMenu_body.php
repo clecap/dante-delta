@@ -106,14 +106,30 @@ HERE;
 }
 
 
-
-// this hook is used to ensure that after editing a sidebar relevant page in the MediaWiki namespace, the sidebar cache is deleted
+// ensure that after editing a sidebar relevant page in the MediaWiki namespace, the sidebar cache is deleted
+// ensure that editing the page Sidebar (and Mainpage) also generates a copy of it in directory assets so we can later pick it up again
+//   this is necessary since Sidebar (and Mainpage) are the only pages we need to inject separately apart from the xml backup archive
 public static function onEditPageattemptSaveafter( EditPage $editPage, Status $status, $details ) {
   global $IP;
-  if ( $editPage->getTitle()->getNamespace() == NS_MEDIAWIKI) {            // only if the edit takes place in the MediaWiki namespace
+  // danteLog ("DanteTree", "oneditpageattempt \n" );
+  if ( $editPage->getTitle()->getNamespace() == NS_MAIN) {     
+    $titleText = $editPage->getTitle()->getText();
+    //danteLog ("DanteTree", "oneditpageattempt: ".$titleText."\n" );
+    if ($titleText == "Main Page") {
+      $textData = $editPage->getArticle()->getPage()->getContent()->getNativeData();
+      //danteLog ("DanteTree", "oneditpageattempt: ".$titleText." with " . $textData."\n" );
+      $retVal = file_put_contents ($IP."/assets/Main Page", $textData);
+      //danteLog ("DanteTree", "oneditpageattempt:stored:  ". print_r ($retVal, true).  "  type " .gettype($retVal)."\n" );
+    }
+  }
+  else if ( $editPage->getTitle()->getNamespace() == NS_MEDIAWIKI) {            // only if the edit takes place in the MediaWiki namespace
     $titleText = $editPage->getTitle()->getText();
     if ( str_starts_with($titleText, "Sidebar") ) { $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); } }
-    }  
+    if ( $titleText == "Sidebar" ) {
+      $textData = $editPage->getArticle()->getPage()->getContent()->getNativeData();
+      file_put_contents ($IP."/assets/Sidebar", $textData);
+    }
+  }
 }  // end function afterAttemptSave
 
 
