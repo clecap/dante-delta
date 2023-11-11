@@ -84,6 +84,7 @@ extensions/DanteLinks/DANTELINKS-LOGFILE
 !extensions/DanteTree
 !extensions/DanteTree/*
 extensions/DanteTree/.DS_Store
+extensions/DanteTree/LOGFILE
 
 !extensions/DantePresentations
 !extensions/DantePresentations/*
