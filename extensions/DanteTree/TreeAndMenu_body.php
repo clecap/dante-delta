@@ -72,12 +72,12 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
  //     $html  =    "<div class=\"fancytree todo\" id=\"sidebar-cattree\" style=\"display:none;\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
      $html  =    "<div class=\"fancytree todo\" style=\"display:none;\" id=\"sidebar-cattree\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
      
-
+  // here we add the button-like stuff below the category
   $add = <<<HERE
    <div style="margin-left:4px; margin-top:6px;line-height:20px;font-size:12pt;">
   <a href="$wgServer/$wgScriptPath/index.php/Special:Categories" class="dicon" title="Paged list of all categories">&forall;</a>
   <a href="$wgServer/$wgScriptPath/index.php/MediaWiki:CategoryTree"  class="dicon" title="Category tree">&#x1F332;</a>
-  <a href=""  class="dicon" title="Category cloud">&#9729;</a>
+  <a href="$wgServer/$wgScriptPath/index.php/MediaWiki:CategoryCloud"  class="dicon" title="Category cloud">&#9729;</a>
   <a href="$wgServer/$wgScriptPath/index.php/Special:UncategorizedPages"  class="dicon" title="List of pages without category">&empty;</a>
   <a href="$wgServer/$wgScriptPath/index.php/Special:UncategorizedCategories" 
   style="color:red;"
