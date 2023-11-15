@@ -100,6 +100,7 @@ wfLoadExtension( 'DanteBread' );
 wfLoadExtension( 'DanteLinks' );
 wfLoadExtension( 'DanteTree' );
 
+
 $wgGroupPermissions['sysop']['dante-restore'] = true;  // TODO: this should go into the registration function of the extension as a default somehow and not be required here. // NOTE: here: it must be before loading the extension 
 $wgGroupPermissions['sysop']['dante-dump'] = true;
 $wgGroupPermissions['sysop']['dante-dbrestore'] = true;
@@ -108,6 +109,11 @@ wfLoadExtension( 'DanteBackup' );
 
 
 wfLoadExtension( 'DanteSnippets' );
+  
+
+//wfLoadExtension( 'DanteBoilerSpecial' );
+
+wfLoadExtension( 'DanteCategoryBrowser' );
 
 
 # $wgParserCacheType       = CACHE_DB;
@@ -131,8 +137,8 @@ wfLoadSkin( 'DantePresentationSkin' );
 # include stuff generated dynamically by scripts
 require ("DanteDynamicInstalls.php");
 
-
-
+## setting for graphviz dot  
+$danteDotPath="/usr/bin/dot";
 
 ##
 ## Configuring Extension wikEdDiff
