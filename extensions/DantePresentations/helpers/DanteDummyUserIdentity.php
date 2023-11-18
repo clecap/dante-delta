@@ -6,39 +6,39 @@ class DanteDummyUserIdentity implements MediaWiki\User\UserIdentity {
   public bool $danteEndpoint = true;
 
   function __construct ( ?string $userName ) {
-    EndpointLog ( "DanteDummyUserIdentity: constructor called \n");
+    //EndpointLog ( "DanteDummyUserIdentity: constructor called \n");
     $mwServices      =  MediaWiki\MediaWikiServices::getInstance(); 
     $loadBalancer    =  $mwServices->getDBLoadBalancer();
     $userNameUtils   =  $mwServices->getUserNameUtils(); 
     $userFactory     =  new MediaWiki\User\UserFactory ( $loadBalancer, $userNameUtils );
     if ( $userName === null)  { 
-      EndpointLog ( "DanteDummyUserIdentity: constructor: userName is null, constructing anonymous user \n");
+      //EndpointLog ( "DanteDummyUserIdentity: constructor: userName is null, constructing anonymous user \n");
       $result = $userFactory->newAnonymous( ); 
-      EndpointLog ( "DanteDummyUserIdentity: constructor: having anonymouse user \n");
+      //EndpointLog ( "DanteDummyUserIdentity: constructor: having anonymouse user \n");
     } 
     else                      { 
-      EndpointLog ( "DanteDummyUserIdentity: userName is: ".print_r ($userName, true)." \n");
+      //EndpointLog ( "DanteDummyUserIdentity: userName is: ".print_r ($userName, true)." \n");
       $result = $userFactory->newFromName( $userName ); 
 
-      EndpointLog ( "DanteDummyUserIdentity: after newFromName call \n");
+      //EndpointLog ( "DanteDummyUserIdentity: after newFromName call \n");
       if ($result === null) {
-        EndpointLog ("DanteDummyUserIdentity: userName was invalid, obtained null user, constructing anonymous user\n");
+        //EndpointLog ("DanteDummyUserIdentity: userName was invalid, obtained null user, constructing anonymous user\n");
        $result = $userFactory->newAnonymous( ); 
-        EndpointLog ("DanteDummyUserIdentity: userName was invalid, obtained an anonymous user, who is: \n");
-        EndpointLog ("DanteDummyUserIdentity: anonymous user is: " .print_r ($result, true). " \n");
+        //EndpointLog ("DanteDummyUserIdentity: userName was invalid, obtained an anonymous user, who is: \n");
+        //EndpointLog ("DanteDummyUserIdentity: anonymous user is: " .print_r ($result, true). " \n");
 
       }
       else {
-        EndpointLog ("DanteDummyUserIdentity: userName was invalid, obtained a user\n");
+        //EndpointLog ("DanteDummyUserIdentity: userName was invalid, obtained a user\n");
       }
 
     }
 
     $this->user = $result;  // only now, that we are guaranteed to have a correct value, assign the class variable (otherwise we might get a PHP typecheck error)
 
-    EndpointLog ( "DanteDummyUserIdentity: Found user: " . $this->user->getName(). "\n");
-    EndpointLog ( "DanteDummyUserIdentity: Is registered: " . ($this->user->isRegistered() ? "yes" : "no" ). "\n");
-    EndpointLog ( "DanteDummyUserIdentity: Is anon: " . ($this->user->isAnon() ? "yes" : "no" ). "\n\n");
+    //EndpointLog ( "DanteDummyUserIdentity: Found user: " . $this->user->getName(). "\n");
+    //EndpointLog ( "DanteDummyUserIdentity: Is registered: " . ($this->user->isRegistered() ? "yes" : "no" ). "\n");
+    //EndpointLog ( "DanteDummyUserIdentity: Is anon: " . ($this->user->isAnon() ? "yes" : "no" ). "\n\n");
   }
 
   public function getId( $wikiId = self::LOCAL ): int   { return $this->user->getId();   }

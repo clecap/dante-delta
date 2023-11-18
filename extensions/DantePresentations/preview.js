@@ -40,7 +40,7 @@ const PROCESS = (() => {  // OPEN local scope for local variables
 
   let process = ( eventObject ) => { // the raw service function as it is called from the outside
 
-    if (VERBOSE) {
+    if (false && VERBOSE) {
       if      ( eventObject == "INIT"   )           { console.info  ("preview.js: process called at initialization ");}
       else if ( eventObject == "RESIZE" )           { console.info  ("preview.js: process called after resize" );}
       else if ( eventObject instanceof InputEvent)  { console.info  ("preview.js: process called after InputEvent ", "type=" , eventObject.inputType, ( eventObject.isComposing ? " COMPOSING " : " NOT_COMPOSING" ), "data=", eventObject.data, eventObject);}
@@ -99,7 +99,6 @@ function receivedEndpointResponse(e) {
     console.warn (`DantePresentations: preview: Received an ERROR message from an endpoint. Status Code=${e.target.status} Status Text=${e.target.statusText});`);
     if (confirm (`Server Error: Status Code ${e.target.status} ${e.target.statusText} \nURL: ${e.target.responseURL}\nConfirm to open more detailed error window`)) {
       window.open ( e.target.responseURL, "_blank");
-
     };
     return; } 
   else {
@@ -107,7 +106,7 @@ function receivedEndpointResponse(e) {
     
     // now check if the response is outdated
     if (e.target.timeRequestMade) {  // do we have a timestamp?
-      if (e.target.timeRequestMade > QUEUE.currentTimestamp) { if (VERBOSE) {console.log ("  Will display the endpoint response"); }
+      if (e.target.timeRequestMade > QUEUE.currentTimestamp) { if (VERBOSE) {console.log ("  Will display the endpoint response to request ", e.target.timeRequestMade, e.target.numberOfRequest); }
                                                                displayEndpointResponseDoubleBuffer (e); }
       else                                                   {if (VERBOSE) { console.log (`  Will discard endpoint response. Tool old: From ${e.target.timeRequestMade} and thus older than current status ${QUEUE.currentTimestamp}`); }
                                                                QUEUE.remove (e.target);}
@@ -174,11 +173,9 @@ function displayEndpointResponseSingleBuffer (e) {
 }
 
 
-
-
 // this is the new function
 function displayEndpointResponseDoubleBuffer (e) {
-  let VERBOSE = true;
+  let VERBOSE = false;
   if (VERBOSE) {console.log ("displayEndpointResponseDoubleBuffer called");}
 
   var curFrame = previewFrames[currentFrame];
@@ -190,11 +187,21 @@ function displayEndpointResponseDoubleBuffer (e) {
   QUEUE.remove (e.target);                                                                // remove the response just received so the topmost queue element is the most recent invocation we are waiting for 
   QUEUE.nonCancelable ();                                                                 // make most recent nonCancelable and cancel all others
 
-
   newFrame.onload = function () {  // the frame we just wrote has, as consequence of the writing, lost its handlers - so add them again after the load has completed 
-    let current = curFrame.contentWindow.pageYOffset;
-    newFrame.contentWindow.scrollTo (0, current);
-    // console.log ("******* newFrame.onload ", curFrame.contentWindow.pageYOffset, newFrame.contentWindow.pageYOffset);
+    let current = curFrame.contentWindow.pageYOffset;    // get scroll status of the current window
+
+//    const scrollTop = .scrollY;                               // Current vertical scroll position
+    const windowHeight = curFrame.contentWindow.innerHeight;                        // Height of the viewport
+    const documentHeight = curFrame.contentWindow.document.documentElement.scrollHeight;   // Total height of the document
+
+    let perc = 100.0 * (current + windowHeight) / documentHeight;
+    // console.info ("current scrolled=", current, " windowHeight=", windowHeight, "sum=", (current + windowHeight), " documentHeight=", documentHeight,  "percentage scrolled: " , perc);
+    if (perc > 98.5) {
+      current = (documentHeight - windowHeight + 20);
+      // console.info ("adjusted scroll to ", current);
+
+    }
+    newFrame.contentWindow.scrollTo (0, current);        // and impose it on the new frame jsut activated
 
     newFrame.contentWindow.addEventListener ("focus", (e) => {console.warn ("FOCUS");  newFrame.classList.add ("hasFocus");   }); 
     newFrame.contentWindow.addEventListener ("blur",  (e) => {console.warn ("BLUR", ); newFrame.classList.remove("hasFocus"); }); 
@@ -217,7 +224,7 @@ function displayEndpointResponseDoubleBuffer (e) {
     newFrame.style.visibility = "visible";               // new frame becomes visible
 
     if (QUEUE.getLen () == 0) {
-      console.log ("removing pending");
+      // console.log ("remove UI indication that an xhr is pending");
       document.body.classList.remove ("xhrPending", "inputChanged");}              // show by decoration of frame whether we still are awaiting responses
     currentFrame = (currentFrame == 0 ? 1 : 0);          // adjust the pointer
   }
@@ -228,6 +235,7 @@ function displayEndpointResponseDoubleBuffer (e) {
 
 
 
+let numberOfRequest = 0;
 
 function processAll() {
   var body = b64EncodeUnicode ( document.getElementById ( "wpTextbox1" ).value );
@@ -245,13 +253,16 @@ function processAll() {
 
   // header and xhr object gets a timestamp when the request was made and sent to the server
   xhr.timeRequestMade = Date.now();
+  xhr.numberOfRequest = numberOfRequest++;
   xhr.setRequestHeader ("X-Dante-ClientRequestTime", xhr.timeRequestMade);
   xhr.onload = (e) => {receivedEndpointResponse (e);};
 
+  console.log ("Submitting request to queue ", xhr.numberOfRequest);
   QUEUE.submit ( xhr );
   document.body.classList.remove ("inputChanged");
   document.body.classList.add ("xhrPending");
-  console.info ("switched to pending: " + document.body.classList);
+  // console.info ("switched to pending: " + document.body.classList);
+  console.log ("Sending request ", xhr.numberOfRequest);
   xhr.send ( body );
 }
 
@@ -263,6 +274,10 @@ function processAll() {
 function initializeTextarea() { 
   var storeResize = true;                                   // shall the resize observer store the resize values?
   var textarea = document.getElementById ( "wpTextbox1" );   // pick up the textarea
+
+  textarea.setAttribute ("autocomplete", "off");
+  textarea.setAttribute ("autocorrect", "off");
+  textarea.setAttribute ("autocapitalize", "off");
 
   const wasResized = () => {
     const VERBOSE = true;
@@ -407,7 +422,7 @@ window.editPreviewPatch = DPRES.editPreviewPatch;
 */
 
 var QUEUE = (() => {
-  const VERBOSE = false;
+  const VERBOSE = true;
   let pendingRequests = [];                                                           // list of pending requests waiting for a server reply
   let currentTimestamp = 0;                                                           // time stamp of the request whose content is showing currently
   var submit = ( x ) => { pendingRequests.unshift (x); };                             // submit a fresh request to the queue
@@ -416,8 +431,8 @@ var QUEUE = (() => {
   var remove = (ele) => { pendingRequests=pendingRequests.filter ( x => x!=ele);}
   var cancel = () => {                                                                // cancel all but the non-cancelable, and remove them from the queue as well
     pendingRequests = pendingRequests.filter ( ele => {
-      if (ele.nonCancelable) { if (VERBOSE) {console.log ("keeping request made at ", ele.timeRequestMade);}  return true;} 
-      else { if (VERBOSE) {console.log ("aborting request made at", ele.timeRequestMade);}  ele.abort(); return false;}
+      if (ele.nonCancelable) { if (VERBOSE) {console.log ("keeping request ", ele.numberOfRequest, " made at ", ele.timeRequestMade);}  return true;} 
+      else { if (VERBOSE) {console.log ("aborting request number ", ele.numberOfRequest, " made at", ele.timeRequestMade);}  ele.abort(); return false;}
     });
   };
   return {submit, nonCancelable, currentTimestamp, getLen, remove};  // export object

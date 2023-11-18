@@ -6,13 +6,8 @@
  */
     
 
-/**
- * With require WebStart.php (MW_INSTALL_PATH may need to be set beforehand, see Manual:$IP), 
- * a script gets access to MediaWiki components and consequently it can call the API internally or
- */
 
-
-// need the following two lines to obtain reasonable errors from the endpoint instead of only 500 er status from webserver
+// need the following two lines to obtain reasonable errors from the endpoint instead of only 500 er status from webserver  // TODO: adjust this for production !!!
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
@@ -21,7 +16,6 @@ require_once ("../../../includes/WebStart.php");
 require_once ("../helpers/DanteDummyUserIdentity.php");
 require_once ("../helpers/DanteDummyPageReference.php");
 require_once ("../renderers/hideRenderer.php");
-
 
 
 function EndpointLog ($text) {
@@ -35,6 +29,21 @@ function EndpointLog ($text) {
   if ($fileSize == false) { return; }
   if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
   }
+
+
+function ParsifalLog ($text) {
+  global $wgAllowVerbose;
+  //if (!$wgAllowVerbose) {return;}
+  $fileName = "../../Parsifal/LOGFILE";
+  if($tmpFile = fopen( $fileName, 'a')) {fwrite($tmpFile, "DanteEndpoint: ".$text);  fclose($tmpFile);}  // NOTE: close immediatley after writing to ensure proper flush
+  else {throw new Exception ("parsifalLog in danteEndpoint.php could not log"); }
+
+  $fileSize = filesize ($fileName);
+  if ($fileSize == false) { return; }
+  if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
+  }
+
+
 
 
 class DanteEndpoint {
@@ -63,7 +72,7 @@ class DanteEndpoint {
   protected ?string   $dbkey;
 
 
-// TODO: looks like the following is either not needed or secudnary constructible ??
+  // TODO: looks like the following is either not needed or secudnary constructible ??
   protected ?string   $pageName;
   protected ?string   $title;
   protected ?string   $pageContentLanguage;
@@ -79,9 +88,9 @@ class DanteEndpoint {
     self::dataFromHeader ();    // get data from http headers (might be set in preview.js)
     self::dataFromQuery  ();    // get data from query string (overwrite data from headers)
 
-    EndpointLog ("In constructur hiding = ". print_r ($this->hiding, true) . "\n");
+    // EndpointLog ("In constructur hiding = ". print_r ($this->hiding, true) . "\n");
 
-    EndpointLog ("\nDanteEndpoint constructed ---------------------\n");
+    // EndpointLog ("\nDanteEndpoint constructed ---------------------\n");
   }
 
 
@@ -89,16 +98,16 @@ class DanteEndpoint {
   // pick up headers in the http header and parse relevant information into this object
   private function dataFromHeader () {
     $headers  = getallheaders();                                 // additional headers get set in preview.js 
-    EndpointLog ("\n Found headers: \n" . print_r ( $headers, true));
+    // EndpointLog ("\n Found headers: \n" . print_r ( $headers, true));
     $this->pickupDataFromArray ( $headers );
   }
 
   // pick up the query string from the URL and parse the information into this object
   private function dataFromQuery () {
-    EndpointLog ("\nFound SERVER=" . print_r ($_SERVER, true));   
-    EndpointLog ("\n Query String is: ". print_r ($_SERVER['QUERY_STRING'], true));
+    // EndpointLog ("\nFound SERVER=" . print_r ($_SERVER, true));   
+    // EndpointLog ("\n Query String is: ". print_r ($_SERVER['QUERY_STRING'], true));
     parse_str ($_SERVER['QUERY_STRING'], $parsed);
-    EndpointLog ("\nParsed Query String is " . print_r ($parsed, true));  
+    // EndpointLog ("\nParsed Query String is " . print_r ($parsed, true));  
     $this->pickupDataFromArray ( $parsed );
   }
 
@@ -127,8 +136,8 @@ class DanteEndpoint {
    $this->hh              =  ( isset ($arr["hh"])                 ?   strcmp ($arr["hh"], "true")==0  :  false );   // hh: header hiding
 
 
-//    $this->zoom          = "100";  // bais page size in percent
-    $this->transformScale = 1;
+  //    $this->zoom          = "100";  // bais page size in percent
+  $this->transformScale = 1;
 
 
 // TODO: do a sanity check (against injection attacks)
@@ -157,11 +166,11 @@ class DanteEndpoint {
 
 
   public function getUserIdentity () { 
-    EndpointLog ("DanteEndpoint: getUserIdentity entered\n");
+    // EndpointLog ("DanteEndpoint: getUserIdentity entered\n");
     if ( $this->userIdentity === null ) {
-      EndpointLog ("DanteEndpoint: getUserIdentity will generate new userIdentity\n");
+      // EndpointLog ("DanteEndpoint: getUserIdentity will generate new userIdentity\n");
       $this->userIdentity = new DanteDummyUserIdentity ( $this->userName );}  
-    EndpointLog ("DanteEndpoint: getUserIdentity will leave\n");
+    // EndpointLog ("DanteEndpoint: getUserIdentity will leave\n");
     return $this->userIdentity; 
   }
 
@@ -176,10 +185,10 @@ class DanteEndpoint {
 
 
   public function setResponseHeaders () {
-    EndpointLog ("DanteEndpoint: setResponseHeaders entered\n");
+    // EndpointLog ("DanteEndpoint: setResponseHeaders entered\n");
     header("X-EndpointGenerated-Time-musec:" . $this->startTime);
     header("X-EndpointStartSending-Time-musec:" . microtime (true));
-    EndpointLog ("DanteEndpoint: setResponseHeaders will leave now\n");
+    // EndpointLog ("DanteEndpoint: setResponseHeaders will leave now\n");
   }   // set additional response headers we might need
 
 
@@ -194,14 +203,14 @@ class DanteEndpoint {
 //   THROWS in case of an error
 
   public function getContent ( ) {
-  EndpointLog ("DanteEndpoint: getContent\n");
+    // EndpointLog ("DanteEndpoint: getContent\n");
     $this->stringContent = "Hello World: This function getContent is defined in danteEndpoint.php and should be overwritten by extending this class ";
     return 1;
   }
 
 
   public function getMimeType () { 
-    EndpointLog ("DanteEndpoint: getMimeType\n");
+    // EndpointLog ("DanteEndpoint: getMimeType\n");
     return "text/html";}
 
 
@@ -215,31 +224,36 @@ class DanteEndpoint {
  */
 public function parseText ( $text, $hiding, $section = NULL ) {
 
-  EndpointLog ("DanteEndpoint: parseText entered, local variable hiding is " . ($hiding ? "true" : "false") . "\n");
+  // EndpointLog ("DanteEndpoint: parseText entered, local variable hiding is " . ($hiding ? "true" : "false") . "\n");
   $userId = $this->getUserIdentity();
-  EndpointLog ("DanteEndpoint: parseText got userId: " . print_r ($userId, true) . "\n");  // print_r of $options leads to memory exhaustion.
+  //EndpointLog ("DanteEndpoint: parseText got userId: " . print_r ($userId, true) . "\n");  // print_r of $options leads to memory exhaustion.
   $options = new ParserOptions ( $userId );        // let the parent class provide a user identity
-  EndpointLog ("DanteEndpoint: parseText got parse options:  \n");  // print_r of $options leads to memory exhaustion.
+  //EndpointLog ("DanteEndpoint: parseText got parse options:  \n");  // print_r of $options leads to memory exhaustion.
 
   $options->setRemoveComments (false);
 
   // $this->setOption( 'suppressTOC', true );  // in 1.39  $options->setSuppressTOC (true);
 
-  EndpointLog ("DanteEndpoint: parseText will generate instance of parser\n");
+  //EndpointLog ("DanteEndpoint: parseText will generate instance of parser\n");
 
   // obtain an instance of the parser
   $lineStart     = true;
   $clearState    = true;
   $revid         = null;
   $mwServices    = MediaWiki\MediaWikiServices::getInstance();
+  // ParsifalLog ("*** DanteEndpoint: parseText will now build a fresh parser \n");
   $parser        = $mwServices->getParserFactory()->create();
-  EndpointLog ("DanteEndpoint: parseText having instance of parser\n");
+  $parser->danteTag    = "danteEndpoint"; 
+  // EndpointLog ("DanteEndpoint: parseText having instance of parser\n");
+  // ParsifalLog ("*** DanteEndpoint: parseText just obtained a parser\n");
 
   $pageRef = $this->getPageReference();
-  EndpointLog ("DanteEndpoint: parseText having instance of page reference\n");
-  EndpointLog ("   PageReference is: ". print_r ($pageRef, true). "\n");
+  // ParsifalLog ("*** DanteEndpoint: parseText just got a page reference\n");
 
-  EndpointLog ("DanteEndpoint: parseText: text=" . $text. "\n");
+  // EndpointLog ("DanteEndpoint: parseText having instance of page reference\n");
+  // EndpointLog ("   PageReference is: ". print_r ($pageRef, true). "\n");
+
+  // EndpointLog ("DanteEndpoint: parseText: text=" . $text. "\n");
 
   $parserOutput = NULL;  // must define this outside of the try block
   $parsedText   = NULL;  // must define this outside of the try block
@@ -258,8 +272,10 @@ public function parseText ( $text, $hiding, $section = NULL ) {
     $text = $parser->getSection ($text, $section, "NOT FOUND - see danteEndpoint.php"); 
   }
 
+  ParsifalLog ("*** DanteEndpoint: parseText: will start to parse\n");
   $parserOutput  = $parser->parse ( $text, $pageRef, $options, $lineStart, $clearState, $revid); 
   EndpointLog ("\nDanteEndpoint: Test has been parsed\n");
+  ParsifalLog ("*** DanteEndpoint: parseText has completed parsing\n");
 
   // use a specific skin object for post treatment (requires internal skin name to be used)    TODO: make this selectable  // does thois have an effect ???? TODO
  // $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("cologneblue");

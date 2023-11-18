@@ -1,8 +1,6 @@
 <?php
 
-/**
- * This endpoint provides live previews for Mediawiki edits
- */
+/** This endpoint provides live previews for Mediawiki edits */
 
 
 /**
@@ -19,16 +17,16 @@ class MediawikiEndpoint extends DanteEndpoint {
 
 // MediawikiEndpoint gets its contents from the post body
 public function getInput () {
-   EndpointLog ("MediawikiEndpoint: getInput entered\n");
+  //EndpointLog ("MediawikiEndpoint: getInput entered\n");
   $body = file_get_contents("php://input");         // get the input; here: the raw body from the request
   $text = base64_decode ($body);                    // in an earlier version we used, unsuccessfully, some conversion, as in:   $body = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $body); 
-   EndpointLog ("MediawikiEndpoint: getInput sees text: ".$text . "\n");
+  // EndpointLog ("MediawikiEndpoint: getInput sees text: ".$text . "\n");
   return $text;
 }
 
 
 public function getContent ( ) {
-  EndpointLog ("MediawikiEndpoint: getContent entered\n");
+  // EndpointLog ("MediawikiEndpoint: getContent entered\n");
   // $this->stringContent = "= HIHI = \n  '''qwe''' [[Main]]"; return 1;   // NOTE: For debugging / testing: Uncomment this for testing purposes, then call the endpoint directly in browser
 
   $text = $this->getInput();

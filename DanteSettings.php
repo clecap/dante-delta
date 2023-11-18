@@ -162,3 +162,24 @@ $wgWikEdDiffUnitTesting = false;          # Run unit tests to prove correct work
 
 
 
+/* DEBUG code
+
+if (false) {
+  $entityBody = file_get_contents('php://input');
+  if($tmpFile = fopen( __DIR__."/extensions/Parsifal/LOGFILE" , 'a')) 
+    {
+     fwrite($tmpFile, "+++++++++++++++++++++ DanteSettings.pgp was loaded ".$_SERVER['REQUEST_URI']."  " .$_SERVER['QUERY_STRING']."\n"); 
+     // fwrite($tmpFile, "++++ $entityBody \n");   // if we also want to display the body of the call
+     fclose($tmpFile); 
+    }    
+  else {throw new Exception ("debugLog in TexProcessor could not log"); }
+}
+
+*/
+
+
+
+
+
+
+
