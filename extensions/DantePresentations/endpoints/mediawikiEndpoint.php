@@ -65,22 +65,3 @@ public function getContent ( ) {
 
 $point = new MediawikiEndpoint ();
 $point->execute();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
