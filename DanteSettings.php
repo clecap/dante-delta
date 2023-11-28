@@ -137,6 +137,15 @@ wfLoadSkin( 'DantePresentationSkin' );
 # include stuff generated dynamically by scripts
 require ("DanteDynamicInstalls.php");
 
+
+## must manually insert this here
+wfLoadExtension( 'SemanticMediaWiki' );
+####  TODO: adjust this accordingly; needed for sparql endpoints  compare: https://www.semantic-mediawiki.org/wiki/Help:EnableSemantics
+enableSemantics( );
+
+
+
+
 ## setting for graphviz dot  
 $danteDotPath="/usr/bin/dot";
 
