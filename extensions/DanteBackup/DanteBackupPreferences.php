@@ -7,6 +7,7 @@ public static function onUserSaveSettings( User $user ) {}
 public static function onGetPreferences ( $user, &$preferences ) { 
 
   if ( $user->isAllowed ("dante-dump") || $user->isAllowed ("dante-restore") ) {
+
     $preferences['aws-accesskey']       = ['type' => 'text',  'section' => 'dante/aws', 'label-message' => 'aws-prefs-label-key',     'help-message' => 'aws-prefs-key'];
     $preferences['aws-secretaccesskey'] = ['type' => 'text',  'section' => 'dante/aws', 'label-message' => 'aws-prefs-label-skey',    'help-message' => 'aws-prefs-skey'];
     $preferences['aws-bucketname']      = ['type' => 'text',  'section' => 'dante/aws', 'label-message' => 'aws-prefs-label-bucket',  'help-message' => 'aws-prefs-bucket'];
