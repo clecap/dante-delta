@@ -103,8 +103,3 @@ extensions/DanteBackup/LOGFILE
 !skins/DantePresentationSkin
 !skins/DantePresentationSkin/*
 skins/DantePresentationSkin/LOGFILE
-
-## however we still have to forbid again the following:
-
-
-
