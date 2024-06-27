@@ -7,7 +7,7 @@
 # no apple artefacts
 #
 .DS_Store
-deprecated/
+deprecated/  
 
 # no installable stuff
 annos/node_modules
