@@ -139,9 +139,9 @@ require ("DanteDynamicInstalls.php");
 
 
 ## must manually insert this here
-wfLoadExtension( 'SemanticMediaWiki' );
+# wfLoadExtension( 'SemanticMediaWiki' );
 ####  TODO: adjust this accordingly; needed for sparql endpoints  compare: https://www.semantic-mediawiki.org/wiki/Help:EnableSemantics
-enableSemantics( );
+# enableSemantics( );
 
 
 
