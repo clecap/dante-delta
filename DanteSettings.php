@@ -113,7 +113,7 @@ wfLoadExtension( 'DanteSnippets' );
 
 //wfLoadExtension( 'DanteBoilerSpecial' );
 
-wfLoadExtension( 'DanteCategoryBrowser' );
+//wfLoadExtension( 'DanteCategoryBrowser' );
 
 
 # $wgParserCacheType       = CACHE_DB;
