@@ -191,7 +191,7 @@ private static function getCatConfig () {
 
 public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
   global $wgExtensionAssetsPath;
-  $out->addHeadItem("earlyIcons",    "<link rel='preload' as='image' href='../extensions/DanteTree/fancytree/icons.gif'>");  // preload the DanteTree images (does work on Chrome)
+  $out->addHeadItem("earlyIcons",    "<link rel='preload' as='image' href='{$wgExtensionAssetsPath}/DanteTree/fancytree/icons.gif'>");  // preload the DanteTree images (does work on Chrome)
 
   $out->addHeadItem ("sidebarstyle", <<<EOT
 <script data-src="TreeAndMenu_body.php">
