@@ -219,7 +219,15 @@ function displayEndpointResponseDoubleBuffer (e) {
     // adapt the frames for double buffering
     curFrame.style.visibility ="hidden";                     // current frame becomes invisible
     newFrame.contentWindow.document.body.style.zoom     =  currentZoom ; 
-    $("iframe").contents().find(".collapseResult").show();   // the collapsible elements (eg of Parsifal) must be opened in the preview window 
+
+    // the collapsible elements in the preview window (eg those coming Parsifal) must be opened in the preview window 
+    document.querySelectorAll('iframe').forEach(function(iframe) {
+      var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+      var elementsInIframe = iframeDocument.querySelectorAll('.collapseResult');
+    elementsInIframe.forEach(function(element) {
+        element.style.display = 'block'; // or any other appropriate display style
+    });
+    });
 
     newFrame.style.visibility = "visible";               // new frame becomes visible
 

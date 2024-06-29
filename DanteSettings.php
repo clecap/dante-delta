@@ -78,7 +78,9 @@ wfLoadExtension ('InputBox');                    // adds <inputbox> for allowing
 wfLoadextension ('ImageMap');                    // adds <imagemap> tag for HTML clickable image maps 
 wfLoadExtension ('Interwiki');                   // adds interwiki link formats
 wfLoadExtension ('SyntaxHighlight_GeSHi');       // adds <syntaxhighlight> tag for syntax highlighting
-wfLoadExtension ('WikiMarkdown');                // adds <markdown> to include markdown syntax into the wiki
+
+# produces an error in load.php under php8.2 
+## wfLoadExtension ('WikiMarkdown');                // adds <markdown> to include markdown syntax into the wiki
 
 wfLoadExtension ('DynamicPageList3');
 
