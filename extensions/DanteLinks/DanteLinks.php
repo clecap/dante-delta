@@ -226,7 +226,7 @@ private static function extractAttributes ( &$text, &$attribs ) {
 
 public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) { 
   global $wgServer, $wgScriptPath;
-  $out->addHeadItem ("dantelink", "<style>a.windowlink {background-image: url(${wgServer}${wgScriptPath}/skins/Vector/resources/common/images/link-external-small-rtl-progressive.svg?30a3a) !important;}</style>");
+  $out->addHeadItem ("dantelink", "<style>a.windowlink {background-image: url({$wgServer}{$wgScriptPath}/skins/Vector/resources/common/images/link-external-small-rtl-progressive.svg?30a3a) !important;}</style>");
 }
 
 
