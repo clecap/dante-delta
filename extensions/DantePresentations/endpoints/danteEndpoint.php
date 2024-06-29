@@ -63,11 +63,15 @@ class DanteEndpoint {
   // information obtained from the header
   // the value of null means that no information has been provided in the header
   protected ?string   $userName;
-
   protected $sect;
 
   protected ?int      $userId;                             // 0 if anonymous
   protected  ?int     $ns;
+  protected ?string   $nsName;
+  protected ?string   $titleText;
+  protected bool      $hiding;
+  protected bool      $hh;
+  protected float     $transformScale;
 
   protected ?string   $dbkey;
 
