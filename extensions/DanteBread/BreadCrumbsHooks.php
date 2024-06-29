@@ -12,37 +12,23 @@ class BreadCrumbsHooks {
   // NOTE: this injects directly into the header and leads to an immediate loading
   public static function onOutputPageAfterGetHeadLinksArray ( $tags, OutputPage $out ) { 
     global $wgScriptPath;
-    $out->addHeadItem("breadStyle", "<script src='$wgScriptPath/extensions/DanteBread/breadCrumbs-min.js'></script>");
+    $out->addHeadItem("breadStyle", "<script src='$wgScriptPath/extensions/DanteBread/breadCrumbs.js'></script>");
     $out->addHeadItem("bread", "<style>".BreadCrumbsHooks::$cssSpec."</style>");
   }
 
-  
+
   public static function onSiteNoticeAfter ( &$siteNotice, $skin) {
     $siteNotice .= '<div id="breadcrumbinsert"></div><script>window.doBreadNow()</script>';  
     return false;
   }
 
-  // at this moment in the build process we have easy access to the current page name and we add the current page name into the crumbs for the next occasion
+
+  // add the current page name into the crumbs for the next occasio displaying themn
   public static function onBeforePageDisplay( $output, $skin ) {
     $title = $output->getTitle();
-
-/*
-    if ( self::getDisplayTitle( $title, $displayTitle ) ) {
-      $pagename = $displayTitle;  // danteLog ("DanteBread", "onBeforePageDisplay case 1: $pagename\n");
-    }  
-    else {
-      $pagename = $title->getPrefixedText();  // danteLog ("DanteBread", "onBeforePageDisplay case 2: $pagename\n");  
-    } 
-*/
-
-///// TODO: PageProps::getInstance()->getProperties( $title, 'displaytitle' );  has been deprecated in Mediawiki
-///// so we must live without this info here or find a workaround.
-
-  $pagename = $title->getPrefixedText();
-
-
-    // check if it exists (some skins might not call above Hook onSiteNoticeAfter)
-    $output->addInlineScript ("if (window.addFreshCrumb) {window.addFreshCrumb('".$pagename."');}");
+    $pageName = $title->getPrefixedText();    // title incl prefix without underscores
+    $pageKey  = $title->getPrefixedDBkey();   // title incl prefix with underscores
+    $output->addInlineScript ("if (window.addFreshCrumb) {window.addFreshCrumb('".$pageName."','".$pageKey."');}");
   }
 
 
@@ -53,7 +39,6 @@ class BreadCrumbsHooks {
   private static function getDisplayTitle( Title $title, &$displaytitle ) {
     $pagetitle = $title->getPrefixedText();
     $title     = $title->createFragmentTarget( '' );
-    
     if ( $title instanceof Title && $title->canExist() ) {
       $values = PageProps::getInstance()->getProperties( $title, 'displaytitle' );
       $id = $title->getArticleID();
