@@ -60,7 +60,7 @@ $wgGroupPermissions['*']['createaccount'] = false; # currently prevent account c
 $wgEditPageFrameOptions ="SAMEORIGIN";                // required to allow the preview iframe in the edit view to navigate to pages of the same 
 
 $wgLogos = false;
-$wgFavicon = "$wgScriptPath/favicon.ico";
+$wgFavicon = "/favicon.ico";
 
 # include installations of all skins which we did install here
 if ( file_exists('DanteSkinsInstalled.php') ) {include ("DanteSkinsInstalled.php");}
