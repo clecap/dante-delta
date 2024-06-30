@@ -1,9 +1,9 @@
 {
   "name":     "DanteBread",
-  "version":  "1.0", 
+  "version":  "1.1", 
   "author":   ["Clemens H. Cap"],
   "url":      "",
-  "description": "Compact and fast breadcrumb extension without FOUC, delays and similar problems",
+  "description": "Compact and fast breadcrumb extension in the sense of recently visited pages; without FOUC, delays and similar problems",
   "license-name": "GPL-2.0-or-later",
   "type": "other",
   "AutoloadClasses": {"BreadCrumbsHooks": "BreadCrumbsHooks.php"},

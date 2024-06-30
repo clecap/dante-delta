@@ -1,107 +1,73 @@
 (() => {  // scope protection
 
-  const globalMaxCrumbs = 20;
-  const maxLength =   50;  
-  const siteMaxCrumbs = 8; 
 
+// Declaration
+class BreadCrumbs {
+  static globalMaxCrumbs =  8;
+  static maxLength       = 20;  
 
-/** The DATA STRUCTURE used here is an array of objects of type {pageKey, pageName}
- *    pageKey:       the DB key of the page to call when clicking on the breadcrumb
- *    pageName:      the name to display for the breadcrumb
- *    
- */
-
-
-window.clearBreadcrumbs = function() {
-  localStorage.setItem ("breadcrumbs", JSON.stringify([]));
-  window.doBreadNow();
-}
-
-
-  window.doBreadNow = function () {   
-    var breadcrumbs = localStorage.getItem ("breadcrumbs");                          // get current breadcrumbs from localStorage (allows cross window breadcrumbs)
-    //console.warn ("doBreadNow: localStorage delivered: ", breadcrumbs);
-    if ( breadcrumbs ) { try {breadcrumbs = JSON.parse( breadcrumbs );} catch ( e ) { breadcrumbs = [];} } else {breadcrumbs = [];}
-
-    // remove this URL from the breadcrumbs if it is already in it
-    var url = location.pathname; // + location.search;
-    var index = 0;
-    while ( index < breadcrumbs.length ) {
-      if ( breadcrumbs[ index ].url === url ) {breadcrumbs.splice( index, 1 );} else {index++;}
+  static add (pageName, pageKey, prefix) {
+    // console.info ("breadCrumbs.add: ", pageName, pageKey, prefix);
+    if (pageName.startsWith ("Special:") ) { // console.info ("BreadCrumbs:add not including Special: pages into breadcrumbs");
+      return;
     }
-
-    // format breadcrumbs for display
-    var visibleCrumbs = [];
-    for ( index = breadcrumbs.length - 1; index >= 0; index-- ) {  // step backwards through the crumbs
-        if ( visibleCrumbs.length < siteMaxCrumbs ) {
-          var breadcrumb = breadcrumbs[ index ];
-          var link = '<a href="' + breadcrumb.url + '">';
-          var title = breadcrumb.title;
-          if ( title.length > maxLength ) {title = title.substr( 0, maxLength ) + '...';}
-          link += title + '</a>';
-          visibleCrumbs.push( link );
-        } else {breadcrumbs.splice( index, 1 );}
-      
-    }
-
+    let bc = BreadCrumbs.get();
+    if ( bc.map ( x => x.pageName ).includes(pageName) ) { // console.info ("breadCrumbs.add: breadcrumbs already include this ", pageName, pageKey);
+      return;}
+    bc.push ( {pageName, pageKey, prefix} );
     // truncate breadcrumbs to maximal length
-    if ( breadcrumbs.length > globalMaxCrumbs ) { breadcrumbs = breadcrumbs.slice( breadcrumbs.length - globalMaxCrumbs ); }
-     
-    localStorage.setItem ("breadcrumbs", JSON.stringify(breadcrumbs));   // save rbeadcrumbs
-    
-    var txt = "";
-    for ( index = 0; index < visibleCrumbs.length; index++ ) {txt += ' ' + visibleCrumbs[ index ] + ' &raquo; ';}
-    txt += "<a href='javascript:window.clearBreadcrumbs();' class='oo-ui-panelLayout-framed'   style='font-size:7pt; padding:1pt;' title='Clear breadcrumbs'>del</a>";
-    document.getElementById ("breadcrumbinsert").innerHTML = txt;
-    return txt;
-    
+    if ( bc.length > BreadCrumbs.globalMaxCrumbs ) { bc = bc.slice( bc.length - BreadCrumbs.globalMaxCrumbs ); }
+    localStorage.setItem ("breadcrumbs", JSON.stringify( bc ));      
   }
 
-  // return true when pagenames p1 and p2 should be considered a duplicate of url2 for purposes of breadcrumb insertion; both parameters must be strings
-  const nameEqual = (p1, p2) => {
-    console.warn ("nameEqual called for: " + p1 + "    " + p2 );
+  static get () {                                             // console.info ("BreadCrumbs.get: obtaining a healthy breadcrumbs array");
+    let breadcrumbs = localStorage.getItem ("breadcrumbs");   // console.info ("BreadCrumbs.get: got from local storage: ", breadcrumbs); 
+    try {
+      if ( !breadcrumbs ) { throw new Error ("breadcrumbs in storage were falsish "); }                                                   
+      breadcrumbs = JSON.parse( breadcrumbs );
+      if ( !Array.isArray (breadcrumbs) ) { throw new Error ("breadcrumbs in storage were not an array ");}
+      return breadcrumbs; }
+    catch (e) { 
+      console.info ("BreadCrumbs.get exception triggered, reinitializing. Reason was: ", e);
+      localStorage.setItem ("breadcrumbs", JSON.stringify( [] ));     
+      return [];
+    } // catch 
+  }
 
-    if (p1 === p2) { return true; }   // if they are exactly identical, they are identical
- 
-//   let URL1, URL2;
-//    try {URL1 = new URL (url1, base); URL2 = new URL (url2, base);} catch (x) {throw new Error (x + " url1="+url1, "url2="+url2);}
-//    let par1 = new URLSearchParams (par1); let par2 = new URLSearchParams (par2);
-//    if (par1.title == par2.title) {return true;}
-    return false;
-  };
-
-
-  window.addFreshCrumb = function (pageName, pageKey) {
-    console.warn ("addFreshCrumb called with pageName=" + pageName + "  and  pageKey=" + pageKey);
-    var breadcrumbs = localStorage.getItem ("breadcrumbs");          // get current breadcrumbs from localStorage (this allows cross window breadcrumbs)
-
-    console.warn ("addFreshCrumb got from localStorage: ", breadcrumbs);
-    if ( breadcrumbs ) { try {breadcrumbs = JSON.parse( breadcrumbs );} catch ( e ) { breadcrumbs = [];} } else {breadcrumbs = [];}
-
-    var index = 0;
-    while ( index < breadcrumbs.length ) {
-      if ( nameEqual (breadcrumbs[ index ].pageName, pageName) ) {breadcrumbs.splice( index, 1 );} else {index++;}
+  static insert () {
+    let bc = BreadCrumbs.get ();    console.info ("breadCrumbs.insert: found ", bc);
+    var vc = [];
+    for ( let index = bc.length - 1; index >= 0; index-- ) {    // step backwards through the crumbs
+      var link = '<a href="' + bc[index].prefix + '/index.php?title=' + bc[index].pageKey + '" title="Go to: ' + bc[index].pageName + '" >';
+      var text = bc[index].pageName;
+      if ( text.length > BreadCrumbs.maxLength ) {text = text.substr( 0, BreadCrumbs.maxLength ) + '...';}
+      link += text + '</a>';
+      vc.push( link );
     }
+    // console.info ("BreadCrumbs.insert: vc is ", vc);
+    let txt = vc.reduce ( (ac, cv) =>  ac + cv + ' &raquo; ' , "") + 
+      "<a href='javascript:window.clearBreadcrumbs();' style='font-size:9pt; font-variant-caps: all-small-caps;padding:1pt;' title='Clear breadcrumbs'>del</a>";
+    // console.info ("BreadCrumbs.inster: txt is ", txt);
+    document.getElementById ("breadcrumbinsert").innerHTML = txt;
+  }
 
-    // add the current URL to the breadcrumbs if it points to a valid page
-    if (  pageName.substring( pageName.length - 8 ) !== 'Badtitle' ) {
-      breadcrumbs.push( {pageKey, pageName} );
-    }
-    else {
-      console.warn ("addFreshCrumb: url found violates rules, it is: " + url + "  at " + pageName);
-    }
+} // end class
+
+
+  // INTERFACE. Called when we should insert the bread crum into the DOM
+  window.doBreadNow = function () { BreadCrumbs.insert();}
+
+  // INTERFACE. Called when a fresh crumb should be inserted.
+  window.addFreshCrumb = function (pageName, pageKey, prefix) { BreadCrumbs.add (pageName, pageKey, prefix); }
+
+  // INTERFACE. Called when user requested to clear the breadcrumbs trail by clicking on the DEL element in the bread crumb trail
+  window.clearBreadcrumbs = function () { 
+    localStorage.setItem ("breadcrumbs", JSON.stringify( [] ));   // store empty value
+    BreadCrumbs.insert();   // and, to be responsive, regenerate immediately
+  }
+
     
-    // truncate breadcrumbs to maximal length
-    if ( breadcrumbs.length > globalMaxCrumbs ) { breadcrumbs = breadcrumbs.slice( breadcrumbs.length - globalMaxCrumbs ); }
-     
-    localStorage.setItem ("breadcrumbs", JSON.stringify(breadcrumbs));   // save rbeadcrumbs
-    //console.warn ("addFreshCrumbs stored: ", JSON.stringify(breadcrumbs));
-  }  
-})();
-
-
-
-
+})(); // close scope protection
 
 
 
