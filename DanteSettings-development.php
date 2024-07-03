@@ -2,7 +2,7 @@
  
 #
 # System internal parameters to be used in development
-#
+# This is copied to DanteSettings-used.php in Special:ParsifalDebug
 
 $wgDanteOperatingMode      = "Development";
 $wgShowExceptionDetails    = true;

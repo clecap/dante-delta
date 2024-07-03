@@ -2,7 +2,7 @@
 
 #
 # System internal parameters to be used in production
-#
+# This is copied to DanteSettings-used.php in Special:ParsifalDebug
 
 
 ## DEBUG messages
@@ -34,3 +34,7 @@ $wgResourceLoaderMaxage = [
 
 
 $wgCacheDirectory = "$IP/cache";
+
+# report all errors except deprecated things 
+error_reporting( E_ALL &! E_DEPRECATED );  
+ini_set( 'display_errors', 1 );

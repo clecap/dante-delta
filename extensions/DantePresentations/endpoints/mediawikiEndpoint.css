@@ -18,3 +18,13 @@ body {padding: 10pt 10pt 10pt 10pt; box-sizing:border-box;}
 
 
 /* body {height:10vh; width:100vh;} */
+
+
+/* THIS is for overriding the error messages from Parsifal inside of a preview */
+/* defined in Decorator.php */
+
+.errorWrap {}
+.miniError {font-size:small; width:500px; display:inline-block; position:absolute; top:0px; right:0px; text-align:right; border:0px; margin:0px;}
+.winError { display:none; font-size:small; width:500px; position:absolute; top:0px; right:20px; text-align:right; border:0px; margin:0px;}
+
+.logWrap {display:none;} /* do not show normal log links in preview */

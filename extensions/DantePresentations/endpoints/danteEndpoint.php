@@ -8,11 +8,19 @@
 
 
 // need the following two lines to obtain reasonable errors from the endpoint instead of only 500 er status from webserver  // TODO: adjust this for production !!!
-error_reporting(E_ALL);
-ini_set('display_errors', 'On');
+
 
 
 require_once ("../../../includes/WebStart.php");
+
+
+require_once ("../../../DanteSettings-used.php");  // also needed to pick up production or development conventions in the endpoint
+
+//error_reporting(E_ALL);
+//error_reporting (0);
+//ini_set('display_errors', 'On');
+
+
 require_once ("../helpers/DanteDummyUserIdentity.php");
 require_once ("../helpers/DanteDummyPageReference.php");
 require_once ("../renderers/hideRenderer.php");
