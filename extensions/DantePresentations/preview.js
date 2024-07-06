@@ -2,6 +2,9 @@
 // first we use encodeURIComponent to get percent-encoded UTF-8, then we convert the percent encodings into raw bytes which can be fed into btoa.
 
 
+const DOUBLEBUFFERED = true;     // switch betwwen double buffered operation and single buffered operation
+
+
 // TODO: check for optimization: could we eventually get rid of this additional base64 coding / decoding step ??? // MUST check ß äüö and stuff
 
 // function used for encoding unicode to base64
@@ -17,7 +20,7 @@ function b64EncodeUnicode(str) {return btoa(encodeURIComponent(str).replace(/%([
 *     The function is called with a single parameter eventObject
 *       eventObject == "INIT"                called for the first time after initialization 
 *       eventOBject == "RESIZE"              called due to a resize of the preview area
-*       eventObject instanceof InputEvent    called due to change in input
+*       eventObject instanceof InputEvent    called due to a change in input
 */
 
 const PROCESS = (() => {  // OPEN local scope for local variables
@@ -30,10 +33,9 @@ const PROCESS = (() => {  // OPEN local scope for local variables
   let fct;                 // the payload function to be called for execution
   let oldestUnservedTS;
 
-  let immediate = false;  // if true: service always immediately without waiting
-
-  let setImmediate = ( flag ) => { immediate = flag; };
-  let getImmediate = () => immediate;
+  let immediate       = false;  // if true: service always immediately without waiting
+  let setImmediate    = ( flag ) => { immediate = flag; };
+  let getImmediate    = () => immediate;
   let toggleImmediate = () => {immediate = !immediate;}
 
   let setFct = (f) => { fct = f; };  // setter for fct
@@ -58,7 +60,7 @@ const PROCESS = (() => {  // OPEN local scope for local variables
 
     // CASE 2: When the oldest inputevent which has not yet been served is longer ago than MAX_EVENT_WAIT [ms]
 
-    if (queueing) {  // in case we are already in queueing mode
+    if (queueing) {  // in case we are already in queueing 
       if ( eventObject.timeStamp - oldestUnservedTS > MAX_EVENT_WAIT ) { 
         console.info (`CASE 2: ${eventObject.timeStamp} ${oldestUnservedTS}`); 
         if (timeout) {window.clearTimeout (timeout); timeout= null;} 
@@ -93,7 +95,7 @@ const DPRES = (() => {
 function receivedEndpointResponse(e) {
   const VERBOSE = true; 
 
-  let arrived = Date.now();
+  let arrived = Date.now();  
 
   if (e.target.status != 200) {
     console.warn (`DantePresentations: preview: Received an ERROR message from an endpoint. Status Code=${e.target.status} Status Text=${e.target.statusText});`);
@@ -107,9 +109,11 @@ function receivedEndpointResponse(e) {
     // now check if the response is outdated
     if (e.target.timeRequestMade) {  // do we have a timestamp?
       if (e.target.timeRequestMade > QUEUE.currentTimestamp) { if (VERBOSE) {console.log ("  Will display the endpoint response to request ", e.target.timeRequestMade, e.target.numberOfRequest); }
-                                                               displayEndpointResponseDoubleBuffer (e); }
-      else                                                   {if (VERBOSE) { console.log (`  Will discard endpoint response. Tool old: From ${e.target.timeRequestMade} and thus older than current status ${QUEUE.currentTimestamp}`); }
-                                                               QUEUE.remove (e.target);}
+          (DOUBLEBUFFERED ? displayEndpointResponseDoubleBuffer : displayEndpointResponseSingleBuffer) (e); 
+ 
+    }
+      else    { if (VERBOSE) { console.log (`  Will discard endpoint response. Tool old: From ${e.target.timeRequestMade} and thus older than current status ${QUEUE.currentTimestamp}`); }
+                                                             QUEUE.remove (e.target);}
     }
     else {console.warn ("  The XHR object had no timestamp, this is a protocol error!");}
   }
@@ -119,41 +123,38 @@ function receivedEndpointResponse(e) {
   sum.innerHTML = "Status: " + e.target.status + " Roundtrip: " + roundTrip + "[ms]" + (PROCESS.getImmediate() ? " immediate " : " delayed " ) + "(change with Alt) ";
 }
 
+
+
 // double buffered preview frame prevents flickering and ensures faster and smoother UI reaction
 let previewFrames = [];
 let currentFrame = 0;
 let currentZoom = 1;
 
-// this is the old function without double buffer which is eventually TODO: deprecated
+
+// this is the single buffered display of an endpoint response; we maintain it to have a fallback for debugging purposes
 function displayEndpointResponseSingleBuffer (e) {
   let VERBOSE = true;
-  if (VERBOSE) {console.log ("displayEndpointResponse called");}
-
+  if (VERBOSE) {console.log ("displayEndpointResponse SINGLE buffered called");}
   var previewFrame = document.getElementById ("previewFrame");                            // get a handle of the previewFrame
-
-//  console.log (e.target);
-//  console.log (e.target.response);
-
   document.getElementById ("previewFrame").setAttribute ("srcdoc", e.target.response);    // show current content in the previewFrame
-
-//  document.getElementById ("previewFrame").style.visibility="visible";                    // ensure visibility of the content
 
   QUEUE.currentTimestamp = e.target.timeRequestMade;                                      // update time stamp of the content currently on display
   QUEUE.remove (e.target);                                                                // remove the response just received so the topmost queue element is the most recent invocation we are waiting for 
   QUEUE.nonCancelable ();                                                                 // make most recent nonCancelable and cancel all others
   if (QUEUE.getLen () == 0) {
-    console.info ("removing pending");
+    console.info ("displayEndpointResponse: removing pending");
     document.body.classList.remove ("xhrPending", "inputChanged");}              // show by decoration of frame whether we still are awaiting responses
+  else {
+    console.info ("displayEndpointResponse: queue length currently " + QUEUE.getLen() );
+  }
 
   // we want azoom change inside of only the iframe with the preview content alone
 // TODO:  for some stupid reason this does not work.  srcdoc ??  maybe other reason.
 // TODO: if it really does not work: add this to the html code as it is built in the mediawiki.php endpoint and the other endpoints 
-
   document.getElementById ("previewFrame").onload = function() {
     document.getElementById ("previewFrame").contentWindow.addEventListener ("focus", (e) => {console.warn ("FOCUS");  previewFrame.classList.add ("hasFocus");   }); 
     document.getElementById ("previewFrame").contentWindow.addEventListener ("blur",  (e) => {console.warn ("BLUR", ); previewFrame.classList.remove("hasFocus"); }); 
    // document.getElementById ("previewFrame").contentWindow.onbeforeunload = function() { console.warn ("beforeunload");previewFrame.classList.remove ("hasFocus");}
-
     document.getElementById ("previewFrame").contentWindow.document.addEventListener ("keydown" , (e) => { 
       console.log ("Key pressed: ", e.key);
       if (e.metaKey && (e.key=="+" || e.key=="-") ) {
@@ -232,7 +233,7 @@ function displayEndpointResponseDoubleBuffer (e) {
     newFrame.style.visibility = "visible";               // new frame becomes visible
 
     if (QUEUE.getLen () == 0) {
-      // console.log ("remove UI indication that an xhr is pending");
+       // console.log ("remove UI indication that an xhr is pending");
       document.body.classList.remove ("xhrPending", "inputChanged");}              // show by decoration of frame whether we still are awaiting responses
     currentFrame = (currentFrame == 0 ? 1 : 0);          // adjust the pointer
   }
@@ -241,9 +242,9 @@ function displayEndpointResponseDoubleBuffer (e) {
   if (QUEUE.getLen() > 0) {console.warn ("will exit displayEndpointResponse, queue still is ", QUEUE.getLen());}
 }
 
-
-
 let numberOfRequest = 0;
+
+
 
 function processAll() {
   var body = b64EncodeUnicode ( document.getElementById ( "wpTextbox1" ).value );
@@ -267,11 +268,14 @@ function processAll() {
 
   console.log ("Submitting request to queue ", xhr.numberOfRequest);
   QUEUE.submit ( xhr );
-  document.body.classList.remove ("inputChanged");
-  document.body.classList.add ("xhrPending");
+
+
+
   // console.info ("switched to pending: " + document.body.classList);
   console.log ("Sending request ", xhr.numberOfRequest);
   xhr.send ( body );
+  document.body.classList.remove ("inputChanged");
+  document.body.classList.add ("xhrPending");        // signal in UI that a request from the server is pending
 }
 
 
@@ -322,13 +326,15 @@ function initializeTextarea() {
 
   //var previewImage = document.createElement ("img");     previewImage.id = "previewImage";  Object.assign (previewImage.style, {width:"100%", height:"100%", position:"absolute", border: "0px solid yellow", left:"0px", top:"0px"} );
   
-  previewFrames[0] = document.createElement ("iframe"); Object.assign (previewFrames[0].style, {width:"100%", height:"100%", position:"absolute", left:"0px", top:"0px"} );
-  previewFrames[1] = document.createElement ("iframe"); Object.assign (previewFrames[1].style, {width:"100%", height:"100%", position:"absolute", left:"0px", top:"0px"} );
+  previewFrames[0] = document.createElement ("iframe"); Object.assign (previewFrames[0].style, {width:"100%", height:"100%", position:"absolute", left:"0px", top:"0px"} ); previewFrames[0].id="previewFrame";
+
+  if (DOUBLEBUFFERED) {previewFrames[1] = document.createElement ("iframe"); Object.assign (previewFrames[1].style, {width:"100%", height:"100%", position:"absolute", left:"0px", top:"0px"} ); previewFrames[1].id="previewFrame1";}
 
   previewFrames[0].classList.add ("previewFrameClass");
-  previewFrames[1].classList.add ("previewFrameClass");
+  if (DOUBLEBUFFERED) {previewFrames[1].classList.add ("previewFrameClass");}
 
-  previewContainer.appendChild (previewFrames[0]);   previewContainer.appendChild (previewFrames[1]);
+  previewContainer.appendChild (previewFrames[0]);   
+  if (DOUBLEBUFFERED) {previewContainer.appendChild (previewFrames[1]);}
   newEditContainer.appendChild (previewContainer);
   
   let editform = document.getElementById ("editform"); 
@@ -417,6 +423,7 @@ function editPreviewPatch () {  // the clutch to PHP; we may adapat it to use Co
 
 window.editPreviewPatch = DPRES.editPreviewPatch;
 
+
 /** Request freshness
 * 
 *  To cut down on the number of pending requests we provide the request on client side and on server side (via header) with a time stamp.
@@ -429,22 +436,24 @@ window.editPreviewPatch = DPRES.editPreviewPatch;
 *
 */
 
-var QUEUE = (() => {
+var QUEUE = (() => { // BEGIN of QUEUE scope
   const VERBOSE = true;
-  let pendingRequests = [];                                                           // list of pending requests waiting for a server reply
-  let currentTimestamp = 0;                                                           // time stamp of the request whose content is showing currently
-  var submit = ( x ) => { pendingRequests.unshift (x); };                             // submit a fresh request to the queue
-  var nonCancelable = () => { if (pendingRequests.length > 0) {pendingRequests[0].nonCancelable = true; cancel();} };   // mark top of the queue (which is the most recently added) as non-cancelable
-  var getLen = () => pendingRequests.length;
-  var remove = (ele) => { pendingRequests=pendingRequests.filter ( x => x!=ele);}
-  var cancel = () => {                                                                // cancel all but the non-cancelable, and remove them from the queue as well
+  let pendingRequests  = [];                                                                                               // list of pending requests waiting for a server reply
+  let currentTimestamp = 0;                                                                                                // time stamp of the request whose content is showing currently
+  var submit           = ( x ) => { pendingRequests.unshift (x); };                                                        // submit a fresh request to the queue
+  var nonCancelable    = () => { if (pendingRequests.length > 0) {pendingRequests[0].nonCancelable = true; cancel();} };   // mark top of the queue (which is the most recently added) as non-cancelable
+  var getLen           = () => pendingRequests.length;                                                                     // get length of the queue
+  var remove           = (ele) => { pendingRequests=pendingRequests.filter ( x => x!=ele);}                                // remove a specific element from the queue
+  var cancel           = () => {                                                                                           // cancel all but the non-cancelable, and remove them from the queue as well
     pendingRequests = pendingRequests.filter ( ele => {
       if (ele.nonCancelable) { if (VERBOSE) {console.log ("keeping request ", ele.numberOfRequest, " made at ", ele.timeRequestMade);}  return true;} 
-      else { if (VERBOSE) {console.log ("aborting request number ", ele.numberOfRequest, " made at", ele.timeRequestMade);}  ele.abort(); return false;}
+      else { if (VERBOSE) {console.log ("aborting request number ", ele.numberOfRequest, " made at", ele.timeRequestMade);}  ele.abort(); 
+              return false;}
     });
   };
   return {submit, nonCancelable, currentTimestamp, getLen, remove};  // export object
-})();
+
+})();  // END OF QUEUE scope
 
 
 /** slow down the issuing of requests in case of a resizing of the preview area 

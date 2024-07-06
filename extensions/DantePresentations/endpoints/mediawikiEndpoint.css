@@ -13,8 +13,10 @@ body {background-color: white;}
 
 body {padding: 10pt 10pt 10pt 10pt; box-sizing:border-box;}
 
+
 /* correcting for styles we get from vector skin but which are unwanted in the preview situation */
-.mw-body {padding: 10pt 10pt 10pt 10pt; margin-left:0px; border:0px;}
+.mw-body {padding: 20pt 10pt 10pt 10pt; margin-left:0px; border:0px;} /* 20pt padding top needed so that we can see an error message in case of an amsmath element beginning the page without a heading */
+
 
 
 /* body {height:10vh; width:100vh;} */
@@ -23,8 +25,9 @@ body {padding: 10pt 10pt 10pt 10pt; box-sizing:border-box;}
 /* THIS is for overriding the error messages from Parsifal inside of a preview */
 /* defined in Decorator.php */
 
-.errorWrap {}
+.errorWrap {top:-24px; background:white;}
 .miniError {font-size:small; width:500px; display:inline-block; position:absolute; top:0px; right:0px; text-align:right; border:0px; margin:0px;}
-.winError { display:none; font-size:small; width:500px; position:absolute; top:0px; right:20px; text-align:right; border:0px; margin:0px;}
+
+.winError { display:none; } /* do not show window opening link in endpoint preview */
 
 .logWrap {display:none;} /* do not show normal log links in preview */

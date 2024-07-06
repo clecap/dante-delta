@@ -237,6 +237,12 @@ class DanteEndpoint {
 public function parseText ( $text, $hiding, $section = NULL ) {
 
   // EndpointLog ("DanteEndpoint: parseText entered, local variable hiding is " . ($hiding ? "true" : "false") . "\n");
+
+  
+  //$me = "/var/www/html/wiki-dir/extensions/DantePresentations/endpoints/danteEndpoint.php";
+  //$isCached = opcache_is_script_cached ( $me );
+  //ParsifalLog ("*** DanteEndpoint: parseText: cache status is now: ".($isCached ? " CACHED" : "NOT CACHED")."\n");
+
   $userId = $this->getUserIdentity();
   //EndpointLog ("DanteEndpoint: parseText got userId: " . print_r ($userId, true) . "\n");  // print_r of $options leads to memory exhaustion.
   $options = new ParserOptions ( $userId );        // let the parent class provide a user identity
