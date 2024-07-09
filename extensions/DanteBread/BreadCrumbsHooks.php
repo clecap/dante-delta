@@ -42,6 +42,7 @@ class BreadCrumbsHooks {
 // $title the Title object for the page
 // &$displaytitle to return the display title, if set
 // return bool true if the page has a displaytitle page property that is different from the prefixed page name, false otherwise
+/*
   private static function getDisplayTitle( Title $title, &$displaytitle ) {
     $pagetitle = $title->getPrefixedText();
     $title     = $title->createFragmentTarget( '' );
@@ -58,5 +59,6 @@ class BreadCrumbsHooks {
     }
     return false;
   }
-  
+  */
+
 }

@@ -20,7 +20,6 @@ static function debugLog ($text) {
   else {throw new Exception ("debugLog could not log"); }
 }
 
-
 public static function onSkinBuildSidebar ($skin, &$bar ) {
   global $wgOut;
   global $IP;
@@ -39,12 +38,8 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
     return true;
   }
 
-
   foreach ($arrKeys as $key) {
-
-    if (in_array ( $key,  array ("SEARCH", "TOOLBOX", "LANGUAGES") ) )  { 
- 
-      continue; }  // ignore these standard sidebar items 
+    if (in_array ( $key,  array ("SEARCH", "TOOLBOX", "LANGUAGES") ) )  { continue; }  // ignore these standard sidebar items 
 
     // the category tree is specified as an array of objects of which there are two variants    {tree: CatName, depth:4}   or   {name: CatName}
     // every object may also have an additional   className   and an additional  style  attribute  to be used for styling the entry
@@ -70,10 +65,10 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
       if ($VERBOSE) {elf::debugLog ("The cHtml generated is: " .$cHtml);}
 
  //     $html  =    "<div class=\"fancytree todo\" id=\"sidebar-cattree\" style=\"display:none;\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
-     $html  =    "<div class=\"fancytree todo\" style=\"display:none;\" id=\"sidebar-cattree\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
+      $html  =    "<div class=\"fancytree todo\" style=\"display:none;\" id=\"sidebar-cattree\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
      
-  // here we add the button-like stuff below the category
-  $add = <<<HERE
+      // here we add the button-like stuff below the category
+      $add = <<<HERE
    <div style="margin-left:4px; margin-top:6px;line-height:20px;font-size:12pt;">
   <a href="$wgServer/$wgScriptPath/index.php/Special:Categories" class="dicon" title="Paged list of all categories">&forall;</a>
   <a href="$wgServer/$wgScriptPath/index.php/MediaWiki:CategoryTree"  class="dicon" title="Category tree">&#x1F332;</a>
@@ -86,9 +81,8 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
 </div>
 HERE;
 
-  $html = $html . $add;
-
-     $bar[ 'catus' ] = [ [ 'html' =>  $html ]];
+      $html = $html . $add;
+      $bar[ 'catus' ] = [ [ 'html' =>  $html ]];
     }
 
     if (is_int ($key)) {continue;}
@@ -171,11 +165,8 @@ private static function getCatConfig () {
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
     $code    = ContentHandler::getContentText ( $contentObject );
     if ($VERBOSE) {self::debugLog ("\n\n Categories configuration text before scanning is: " . $code . "  \n\n");}      
-        
     $code = extractPreContents ($code);
-
     if ($VERBOSE) {self::debugLog ("\n\n Categories configuration text is: " . $code . "  \n\n");}
-    
     $obj = json_decode ($code, true);
     if ($obj == null) { 
       if ($VERBOSE) {self::debugLog ("\n\n Categories configuration object could not be parsed since we received this:\n\n $code \n");}
@@ -192,7 +183,6 @@ private static function getCatConfig () {
 public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
   global $wgExtensionAssetsPath;
   $out->addHeadItem("earlyIcons",    "<link rel='preload' as='image' href='{$wgExtensionAssetsPath}/DanteTree/fancytree/icons.gif'>");  // preload the DanteTree images (does work on Chrome)
-
   $out->addHeadItem ("sidebarstyle", <<<EOT
 <script data-src="TreeAndMenu_body.php">
   let pers = window.localStorage.getItem ("sidebar-width");
@@ -237,7 +227,6 @@ static  function buildLink ($name, $style = "") {
 //        false means: only render my kids
 static function renderCat ($name, $depth, $me) {
   if ($depth <= 0) {return "<li>" . self::buildLink($name) . "</li>" ;}                  
-
   $local = "";
   if ($me) {$local = "<li>".self::buildLink($name);}
   $categs = self::getChildren($name);                        // get categories which are children of $name

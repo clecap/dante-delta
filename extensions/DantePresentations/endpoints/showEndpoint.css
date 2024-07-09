@@ -30,5 +30,9 @@ img.drawioShowendpoint {
   border: 1px dotted grey;
 }
 
+/* reduce distance between two amsmath elements seperated by a paragraph */
+script + p { line-height:0.1;}
+
+
 /* do not show handle to error messages in showEndpoint */
 .errorWrap {display:none;}

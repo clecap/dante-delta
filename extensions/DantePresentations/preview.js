@@ -27,7 +27,7 @@ const PROCESS = (() => {  // OPEN local scope for local variables
   const MAX_EVENT_WAIT = 1000;
   const MAX_FALLBACK   = 1100;
 
-  const VERBOSE = true;
+  const VERBOSE = false;
   let queueing = false;    // we have at least one preview request which has not yet been served
   let timeout  = null;     // a scheduled task to run the processing at any cost
   let fct;                 // the payload function to be called for execution
@@ -92,8 +92,9 @@ const PROCESS = (() => {  // OPEN local scope for local variables
 const DPRES = (() => {
 
 // when the client receives any response from the preview endpoint: patch the information into the area where we show the preview
+// function is called by processAll
 function receivedEndpointResponse(e) {
-  const VERBOSE = true; 
+  const VERBOSE = false; 
 
   let arrived = Date.now();  
 
@@ -113,7 +114,10 @@ function receivedEndpointResponse(e) {
  
     }
       else    { if (VERBOSE) { console.log (`  Will discard endpoint response. Tool old: From ${e.target.timeRequestMade} and thus older than current status ${QUEUE.currentTimestamp}`); }
-                                                             QUEUE.remove (e.target);}
+                QUEUE.remove (e.target);
+             if (QUEUE.getLen () == 0 ) { document.body.classList.remove ("xhrPending", "inputChanged");}
+
+          }
     }
     else {console.warn ("  The XHR object had no timestamp, this is a protocol error!");}
   }
@@ -130,10 +134,10 @@ let previewFrames = [];
 let currentFrame = 0;
 let currentZoom = 1;
 
-
+ 
 // this is the single buffered display of an endpoint response; we maintain it to have a fallback for debugging purposes
 function displayEndpointResponseSingleBuffer (e) {
-  let VERBOSE = true;
+  let VERBOSE = false;
   if (VERBOSE) {console.log ("displayEndpointResponse SINGLE buffered called");}
   var previewFrame = document.getElementById ("previewFrame");                            // get a handle of the previewFrame
   document.getElementById ("previewFrame").setAttribute ("srcdoc", e.target.response);    // show current content in the previewFrame
@@ -266,13 +270,10 @@ function processAll() {
   xhr.setRequestHeader ("X-Dante-ClientRequestTime", xhr.timeRequestMade);
   xhr.onload = (e) => {receivedEndpointResponse (e);};
 
-  console.log ("Submitting request to queue ", xhr.numberOfRequest);
+//  console.log ("Submitting request to queue ", xhr.numberOfRequest);
   QUEUE.submit ( xhr );
 
-
-
-  // console.info ("switched to pending: " + document.body.classList);
-  console.log ("Sending request ", xhr.numberOfRequest);
+//  console.log ("Sending request ", xhr.numberOfRequest);
   xhr.send ( body );
   document.body.classList.remove ("inputChanged");
   document.body.classList.add ("xhrPending");        // signal in UI that a request from the server is pending
@@ -437,7 +438,7 @@ window.editPreviewPatch = DPRES.editPreviewPatch;
 */
 
 var QUEUE = (() => { // BEGIN of QUEUE scope
-  const VERBOSE = true;
+  const VERBOSE = false;
   let pendingRequests  = [];                                                                                               // list of pending requests waiting for a server reply
   let currentTimestamp = 0;                                                                                                // time stamp of the request whose content is showing currently
   var submit           = ( x ) => { pendingRequests.unshift (x); };                                                        // submit a fresh request to the queue

@@ -1,6 +1,5 @@
 (() => {  // scope protection
 
-
 // Declaration
 class BreadCrumbs {
   static globalMaxCrumbs =  8;
@@ -21,7 +20,7 @@ class BreadCrumbs {
   }
 
   static get () {                                             // console.info ("BreadCrumbs.get: obtaining a healthy breadcrumbs array");
-    let breadcrumbs = localStorage.getItem ("breadcrumbs");   // console.info ("BreadCrumbs.get: got from local storage: ", breadcrumbs); 
+    let breadcrumbs = localStorage.getItem ("breadcrumbs");   // console.info ("BreadCrumbs.get: got from local storage: ", breadcrumbs);
     try {
       if ( !breadcrumbs ) { throw new Error ("breadcrumbs in storage were falsish "); }                                                   
       breadcrumbs = JSON.parse( breadcrumbs );
@@ -45,14 +44,12 @@ class BreadCrumbs {
       vc.push( link );
     }
     // console.info ("BreadCrumbs.insert: vc is ", vc);
-    let txt = vc.reduce ( (ac, cv) =>  ac + cv + ' &raquo; ' , "") + 
+    let txt = vc.reduce ( (ac, cv) =>  ac + cv + ' &nbsp;&nbsp;&nbsp; ' , "") + 
       "<a href='javascript:window.clearBreadcrumbs();' style='font-size:9pt; font-variant-caps: all-small-caps;padding:1pt;' title='Clear breadcrumbs'>del</a>";
     // console.info ("BreadCrumbs.inster: txt is ", txt);
     document.getElementById ("breadcrumbinsert").innerHTML = txt;
   }
-
 } // end class
-
 
   // INTERFACE. Called when we should insert the bread crum into the DOM
   window.doBreadNow = function () { BreadCrumbs.insert();}
