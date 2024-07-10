@@ -2,6 +2,12 @@
 // first we use encodeURIComponent to get percent-encoded UTF-8, then we convert the percent encodings into raw bytes which can be fed into btoa.
 
 
+// NOTE: preview.js only is loaded when editing and used for the preview functionality
+//       The rest is in Parsifal runtime.js !!
+
+
+// console.warn ("preview starts loading");
+
 const DOUBLEBUFFERED = true;     // switch betwwen double buffered operation and single buffered operation
 
 
@@ -27,6 +33,8 @@ const PROCESS = (() => {  // OPEN local scope for local variables
   const MAX_EVENT_WAIT = 1000;
   const MAX_FALLBACK   = 1100;
 
+  let getDelay = () => MAX_EVENT_WAIT;
+
   const VERBOSE = false;
   let queueing = false;    // we have at least one preview request which has not yet been served
   let timeout  = null;     // a scheduled task to run the processing at any cost
@@ -38,11 +46,22 @@ const PROCESS = (() => {  // OPEN local scope for local variables
   let getImmediate    = () => immediate;
   let toggleImmediate = () => {immediate = !immediate;}
 
+  let changeMode      = () => {toggleImmediate(); showMode();}; // toggle the setting and display the change immediately as user feedback
+
+  let showMode  = () => {  // patch in the process mode information into span id='showMode'
+    let ele = document.getElementById ('showMode');
+    if (ele) {
+      let delay = PROCESS.getDelay().toString().padStart (5, '\u00A0');
+      ele.innerHTML = "<a onclick='PROCESS.changeMode();' title='Click to change mode; CTRL with focus in editor to trigger one immediate processing'>Mode</a>: " + (PROCESS.getImmediate() ? " immediate " : " delay max " + delay + "[ms]");
+    }
+  }
+
+
   let setFct = (f) => { fct = f; };  // setter for fct
 
   let process = ( eventObject ) => { // the raw service function as it is called from the outside
 
-    if (false && VERBOSE) {
+    if (VERBOSE) {
       if      ( eventObject == "INIT"   )           { console.info  ("preview.js: process called at initialization ");}
       else if ( eventObject == "RESIZE" )           { console.info  ("preview.js: process called after resize" );}
       else if ( eventObject instanceof InputEvent)  { console.info  ("preview.js: process called after InputEvent ", "type=" , eventObject.inputType, ( eventObject.isComposing ? " COMPOSING " : " NOT_COMPOSING" ), "data=", eventObject.data, eventObject);}
@@ -78,7 +97,7 @@ const PROCESS = (() => {  // OPEN local scope for local variables
     }
   }; 
 
-  return {process, setFct, setImmediate, getImmediate, toggleImmediate};
+  return {process, setFct, setImmediate, getImmediate, toggleImmediate, getDelay, changeMode, showMode};
 
 })();  // CLOSE local scope
 
@@ -90,6 +109,7 @@ const PROCESS = (() => {  // OPEN local scope for local variables
 
 // define namespace DPRES for extension DantePresentations to ensure proper separation from other components
 const DPRES = (() => {
+
 
 // when the client receives any response from the preview endpoint: patch the information into the area where we show the preview
 // function is called by processAll
@@ -123,9 +143,13 @@ function receivedEndpointResponse(e) {
   }
 
   let roundTrip = Date.now() - e.target.timeRequestMade;
+  roundTrip = roundTrip.toString().padStart (5, '\u00A0');
   var sum = document.body.querySelector ("label[for=wpSummary]");
-  sum.innerHTML = "Status: " + e.target.status + " Roundtrip: " + roundTrip + "[ms]" + (PROCESS.getImmediate() ? " immediate " : " delayed " ) + "(change with Alt) ";
+  sum.innerHTML = "Status: " + e.target.status + " Roundtrip: " + roundTrip + "[ms] " + "<span id='showMode'></span>";
+  PROCESS.showMode();   // patch in the process mode information into span id='showMode'          
 }
+
+
 
 
 
@@ -251,7 +275,16 @@ let numberOfRequest = 0;
 
 
 function processAll() {
-  var body = b64EncodeUnicode ( document.getElementById ( "wpTextbox1" ).value );
+
+  var body;
+
+  if (codemirrorFlag) {
+     body = b64EncodeUnicode ( myCodeMirror.getValue() );
+}
+else {body = b64EncodeUnicode ( document.getElementById ( "wpTextbox1" ).value );}
+
+
+  // console.info ("DantePresentation: calling processAll with body", body);
   const xhr = new XMLHttpRequest();
   xhr.open ("POST", "./extensions/DantePresentations/endpoints/mediawikiEndpoint.php", true);   //////// TODO: how do we select the specific endpoitn : reveal or parsifal or markdwon or whatever ????
   xhr.setRequestHeader ("Content-Type", "text/plain;charset=UTF-8");
@@ -286,11 +319,12 @@ function processAll() {
 // Apply path to the edit page of Mediawiki. Called by <script> tag injected in DantePresentations.php:onEditPageshowEditForminitial
 function initializeTextarea() { 
   var storeResize = true;                                   // shall the resize observer store the resize values?
-  var textarea = document.getElementById ( "wpTextbox1" );   // pick up the textarea
 
-  textarea.setAttribute ("autocomplete", "off");
-  textarea.setAttribute ("autocorrect", "off");
+  var textarea = document.getElementById ( "wpTextbox1" );     // pick up the textarea
+  textarea.setAttribute ("autocomplete",   "off");             // and set some parameters
+  textarea.setAttribute ("autocorrect",    "off");
   textarea.setAttribute ("autocapitalize", "off");
+  textarea.myFontSize = 14; textarea.style.fontSize = textarea.myFontSize + "pt";
 
   const wasResized = () => {
     const VERBOSE = true;
@@ -310,9 +344,7 @@ function initializeTextarea() {
   Object.assign (textarea.style, { minWidth: "150px", resize: "horizontal", display:"inline-block" } );
 
   if (window.localStorage.getItem ("textareaWidth"))  {textarea.style.width = window.localStorage.getItem ("textareaWidth") + "px";}
-  //if (window.localStorage.getItem ("textareaHeight")) {textarea.style.height = window.localStorage.getItem ("textareaHeight") + "px";}
 
-  textarea.myFontSize = 14; textarea.style.fontSize = textarea.myFontSize + "pt";
 
   var newEditContainer = document.createElement ("div");   // container of (textarea for editing) and (preview area)
   newEditContainer.id  = "new-edit-container";
@@ -321,23 +353,32 @@ function initializeTextarea() {
   var parent = textarea.parentNode; parent.replaceChild (newEditContainer, textarea);
   newEditContainer.appendChild (textarea);
 
-  var previewContainer = document.createElement ("div");          // generate a container for the preview
+ 
+ 
+  
+  
+
+ var previewContainer = document.createElement ("div");          // generate a container for the preview
   previewContainer.id = "inline-edit-preview-container";
   Object.assign (previewContainer.style, {minWidth: "18px", display: "inline-block", flex:"1 1 auto", "box-sizing": "border-box", position: "relative"} ); 
 
-  //var previewImage = document.createElement ("img");     previewImage.id = "previewImage";  Object.assign (previewImage.style, {width:"100%", height:"100%", position:"absolute", border: "0px solid yellow", left:"0px", top:"0px"} );
-  
-  previewFrames[0] = document.createElement ("iframe"); Object.assign (previewFrames[0].style, {width:"100%", height:"100%", position:"absolute", left:"0px", top:"0px"} ); previewFrames[0].id="previewFrame";
-
-  if (DOUBLEBUFFERED) {previewFrames[1] = document.createElement ("iframe"); Object.assign (previewFrames[1].style, {width:"100%", height:"100%", position:"absolute", left:"0px", top:"0px"} ); previewFrames[1].id="previewFrame1";}
+  previewFrames[0] = document.createElement ("iframe"); 
+  Object.assign (previewFrames[0].style, {width:"100%", height:"100%", position:"absolute", left:"0px", top:"0px"} ); 
+  previewFrames[0].id="previewFrame";
+  if (DOUBLEBUFFERED) {
+    previewFrames[1] = document.createElement ("iframe"); 
+    Object.assign (previewFrames[1].style, {width:"100%", height:"100%", position:"absolute", left:"0px", top:"0px"} ); 
+    previewFrames[1].id="previewFrame1";}
 
   previewFrames[0].classList.add ("previewFrameClass");
   if (DOUBLEBUFFERED) {previewFrames[1].classList.add ("previewFrameClass");}
 
   previewContainer.appendChild (previewFrames[0]);   
   if (DOUBLEBUFFERED) {previewContainer.appendChild (previewFrames[1]);}
-  newEditContainer.appendChild (previewContainer);
-  
+newEditContainer.appendChild (previewContainer);
+
+
+
   let editform = document.getElementById ("editform"); 
 
   PROCESS.setFct ( processAll );                                       // define which function to use for processing for previewing
@@ -351,34 +392,45 @@ function initializeTextarea() {
   textarea.addEventListener ("keydown", (e) => { // console.log ("Key pressed: ", e.key);
     if (e.metaKey && (e.key=="+" || e.key=="-") ) {e.preventDefault (); e.stopPropagation(); textarea.myFontSize += ( e.key=="+" ? 2 : -2 ); textarea.style.fontSize = textarea.myFontSize + "pt"; return;} 
     switch (e.key) {
-      case "Escape":   console.log ("removing input listener");  editform.removeEventListener ("input", PROCESS.process );  break;
-      case "Control":  console.log ("re-adding input listener"); editform.addEventListener ("input", PROCESS.process);  PROCESS.process ( "INIT" );   break;
-      case "Alt":      console.log ("immediate processing");  PROCESS.toggleImmediate ();  PROCESS.process ( "INIT" );   break;
+      // case "Escape":   console.log ("removing input listener");  editform.removeEventListener ("input", PROCESS.process );  break;
+      // case "Control":  console.log ("re-adding input listener"); editform.addEventListener ("input", PROCESS.process);  PROCESS.process ( "INIT" );   break;
+      case "Control":      console.log ("immediate processing");     PROCESS.process ( "INIT" );   break;
+   //   case "Ctrl":    console.log ("toggeling immediate");      PROCESS.changeMode ();   break;
     }
 
    });
-
-
-
 
 }
 
 
 
 
+
+let myCodeMirror;
+
+
+
 function initializeCodeMirror () {
   var myTextArea   = document.getElementById("wpTextbox1");
-  var myCodeMirror = CodeMirror.fromTextArea ( myTextArea, { lineNumbers:true, matchBrackets:true} );    // returns an abstract CodeMirror object
+  myCodeMirror = CodeMirror.fromTextArea ( myTextArea, { lineNumbers:true, matchBrackets:true} );    // returns an abstract CodeMirror object
 
   var cmElement = document.querySelector (".CodeMirror");
   cmElement.myFontSize = 14; 
   cmElement.style.fontSize = cmElement.myFontSize + "pt";  
   cmElement.CodeMirror.refresh();
-  cmElement.addEventListener ("keydown", (e) => { // console.log ("Key pressed: ", e.key);
+  cmElement.addEventListener ("keydown", (e) => { // console.log ("CMirror Key pressed: ", e.key);
     if (e.metaKey && (e.key=="+" || e.key=="-") ) {e.preventDefault (); e.stopPropagation(); 
       cmElement.myFontSize += ( e.key=="+" ? 2 : -2 ); cmElement.style.fontSize = cmElement.myFontSize + "pt"; 
       cmElement.CodeMirror.refresh();            // needed by code mirror after a font change
-    }  });
+    }  
+    switch (e.key) {
+      // case "Escape":   console.log ("CM removing input listener");  editform.removeEventListener ("input", PROCESS.process );  break;
+      // case "Control":  console.log ("CM re-adding input listener"); editform.addEventListener ("input", PROCESS.process);  PROCESS.process ( "INIT" );   break;
+      case "Control":      console.log ("CM immediate processing");     PROCESS.toggleImmediate ();  PROCESS.process ( "INIT" );   break;
+      //case "Ctrl":    console.log ("toggeling immediate");      PROCESS.changeMode ();   break;
+    }
+
+  } );
 
   if (window.localStorage.getItem ("textareaWidth"))  {cmElement.style.width = window.localStorage.getItem ("textareaWidth") + "px";}
 
@@ -404,22 +456,32 @@ function initializeCodeMirror () {
 
   new ResizeObserver (wasResized).observe (cmElement);          // NEW: cmElement
   new ResizeObserver (wasResized).observe (document.body);
+
 }
+
+
+let codemirrorFlag = false;
 
 
 function editPreviewPatch () {  // the clutch to PHP; we may adapat it to use CodeMirror, textarea or whatever client side editor we desire  
   initializeTextarea();
+  codemirrorFlag = false;
   let params = (new URL (document.location)).searchParams;
     if (params.get("editormode") == "codemirror") {
     initializeCodeMirror ();  // additionally initialize a code mirror instance
+    codemirrorFlag = true;
   }
 }
 
 
-  return {editPreviewPatch};
+  return {editPreviewPatch};  // export into DPRES
 
 }  )();
 /*** END DPRES **/
+
+
+
+window.DPRES = DPRES;
 
 
 window.editPreviewPatch = DPRES.editPreviewPatch;
@@ -464,3 +526,8 @@ function waitBeforeInvoke (ms) { // this MUST be used when the preview area is r
   window.clearTimeout (timer);   
   timer = window.setTimeout ( () => PROCESS.process ("RESIZE") , ms);       // start a timer and only then invoke processing
 }
+
+
+
+
+// console.warn ("preview.js is loaded");
