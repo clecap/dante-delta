@@ -195,6 +195,7 @@ $hint = "";
 
 // LINK is activated via jQuery in ex.DantePresentations.js focusing on the class name of the link
 
+/*
   $links['positionPart'] = [
       'targetTitle' => $title,
       'text' => "position",
@@ -210,7 +211,7 @@ $hint = "";
         'attribs' => [  
          "class" => "section-annotation-link internal", "data-section" => $section, "data-section-marker" => $section, "title" => "Sect ".$section ],
         'query' => array( ), 'options' => array() ];
-
+*/
 
   }  // end onSkinEditSectionLinks
 

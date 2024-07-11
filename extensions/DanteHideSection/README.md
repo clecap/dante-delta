@@ -3,14 +3,6 @@
 DanteHideSection is a patch of HideSection, which allows an animated, smooth, soft hiding action.
 
 
-
-
-
-
-
-
-
-
 # HideSection
 
 

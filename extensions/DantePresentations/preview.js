@@ -180,8 +180,8 @@ function displayEndpointResponseSingleBuffer (e) {
 // TODO:  for some stupid reason this does not work.  srcdoc ??  maybe other reason.
 // TODO: if it really does not work: add this to the html code as it is built in the mediawiki.php endpoint and the other endpoints 
   document.getElementById ("previewFrame").onload = function() {
-    document.getElementById ("previewFrame").contentWindow.addEventListener ("focus", (e) => {console.warn ("FOCUS");  previewFrame.classList.add ("hasFocus");   }); 
-    document.getElementById ("previewFrame").contentWindow.addEventListener ("blur",  (e) => {console.warn ("BLUR", ); previewFrame.classList.remove("hasFocus"); }); 
+    document.getElementById ("previewFrame").contentWindow.addEventListener ("focus", (e) => { /* console.warn ("FOCUS"); */  previewFrame.classList.add ("hasFocus");   }); 
+    document.getElementById ("previewFrame").contentWindow.addEventListener ("blur",  (e) => { /* console.warn ("BLUR", ); */ previewFrame.classList.remove("hasFocus"); }); 
    // document.getElementById ("previewFrame").contentWindow.onbeforeunload = function() { console.warn ("beforeunload");previewFrame.classList.remove ("hasFocus");}
     document.getElementById ("previewFrame").contentWindow.document.addEventListener ("keydown" , (e) => { 
       console.log ("Key pressed: ", e.key);
@@ -232,8 +232,8 @@ function displayEndpointResponseDoubleBuffer (e) {
     }
     newFrame.contentWindow.scrollTo (0, current);        // and impose it on the new frame jsut activated
 
-    newFrame.contentWindow.addEventListener ("focus", (e) => {console.warn ("FOCUS");  newFrame.classList.add ("hasFocus");   }); 
-    newFrame.contentWindow.addEventListener ("blur",  (e) => {console.warn ("BLUR", ); newFrame.classList.remove("hasFocus"); }); 
+    newFrame.contentWindow.addEventListener ("focus", (e) => { /* console.warn ("FOCUS");*/  newFrame.classList.add ("hasFocus");   }); 
+    newFrame.contentWindow.addEventListener ("blur",  (e) => { /* console.warn ("BLUR", ); */ newFrame.classList.remove("hasFocus"); }); 
    // document.getElementById ("previewFrame").contentWindow.onbeforeunload = function() { console.warn ("beforeunload");previewFrame.classList.remove ("hasFocus");}
 
     newFrame.contentWindow.document.addEventListener ("keydown" , (e) => { 
