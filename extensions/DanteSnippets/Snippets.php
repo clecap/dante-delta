@@ -4,7 +4,7 @@
  *  \author   Clemens H. Cap
  *  \brief    Bundle the static and job specific functionalities. Represent a Job for storing a Snippet in NS_SNIP
  */
-
+ 
 
 class Snippets extends Job {
 
