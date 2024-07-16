@@ -111,11 +111,6 @@ wfLoadExtension( 'DanteBackup' );
 
 
 wfLoadExtension( 'DanteSnippets' );
-  
-
-//wfLoadExtension( 'DanteBoilerSpecial' );
-
-//wfLoadExtension( 'DanteCategoryBrowser' );
 
 
 # $wgParserCacheType       = CACHE_DB;
@@ -171,6 +166,8 @@ $wgWikEdDiffDebug = false;                # Show debug infos and stats (block, g
 $wgWikEdDiffTimer = false;                # Show timing results in debug console (false)
 $wgWikEdDiffUnitTesting = false;          # Run unit tests to prove correct working, display results in debug console (false)
 
+
+$wgLogo="$wgScriptPath/caravaggio-180x180.png";
 
 
 /* DEBUG code

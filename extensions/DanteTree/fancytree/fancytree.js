@@ -375,13 +375,14 @@ const installPropagate = () => {
 };
 
 
-const logoPatcher = () => { 
+const logoPatcher = () => {     //** patches the logo a bit  */
   const logo = document.getElementById ("p-logo");   
-  logo.innerHTML = ""; 
-  var span = document.createElement ('span');
-  span.innerHTML = mw.config.get('wgSiteName'); 
-  span.className='personal-wiki-name-logo'; span.setAttribute ('title', 'Name of the specific dantewiki to distinguish multiple variants');
-  logo.appendChild (span);
+  //logo.innerHTML = ""; 
+  var ele = document.createElement ('a');
+  ele.innerHTML = mw.config.get('wgSiteName'); 
+  ele.className='personal-wiki-name-logo'; 
+  ele.setAttribute ('title', 'Name of the specific dantewiki to distinguish multiple variants');
+  logo.appendChild (ele);
 };
 
 
@@ -448,13 +449,14 @@ window.initializeCatTree = () => {
 };
 
 
-var sidebarIsPatched = false;  // used to make patchSidebar idempotent
+var sidebarIsPatched = false;  // used to make patchSidebar idempotent; needed since we might call it several times when buildng sidebar
+
 
 function patchSidebar () {
   const VERBOSE = false;    if (VERBOSE) {console.error ("TreeAndMenu: doTreeFinalizer called");}
   if (sidebarIsPatched) { if (VERBOSE) {console.info ("fancytree.js: sidebar is already patched");}    return;}       // only do it once, may be called several times - function made idempotent by this
 
-  // logoPatcher ();        // not used currently
+  logoPatcher ();        // not used currently
 
   initializeCatTree ();     // must be done before we show the sidebar (involves tree modifications) and before we patchPortletHeaders
   patchPortletHeaders();    // patch headers or the portlets in the sidebar so that they show an open/close icon next to their label
@@ -509,18 +511,15 @@ $( function() {
 // implement opening some toolbox links which depend on the specific page on which we are to do so
 $(  function() {
 
-$("a[href$='/Dummy:WhatLinksHere']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "/Special:WhatLinksHere/"  + mw.config.get('wgPageName') );
-
-$("a[href$='/Dummy:PageInfo']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title="  + mw.config.get('wgPageName') +"&action=info" );
-$("a[href$='/Dummy:RelatedChanges']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "/Special:RecentChangesLinked/"  + mw.config.get('wgPageName') );
-$("a[href$='/Dummy:PermaLink']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title=" + mw.config.get('wgPageName') +"&oldid=" + mw.config.get ("wgRevisionId"));
-$("a[href$='/Dummy:CiteThisPage']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title=Special:CiteThisPage&page=" + mw.config.get('wgPageName') +"&id=" + mw.config.get ("wgRevisionId") + "&wpFormIdentifier=titleform");
+  $("a[href$='/Dummy:WhatLinksHere']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "/Special:WhatLinksHere/"  + mw.config.get('wgPageName') );
+  $("a[href$='/Dummy:PageInfo']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title="  + mw.config.get('wgPageName') +"&action=info" );
+  $("a[href$='/Dummy:RelatedChanges']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "/Special:RecentChangesLinked/"  + mw.config.get('wgPageName') );
+  $("a[href$='/Dummy:PermaLink']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title=" + mw.config.get('wgPageName') +"&oldid=" + mw.config.get ("wgRevisionId"));
+  $("a[href$='/Dummy:CiteThisPage']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title=Special:CiteThisPage&page=" + mw.config.get('wgPageName') +"&id=" + mw.config.get ("wgRevisionId") + "&wpFormIdentifier=titleform");
 
 
 // https://localhost:4443/wiki-dir/index.php?title=Special:CiteThisPage&page=Main_Page&id=108&wpFormIdentifier=titleform
-
 // https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&oldid=126
-
 //https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&action=info
 
 }

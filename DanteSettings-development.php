@@ -20,8 +20,11 @@ $wgCachePages              = false;
 
 $wgAllowVerbose            = true;
 
-error_reporting( -1 );
+#error_reporting( -1 );
+error_reporting (E_ALL & ~E_DEPRECATED );  # report all errors but not deprecations
+
 ini_set( 'display_errors', 1 );
+
 
 opcache_reset();
 

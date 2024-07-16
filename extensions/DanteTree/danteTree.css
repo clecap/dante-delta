@@ -4,8 +4,16 @@
 
 
 /* do not display the site logo */
-#p-logo {display:none;} 
+/* #p-logo {display:none;}  */
 
+/* adjust the size to our logo */
+
+.mw-wiki-logo {vertical-align:middle;}
+#p-logo {width: 300px;  height:60px;}
+#p-logo a {height:60px; width:60px; background-size:60px 60px; display:inline-block;}
+#p-logo {margin-bottom:0.5em;}
+
+.personal-wiki-name-logo {margin-left:10px; font-weight:bold;}
 
 .ui-resizable-e   {width:20px !important;}
 

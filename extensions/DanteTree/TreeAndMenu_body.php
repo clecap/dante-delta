@@ -1,5 +1,9 @@
 <?php
 
+
+/** NOTE: we use a cache for the Sidebar. Files is fine, since it also provides a cached Sidebar in a cold start
+    which ACPu would not */
+
 use MediaWiki\MediaWikiServices;
 
 class TreeAndMenu {
@@ -27,7 +31,6 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
   global $wgAllowVerbose; $VERBOSE = false && $wgAllowVerbose;
   // self::debugLog ("onSkinBuildSidebar called \nsees bar=".print_r ($bar, true)."\n");
   $arrKeys = array_keys ($bar);
-
   $entryTime = hrtime(true);
 
   // when served from the cache on MacPro this takes less than 1 ms, when served by generating it may take some 60 ms. Thus a cache here is helpful.
@@ -187,7 +190,7 @@ public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
 <script data-src="TreeAndMenu_body.php">
   let pers = window.localStorage.getItem ("sidebar-width");
   if (pers) {
-    let style = `<style>`+
+    let style = `<style data-src="TreeAndMenu_body.php">`+
       `#mw-panel {width: \${pers} ; height: 100%;}
       #content   {margin-left: \${pers};}
       #left-navigation  {margin-left: \${pers};}
@@ -197,8 +200,6 @@ public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
   }
 </script>        
 EOT);
-
-
 
 
   $out->addModules('ext.fancytree');                                                         // scripts may load via ressource loader

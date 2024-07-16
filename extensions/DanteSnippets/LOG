@@ -1,0 +1,292 @@
+
+*** Rendertagsnip got: 
+asd
+
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: 
+asd
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User evaluates to falsish, not submitting a job!
+
+*** Rendertagsnip got: 
+asd
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+
+
+*** SUBMITTING a JOB: at time=12:28:03
+
+
+
+*** SUBMITED JOB to the jobqueue
+
+*** Starting to execute a JOB at current time=12:28:04
+*** I am a job submitted at        12:28:03
+               with sniptitle:     Test/Dante Snippets
+               with orgtitle:      Test/Dante Snippets
+               with content:       
+asd
+
+               from user by name:  Admin
+*** Got a title object for title: Test/Dante Snippets
+*** Got a page object
+*** Username is not null and is Admin
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User is sane
+*** Got updater
+*** Got content
+*** did set content and slot
+*** got comment, will now save the revision
+*** saved revision, checking status now
+*** Status: OK 
+*** Status: GOOD 
+******** JOB has completed 
+
+*** Rendertagsnip got: 
+asd
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+
+
+*** SUBMITTING a JOB: at time=12:31:37
+
+
+
+*** SUBMITED JOB to the jobqueue
+
+*** Starting to execute a JOB at current time=12:31:38
+*** I am a job submitted at        12:31:37
+               with sniptitle:     Test/Dante Snippets
+               with orgtitle:      Test/Dante Snippets
+               with content:       
+asd
+
+               from user by name:  Admin
+*** Got a title object for title: Test/Dante Snippets
+*** Got a page object
+*** Username is not null and is Admin
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User is sane
+*** Got updater
+*** Got content
+*** did set content and slot
+*** got comment, will now save the revision
+*** saved revision, checking status now
+*** Status: OK 
+*** Status: NOT GOOD 
+******** JOB has completed 
+
+*** Rendertagsnip got: 
+asd
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+
+
+*** SUBMITTING a JOB: at time=12:31:45
+
+
+
+*** SUBMITED JOB to the jobqueue
+
+*** Starting to execute a JOB at current time=12:31:46
+*** I am a job submitted at        12:31:45
+               with sniptitle:     Test/Dante Snippets
+               with orgtitle:      Test/Dante Snippets
+               with content:       
+asd
+
+               from user by name:  Admin
+*** Got a title object for title: Test/Dante Snippets
+*** Got a page object
+*** Username is not null and is Admin
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User is sane
+*** Got updater
+*** Got content
+*** did set content and slot
+*** got comment, will now save the revision
+*** saved revision, checking status now
+*** Status: OK 
+*** Status: NOT GOOD 
+******** JOB has completed 
+
+*** Rendertagsnip got: 
+asd
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+
+
+*** SUBMITTING a JOB: at time=12:31:53
+
+
+
+*** SUBMITED JOB to the jobqueue
+
+*** Starting to execute a JOB at current time=12:31:53
+*** I am a job submitted at        12:31:53
+               with sniptitle:     Test/Dante Snippets
+               with orgtitle:      Test/Dante Snippets
+               with content:       
+asd
+
+               from user by name:  Admin
+*** Got a title object for title: Test/Dante Snippets
+*** Got a page object
+*** Username is not null and is Admin
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User is sane
+*** Got updater
+*** Got content
+*** did set content and slot
+*** got comment, will now save the revision
+*** saved revision, checking status now
+*** Status: OK 
+*** Status: NOT GOOD 
+******** JOB has completed 
+
+*** Rendertagsnip got: 
+asd
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+
+
+*** SUBMITTING a JOB: at time=12:43:45
+
+
+
+*** SUBMITED JOB to the jobqueue
+
+*** Starting to execute a JOB at current time=12:43:45
+*** I am a job submitted at        12:43:45
+               with sniptitle:     Test/Dante Snippets
+               with orgtitle:      Test/Dante Snippets
+               with content:       
+asd
+
+               from user by name:  Admin
+*** Got a title object for title: Test/Dante Snippets
+*** Got a page object
+*** Username is not null and is Admin
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User is sane
+*** Got updater
+*** Got content
+*** did set content and slot
+*** got comment, will now save the revision
+*** saved revision, checking status now
+*** Status: OK 
+*** Status: NOT GOOD 
+******** JOB has completed 
+
+*** Rendertagsnip got: 
+asd
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User evaluates to falsish, not submitting a job!
+
+*** Rendertagsnip got: 
+asd
+
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: 
+asd
+
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: 
+asd qwe 
+
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: 
+asd qwe ad 
+
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: 
+asd qwe ad 
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User evaluates to falsish, not submitting a job!
+
+*** Rendertagsnip got: 
+asd qwe ad 
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+
+
+*** SUBMITTING a JOB: at time=12:44:36
+
+
+
+*** SUBMITED JOB to the jobqueue
+
+*** Starting to execute a JOB at current time=12:44:37
+*** I am a job submitted at        12:44:36
+               with sniptitle:     Test/Dante Snippets
+               with orgtitle:      Test/Dante Snippets
+               with content:       
+asd qwe ad 
+
+               from user by name:  Admin
+*** Got a title object for title: Test/Dante Snippets
+*** Got a page object
+*** Username is not null and is Admin
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User is sane
+*** Got updater
+*** Got content
+*** did set content and slot
+*** got comment, will now save the revision
+*** saved revision, checking status now
+*** Status: OK 
+*** Status: GOOD 
+******** JOB has completed 
