@@ -75,9 +75,6 @@ public static function onSkinAfterPortlet ( $skin, $portlet, &$html ) {
 
 
 
-
-
-
 // &$url: The URL of the external link
 // &$text: The link text that would normally be displayed on the page
 // &$link: The link HTML if you choose to override the default.
@@ -129,21 +126,22 @@ public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attrib
 public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
   global $wgScript;
 
-  self::debugLog ("HtmlPageLinkRendererEnd: (internal and interwiki links)\n");
+  self::debugLog ("HtmlPageLinkRendererEnd: (internal and interwiki links) 1 \n");
   self::debugLog ("  text    =" . HtmlArmor::getHtml ($text) ."\n");  
   self::debugLog ("  target  =" . $target ."\n");   
   self::debugLog ("  isKnown =" . $isKnown ."\n");
   self::debugLog ("  attribs =" . print_r ($attribs, true) ."\n");
   self::debugLog ("  ret     =" . $isKnown ."\n\n\n");
 
-
-
 //  return true;  // Do not modify
 
-
   $myText = HtmlArmor::getHtml($text);     // the text  
+
   $endPos = strpos ( $myText, "¦");
-  if ( $endPos === false ) {return true;}  // text contains no broken pipe: keep anchor as it is
+
+  $snipInfo = self::getSnipInfo ($target);
+
+  if ( $endPos === false && strlen ( $snipInfo ) == 0 ) {return true; }  // return unmodified link
 
   // we must adjust the notion of isKnown, since the check if we have this page already must focus on the title without the broken pipe
   // we must go from the target (with broken pipe) to the target without the broken pipe
@@ -158,9 +156,13 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
   unset ($attribs['href']);   // remove from MediaWiki attribs the attribute href, as it will be set here
   unset ($attribs['class']);  // remove from MediaWiki attribs the attribute class, as it might be a "new", which is no longer correct after this processing
 
-  $flag = self::extractAttributes ($text, $attribs);
+  $flag = self::extractAttributes ($text, $attribs); // did we obtain additional attributes ?
   // self::debugLog ("LinkRendererBegin: after text=" . HtmlArmor::getHtml ($text) ."\n"); self::debugLog ("LinkRendererBegin: after target=" . $target ."\n\n");     
   
+  self::debugLog ("  BEFORE flag test\n");
+
+
+
   if ($flag) {
     self::debugLog ("  did find some attributes\n\n\n");
     $attribText = "";      // collect the attribute values
@@ -176,18 +178,37 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
 
     if (!$isKnown) {  // for unknown internal links we need a special formatting
       self::debugLog ("  Writing for unknown page\n");
-                     $ret = "<a href='".$wgScript."?title=".$target."&action=edit&redlink=1' class='new' title='". $target. " (page does not exist)' data-dante=''>".$anchorText."</a> ";  }
+      $ret = "<a href='".$wgScript."?title=".$target."&action=edit&redlink=1' class='new'  $snipInfo  title='". $target. " (page does not exist!)'>".$anchorText."</a> ";  }
     else           { 
         self::debugLog ("  Writing for KNOWN page\n");
-      $ret = "<a href='".$text."' title='". $myTarget ."' " . $attribText. " >".$anchorText."</a>"; }
+      $ret = "<a href='".$text."' $snipInfo  title='". $myTarget ."' " . $attribText. ">".$anchorText."</a>"; }
     
     self::debugLog ("  Supposed link is: ".$ret."\n");
     return false;           // false: use our new, dante-patched link
   }
-  else { 
-    self::debugLog ("  did NOT find any attributes\n\n\n");
-    return true; }     // true: keep the original anchor as it is 
+
+  else {  self::debugLog ("  did NOT find any attributes\n\n\n");
+    $ret = "<a href='".$wgScript."?title=".$target."&action=edit&redlink=1' class='new'  $snipInfo  title='". $target. " (page does not exist!!)' >".$anchorText."</a> ";
+
+    return false;  // use our new anchor form
+    return true;      // true: keep the original anchor as it is 
+  }
+
 }
+
+
+// TODO: check for injection problems. can the string injected into data-* do some rubbish somehow when containing quotes?
+private static function getSnipInfo ($target) {
+  if (str_starts_with ($target, "Snip:") ) { return "data-snip='$target'";}     
+
+  $title = Title::newFromText("Snip:" . $target);
+  if ( !$title )             { return "data-debug='Snip Title not valid'"; }
+  if ( !$title->isKnown() )  { return "data-debug='Snip Title not known'"; }
+  $wikiPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle($title);
+  if (!$wikiPage->exists())  { return "data-debug='Snip Page does not exist'"; }
+  return "data-snip='$title'"; 
+}
+
 
 
 // $text is a string or Armor object which may contain a broken pipe symbol
@@ -226,6 +247,7 @@ private static function extractAttributes ( &$text, &$attribs ) {
 
 public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) { 
   global $wgServer, $wgScriptPath;
+  $out->addModules('ext.dantelinks');
   $out->addHeadItem ("dantelink", "<style>a.windowlink {background-image: url({$wgServer}{$wgScriptPath}/skins/Vector/resources/common/images/link-external-small-rtl-progressive.svg?30a3a) !important;}</style>");
 }
 

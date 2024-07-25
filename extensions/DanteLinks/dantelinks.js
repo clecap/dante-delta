@@ -1,4 +1,16 @@
 
+
+function checkPopup (e) {
+
+  console.log (e);
+  console.log (e.target.href);
+
+
+
+};
+
+
+
 // this JS snippet implements correct and new treatment of target attributes in anchors
 //
 // target=_window    opens in a new window, similar size as opener
@@ -11,6 +23,12 @@ $( function(){
 
   // external links always open in a fresh tab
   $('a[class*="external"]').click( function(){window.open(this.href, "_blank", "noopener=1,noreferrer=1"); return false;});
+
+
+  $('a').on ("mouseover", function(e) {checkPopup (e);});
+
+//  $()
+
 
 } );
 

@@ -290,3 +290,43 @@ asd qwe ad
 *** Status: OK 
 *** Status: GOOD 
 ******** JOB has completed 
+
+*** Rendertagsnip got: 
+asd qwe ad 
+
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+
+
+*** SUBMITTING a JOB: at time=11:56:22
+
+
+
+*** SUBMITED JOB to the jobqueue
+
+*** Starting to execute a JOB at current time=11:56:22
+*** I am a job submitted at        11:56:22
+               with sniptitle:     Test/Dante Snippets
+               with orgtitle:      Test/Dante Snippets
+               with content:       
+asd qwe ad 
+
+               from user by name:  Admin
+*** Got a title object for title: Test/Dante Snippets
+*** Got a page object
+*** Username is not null and is Admin
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User is sane
+*** Got updater
+*** Got content
+*** did set content and slot
+*** got comment, will now save the revision
+*** saved revision, checking status now
+*** Status: OK 
+*** Status: NOT GOOD 
+******** JOB has completed 
