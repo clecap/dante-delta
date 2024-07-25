@@ -147,10 +147,18 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
   // we must go from the target (with broken pipe) to the target without the broken pipe
   $targetEndPos = strpos ( $target, "¦");
   $myTarget = substr ( $target, 0, $targetEndPos );
-  $myTarget = trim ( $myTarget );                              // target without any broken pip portion
+  $myTarget = trim ( $myTarget );                  // target without any broken pip portion
   $targetTitle = Title::newFromText( $myTarget );  // according to doc: uses the namespace encoded into the target
-  $targetWP =  WikiPage::factory( $targetTitle );
-  if ($targetWP->exists ()) {$isKnown = true;}
+
+  if ($targetTitle === null) { 
+    $isKnown = false;
+    self::debugLog ("DanteLinks: targetTitle not found for: " . $myTarget);
+  }
+  else {
+    $targetWP =  WikiPage::factory( $targetTitle );
+    if ($targetWP->exists ()) {$isKnown = true;}
+  }
+
   self::debugLog ("  isKnown =" . $isKnown . "   (after correction)\n");
 
   unset ($attribs['href']);   // remove from MediaWiki attribs the attribute href, as it will be set here
