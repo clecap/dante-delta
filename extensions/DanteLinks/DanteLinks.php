@@ -169,8 +169,6 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
   
   self::debugLog ("  BEFORE flag test\n");
 
-
-
   if ($flag) {
     self::debugLog ("  did find some attributes\n\n\n");
     $attribText = "";      // collect the attribute values
@@ -196,6 +194,7 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
   }
 
   else {  self::debugLog ("  did NOT find any attributes\n\n\n");
+    $anchorText = $myText;
     $ret = "<a href='".$wgScript."?title=".$target."&action=edit&redlink=1' class='new'  $snipInfo  title='". $target. " (page does not exist!!)' >".$anchorText."</a> ";
 
     return false;  // use our new anchor form
