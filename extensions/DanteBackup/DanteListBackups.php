@@ -27,7 +27,7 @@ public function execute( $par ) {
   $retval = DanteCommon::fullExec($cmd, $stdout, $stderr);  
 
   $prep = new AWSEnvironmentPreparatorUser ( $this->getUser() );
-  executeAWS_FG_RET ( $prep, $cmd, $output, $error );
+  Executor::executeAWS_FG_RET ( $prep, $cmd, $output, $error );
 
   if ($retval != 0) { $this->getOutput()->addHTML ( "ERROR " . print_r ($stderr, true) );} 
   else              { $this->getOutput()->addHTML ( DanteListBackups::formatLSOutput ( $stdout, $opsDB, $opsPage ) ); }

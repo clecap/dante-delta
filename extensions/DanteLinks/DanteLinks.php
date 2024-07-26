@@ -133,13 +133,11 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
   self::debugLog ("  attribs =" . print_r ($attribs, true) ."\n");
   self::debugLog ("  ret     =" . $isKnown ."\n\n\n");
 
-//  return true;  // Do not modify
+  return true;  // Do not modify
 
-  $myText = HtmlArmor::getHtml($text);     // the text  
-
-  $endPos = strpos ( $myText, "¦");
-
-  $snipInfo = self::getSnipInfo ($target);
+  $myText = HtmlArmor::getHtml($text);       // the text of the anchor 
+  $endPos = strpos ( $myText, "¦");          // search for a broken pipe extension symbol
+  $snipInfo = self::getSnipInfo ($target);   // search for snippet info
 
   if ( $endPos === false && strlen ( $snipInfo ) == 0 ) {return true; }  // return unmodified link
 
@@ -206,13 +204,14 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
 
 // TODO: check for injection problems. can the string injected into data-* do some rubbish somehow when containing quotes?
 private static function getSnipInfo ($target) {
-  if (str_starts_with ($target, "Snip:") ) { return "data-snip='$target'";}     
+  if (str_starts_with ($target, "Snip:") ) { return "data-snip='$target'";}         // target starts with Snip:  as namespace indication
 
+  // Ok, we are not linking to Snip: explicitely but there still might be a snip page for where we are linking to
   $title = Title::newFromText("Snip:" . $target);
-  if ( !$title )             { return "data-debug='Snip Title not valid'"; }
-  if ( !$title->isKnown() )  { return "data-debug='Snip Title not known'"; }
+  if ( !$title )             { self::debugLog ("Title not valid error for target=Snip:$target");  return ""; }
+  if ( !$title->isKnown() )  { self::debugLog ("Title not known for target=Snip:$target");        return ""; }
   $wikiPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle($title);
-  if (!$wikiPage->exists())  { return "data-debug='Snip Page does not exist'"; }
+  if (!$wikiPage->exists())  { self::debugLog ("Snip Page does not exist for Snip:$target"); return "";}
   return "data-snip='$title'"; 
 }
 
