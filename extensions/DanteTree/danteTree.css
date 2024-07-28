@@ -3,8 +3,6 @@
 /*************/
 
 
-/* do not display the site logo */
-/* #p-logo {display:none;}  */
 
 /* adjust the size to our logo */
 
@@ -19,9 +17,6 @@
 
 
 #p-logo + .mw-portlet .vector-menu-heading {display:block;}   /* override some unwanted thing from vector ?!?!?! */
-
-
-#footer-poweredbyico { display: none; }
 
 
 .vector-menu-portal .vector-menu-heading { color: green; font-size: 1.00em; background-image:none; font-weight:bold;}

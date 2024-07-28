@@ -14,6 +14,7 @@ $specialPageAliases['en'] = [
   'DanteDBDump' => [ 'DanteDBDump', 'Dante DB Dump' ], 
   'DanteDBRestore' => [ 'DanteDBRestore', 'Dante DB Restore' ],
   'DanteListBackups' => [ 'DanteListBackups', 'Dante List Backups' ],
+  'DanteInitialStore' => [ 'DanteInitialStore', 'Dante Initial Store']
 ];
 
 $specialPageAliases['de'] = [
@@ -22,4 +23,5 @@ $specialPageAliases['de'] = [
   'DanteDBDump' => [ 'DanteDBDump', 'Dante DB Dump' ], 
   'DanteDBRestore' => [ 'DanteDBRestore', 'Dante DB Restore' ],
   'DanteListBackups' => [ 'DanteListBackups', 'Dante List Backups' ],
+  'DanteInitialStore' => [ 'DanteInitialStore', 'Dante Initial Store']
 ];

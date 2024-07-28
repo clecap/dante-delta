@@ -7,6 +7,7 @@
   "dantedbdump":          "Dante Database Dump",
   "dantedbrestore":       "Dante Database Restore",
   "dantelistbackups":     "Dante List Backups",
+  "danteinitialstore":    "Dante Initial Store",
 
   "myform2-section1":  "Amazon S3 Bucket Data",
   "myform2-section2":  "Features of the dump",

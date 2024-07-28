@@ -11,6 +11,9 @@ public function __construct () { parent::__construct( 'DanteDBDump', 'dante-dbdu
 
 public function getGroupName() {return 'dante';}
 
+
+
+
 public function execute( $par ) {
   if (! $this->getUser()->isAllowed ("dante-dbdump") ) { $this->getOutput()->addHTML ("You do not have the permission to dump."); return;}  
 
@@ -66,7 +69,7 @@ public function execute( $par ) {
   $this->getOutput()->addHTML (wfMessage ("dante-database-dump-intro"));  // show some intro text
 
   // describe the form to be displayed
-  $formDescriptor2 = array_merge ( TARGET_FORM, DanteCommon::FEATURES );  // generate the form
+  $formDescriptor2 = array_merge ( DanteCommon::getTARGET_FORM(), DanteCommon::FEATURES );  // generate the form
   $htmlForm2 = new HTMLForm( $formDescriptor2, $this->getContext(), 'dbdumpform' );
   $htmlForm2->setSubmitText( 'Dump Database' );
   $htmlForm2->setSubmitCallback( [ $this, 'processInput' ] );

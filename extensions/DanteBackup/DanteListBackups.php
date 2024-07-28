@@ -23,7 +23,7 @@ public function execute( $par ) {
   putenv ("AWS_ACCESS_KEY_ID=$accessKey"); putenv ("AWS_SECRET_ACCESS_KEY=$secretAccessKey"); 
 
   // s3 ls returns the time in UTC timezone - since the operating system has no concept of a local time zone
-  $cmd = "aws s3 ls $defaultSpec --human-readable ";  $stdout = "";  $stderr = "";
+  $cmd = "/opt/myenv/bin/aws s3 ls $defaultSpec --human-readable ";  $stdout = "";  $stderr = "";
   $retval = DanteCommon::fullExec($cmd, $stdout, $stderr);  
 
   $prep = new AWSEnvironmentPreparatorUser ( $this->getUser() );

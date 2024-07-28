@@ -2,7 +2,6 @@
 
 /** DanteCommon contains some common code used in several parts of the DanteBackup extension */
 
-
 require_once ("Executor.php");
 
 use MediaWiki\MediaWikiServices;
@@ -71,19 +70,7 @@ class DanteCommon {
 ];
 
 
- const TARGET_FORM = [
-    'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
-        'options' => [ 
-                        '<b>AWS S3 foreground</b> (shows error messages; may take minutes to hours)'                                                                 => "awsFore",
-                       '<b>AWS S3 background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'   => "awsBack", 
-                       "<b>Client</b> (save as file on the client using the browser)"                                                                                                   => "browser",
-                       '<b>Window</b> (show it in the browser window; may include error messages)'                                                                                                     => "window",
-                       '<b>Server foreground</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                               => "serverFore",
-                      '<b>Server background</b> (no error messages; need to check for completion on server; only testing or when server accessible)'                         => "serverBack",
-                     ], 
-        'name' => 'target',  'default' => 'awsFore', 
- ],
-];
+
 
   const DEBUG_FORM = [
     'showls'           => [ 'section' => 'debug',   'class' => 'HTMLCheckField',  'label' => 'Show AWS Bucket ls',             'name' => 'showls', 'type' => 'check'],
@@ -94,13 +81,17 @@ class DanteCommon {
   public static function getTARGET_FORM () {
    return  [
     'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
-        'options' => [ // "bibi".wfMessage ('somestuff')->plain() =>  "checkme",  // TODO: that's how to localize this stuff
-                        '<b>AWS S3 foreground</b> (shows error messages; may take minutes to hours)'                                                                 => "awsFore",
-                       '<b>AWS S3 background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'   => "awsBack", 
-                       "<b>Client</b> (save as file on the client using the browser)"                                                                                                   => "browser",
-                       '<b>Window</b> (show it in the browser window; may include error messages)'                                                                                                     => "window",
-                       '<b>Server foreground</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                               => "serverFore",
-                      '<b>Server background</b> (no error messages; need to check for completion on server; only testing or when server accessible)'                         => "serverBack",
+        'options' => [ // "bibi".wfMessage ('somestuff')->plain() =>  "checkme",  // TODO: that's how to localize this stuff; that's why we have this as return of a function and not as a const array
+           '<b>AWS S3 foreground</b> (shows error messages; may take minutes to hours)'                                                                      => "awsFore",
+           '<b>AWS S3 background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'         => "awsBack", 
+           '<b>Github foreground</b> (shows error messages; may take minutes to hours)'                                                                      => "githubFore",
+           '<b>Github background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'         => "githubBack", 
+           '<b>SSH foreground</b> (shows error messages; may take minutes to hours)'                                                                      => "sshFore",
+           '<b>SSH background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'         => "sshBack", 
+           "<b>Client</b> (save as file on the client using the browser)"                                                                                     => "browser",
+           '<b>Window</b> (show it in the browser window; may include error messages)'                                                                        => "window",
+           '<b>Server foreground</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                               => "serverFore",
+           '<b>Server background</b> (no error messages; need to check for completion on server; only testing or when server accessible)'                      => "serverBack",
                      ], 
         'name' => 'target',  'default' => 'awsFore', 
  ]  ,
@@ -108,8 +99,9 @@ class DanteCommon {
 
   }
 
-
+// TODO: deprecate
   // execute a shell command.
+/*
   public static function execute ($cmd, $name) {   -  // TODO: how do we get access to an error message in this case? - and distinguish thios for the use of the caller ??
     $output = null;
     $retval = null;
@@ -117,7 +109,10 @@ class DanteCommon {
     if ($retval == 0) { return; }  // format error message ?!?! TODO
     else {return implode ("<br>", $output) . "<br>return value = " . $retval;  }
   }
+*/
 
+// TODO: deprecate
+/*
   public static function fullExec($cmd, &$stdout=null, &$stderr=null) {
     $proc = proc_open($cmd, [1 => ['pipe','w'], 2 => ['pipe','w'], ], $pipes);
     $stdout = stream_get_contents($pipes[1]);
@@ -126,6 +121,7 @@ class DanteCommon {
     fclose($pipes[2]);
     return proc_close($proc);
   }
+*/
 
   public static function contentTypeHeader ($zip, $enc) {
     if ($enc) { header( "Content-type: application/octet-stream" );} 
@@ -178,9 +174,10 @@ public static function dumpToWindow ($obj, $zip, $enc, $aesPW) {
 
 // background // TODO redo completelly
 public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
-  $name    = "s3://$bucketName/" . DanteCommon::generateFilename(  $obj->getNativeExtension(), $zip, $enc);
   $cmd = $obj->getCommand ();
   $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+
+  $name    = "s3://$bucketName/" . DanteCommon::generateFilename(  $obj->getNativeExtension(), $zip, $enc);
   $cmd = $cmd . " | aws s3 cp - $name ";
   $cmd = "( $cmd ) &>DANTEDBDump_LOCAL_ERROR_FILE & ";  // TODO: correct redirect ?  test
   $retCode = Executor::executeAWS_FG_RET ( new AWSEnvironmentPreparatorUser ($obj->getUser()), $cmd, $output, $error );
@@ -191,9 +188,10 @@ public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
   // foreground
   // TODO: MAYBE move the bucketName also upstairs into something we can ask from $obj !!
   public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
-    $name    = "s3://$bucketName/" . DanteCommon::generateFilename ($obj->getNativeExtension(), $zip, $enc);
     $cmd = $obj->getCommand ( );
     $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+
+    $name    = "s3://$bucketName/" . DanteCommon::generateFilename ($obj->getNativeExtension(), $zip, $enc);
     $cmd = $cmd . " | aws s3 cp - $name ";
 
     $retText = "";  // accumulates this and the subsequent listing command
@@ -212,31 +210,78 @@ public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
   }
 
 
+/*
+
+public static function dumpToGITHUB_FG ( $obj, $bucketName, $zip, $enc, $aesPW ) {
+  $cmd = $obj->getCommand ( );
+  $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+
+  $cmd "curl -X PUT -H \"Authorization: token " .$YOUR_PERSONAL_ACCESS_TOKEN. "\"  -H \"Content-Type: application/json\"   -d @- \
+  https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/contents/path/to/your/file <<EOF
+{
+  \"message\": \"Streamed file via API\",
+  \"content\": \"$(base64 -w 0 path/to/your/file)\"
+}
+EOF
+";
+
+}
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 public static function dumpToServer ( $obj, $name, $zip, $enc, $aesPW, $background ) {
-    global $wgScriptPath;
+  global $IP;
 
-    $dirPath = $wgScriptPath. "/".DanteCommon::DUMP_PATH;
-    if ( !file_exists ( $dirPath ) ) { mkdir ( $dirPath, 0755); }
-    $filename = DanteCommon::generateFilename( $obj->getNativeExtension(), $zip, $enc);
-    $errorFileName = DanteCommon::DUMP_PATH."/DANTEDBDump_ERROR_FILE$filename";
+  $dirPath = $IP. "/".DanteCommon::DUMP_PATH;
+  echo "---------------------------$IP -----------".$dirPath;
+  if ( !file_exists ( $dirPath ) ) { mkdir ( $dirPath, 0755); }
+  $filename = DanteCommon::generateFilename( $obj->getNativeExtension(), $zip, $enc);
+  $errorFileName = DanteCommon::DUMP_PATH."/DANTEDBDump_ERROR_FILE$filename";
 
-    $cmd = $obj->getCommand ();
-    $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
-    $cmd .= " > ".DanteCommon::DUMP_PATH."/".$filename;
+  $cmd = $obj->getCommand ();
+  $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+  $cmd .= " > ".DanteCommon::DUMP_PATH."/".$filename;
 
-    if ($background) {$cmd = "( $cmd ) &> $errorFileName & ";}
-    $ret = Executor::execute ( $cmd, $output, $error, $duration);
+  if ($background) {$cmd = "( $cmd ) &> $errorFileName & ";}
+  $ret = Executor::execute ( $cmd, $output, $error, $duration);
 
-    if ($background) {
-      if ($ret == 0) { return "<div>The execution was started successful. Command was: $cmd </div>"; }
-      else {return "<div>The execution failed with return value $retCode. We got the following error message: <br><div style='color:red;'>" . implode ("<br>", explode ("\n", $error)) . "</div>"; }
-    } else {
-// TODO
+  if ($background) {
+    if ($ret == 0) { return "<div>The execution was started successful. Command was: $cmd </div>"; }
+    else {return "<div>The execution failed with return value $retCode. We got the following error message: <br><div style='color:red;'>" . implode ("<br>", explode ("\n", $error)) . "</div>"; }
+  } 
+  else {  // when running in foreground 
+    return "<div>Execution of $cmd return value $ret and output $output and error $error</div>";
+
    }
   }
 
+
+
 } // end CLASS
+
+
 
 
 /** An interface EnvironmentPreparator serves to prepare and clear an environment for the execution of shell commands

@@ -50,8 +50,17 @@ public function execute( $par ) {
     switch ($values["target"]) {
       case "window":        $this->getOutput()->disable();   DanteCommon::dumpToWindow  ( $this, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW );  break;
       case "browser":       $this->getOutput()->disable();   DanteCommon::dumpToBrowser ( $this, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW );  break;
+
       case "awsFore":       $txt = DanteCommon::dumpToAWS_FG ( $this,  $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);   break;
       case "awsBack":       $txt = DanteCommon::dumpToAWS_BG ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);  break;
+
+/*
+      case "githubFore":       $txt = DanteCommon::dumpToAWS_FG ( $this,  $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);   break;
+      case "githubBack":       $txt = DanteCommon::dumpToAWS_BG ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);  break;
+      case "sshFore":       $txt = DanteCommon::dumpToAWS_FG ( $this,  $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);   break;
+      case "sshBack":       $txt = DanteCommon::dumpToAWS_BG ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);  break;
+*/
+
       case "serverFore":    $txt = DanteCommon::dumpToServer ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW, false);   break;
       case "serverBack":    $txt = DanteCommon::dumpToServer ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW, true);      break;
       default:              throw new Exception ("Illegal value found for target:" . $values["target"] . " This should not happen");
@@ -72,6 +81,7 @@ public function execute( $par ) {
   $htmlForm2->setSubmitCallback( [ $this, 'processInput' ] );
   $htmlForm2->show();
 }
+
 
   // generate and returns a command for dumping pages
   public function getCommand (  ) {
@@ -120,6 +130,7 @@ private function getConfigFile ($filename) {
 
 
 // given the name of a category, append to list_of_files_to_backup the title of all articles belonging (directly) to that category
+// TODO: DanteInitialStore.php: makeList is much better !!
 private function makeCatFileList ($category) {
   global $wgScriptPath, $wgServer, $IP;
 

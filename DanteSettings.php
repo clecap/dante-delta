@@ -22,6 +22,37 @@ $wgUrlProtocols = [
 ];
 
 
+
+$wgRightsText=  "Copyright";   // This variable must be non-empty in order that the contents of MediaWiki:Copyright is shown 
+
+
+$wgFooterIcons = [
+  "copyright" => [
+    "copyright" => [
+      "src" => $wgServer.$wgScriptPath."/copyright-32.png",
+      "url" => $wgServer.$wgScriptPath."/index.php?title=MediaWiki:CopyrightNotice",
+      "alt" => "Copyright may be reserved",
+      "id"  => "copyyright-icon-element",
+      "style" => "object-fit:contain;",
+      "title" => "Links to the page explaining copyright"
+], // placeholder for the built in copyright icon
+  ],
+  "poweredby" => [
+    "mediawiki" => [
+			// Defaults to point at
+			// "$wgResourceBasePath/resources/assets/poweredby_mediawiki_88x31.png"
+			// plus srcset for 1.5x, 2x resolution variants.
+			"src" => $wgServer.$wgScriptPath."/poweredby_dantewiki_88x31.png",
+			"url" => "https://github.com/clecap/dante-wiki",
+			"alt" => "Powered by DanteWiki",
+      "title" => "Links to this software"
+  ]
+  ],
+];
+
+
+
+
 $wgEnableUploads         = true;                     // allow uploads
 $wgMaxUploadSize         = 100 * 1024 * 1024;        // allow large uploads of up to 100 MB
 $wgAllowExternalImages   = true;                     // allow extenal images to be used 
