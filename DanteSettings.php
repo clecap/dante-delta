@@ -22,9 +22,9 @@ $wgUrlProtocols = [
 ];
 
 
+$wgLogo="$wgScriptPath/caravaggio-180x180.png";
 
 $wgRightsText=  "Copyright";   // This variable must be non-empty in order that the contents of MediaWiki:Copyright is shown 
-
 
 $wgFooterIcons = [
   "copyright" => [
@@ -197,8 +197,6 @@ $wgWikEdDiffDebug = false;                # Show debug infos and stats (block, g
 $wgWikEdDiffTimer = false;                # Show timing results in debug console (false)
 $wgWikEdDiffUnitTesting = false;          # Run unit tests to prove correct working, display results in debug console (false)
 
-
-$wgLogo="$wgScriptPath/caravaggio-180x180.png";
 
 
 /* DEBUG code

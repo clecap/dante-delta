@@ -45,11 +45,12 @@ EOT;
 // NOTE: for the github upload api we need the contents in a shell variable (max 2MB)
 // Two strategies: Size restriction or iterating over individual files
 
-
-
   // Display submitted input
   if ( $token !== '' ) {
     $filepath = self::makeList ("DanteInitialContents");
+
+    $response = self::storeToGithub ($owner, $repository, "$path/$filename-manifest.txt", $token, $output);
+
     $out->addHTML( '<h3>got filepath:</h3><p><pre>' . $filepath . '</pre></p>' );
 
     $cmd = "php  $IP/maintenance/dumpBackup.php --current --uploads  --include-files  --pagelist=$filepath";
@@ -127,7 +128,7 @@ static private function storeToGithub ($owner, $repo, $path, $token, $content) {
   $fileSha = isset($responseData['sha']) ? $responseData['sha'] : null;
 
   // Prepare data for GitHub API
-  $data = ['message' => 'Updating file with new data', 'content' => base64_encode($content), 'sha' => $fileSha, ];
+  $data = ['message' => 'Updating $path with new data', 'content' => base64_encode($content), 'sha' => $fileSha, ];
 
   // Send the data to GitHub
   $ch = curl_init();

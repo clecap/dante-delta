@@ -73,7 +73,7 @@ public static function onSkinAddFooterLinks( Skin $skin, string $key, array &$fo
     $footerlinks['imprint'] = Html::element( 'a',
       ['href' => $wgServer.$wgScriptPath."/index.php/"."Project:Imprint", 'rel' => 'noreferrer noopener' ], "Imprint");
 
-    $footerlinks['test'] = Html::element( 'a',
+    $footerlinks['parsifaldebug'] = Html::element( 'a',
       ['href' => $wgServer.$wgScriptPath."/index.php/"."Special:ParsifalDebug", 'rel' => 'noreferrer noopener' ], "Mode: " . $wgDanteOperatingMode);
 
     $freeSpace = "Free Space: " . floor ( disk_free_space ("/var/www/html") / 1000000000 ) . " GB";
