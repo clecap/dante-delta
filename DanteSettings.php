@@ -22,7 +22,7 @@ $wgUrlProtocols = [
 ];
 
 
-$wgLogo="$wgScriptPath/caravaggio-180x180.png";
+$wgLogo="/dante-assets/logo-180x180.png";
 
 $wgRightsText=  "Copyright";   // This variable must be non-empty in order that the contents of MediaWiki:Copyright is shown 
 
