@@ -29,7 +29,7 @@ $wgRightsText=  "Copyright";   // This variable must be non-empty in order that 
 $wgFooterIcons = [
   "copyright" => [
     "copyright" => [
-      "src" => $wgServer.$wgScriptPath."/copyright-32.png",
+      "src" => "/dante-assets/copyright-32.png",
       "url" => $wgServer.$wgScriptPath."/index.php?title=MediaWiki:CopyrightNotice",
       "alt" => "Copyright may be reserved",
       "id"  => "copyyright-icon-element",
@@ -42,7 +42,7 @@ $wgFooterIcons = [
 			// Defaults to point at
 			// "$wgResourceBasePath/resources/assets/poweredby_mediawiki_88x31.png"
 			// plus srcset for 1.5x, 2x resolution variants.
-			"src" => $wgServer.$wgScriptPath."/poweredby_dantewiki_88x31.png",
+			"src" => "/dante-assets/poweredby_dantewiki_88x31.png",
 			"url" => "https://github.com/clecap/dante-wiki",
 			"alt" => "Powered by DanteWiki",
       "title" => "Links to this software"
