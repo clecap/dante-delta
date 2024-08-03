@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 class DanteLinks {
 
 static function debugLog ($text) {
@@ -133,7 +135,9 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
   self::debugLog ("  attribs =" . print_r ($attribs, true) ."\n");
   self::debugLog ("  ret     =" . $isKnown ."\n\n\n");
 
-  return true;  // Do not modify
+
+//  return true;  // Do not modify
+
 
   $myText = HtmlArmor::getHtml($text);       // the text of the anchor 
   $endPos = strpos ( $myText, "¦");          // search for a broken pipe extension symbol

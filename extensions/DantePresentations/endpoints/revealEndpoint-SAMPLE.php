@@ -28,14 +28,7 @@ $this->parse( $wikitext )->getText( [ 'wrapperDivClass' => '' ] );
 class RevealEndpoint {
 
 
-public getRequestHeaders () {
- // obtain and sanitize further parameter values from the http header
-  //$his->tag                  = $_SERVER['HTTP_X_PARSIFAL_TAG'];
-  //$this->paraText             = $_SERVER['HTTP_X_PARSIFAL_PARA'];   
-  //$this->availablePixelWidth  = $_SERVER['HTTP_X_PARSIFAL_AVAILABLE_PIXEL_WIDTH'];     if (! isset ($this->availablePixelWidth)) { $this->availablePixelWidth = 600; }
-  //$this->widthLatexCm         =  TAG2WIDTHinCM[$tag];                                  if (! isset ($this->widthLatexCm))        { $this->widthLatexCm = 15; }  
-  return;
-}
+
 
 public sendResponseHeaders () {
  // add some headers to the response to support debugging and further handling
@@ -52,14 +45,7 @@ public sendResponseHeaders () {
 
 public sendToClient () {}
 
-public ensureEnvironment () {
-  // ensure necessary environment for the converting process
-  // TeXProcessor::ensureCacheDirectory ();                        // TODO: all the time ??? 
-  // TeXProcessor::ensureEnvironment ();  
-  // umask (0077);                                                 // preview files should be generated at 600 permission
 
-
-}
 
 public static function texPreviewEndpoint () {
   $VERBOSE    = false; 

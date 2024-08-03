@@ -15,11 +15,8 @@ $this->parse( $wikitext )->getText( [ 'wrapperDivClass' => '' ] );
 
 class RevealEndpoint extends DanteEndpoint {
 
-public function ensureEnvironment () {
-  $this->parser = MediaWikiServices::getInstance()->getParserFactory()->create();
-}
-
 public function getContent ( $text ) {
+  $this->parser = MediaWikiServices::getInstance()->getParserFactory()->create();
   PageReference $pageReference = new DanteDummyPageReference();
   ParserOptions $options = new ParserOptions ();
   $options->setRemoveComments (false);

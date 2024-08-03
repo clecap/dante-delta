@@ -12,11 +12,11 @@ $wgDebugToolbar            = true;
 #$wgShowDebug               = true;
 $wgDevelopmentWarnings     = true;
 
-$wgMessageCacheType        = CACHE_NONE;
+$wgMessageCacheType        = CACHE_ACCEL;
 
-$wgParserCacheType         = CACHE_NONE;
-$wgCachePages              = false;
-## $wgMainCache
+$wgParserCacheType         = CACHE_ACCEL;
+$wgCachePages              = true;
+$wgMainCache  = CACHE_ACCEL;
 
 $wgAllowVerbose            = true;
 
@@ -24,6 +24,7 @@ $wgAllowVerbose            = true;
 error_reporting (E_ALL & ~E_DEPRECATED );  # report all errors but not deprecations
 
 ini_set( 'display_errors', 1 );
+
 
 
 opcache_reset();

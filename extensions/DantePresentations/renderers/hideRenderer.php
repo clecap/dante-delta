@@ -2,11 +2,16 @@
 
 class HideRenderer {
 
-// hook function for rendering hidden blocks as hidden
+// hook function for rendering hidden blocks <hide> as hidden
 public static function renderHidden ( $input, array $args, Parser $parser, PPFrame $frame ) {
     return "";
 }
 
+// hook function for rendering hidden blocks <hide> as normal, as if they were there.
+public static function renderNormal ( $input, array $args, Parser $parser, PPFrame $frame ) {
+  $output = $parser->recursiveTagParse( $input, $frame );                                   // the tag works recursively, 
+  return $output;
+}
 
 public static function renderAdaptive ( $input, array $args, Parser $parser, PPFrame $frame ) {
     $output = $parser->recursiveTagParse( $input, $frame );                                   // the tag works recursively, 
@@ -21,7 +26,7 @@ public static function renderAdaptive ( $input, array $args, Parser $parser, PPF
   }
 
 
-
+// hook function for renderin hidden blocks <hide> as prominent
 public static function renderProminent ( $input, array $args, Parser $parser, PPFrame $frame ) {
     $output = $parser->recursiveTagParse( $input, $frame );                                   // the tag works recursively, 
       // see https://stackoverflow.com/questions/7639863/mediawiki-tag-extension-chained-tags-do-not-get-processed 

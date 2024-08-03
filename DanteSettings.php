@@ -33,7 +33,7 @@ $wgFooterIcons = [
       "url" => $wgServer.$wgScriptPath."/index.php?title=MediaWiki:CopyrightNotice",
       "alt" => "Copyright may be reserved",
       "id"  => "copyyright-icon-element",
-      "style" => "object-fit:contain;",
+      "style" => "object-fit:contain; transform: scale(0.5);  transform-origin: center; position:relative; left:20px;",  // NOTE: we want this here since in a css stylesheet via load.php we would see a FOUC
       "title" => "Links to the page explaining copyright"
 ], // placeholder for the built in copyright icon
   ],

@@ -1,42 +1,118 @@
 
-*** Rendertagsnip got: 
-asd
-
+*** Rendertagsnip got: This is the contents of the snip.
 *** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
-*** Rendertagsnip got: 
-asd
+*** Rendertagsnip got: This is the contents of the snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
+*** Rendertagsnip got: This is the contents of the snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: This is the contents of the snip.
 *** Got loadBalancer
 *** Got userNameUtils
 *** Got userFactory
 *** Got user, now checking for user sanity
 *** User evaluates to falsish, not submitting a job!
 
-*** Rendertagsnip got: 
-asd
+*** Rendertagsnip got: This is the contents of the snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
+*** Rendertagsnip got: This is the contents of the snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: This is the contents of jthe snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: This is the contents of jthe snip.
 *** Got loadBalancer
 *** Got userNameUtils
 *** Got userFactory
-*** Got user, now checking for user sanity
+*** Got user  192.168.65.1, now checking for user sanity
+*** User evaluates to falsish, not submitting a job!
+
+*** Rendertagsnip got: This is the contents of jthe snip.
+
+*** *** *** Admin*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: This is the contents of jthe snip.
+
+*** *** *** Admin*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: This ish the contents of jthe snip.
+
+*** *** *** Admin*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: This ish the contents of jthe snip.
+
+*** *** *** Admin*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user with name: 192.168.65.1, now checking for user sanity
+*** User evaluates to falsish, not submitting a job!
+
+*** Rendertagsnip got: This ish thnne contents of jthe snip.
+
+*** Rendertagsnip got: This ish thnne contents of jthe snip.
+
+*** Rendertagsnip got: This ish thnne conatents of jthe snip.
+
+*** Rendertagsnip got: This ish thnne conatents of jthe snip.
+
+*** Rendertagsnip got: XThis ish thnne conatents of jthe snip.
+
+*** Rendertagsnip got: XThis ish thnne conatents of jthe snip.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+
+*** Rendertagsnip got: XT snip.
+
+*** Rendertagsnip got: XT snip.
+
+*** Rendertagsnip got: XT snip.
+
+*** Rendertagsnip got: XT snip.
+
+*** Rendertagsnip got: XT snip.
+
+*** Rendertagsnip got: XT snip.
+
+*** Rendertagsnip got: XT snip.
+
+*** Rendertagsnip got: XT snip.
+
+*** *** *** User is: Admin
+
+*** SUBMITTING a JOB: at time=20:58:29
 
 
-*** SUBMITTING a JOB: at time=12:28:03
+*** Rendertagsnip got: XT snip.
+
+*** *** *** User is: Admin
+
+*** SUBMITTING a JOB: at time=20:58:29
+
+
+*** Rendertagsnip got: XT snip.
+
+*** *** *** User is: Admin
+
+*** SUBMITTING a JOB: at time=20:59:02
 
 
 
 *** SUBMITED JOB to the jobqueue
 
-*** Starting to execute a JOB at current time=12:28:04
-*** I am a job submitted at        12:28:03
-               with sniptitle:     Test/Dante Snippets
-               with orgtitle:      Test/Dante Snippets
-               with content:       
-asd
-
+*** Starting to execute a JOB at current time=20:59:02
+*** I am a job submitted at        20:59:02
+               with sniptitle:     Sniptest
+               with orgtitle:      Sniptest
+               with content:       XT snip.
                from user by name:  Admin
-*** Got a title object for title: Test/Dante Snippets
+*** Got a title object for title: Sniptest
 *** Got a page object
 *** Username is not null and is Admin
 *** Got loadBalancer
@@ -53,30 +129,23 @@ asd
 *** Status: GOOD 
 ******** JOB has completed 
 
-*** Rendertagsnip got: 
-asd
+*** Rendertagsnip got: XT snip.
 
-*** Got loadBalancer
-*** Got userNameUtils
-*** Got userFactory
-*** Got user, now checking for user sanity
+*** *** *** User is: Admin
 
-
-*** SUBMITTING a JOB: at time=12:31:37
+*** SUBMITTING a JOB: at time=20:59:23
 
 
 
 *** SUBMITED JOB to the jobqueue
 
-*** Starting to execute a JOB at current time=12:31:38
-*** I am a job submitted at        12:31:37
-               with sniptitle:     Test/Dante Snippets
-               with orgtitle:      Test/Dante Snippets
-               with content:       
-asd
-
+*** Starting to execute a JOB at current time=20:59:24
+*** I am a job submitted at        20:59:23
+               with sniptitle:     Sniptest
+               with orgtitle:      Sniptest
+               with content:       XT snip.
                from user by name:  Admin
-*** Got a title object for title: Test/Dante Snippets
+*** Got a title object for title: Sniptest
 *** Got a page object
 *** Username is not null and is Admin
 *** Got loadBalancer
@@ -93,30 +162,53 @@ asd
 *** Status: NOT GOOD 
 ******** JOB has completed 
 
-*** Rendertagsnip got: 
-asd
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
-*** Got loadBalancer
-*** Got userNameUtils
-*** Got userFactory
-*** Got user, now checking for user sanity
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
-*** SUBMITTING a JOB: at time=12:31:45
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+
+*** *** *** User is: Admin
+
+*** SUBMITTING a JOB: at time=21:00:07
 
 
 
 *** SUBMITED JOB to the jobqueue
 
-*** Starting to execute a JOB at current time=12:31:46
-*** I am a job submitted at        12:31:45
-               with sniptitle:     Test/Dante Snippets
-               with orgtitle:      Test/Dante Snippets
-               with content:       
-asd
-
+*** Starting to execute a JOB at current time=21:00:08
+*** I am a job submitted at        21:00:07
+               with sniptitle:     Sniptest
+               with orgtitle:      Sniptest
+               with content:       XT snip.
                from user by name:  Admin
-*** Got a title object for title: Test/Dante Snippets
+*** Got a title object for title: Sniptest
 *** Got a page object
 *** Username is not null and is Admin
 *** Got loadBalancer
@@ -133,30 +225,62 @@ asd
 *** Status: NOT GOOD 
 ******** JOB has completed 
 
-*** Rendertagsnip got: 
-asd
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
-*** Got loadBalancer
-*** Got userNameUtils
-*** Got userFactory
-*** Got user, now checking for user sanity
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
-*** SUBMITTING a JOB: at time=12:31:53
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+
+*** *** *** User is: Admin
+
+*** SUBMITTING a JOB: at time=21:00:56
 
 
 
 *** SUBMITED JOB to the jobqueue
 
-*** Starting to execute a JOB at current time=12:31:53
-*** I am a job submitted at        12:31:53
-               with sniptitle:     Test/Dante Snippets
-               with orgtitle:      Test/Dante Snippets
-               with content:       
-asd
-
+*** Starting to execute a JOB at current time=21:00:57
+*** I am a job submitted at        21:00:56
+               with sniptitle:     Sniptest
+               with orgtitle:      Sniptest
+               with content:       XT snip.
                from user by name:  Admin
-*** Got a title object for title: Test/Dante Snippets
+*** Got a title object for title: Sniptest
 *** Got a page object
 *** Username is not null and is Admin
 *** Got loadBalancer
@@ -173,30 +297,57 @@ asd
 *** Status: NOT GOOD 
 ******** JOB has completed 
 
-*** Rendertagsnip got: 
-asd
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
-*** Got loadBalancer
-*** Got userNameUtils
-*** Got userFactory
-*** Got user, now checking for user sanity
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
-*** SUBMITTING a JOB: at time=12:43:45
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+
+*** *** *** User is: Admin
+
+*** SUBMITTING a JOB: at time=18:29:52
 
 
 
 *** SUBMITED JOB to the jobqueue
 
-*** Starting to execute a JOB at current time=12:43:45
-*** I am a job submitted at        12:43:45
-               with sniptitle:     Test/Dante Snippets
-               with orgtitle:      Test/Dante Snippets
-               with content:       
-asd
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+
+*** *** *** User is: Admin
+
+*** SUBMITTING a JOB: at time=18:30:00
+
+
+
+*** SUBMITED JOB to the jobqueue
+
+*** Starting to execute a JOB at current time=18:30:00
+*** I am a job submitted at        18:29:52
+               with sniptitle:     Sniptest
+               with orgtitle:      Sniptest
+               with content:       XT snip.
                from user by name:  Admin
-*** Got a title object for title: Test/Dante Snippets
+*** Got a title object for title: Sniptest
 *** Got a page object
 *** Username is not null and is Admin
 *** Got loadBalancer
@@ -213,68 +364,13 @@ asd
 *** Status: NOT GOOD 
 ******** JOB has completed 
 
-*** Rendertagsnip got: 
-asd
-
-*** Got loadBalancer
-*** Got userNameUtils
-*** Got userFactory
-*** Got user, now checking for user sanity
-*** User evaluates to falsish, not submitting a job!
-
-*** Rendertagsnip got: 
-asd
-
-*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
-
-*** Rendertagsnip got: 
-asd
-
-*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
-
-*** Rendertagsnip got: 
-asd qwe 
-
-*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
-
-*** Rendertagsnip got: 
-asd qwe ad 
-
-*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
-
-*** Rendertagsnip got: 
-asd qwe ad 
-
-*** Got loadBalancer
-*** Got userNameUtils
-*** Got userFactory
-*** Got user, now checking for user sanity
-*** User evaluates to falsish, not submitting a job!
-
-*** Rendertagsnip got: 
-asd qwe ad 
-
-*** Got loadBalancer
-*** Got userNameUtils
-*** Got userFactory
-*** Got user, now checking for user sanity
-
-
-*** SUBMITTING a JOB: at time=12:44:36
-
-
-
-*** SUBMITED JOB to the jobqueue
-
-*** Starting to execute a JOB at current time=12:44:37
-*** I am a job submitted at        12:44:36
-               with sniptitle:     Test/Dante Snippets
-               with orgtitle:      Test/Dante Snippets
-               with content:       
-asd qwe ad 
-
+*** Starting to execute a JOB at current time=18:30:00
+*** I am a job submitted at        18:30:00
+               with sniptitle:     Sniptest
+               with orgtitle:      Sniptest
+               with content:       XT snip.
                from user by name:  Admin
-*** Got a title object for title: Test/Dante Snippets
+*** Got a title object for title: Sniptest
 *** Got a page object
 *** Username is not null and is Admin
 *** Got loadBalancer
@@ -288,33 +384,95 @@ asd qwe ad
 *** got comment, will now save the revision
 *** saved revision, checking status now
 *** Status: OK 
-*** Status: GOOD 
+*** Status: NOT GOOD 
 ******** JOB has completed 
 
-*** Rendertagsnip got: 
-asd qwe ad 
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
-*** Got loadBalancer
-*** Got userNameUtils
-*** Got userFactory
-*** Got user, now checking for user sanity
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
-*** SUBMITTING a JOB: at time=11:56:22
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+
+*** *** *** User is: Admin
+
+*** SUBMITTING a JOB: at time=18:32:15
 
 
 
 *** SUBMITED JOB to the jobqueue
 
-*** Starting to execute a JOB at current time=11:56:22
-*** I am a job submitted at        11:56:22
-               with sniptitle:     Test/Dante Snippets
-               with orgtitle:      Test/Dante Snippets
-               with content:       
-asd qwe ad 
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
 
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.
+
+*** Rendertagsnip got: XT snip.
+
+*** *** *** User is: Admin
+
+*** SUBMITTING a JOB: at time=18:32:26
+
+
+
+*** SUBMITED JOB to the jobqueue
+
+*** Starting to execute a JOB at current time=18:32:26
+*** I am a job submitted at        18:32:15
+               with sniptitle:     Sniptest
+               with orgtitle:      Sniptest
+               with content:       XT snip.
                from user by name:  Admin
-*** Got a title object for title: Test/Dante Snippets
+*** Got a title object for title: Sniptest
+*** Got a page object
+*** Username is not null and is Admin
+*** Got loadBalancer
+*** Got userNameUtils
+*** Got userFactory
+*** Got user, now checking for user sanity
+*** User is sane
+*** Got updater
+*** Got content
+*** did set content and slot
+*** got comment, will now save the revision
+*** saved revision, checking status now
+*** Status: OK 
+*** Status: NOT GOOD 
+******** JOB has completed 
+
+*** Starting to execute a JOB at current time=18:32:26
+*** I am a job submitted at        18:32:26
+               with sniptitle:     Sniptest
+               with orgtitle:      Sniptest
+               with content:       XT snip.
+               from user by name:  Admin
+*** Got a title object for title: Sniptest
 *** Got a page object
 *** Username is not null and is Admin
 *** Got loadBalancer

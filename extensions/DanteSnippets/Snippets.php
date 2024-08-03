@@ -5,6 +5,7 @@
  *  \brief    Bundle the static and job specific functionalities. Represent a Job for storing a Snippet in NS_SNIP
  */
  
+use MediaWiki\MediaWikiServices;
 
 class Snippets extends Job {
 
@@ -22,6 +23,8 @@ class Snippets extends Job {
   public static function onRegistration () {
     // self::debugLog ("\n--onRegistration callback called--\n");
     global $wgNamespaceProtection;
+
+// TODO: do we want this? probably yes?
     $wgNamespaceProtection[NS_SNIP] = ['nobody-may-edit-this'];  // prevent anybody from editing a Snippet directly in the Snippet namespace - this ensures consistency of the Snippets with their place of definition
   }
 
@@ -51,20 +54,31 @@ class Snippets extends Job {
 
 //
   public static function renderTagSnip ( $input, array $args, Parser $parser, PPFrame $frame ) {
-  try {  // NOTE: we should always have try-catch blocks around tag functions so we get reasonable feedback and not a http 500 in our DantePresentations/endpoints
+
+
+    try {  // NOTE: we should always have try-catch blocks around tag functions so we get reasonable feedback and not a http 500 in our DantePresentations/endpoints
     self::debugLog ("\n*** Rendertagsnip got: ".$input."\n");
 
     $userId          = $parser->getUserIdentity();
     if ( property_exists ($userId, "danteEndpoint" ) )   { self::debugLog ("*** Looks we are coming from a Dantepresentation endpoint. Do not submit a job in this case.\n");  return $input; }
 
+  // Get the current user's name
+//    $user = MediaWikiServices::getInstance()->getUserFactory()->newFromSession()->getName();
+
+    $user = RequestContext::getMain()->getUser();
+    $userName = $user->getName();
+    self::debugLog ("\n*** *** *** User is: " . $user);
+
+/*
     $userName        = $userId->getName();
     $mwServices      =  MediaWiki\MediaWikiServices::getInstance(); 
     $loadBalancer    =  $mwServices->getDBLoadBalancer();                                   self::debugLog ("*** Got loadBalancer\n");
     $userNameUtils   =  $mwServices->getUserNameUtils();                                    self::debugLog ("*** Got userNameUtils\n");
     $userFactory     =  new MediaWiki\User\UserFactory ( $loadBalancer, $userNameUtils );   self::debugLog ("*** Got userFactory\n");
-    $user            =  $userFactory->newFromName( $userName );
-    self::debugLog ("*** Got user, now checking for user sanity\n");
-  
+    $user            =  $userFactory->newFromName( $userName );                             self::debugLog ("*** Got user with name: $userName, now checking for user sanity\n");
+*/  
+
+
     // we do not want 
     if ( !$user )                  { self::debugLog ("*** User evaluates to falsish, not submitting a job!\n");  return $input; }
     if ( $user->isAnon() )         { self::debugLog ("*** User is anonymous, not submitting a job!\n");          return $input; }
@@ -80,6 +94,7 @@ class Snippets extends Job {
     $job             = new Snippets ( $orgTitle, $params );
 
     self::debugLog ("\n\n*** SUBMITTING a JOB: at time=" . $time ."\n\n");
+    $mwServices      =  MediaWiki\MediaWikiServices::getInstance(); 
     $mwServices->getJobQueueGroupFactory()->makeJobQueueGroup()->push( $job );
     self::debugLog ("\n\n*** SUBMITED JOB to the jobqueue\n");
 
@@ -90,6 +105,7 @@ class Snippets extends Job {
       //else   { }
       return "<div class='mw-collapsible mw-collapsed'>".$args['e']."<div class='mw-collapsible-content'>$input</div></div>"; 
     }
+
     return $input;
   } catch (Exception $ex) { return "Exception in renderTagSnip"; }
   }  // end function
