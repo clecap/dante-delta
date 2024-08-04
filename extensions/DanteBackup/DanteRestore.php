@@ -90,7 +90,7 @@ public static function getCommandAWS ( $accessKey, $secretAccessKey, $name, $zip
   return $cmd;
 }
 
-
+ 
 
 public static function getCommandFile ( $name, $zip, $enc ) {
   global $IP; 
