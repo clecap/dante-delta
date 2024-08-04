@@ -86,7 +86,7 @@ public static function getCommandAWS ( $accessKey, $secretAccessKey, $name, $zip
   array_push ($cmd,  $pipe . " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '8' --debug 2>&1 " ); 
   array_push ($cmd,  $pipe . " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '10' --debug 2>&1" ); 
   array_push ($cmd,  $pipe . " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --uploads --debug 2>&1" ); 
-  $cmd = addPostImport ( $cmd );
+  $cmd = self::addPostImport ( $cmd );
   return $cmd;
 }
 
@@ -103,13 +103,13 @@ public static function getCommandFile ( $name, $zip, $enc ) {
   array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --namespaces '8'  ");    // get MediaWiki: namespace (need Parsifal templates on board first)
   array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --namespaces '10' ");    // get Template: namespace
   array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --uploads  " );           // TODO: can we really merge this into "all the rest" ?????
-  $cmd = addPostImport ( $cmd );                                                              // do maintenance stuff we need to do after every import
+  $cmd = self::addPostImport ( $cmd );                                                              // do maintenance stuff we need to do after every import
   return $cmd;
 }
 
 // appends to the command array $cmd all those commands required after an import and return the new command array
 private static function addPostImport ( $cmd ) {
-
+  global $IP;
  // see https://www.mediawiki.org/wiki/Manual:ImportDump.php about how we must run this after an import // TODO: really all of this ????
   array_push ($cmd,  "php $IP/maintenance/rebuildrecentchanges.php"); 
   array_push ($cmd,  "php maintenance/initSiteStats.php --update ");

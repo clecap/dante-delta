@@ -149,19 +149,20 @@ class Executor {
 
 // called with an array of shell functions which produce live, real time output
 // pipes the output, as it comes up, to the web page, including stderr
-// terminates by writing $final
 public static function liveExecuteX ( $arr, $final ) {
 
   header('Content-Type: text/event-stream');
   header('Cache-Control: no-cache');
   header('Connection: keep-alive');
 
-  echo "Do not reload or close window until we tell you so"; echo "\n\n"; flush(); ob_flush();
+  echo "\n\n"; echo "IMPORTANT: Do not reload or close window until we tell you so"; echo "\n\n"; flush(); ob_flush();
 
-  $didHaveError = false;
+  $didHaveError = false;  // flag to detect if we ever had an error
+  $errorCount   = 0;      // counts the number of command which were in error
 
+  $count = 1;
   foreach ( $arr as $ele ) {
-    echo "----- COMMAND:  $ele"; echo "\n"; flush(); ob_flush();
+    echo "---- COMMAND: ". sprintf ("%3d", $count++) . " $ele"; echo "\n"; flush(); ob_flush();
     $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes);
     while (!feof ($pipes[1])) {  // drain stdout
       $info = fgets ($pipes[1]);
@@ -182,7 +183,7 @@ public static function liveExecuteX ( $arr, $final ) {
     }  // end while draining stderr
     $closeParam = proc_close($proc);
     if ($closeParam != 0) {
-      $didHaveError = true;
+      $didHaveError = true; $errorCount++;
       echo "\n\n";
       echo "************************************* \n";
       echo "*************** ERROR *************** \n";
@@ -190,18 +191,16 @@ public static function liveExecuteX ( $arr, $final ) {
       echo "*** \n";
       echo "*** The  Exit code was: $closeParam \n";
       echo "*** The erroneous command was: $ele \n";
-      echo "*** \n";
-  }
-  else {
-  echo "-- EXIT CODE of COMMAND at [".date("H:i:s")."] is: ".$closeParam; echo "\n\n"; flush(); ob_flush();}
+      echo "*** \n\n";
+    }
+    else {
+      echo "--- EXIT CODE of COMMAND at [".date("H:i:s")."] is: ".$closeParam . "                 " . ($closeParam == 0 ? 'OKAY': '****** ERROR ******' ); echo "\n\n\n"; flush(); ob_flush();
+    }
   } // end for loop over all commands
 
   echo "\n\n";
-  if ($didHaveError) { echo "************ ONE or more COMMAND were in ERROR ***"; flush(); ob_flush(); } 
+  if ($didHaveError) { echo "************ $errorCount COMMANDs were in ERROR ***"; flush(); ob_flush(); } 
   else {}
-
-
-
 
   echo $final; flush(); ob_flush();
   exit();
