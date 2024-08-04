@@ -102,7 +102,7 @@ public static function getCommandFile ( $name, $zip, $enc ) {
 
   array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --namespaces '8'  ");    // get MediaWiki: namespace (need Parsifal templates on board first)
   array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --namespaces '10' ");    // get Template: namespace
-  array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --uploads  " ;           // TODO: can we really merge this into "all the rest" ?????
+  array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --uploads  " );           // TODO: can we really merge this into "all the rest" ?????
   $cmd = addPostImport ( $cmd );                                                              // do maintenance stuff we need to do after every import
   return $cmd;
 }
@@ -111,7 +111,7 @@ public static function getCommandFile ( $name, $zip, $enc ) {
 private static function addPostImport ( $cmd ) {
 
  // see https://www.mediawiki.org/wiki/Manual:ImportDump.php about how we must run this after an import // TODO: really all of this ????
-  array_push ($cmd,  "php $IP/maintenance/rebuildrecentchanges.php"; 
+  array_push ($cmd,  "php $IP/maintenance/rebuildrecentchanges.php"); 
   array_push ($cmd,  "php maintenance/initSiteStats.php --update ");
   array_push ($cmd,  "php $IP/maintenance/rebuildImages.php"); 
   array_push ($cmd,  "php $IP/maintenance/rebuildall.php"); 
