@@ -98,10 +98,14 @@ class Executor {
   // called with an array of shell functions which produce live, real time output
   // pipes the output, as it comes up, to the web page, including stderr
   // terminates by writing $final
-  public static function liveExecuteX ( $arr, $final ) {
+  public static function liveExecuteX_OLD ( $arr, $final ) {
+
+// this works, but not when we are using compression on the transport layer. in that case
+// the system gathers everything and sends it out only when finished.
+
+
     foreach ( $arr as $ele ) {
-      echo "";
-      echo "<h4>COMMAND: "; echo $ele; echo "</h4>";  flush();ob_flush();
+      echo ""; echo "<h4 style='color:blue;'>COMMAND: "; echo htmlspecialchars($ele); echo "</h4>";  flush();ob_flush();
       $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes);
     
       while (!feof ($pipes[1])) {  // drain stdout
@@ -115,16 +119,22 @@ class Executor {
       while (!feof ($pipes[2])) {  // drain stderr
         $info = fread ($pipes[2], 4096);
         $info = trim ($info);
-        //if (strlen ($info) > 0) {      
+        if (strlen ($info) > 0) {      
           $htmlInfo = str_replace ("\n", "<br>", $info);  
           $htmlInfo = "<span style='color:red;'>ERROR:" .$htmlInfo. "</span>";
           echo "[".date("H:i:s")."] ".$htmlInfo.'<br>';flush();ob_flush(); 
-        //}
-      }  // end while
+        }
+        else {
+          $htmlInfo = "<span>No error information found</span>";
+          echo "[".date("H:i:s")."] ".$htmlInfo.'<br>';flush();ob_flush(); 
+        }
+      }  // end while draining stderr
 
-      $closeParam = proc_close($proc);
-      echo "<h5>EXIT CODE of COMMAND is: ".$closeParam."</h5>";
+//      $closeParam = proc_close($proc);
+//      echo "<h5>EXIT CODE of COMMAND is: ".$closeParam."</h5>";
+
       flush(); ob_flush();
+
       //fclose($pipes[1]);
       //fclose($pipes[2]);
     }
@@ -132,6 +142,71 @@ class Executor {
     echo $final;
     exit();
 }
+
+
+
+
+
+// called with an array of shell functions which produce live, real time output
+// pipes the output, as it comes up, to the web page, including stderr
+// terminates by writing $final
+public static function liveExecuteX ( $arr, $final ) {
+
+  header('Content-Type: text/event-stream');
+  header('Cache-Control: no-cache');
+  header('Connection: keep-alive');
+
+  echo "Do not reload or close window until we tell you so"; echo "\n\n"; flush(); ob_flush();
+
+  $didHaveError = false;
+
+  foreach ( $arr as $ele ) {
+    echo "----- COMMAND:  $ele"; echo "\n"; flush(); ob_flush();
+    $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes);
+    while (!feof ($pipes[1])) {  // drain stdout
+      $info = fgets ($pipes[1]);
+      $info = trim ($info);
+      if (strlen ($info) > 0) {echo "[".date("H:i:s")."] ".$info."\n";flush();ob_flush();}
+    } // end while
+    $first = true;
+    while (!feof ($pipes[2])) {  // drain stderr
+      $info = fgets ($pipes[2]);
+      $info = trim ($info);
+      if (strlen ($info) > 0) {      
+        if ($first) { echo "\n** Information sent to stderr: \n"; flush();ob_flush(); $first = false;}
+        echo "** [".date("H:i:s")."] ".$info."\n"; flush();ob_flush(); 
+      }
+      else {
+          //echo "No error information found"; echo "\n"; flush();ob_flush(); 
+      }
+    }  // end while draining stderr
+    $closeParam = proc_close($proc);
+    if ($closeParam != 0) {
+      $didHaveError = true;
+      echo "\n\n";
+      echo "************************************* \n";
+      echo "*************** ERROR *************** \n";
+      echo "************************************* \n";
+      echo "*** \n";
+      echo "*** The  Exit code was: $closeParam \n";
+      echo "*** The erroneous command was: $ele \n";
+      echo "*** \n";
+  }
+  else {
+  echo "-- EXIT CODE of COMMAND at [".date("H:i:s")."] is: ".$closeParam; echo "\n\n"; flush(); ob_flush();}
+  } // end for loop over all commands
+
+  echo "\n\n";
+  if ($didHaveError) { echo "************ ONE or more COMMAND were in ERROR ***"; flush(); ob_flush(); } 
+  else {}
+
+
+
+
+  echo $final; flush(); ob_flush();
+  exit();
+}
+
 
 
 

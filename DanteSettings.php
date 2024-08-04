@@ -53,6 +53,19 @@ $wgFooterIcons = [
 
 
 
+// Remove the patrol right from all user groups - this clears the 
+$wgGroupPermissions['*']['patrol'] = false;
+$wgGroupPermissions['user']['patrol'] = false;
+$wgGroupPermissions['autoconfirmed']['patrol'] = false;
+$wgGroupPermissions['bot']['patrol'] = false;
+$wgGroupPermissions['sysop']['patrol'] = false;
+$wgGroupPermissions['bureaucrat']['patrol'] = false;
+
+
+
+
+
+
 $wgEnableUploads         = true;                     // allow uploads
 $wgMaxUploadSize         = 100 * 1024 * 1024;        // allow large uploads of up to 100 MB
 $wgAllowExternalImages   = true;                     // allow extenal images to be used 

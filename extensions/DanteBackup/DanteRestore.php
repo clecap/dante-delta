@@ -71,68 +71,55 @@ class DanteRestore extends SpecialPage {
 	}
 
 
-
-	protected function getGroupName() {return 'dante';}
-
+protected function getGroupName() {return 'dante';}
 
 
-  public static function getCommandAWS ( $accessKey, $secretAccessKey, $name, $zip, $enc ) {
-    global $IP; 
+public static function getCommandAWS ( $accessKey, $secretAccessKey, $name, $zip, $enc ) {
+  global $IP; 
+  $cmd = array ();
   
     // putenv ("AWS_ACCESS_KEY_ID=$accessKey"); putenv ("AWS_SECRET_ACCESS_KEY=$secretAccessKey");  // TODO: where do we set the environment ???
   
   // TODO: USE $name !!!!
-    $cmd1 = " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '8' --debug 2>&1 "; 
-    $cmd2 = " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '10' --debug 2>&1"; 
-    $cmd3 = " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --uploads --debug 2>&1" ; 
-    // $rebuild   = "php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug"; //// TODO this is not rebuild but a damaged importDump for error reporting tests 
-    $rebuild   = "php $IP/maintenance/rebuildrecentchanges.php"; 
-    $initStats = "php maintenance/initSiteStats.php --update  2>&1";
-    return array ($cmd1, $cmd2, $cmd3, $rebuild, $initStats);
-  }
+  $pipe = "set -o pipefail; ";  // prefix this to every piped command
 
-
-  public static function getCommandFile ( $name, $zip, $enc ) {
-    global $IP; 
-    
-  $cmdStart = " echo '<h2>Do not reload or close window until we tell you so</h2>' ";
-
-    $cmd0 = " cp $name /tmp/keepme.xml";
-
-    $cmd1 = " php $IP/maintenance/importDump.php --namespaces '8' --debug $name  "; 
-    danteLog ("DanteBackup", "CMD1: " . $cmd1 . "\n"); 
-    
-    $cmd2 = " php $IP/maintenance/importDump.php --namespaces '10' --debug $name "; 
-    danteLog ("DanteBackup", "CMD1: " . $cmd2 . "\n");     
-    
-    $cmd3 = " php $IP/maintenance/importDump.php --debug $name " ; 
-    danteLog ("DanteBackup", "CMD1: " . $cmd3 . "\n"); 
-    
-    $cmd4 = " php $IP/maintenance/importDump.php --uploads --debug $name " ; 
-    danteLog ("DanteBackup", "CMD1: " . $cmd4 . "\n"); 
-    
-    $rebuild   = "php $IP/maintenance/rebuildrecentchanges.php"; 
-    danteLog ("DanteBackup", "CMD1: " . $rebuild . "\n"); 
-    
-    $initStats = "php maintenance/initSiteStats.php --update ";
-    danteLog ("DanteBackup", "CMD1: " . $initStats . "\n"); 
-
-    $rebuildImages   = "php $IP/maintenance/rebuildImages.php"; 
-
-    $rebuildAll   = "php $IP/maintenance/rebuildall.php"; 
-    $checkImages   = "php $IP/maintenance/checkImages.php"; 
- 
-    $refresh = "php $IP/maintenance/refreshFileHeaders.php --verbose";
-
-   // return array ($cmd4);
-
-    return array ($cmdStart, $cmd0, $cmd1, $cmd2, $cmd4, $rebuild, $initStats, $rebuildImages, $rebuildAll, $checkImages, $refresh);
-  }
+  array_push ($cmd,  $pipe . " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '8' --debug 2>&1 " ); 
+  array_push ($cmd,  $pipe . " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '10' --debug 2>&1" ); 
+  array_push ($cmd,  $pipe . " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --uploads --debug 2>&1" ); 
+  $cmd = addPostImport ( $cmd );
+  return $cmd;
+}
 
 
 
+public static function getCommandFile ( $name, $zip, $enc ) {
+  global $IP; 
+  $cmd = array ();
 
+///// TODO: can we allow to specify an upload pipe filter, eg for updating the timestamps ??????  and doing other filtering stuff ??????
+///// TODO_ HOW to we import the PASSWORD fENVIRONMENT VARIABLE ???
+  $prefix = "set -o pipefail; " . ($enc ? " openssl aes-256-cbc -d -salt -pass env:LOCAL_FILE_ENC | " : "" )  . ($zip ? "gunzip -c $name | " : "cat $name | ");
 
+  array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --namespaces '8'  ");    // get MediaWiki: namespace (need Parsifal templates on board first)
+  array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --namespaces '10' ");    // get Template: namespace
+  array_push ( $cmd,  $prefix . " php $IP/maintenance/importDump.php --uploads  " ;           // TODO: can we really merge this into "all the rest" ?????
+  $cmd = addPostImport ( $cmd );                                                              // do maintenance stuff we need to do after every import
+  return $cmd;
+}
+
+// appends to the command array $cmd all those commands required after an import and return the new command array
+private static function addPostImport ( $cmd ) {
+
+ // see https://www.mediawiki.org/wiki/Manual:ImportDump.php about how we must run this after an import // TODO: really all of this ????
+  array_push ($cmd,  "php $IP/maintenance/rebuildrecentchanges.php"; 
+  array_push ($cmd,  "php maintenance/initSiteStats.php --update ");
+  array_push ($cmd,  "php $IP/maintenance/rebuildImages.php"); 
+  array_push ($cmd,  "php $IP/maintenance/rebuildall.php"); 
+  array_push ($cmd,  "php $IP/maintenance/checkImages.php"); 
+  array_push ($cmd,  "php $IP/maintenance/refreshFileHeaders.php --verbose");
+
+  return $cmd;
+}
 
 
 
