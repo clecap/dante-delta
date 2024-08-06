@@ -19,6 +19,12 @@
 
   "dante-page-dump-intro": "This page allows you to produce a dump of the '''content''' of this dantewiki (read: articles, files, revisions but no user accounts, system messages, system configurations and further so-called meta data). For files, content and upload actions are included. Make sure, File: pages are selected when not dumping all pages. For more information consult [[Help:DanteBackup]].",
 
+  "dante-page-restore-intro": "This page allows you to restore a dump of the '''content''' of this dantewiki (read: articles, files, revisions but no user accounts, system messages, system configurations and further so-called meta data). Please select a file to be used for restoring. For more information consult [[Help:DanteRestore]].",
+
+  "select-local-file": "Select a file from your local machine",
+
+  "restore-from-aws": "Select one of the following AWS S3 files",
+
   "dumpform-srcfeatures": "Source: What shall the dump include?", 
   "dumpform-rb":  "Pages: Which pages shall be included?",
   "dumpform-ra":  "Revisions: Which revisions shall be included?",

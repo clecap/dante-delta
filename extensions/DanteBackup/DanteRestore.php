@@ -1,77 +1,148 @@
 <?php
 
 require_once ("Executor.php");
+require_once ("DanteCommon.php");
 
 class DanteRestore extends SpecialPage {
-	
-	public function __construct() {parent::__construct( 'DanteRestore', 'dante-restore' ); }
 
-	public function doesWrites() {return true;}
+public function __construct() {parent::__construct( 'DanteRestore', 'dante-restore' ); }
 
-	public function execute( $par ) {
+public function doesWrites() {return true;}
+
+public function execute( $par ) {
     // TODO: test alternative of an exception 
     if (! $this->getUser()->isAllowed ("dante-restore") ) { $this->getOutput()->addHTML ("You do not have the permission to dump."); return;}  
 
-		$this->useTransactionalTimeLimit();  // raise time limit for this operation
+  $this->useTransactionalTimeLimit();  // raise time limit for this operation
+  $this->setHeaders();
+  $this->outputHeader();
+  $this->checkReadOnly();  // TODO: what does this do ????
 
-		$this->setHeaders();
-		$this->outputHeader();
+  $request = $this->getRequest();
+  if ( $request->wasPosted() && $request->getRawVal( 'action' ) == 'submit' ) {
+    $request = $this->getRequest();
+    $sourceName = $request->getVal( 'source' );
+    danteLog ("DanteBackup", "sourcename: $sourceName \n");
+    danteLog ("DanteBackup", "ALL: " . print_r ($_FILES, true) . "\n");
+    danteLog ("DanteBackup", "name " . $_FILES['xmlimport']['name'] . "\n");
+    danteLog ("DanteBackup", "mime: " . $_FILES['xmlimport']['type'] . "\n");
+    danteLog ("DanteBackup", "size " . $_FILES['xmlimport']['size'] . "\n"); 
+    danteLog ("DanteBackup", "tmp name " . $_FILES['xmlimport']['tmp_name'] . "\n");      
+    danteLog ("DanteBackup", "error " . $_FILES['xmlimport']['error'] . "\n");
+    // danteLog ("DanteBackup", "full path " . $_FILES['xmlimport']['full_path'] . "\n");  // produces PHP  NOTICE: undefined index.
+    $this->doImport ($_FILES['xmlimport']['tmp_name']);
+  }
 
-	//	$this->getOutput()->addModules( 'mediawiki.misc-authed-ooui' );
-	//	$this->getOutput()->addModuleStyles( 'mediawiki.special.import.styles.ooui' );
-
-		$this->checkReadOnly();  // TODO: what does this do ????
-
-		$request = $this->getRequest();
-		if ( $request->wasPosted() && $request->getRawVal( 'action' ) == 'submit' ) {
-      $request = $this->getRequest();
-      $sourceName = $request->getVal( 'source' );
-      danteLog ("DanteBackup", "sourcename: $sourceName \n");
-      danteLog ("DanteBackup", "ALL: " . print_r ($_FILES, true) . "\n");
-      danteLog ("DanteBackup", "name " . $_FILES['xmlimport']['name'] . "\n");
-      danteLog ("DanteBackup", "mime: " . $_FILES['xmlimport']['type'] . "\n");
-      danteLog ("DanteBackup", "size " . $_FILES['xmlimport']['size'] . "\n"); 
-      danteLog ("DanteBackup", "tmp name " . $_FILES['xmlimport']['tmp_name'] . "\n");      
-      danteLog ("DanteBackup", "error " . $_FILES['xmlimport']['error'] . "\n");
-      // danteLog ("DanteBackup", "full path " . $_FILES['xmlimport']['full_path'] . "\n");  // produces PHP  NOTICE: undefined index.
-
-			$this->doImport ($_FILES['xmlimport']['tmp_name']);
+  $this->showForm();
+}
 
 
-		}
-		$this->showForm();
-	}
+private function showForm() {
+
+//  $action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );
 
 
 
-	private function showForm() {
-		$action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );
-		$user = $this->getUser();
-		$out = $this->getOutput();
+
+//  $uploadFormDescriptor += ['intro' => [ 'type' => 'info', 'raw' => true, 'default' => $this->msg( 'importtext' )->parseAsBlock() ] ];  // only demo - not used
+
+
+  $user   = $this->getUser();
+  $out    = $this->getOutput();
 	//	$this->addHelpLink( 'https://meta.wikimedia.org/wiki/Special:MyLanguage/Help:Import', true );
 
-		$uploadFormDescriptor = [];
+//   $out->addHTML (wfMessage ("dante-page-restore-intro"));  // show some intro text
 
-			$uploadFormDescriptor += [
-//				'intro' => [ 'type' => 'info', 'raw' => true, 'default' => $this->msg( 'importtext' )->parseAsBlock() ], // use this for some info text
-				'xmlimport' => ['type' => 'file','name' => 'xmlimport', 'accept' => [ 'application/xml', 'text/xml' ],
-					'label-message' => 'import-upload-filename', 'required' => true,
-				],
-				'source' => ['type' => 'hidden',	'name' => 'source',	'default' => 'upload',	'id' => '',],
-			];
+  $out->addHTML ("<h2>Possibility 1: Uploading a file from your local computer</h2>"); 
 
 
-      $htmlForm = new HTMLForm( $uploadFormDescriptor, $this->getContext() );
-			$htmlForm->setAction( $action );
+// TODO: check if we can upload a gzip., aes, aes and gzip file here !
+  $formLOCAL = [];
+  $formLOCAL += [ 'xmlimport' => ['type' => 'file','name' => 'xmlimport', 'accept' => [ 'application/xml', 'text/xml', 'application/x-gzip-compressed', 'application/octet-stream' ], 'section' => 'select-local-file', 'required' => true, ] ];
 
-      $htmlForm->setId( 'mw-import-upload-form' );
-			$htmlForm->setWrapperLegendMsg( 'import-upload' );
-			$htmlForm->setSubmitTextMsg( 'uploadbtn' );
-			$htmlForm->prepareForm()->displayForm( false );
-	}
+  $htmlFormLOCAL = new HTMLForm( $formLOCAL, $this->getContext() );
+  // $htmlFormLOCAL->setWrapperLegendMsg( 'upload-local' );
+  $htmlFormLOCAL->setFormIdentifier( 'formLOCAL' );
+  $htmlFormLOCAL->prepareForm()->displayForm( false );
 
+  $out->addHTML ("<h2>Possibility 2: Uploading a file from the AWS S3 storage area</h2>"); 
+
+
+  $formAWS = [];
+  $formAWS += [ 'source' => ['type' => 'hidden',	'name' => 'source',	'default' => 'upload',	'id' => '',] ];
+  $formAWS += [ 'zradio88'  => [ 'type' => 'radio', 'section' => 'restore-from-aws', 'options' => $this->getFileArray (),   'name' => 'srces',  'default' => 'all',  ] ];
+  $htmlFormAWS = new HTMLForm( $formAWS, $this->getContext() );
+  $htmlFormAWS->setFormIdentifier( 'formAWS' );
+  $htmlFormAWS->prepareForm()->displayForm( false );
+
+  $out->addHTML ("<h2>Possibility 3: Uploading a file to be retrieved from an Internet URL</h2>"); 
+
+  $form2 = [];
+  $form2 += [ 'url' => [ 'type' => 'text', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
+  $htmlForm2 = new HTMLForm( $form2, $this->getContext() );
+  $htmlForm2->setFormIdentifier( 'form2' );
+  $htmlForm2->prepareForm()->displayForm( false );
+
+// $htmlForm->setAction( $action );
+//  $htmlForm->setId( 'mw-import-upload-form' );
+
+//  $htmlForm->setWrapperLegendMsg( 'import-upload' );  // this provides an entire wrapper around the form
+//  $htmlForm->setSubmitTextMsg( 'uploadbtn' );
+
+
+
+
+}
 
 protected function getGroupName() {return 'dante';}
+
+
+
+private function getFileArray () {
+
+ $bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
+ // $aesPW            = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-encpw' );
+
+
+  $env = DanteCommon::getEnvironmentUser ($this->getUser());
+
+
+  $cmd = "/opt/myenv/bin/aws s3api list-objects-v2 --bucket {$bucketName} --query 'Contents[].[Key,LastModified,Size]' --output json";
+  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
+  
+  $retText = "";  // TODO: actually this is not really needed - only in error - which we do not deal with currently anyhow
+  $retText .= "<h3>Command</h3><code>$cmd</code>"; 
+  $retText .= "<h3>Information sent to <code>stdout</code></h3>" . nl2br (htmlspecialchars ($output, ENT_QUOTES, 'UTF-8')) . "";
+  $retText .= "<h3>Information sent to <code>stderr</code></h3>" . nl2br (htmlspecialchars ( $error,  ENT_QUOTES, 'UTF-8')) . "";
+  if ($retCode == 0) { $retText .= "<h3>Execution successful</h3>";}
+  else               { $retText .= "<h3 style='color:red;'>Execution failed, return code $retCode </h3>";}
+
+  $retText .= "<h3>Directory listening of $bucketName</h3>";
+
+  $cmd = "/opt/myenv/bin/aws s3api list-objects-v2 --bucket {$bucketName} --query 'Contents[].[Key,LastModified,Size]' --output json";
+  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
+  $objects = json_decode($output, true);  // Decode the JSON output into a PHP array
+
+  $retArray = array ();
+  if (is_array($objects)) {
+    usort($objects, function ($a, $b) {return strtotime($b[1]) - strtotime($a[1]);});    // Sort the objects by LastModified in descending order
+    $retText .= "<ul>";
+
+    foreach ($objects as $object) { $retText .= '<li><span style="display:inline-block;width:400px;min-width:400px;">' . $object[0] . '</span><span style="display:inline-block;width:300px;">' . $object[1] . "</span>";
+      $retText .= "<span style='display:inline-block;width:400px;'>". number_format ($object[2]/ (1024*1024), 2)  . "[MB] </span></li>\n"; 
+      $retArray[  "<span style='display:inline-block;width:400px;'>".$object[0]."</span><span style='display:inline-block;width:300px;'>". $object[1] . "</span>".
+       "<span style='display:inline-block;width:400px;'>". number_format ($object[2]/ (1024*1024), 2)  . "[MB] </span>"] = $object[0];
+
+   }
+
+    $retText .= "</ul>";
+  }
+  else { $retText .= "Did not get reply from aws";}
+
+  return $retArray;
+
+}
+
 
 
 public static function getCommandAWS ( $accessKey, $secretAccessKey, $name, $zip, $enc ) {
@@ -90,7 +161,6 @@ public static function getCommandAWS ( $accessKey, $secretAccessKey, $name, $zip
   return $cmd;
 }
 
- 
 
 public static function getCommandFile ( $name, $zip, $enc ) {
   global $IP; 
@@ -117,184 +187,19 @@ private static function addPostImport ( $cmd ) {
   array_push ($cmd,  "php $IP/maintenance/rebuildall.php"); 
   array_push ($cmd,  "php $IP/maintenance/checkImages.php"); 
   array_push ($cmd,  "php $IP/maintenance/refreshFileHeaders.php --verbose");
-
   return $cmd;
 }
 
-
-
-
-  private function doImport ($fileName) {
-    global $wgServer, $wgScript;
-    $arr =self::getCommandFile ( $fileName, false, false);
-    Executor::liveExecuteX ($arr, "<h2>You now can leave the page</h2><br><br><a href='".$wgServer.$wgScript."?Main_Page'>Main Page</a>");
- // putenv ("AWS_ACCESS_KEY_ID=A"); putenv ("AWS_SECRET_ACCESS_KEY=A");
- return true;
-
-
-  }
-
-
-
-
-}
-
-
-
-
-
-
-/*
-require_once ("DanteCommon.php");
-require_once ("Executor.php");
-
-class DanteRestore extends SpecialPage {
-
-public function __construct () {parent::__construct( 'DanteRestore', 'dante-restore' ); }
-
-public function getGroupName() {return 'dante';}
-  
-
-public function execute( $par ) {
-  if (! $this->getUser()->isAllowed ("dante-restore") ) {$this->getOutput()->addHTML ("You do not have the permission to restore."); return;}  
-
-  $request = $this->getRequest();
-  $names   = $request->getValueNames();
-  $values  = $request->getValues (...$names);
-
-  $types   = $request->getValues ("hidden");
-  $type    = (isset ($types["hidden"])  ? $types["hidden"]  :  null );
-
-  $zips     = $request->getValues ("compressed");
-  $zip     = (isset ($zips["compressed"])  ? $zips["compressed"]  :  null );
-
-  $encs    = $request->getValues ("encrypted");
-  $enc     = (isset ($encs["encrypted"])   ? $encs["encrypted"]   :  null );
-
-  $this->setHeaders();
-  $this->getOutput()->addStyle ("../extensions/DanteBackup/danteBackup.css");  // htmlform-tip  // TODO: really needed ?? // TODO: IMPROVE PATH // YES for classes !
-
-// get the values stored in the preferences
-  $bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
-
-
-  $retCode = "";
-  try {
-    $retCode = Executor::executeAWS_FG_RET ( new AWSEnvironmentPreparatorUser ($this->getUser()), " aws s3 ls $bucketName --human-readable ", $output, $error );
-  
-  (new AWSEnvironmentPreparatorUser ($this->getUser()))->prepare();  // to compensate for the clearing which we do in executeAWS_FG_RET;  TODO: MUST clear this later 
-
-} catch (\Exception $x) {}
-
-  $retText = "";
-  if ($retCode != 0) {$retText .= "<hr>ERROR ".   preg_replace ("/\n/", "<br>", $error) . "<hr>"; return;}   // TODO: no, we could still offer local file selection !!
-
-  $output = "";
-  $arrObs = Executor::parseColumns ($output, ["date", "time", "size", "unit", "name"]);
-  $opts = [];  // generate the options for the selection area
-  foreach ($arrObs as $ob) {$opts [ $ob["name"]." <b>". $ob["date"]. " ". $ob["time"] . " (UTC)</b> " . $ob["size"] . "["  .$ob["unit"] . "]"] = $ob["name"];}
-
-  $formDesc = [ 
-   // 'radioRes' => [ 'section' => 'restore-from-s3',   'type' => 'radio', 'label' => '', 'options' => $opts, 'name' => 'selected' ],
-    'filesel'  => [ 'section' => 'restore-form-file', 'type' => 'file',  
-      'uploadable' => true, 'label' => 'Fileselec', 'name' => 'selfile', 'cssclass' => 'fileselector' ]
-  ];
-
-  $htmlForm2 = new HTMLForm( $formDesc, $this->getContext(), 'restform' );
- 
- 
-   $htmlForm2->setSubmitText( 'Restore' );
-
-   $htmlForm2->setSubmitCallback( [ $this, 'processInput' ] );
-
-  $request = $this->getRequest();
-  if ( $request->wasPosted() && $request->getRawVal( 'action' ) == 'submit' ) {
-    //$this->doImport();
-  
-    $source = ImportStreamSource::newFromUpload( "xmlimport" );
-    throw new Exception (  print_r ($source, true));
-  }
-  $htmlForm2->show();
-}
-
-
-
-
-
-
-
-
-
-
-
-private function restoreFromAWS ( $accessKey, $secretAccessKey, $name, $zip, $enc) {
-  set_time_limit(300);  // TODO fix
-
-  putenv ("AWS_ACCESS_KEY_ID=$accessKey"); putenv ("AWS_SECRET_ACCESS_KEY=$secretAccessKey");
-
-  $cmd = " aws s3 cp s3://dantebackup.iuk.one/back1 -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php /var/www/html/wiki-dir/maintenance/importDump.php --uploads "; 
-  $output=null;
-  $retval=null;
-  MWDebug::log ( "will execute: " .   print_r ( $cmd,   true )  );
-  exec ($cmd, $output, $retval);
-  
-  $retText = implode ("<br>", $output) . "<br>return value = " . $retval;
-
-  // now do an ls 
-  $cmd = " aws s3 ls dantebackup.iuk.one/back1 --human-readable 2>&1 ";
-  $output=null;
-  $retval=null;
-  exec ($cmd, $output, $retval);
-  $retText .= "<hr>".implode ("<br>", $output) . "<br>return value = " . $retval;
-
-  // remove any environment settings to prevent further processes from using them
-  putenv ("AWS_ACCESS_KEY_ID=A"); putenv ("AWS_SECRET_ACCESS_KEY=A");
-  return $retText;
-}
- 
-
-
-public static function getCommand ( $accessKey, $secretAccessKey, $name, $zip, $enc ) {
-  global $IP; 
-
-  // putenv ("AWS_ACCESS_KEY_ID=$accessKey"); putenv ("AWS_SECRET_ACCESS_KEY=$secretAccessKey");  // TODO: where do we set the environment ???
-
-// TODO: USE $name !!!!
-  $cmd1 = " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '8' --debug 2>&1 "; 
-  $cmd2 = " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '10' --debug 2>&1"; 
-  $cmd3 = " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --uploads --debug 2>&1" ; 
-  // $rebuild   = "php /var/www/html/wiki-dir/maintenance/importDump.php --uploads --debug"; //// TODO this is not rebuild but a damaged importDump for error reporting tests 
-  $rebuild   = "php $IP/maintenance/rebuildrecentchanges.php"; 
-  $initStats = "php maintenance/initSiteStats.php --update  2>&1";
-  return array ($cmd1, $cmd2, $cmd3, $rebuild, $initStats);
-}
-
-
-
-// return:   true: form will not display again
-//           false: from WILL be displayed again
-//           string: show the string as error message together with the form
-public static function processInput( $formData ) {
-
-//  $fileName = $formData["radioRes"];  
-
-  $file = $formData["filesel"];
- 
- // throw new Exception (  print_r ($source, true));
-
-
-  // get the values stored in the preferences
-  // $bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
-
- // $arr =self::getCommand ("", "", $fileName, false, false);
- // Executor::liveExecuteX ($arr, "<br><br><a href='../index.php/Main_Page'>Main Page</a>");
- // putenv ("AWS_ACCESS_KEY_ID=A"); putenv ("AWS_SECRET_ACCESS_KEY=A");
+private function doImport ($fileName) {
+  global $wgServer, $wgScript;
+  $arr =self::getCommandFile ( $fileName, false, false);
+  Executor::liveExecuteX ($arr);
+  // putenv ("AWS_ACCESS_KEY_ID=A"); putenv ("AWS_SECRET_ACCESS_KEY=A");
   return true;
-  // return print_r ( $formData,  true ) ;
 }
 
+} // end class
 
-}
 
-*/
+
 

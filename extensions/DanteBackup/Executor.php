@@ -1,30 +1,26 @@
 <?php
 
-
-
-/** The class Executor bundles convenience functions for execution shell commands */ 
+// The class Executor bundles convenience functions for execution shell commands
 class Executor {
 
   // execute the command $cmd containing AWS CLI in the background
   // assume that the output is dealt with by the command itself (piping or streaming or whatever)
   public static function executeAWS_BG ( EnvironmentPreparator $prep, $cmd ) {
     $prep->prepare ();
-
+// TODO: MISSING ??????????????????
     $prep->clear();
   }
 
   // execute a return command of the AWS CLI in the foreground; 
   // capture the output, the return code and possibly the error code
   // returns the return code; 
-  public static function executeAWS_FG_RET ( EnvironmentPreparator $prep, string $cmd, ?string &$output, ?string &$error ) {
-    $prep->prepare ();
-    $proc = proc_open($cmd,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes);
+  public static function executeAWS_FG_RET ( string $cmd, $env, ?string &$output, ?string &$error ) {
+    $proc = proc_open($cmd,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes, null, $env);
     $output = stream_get_contents($pipes[1]);
     fclose($pipes[1]);
     $error = stream_get_contents($pipes[2]);
     fclose($pipes[2]);
     $closeParam = proc_close($proc);
-    $prep->clear();
     return $closeParam;
   }
 
@@ -68,12 +64,10 @@ class Executor {
   }
 
 
-  // called with an array of shell functions which produce output
-  // pipes the output, as it comes up, to the web page
-  public static function liveExecute ( $arr ) {
+// called with an array of shell functions which produce output
+// pipes the output, as it comes up, to the web page
+public static function liveExecute ( $arr ) {
   global $wgServer, $wgScript;
-   // $proc = popen("ping -c 5 google.com", 'r');
-   // while (!feof($proc)) {echo "[".date("i:s")."] ".fread($proc, 4096).'<br>';flush();ob_flush();}
 
   foreach ( $arr as $ele ) {
     echo "";
@@ -89,69 +83,16 @@ class Executor {
       }
   }
   echo "<br><br><a href='".$wgServer.$wgScript."/index.php?Main_Page'>Main Page</a>"; flush(); ob_flush();
-
     exit ();
-
-  }
-
-
-  // called with an array of shell functions which produce live, real time output
-  // pipes the output, as it comes up, to the web page, including stderr
-  // terminates by writing $final
-  public static function liveExecuteX_OLD ( $arr, $final ) {
-
-// this works, but not when we are using compression on the transport layer. in that case
-// the system gathers everything and sends it out only when finished.
-
-
-    foreach ( $arr as $ele ) {
-      echo ""; echo "<h4 style='color:blue;'>COMMAND: "; echo htmlspecialchars($ele); echo "</h4>";  flush();ob_flush();
-      $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes);
-    
-      while (!feof ($pipes[1])) {  // drain stdout
-        $info = fread ($pipes[1], 4096);
-        $info = trim ($info);
-        //if (strlen ($info) > 0) {
-          $htmlInfo = str_replace ("\n", "<br>", $info);
-          echo "[".date("H:i:s")."] ".$htmlInfo.'<br>';flush();ob_flush();
-       // } 
-      } // end while
-      while (!feof ($pipes[2])) {  // drain stderr
-        $info = fread ($pipes[2], 4096);
-        $info = trim ($info);
-        if (strlen ($info) > 0) {      
-          $htmlInfo = str_replace ("\n", "<br>", $info);  
-          $htmlInfo = "<span style='color:red;'>ERROR:" .$htmlInfo. "</span>";
-          echo "[".date("H:i:s")."] ".$htmlInfo.'<br>';flush();ob_flush(); 
-        }
-        else {
-          $htmlInfo = "<span>No error information found</span>";
-          echo "[".date("H:i:s")."] ".$htmlInfo.'<br>';flush();ob_flush(); 
-        }
-      }  // end while draining stderr
-
-//      $closeParam = proc_close($proc);
-//      echo "<h5>EXIT CODE of COMMAND is: ".$closeParam."</h5>";
-
-      flush(); ob_flush();
-
-      //fclose($pipes[1]);
-      //fclose($pipes[2]);
-    }
-
-    echo $final;
-    exit();
 }
-
-
-
 
 
 // called with an array of shell functions which produce live, real time output
 // pipes the output, as it comes up, to the web page, including stderr
-public static function liveExecuteX ( $arr, $final ) {
-
-  header('Content-Type: text/event-stream');
+// since we are using compression on the transport layer, this is not going to work as text/html
+// thus we use text/event-stream
+public static function liveExecuteX ( $arr ) {
+  header('Content-Type: text/event-stream');  
   header('Cache-Control: no-cache');
   header('Connection: keep-alive');
 
@@ -159,27 +100,25 @@ public static function liveExecuteX ( $arr, $final ) {
 
   $didHaveError = false;  // flag to detect if we ever had an error
   $errorCount   = 0;      // counts the number of command which were in error
+  $count = 1;             // counts the commands
 
-  $count = 1;
   foreach ( $arr as $ele ) {
     echo "---- COMMAND: ". sprintf ("%3d", $count++) . " $ele"; echo "\n"; flush(); ob_flush();
     $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes);
-    while (!feof ($pipes[1])) {  // drain stdout
+    while (!feof ($pipes[1])) {  // first drain stdout
       $info = fgets ($pipes[1]);
       $info = trim ($info);
       if (strlen ($info) > 0) {echo "[".date("H:i:s")."] ".$info."\n";flush();ob_flush();}
     } // end while
     $first = true;
-    while (!feof ($pipes[2])) {  // drain stderr
+    while (!feof ($pipes[2])) {  // then drain stderr
       $info = fgets ($pipes[2]);
       $info = trim ($info);
       if (strlen ($info) > 0) {      
         if ($first) { echo "\n** Information sent to stderr: \n"; flush();ob_flush(); $first = false;}
         echo "** [".date("H:i:s")."] ".$info."\n"; flush();ob_flush(); 
       }
-      else {
-          //echo "No error information found"; echo "\n"; flush();ob_flush(); 
-      }
+      else { /* no error information found */ }
     }  // end while draining stderr
     $closeParam = proc_close($proc);
     if ($closeParam != 0) {
@@ -202,12 +141,9 @@ public static function liveExecuteX ( $arr, $final ) {
   if ($didHaveError) { echo "************ $errorCount COMMANDs were in ERROR ***"; flush(); ob_flush(); } 
   else {}
 
-  echo $final; flush(); ob_flush();
+  flush(); ob_flush();
   exit();
 }
-
-
-
 
 
 }

@@ -4,14 +4,15 @@ require_once ("DanteCommon.php");
 
 class DanteDump extends SpecialPage {
 
-  public bool $all;       //     if true: take all revisions 
-  public bool $meta;      //     if true: include upload actions
-  public bool $files;     //     if true: include file contents
-  public      $srcFiles;  //     true (all files) or name of a file (including namespace) listing every file to be dumped
+public bool $all;       //     if true: take all revisions, otherwise only take current revision
+public bool $meta;      //     if true: include upload actions
+public bool $files;     //     if true: include file contents
+public      $srcFiles;  //     true (all files) or name of a file (including namespace) listing every file to be dumped
 
 public function __construct () { parent::__construct( 'DanteDump', 'dante-dump' ); }
 
 public function getGroupName() {return 'dante';}
+
 
 public function execute( $par ) {
   if (! $this->getUser()->isAllowed ("dante-dump") ) { $this->getOutput()->addHTML ("You do not have the permission to dump."); return;}  
@@ -66,10 +67,8 @@ public function execute( $par ) {
       default:              throw new Exception ("Illegal value found for target:" . $values["target"] . " This should not happen");
     }
   if ( $txt !== null ) { $this->getOutput()->addHTML ($txt); }
-
   return;
   }
-
 
   $this->getOutput()->addHTML (wfMessage ("dante-page-dump-intro"));  // show some intro text
 
@@ -83,17 +82,17 @@ public function execute( $par ) {
 }
 
 
-  // generate and returns a command for dumping pages
-  public function getCommand (  ) {
-    global $IP;
-    $fullOpt           = ( $this->all      ? "--full "         : "--current");
-    $includeFilesOpt   = ( $this->meta     ?  "--uploads"      : " ");
-    $filesOpt          = ( $this->files    ? "--include-files" : " ");
+// generate and return a command for dumping pages
+public function getCommand (  ) {
+  global $IP;
+  $fullOpt           = ( $this->all      ? "--full "         : "--current");
+  $includeFilesOpt   = ( $this->meta     ?  "--uploads"      : " ");
+  $filesOpt          = ( $this->files    ? "--include-files" : " ");
 
   danteLog ("DanteBackup",  "NOW!\n");
 
-  @unlink ( "$IP/extensions/DanteBackup/list_of_files_to_backup");  // delete list of files to backup
-
+  // generate a file which contains a list of files to dump
+  @unlink ( "$IP/extensions/DanteBackup/list_of_files_to_backup");  // delete list of files to dump
   if ( strcmp ($this->srcFiles, "corefiles")        == 0 )   { danteLog ("DanteBackup", "case: corefiles \n");        $srcOpt = "--pagelist=$IP/extensions/DanteBackup/list_of_files_to_backup";    $this->getConfigFile ("Corefiles");    }
   if ( strcmp ($this->srcFiles, "backupfiles")      == 0 )   { danteLog ("DanteBackup", "case backupfiles \n");       $srcOpt = "--pagelist=$IP/extensions/DanteBackup/list_of_files_to_backup";    $this->getConfigFile ("Backupfiles");  }
   if ( strcmp ($this->srcFiles, "backupcategory")   == 0 )   { danteLog ("DanteBackup", "case backupcategory \n");    $srcOpt = "--pagelist=$IP/extensions/DanteBackup/list_of_files_to_backup";    $this->makeCatFileList  ("backup");  }
@@ -103,8 +102,8 @@ public function execute( $par ) {
   $command = " php $IP/maintenance/dumpBackup.php $fullOpt $includeFilesOpt $filesOpt $srcOpt";
   danteLog ("DanteBackup", "\nCommand for dumping is: " . $command);
 
-    return $command;
-  }
+  return $command;
+}
 
 
 // backup script needs a file which lists every file to be backed up
@@ -182,18 +181,8 @@ private function makeLongList () {
 
 
 
-
-
-
-
-
-
-
-
-
-
-  // return the native file extension this dumper would return
-  public function getNativeExtension () { return "xml";}
+// return the native file extension this dumper would return
+public function getNativeExtension () { return "xml";}
 
 
 // return:   true: form will not display again

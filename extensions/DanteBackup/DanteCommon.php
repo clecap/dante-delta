@@ -23,8 +23,6 @@ function getSubPagesFor( $titleText, $namespace ) {
   $func = function($title) {    return $title->getDBKey(); };
   $mapped = array_map ( $func, $titleArray );
 
-//  throw new Exception ( print_r ($mapped, true));
-//  throw new Exception ( print_r ($titleArray, true));
   return $mapped;
 }
 
@@ -33,65 +31,61 @@ function getSubPagesFor( $titleText, $namespace ) {
 
 class DanteCommon {
 
-  const DUMP_PATH = "DUMP";
+const DUMP_PATH = "DUMP";
 
- // describe the form to be displayed (and insert the default values picked up from preferences)
-   const INFO = [
-    'ainform' => ['type' => 'info', 'section' => '',
-        'label' => 'info',
-        'default' => '<a href="https://wikipedia.org/">Wikipediaqqqq</a>',
-        'raw' => true,   // If true, the above string won't be HTML escaped
-    ] ];
+// describe the form to be displayed (and insert the default values picked up from preferences)
+const INFO = [
+  'ainform' => ['type' => 'info', 'section' => '',
+      'label' => 'info',
+      'default' => '<a href="https://wikipedia.org/">Wikipediaqqqq</a>',
+      'raw' => true,   // If true, the above string won't be HTML escaped
+  ] 
+];
 
-  const FEATURES = [
-    'zip'              => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',    'name' => 'compressed', 'type' => 'check'],
-    'enc'              => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',     'name' => 'encrypted', 'type' => 'check'],
-  ];
+const FEATURES = [
+  'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check'  ],
+  'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check'  ]
+];
 
 
- const SOURCE_FEATURES = [
+const SOURCE_FEATURES = [
   'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
-        'options' => [ 'Only pages listed in <a href=\'./MediaWiki:Corefiles\'>MediaWiki:Corefiles</a>'                                    => "corefiles",
-                       'Only pages listed in <a href=\'./MediaWiki:Backupfiles\'>MediaWiki:Backupfiles</a>'                                => "backupfiles",
-                       'Only pages in <b>category backup</b>'                                                                              => "backupcategory",
-                       'Only pages in a category listed in <a href=\'./MediaWiki:Backupcategories\'>MediaWiki:Backupcategories</a>'        => "backupcategories",
-                       '<b>All</b> pages'                                                                                             => "all", 
+    'options' => [ 'Only pages listed in <a href=\'./MediaWiki:Corefiles\'>MediaWiki:Corefiles</a>'                                  => "corefiles",
+                   'Only pages listed in <a href=\'./MediaWiki:Backupfiles\'>MediaWiki:Backupfiles</a>'                              => "backupfiles",
+                   'Only pages in <b>category backup</b>'                                                                            => "backupcategory",
+                   'Only pages in a category listed in <a href=\'./MediaWiki:Backupcategories\'>MediaWiki:Backupcategories</a>'      => "backupcategories",
+                    '<b>All</b> pages'                                                                                               => "all", 
                      ],   
-        'name' => 'srces',  'default' => 'all', 
- ],
+     'name' => 'srces',  'default' => 'all', 
+  ],
   'radio33'  => [ 'section' => 'srcfeatures/ra' , 'type' => 'radio',  'label' => '', 
-        'options' => [ '<b>Current</b> revision only'                        => "current",
-                       '<b>All</b> revisions'                                => "all", 
+        'options' => [ '<b>Current</b> revision only'                         => "current",
+                       '<b>All</b> revisions'                                 => "all", 
                      ],   
         'name' => 'srcFeatures',  'default' => 'all', 
  ],
-//    'meta'              => [ 'section' => 'srcfeatures/up',  'class' => 'HTMLCheckField',  'label' => 'Include all individual upload actions',              'name' => 'meta', 'type' => 'check'],
-//    'files'             => [ 'section' => 'srcfeatures/up',  'class' => 'HTMLCheckField',  'label' => 'Include file contents (need to select upload actions as well for this)',              'name' => 'files', 'type' => 'check'],
 ];
 
 
-
-
-  const DEBUG_FORM = [
-    'showls'           => [ 'section' => 'debug',   'class' => 'HTMLCheckField',  'label' => 'Show AWS Bucket ls',             'name' => 'showls', 'type' => 'check'],
+const DEBUG_FORM = [
+  'showls'           => [ 'section' => 'debug',   'class' => 'HTMLCheckField',  'label' => 'Show AWS Bucket ls',             'name' => 'showls', 'type' => 'check'],
 ];
-
 
 
   public static function getTARGET_FORM () {
    return  [
     'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
         'options' => [ // "bibi".wfMessage ('somestuff')->plain() =>  "checkme",  // TODO: that's how to localize this stuff; that's why we have this as return of a function and not as a const array
-           '<b>AWS S3 foreground</b> (shows error messages; may take minutes to hours)'                                                                      => "awsFore",
+           '<b>AWS S3 foreground</b> (shows error messages; may take minutes to hours)'                                                                       => "awsFore",
            '<b>AWS S3 background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'         => "awsBack", 
-           '<b>Github foreground</b> (shows error messages; may take minutes to hours)'                                                                      => "githubFore",
+           '<b>Github foreground</b> (shows error messages; may take minutes to hours)'                                                                       => "githubFore",
            '<b>Github background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'         => "githubBack", 
-           '<b>SSH foreground</b> (shows error messages; may take minutes to hours)'                                                                      => "sshFore",
-           '<b>SSH background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'         => "sshBack", 
+           '<b>SSH foreground</b> (shows error messages; may take minutes to hours)'                                                                          => "sshFore",
+           '<b>SSH background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'            => "sshBack", 
            "<b>Client</b> (save as file on the client using the browser)"                                                                                     => "browser",
-           '<b>Window</b> (show it in the browser window; may include error messages)'                                                                        => "window",
+           '<em>Window</em> (show it in the browser window; may include error messages; useful for debugging)'                                                => "window",
            '<b>Server foreground</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                               => "serverFore",
-           '<b>Server background</b> (no error messages; need to check for completion on server; only testing or when server accessible)'                      => "serverBack",
+           '<b>Server background</b> (no error messages; need to check for completion on server; only testing or when server accessible)'                     => "serverBack",
                      ], 
         'name' => 'target',  'default' => 'awsFore', 
  ]  ,
@@ -99,29 +93,6 @@ class DanteCommon {
 
   }
 
-// TODO: deprecate
-  // execute a shell command.
-/*
-  public static function execute ($cmd, $name) {   -  // TODO: how do we get access to an error message in this case? - and distinguish thios for the use of the caller ??
-    $output = null;
-    $retval = null;
-    exec ($cmd, $myOutput, $retval);
-    if ($retval == 0) { return; }  // format error message ?!?! TODO
-    else {return implode ("<br>", $output) . "<br>return value = " . $retval;  }
-  }
-*/
-
-// TODO: deprecate
-/*
-  public static function fullExec($cmd, &$stdout=null, &$stderr=null) {
-    $proc = proc_open($cmd, [1 => ['pipe','w'], 2 => ['pipe','w'], ], $pipes);
-    $stdout = stream_get_contents($pipes[1]);
-    fclose($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]);
-    fclose($pipes[2]);
-    return proc_close($proc);
-  }
-*/
 
   public static function contentTypeHeader ($zip, $enc) {
     if ($enc) { header( "Content-type: application/octet-stream" );} 
@@ -148,7 +119,8 @@ class DanteCommon {
   public static function decUnzipCmd ( $dec, $aesPW, $unzip, $cmd ) { return  ($dec ? " openssl aes-256-cbc -d -salt -pbkdf2 -pass $aesPW | " : " ") .  ($zip ? " gunzip | " : "") . $cmd ; }
 
 
-// execute a command; stream the stdout of the command execution to the browser, assuming (text/plain) to show it best
+// execute a command obtained from $obj->getCommand
+// stream the stdout of the command execution to the browser, assuming (text/plain) to show it best
 public static function dumpToWindow ($obj, $zip, $enc, $aesPW) {
     header( "Content-type: text/plain; charset=utf-8" );
     $cmd = $obj->getCommand ();
@@ -156,7 +128,7 @@ public static function dumpToWindow ($obj, $zip, $enc, $aesPW) {
     $cmd = $cmd . " 2>&1 ";  // redirecting stderror gives us the chance of seeing error messages in the window 
     $result = 0; 
     $ptResult = passthru ($cmd, $result);
-    echo "ERROR: $ptResult, $result, $cmd"; 
+    echo "ERROR: $ptResult, $result, $cmd";
 }
 
   public static function dumpToBrowser ($obj, $zip, $enc, $aesPW) {
@@ -170,85 +142,60 @@ public static function dumpToWindow ($obj, $zip, $enc, $aesPW) {
   }
 
 
-
-
 // background // TODO redo completelly
 public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
-  $cmd = $obj->getCommand ();
+  $cmd = $obj->getCommand ();  // TODO: pipefail ß?????
   $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
 
   $name    = "s3://$bucketName/" . DanteCommon::generateFilename(  $obj->getNativeExtension(), $zip, $enc);
-  $cmd = $cmd . " | aws s3 cp - $name ";
+  $cmd = $cmd . " | /opt/myenv/bin/aws s3 cp - $name ";
   $cmd = "( $cmd ) &>DANTEDBDump_LOCAL_ERROR_FILE & ";  // TODO: correct redirect ?  test
   $retCode = Executor::executeAWS_FG_RET ( new AWSEnvironmentPreparatorUser ($obj->getUser()), $cmd, $output, $error );
   if ($retCode == 0) { return "<div>The background execution has been started. For success check listing of backups or <a href='../DANTEDBDump_LOCAL_ERROR_FILE'>Error File</a></div>"; }
   else {return "<div>The execution failed with return value $retCode. We got the following error message: <br><div style='color:red;'>" . implode ("<br>", explode ("\n", $error)) . "</div>";   }
 }
 
-  // foreground
-  // TODO: MAYBE move the bucketName also upstairs into something we can ask from $obj !!
-  public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
-    $cmd = $obj->getCommand ( );
-    $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
 
-    $name    = "s3://$bucketName/" . DanteCommon::generateFilename ($obj->getNativeExtension(), $zip, $enc);
-    $cmd = $cmd . " | aws s3 cp - $name ";
+// foreground
+public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
+  $cmd     = "set -o pipefail; " . $obj->getCommand ( );  // pipefail prevents masking of error conditions along the pipe
+  $cmd     = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+  $name    = "s3://$bucketName/" . DanteCommon::generateFilename ($obj->getNativeExtension(), $zip, $enc);
+  $cmd    .= " | /opt/myenv/bin/aws s3 cp - $name ";
 
-    $retText = "";  // accumulates this and the subsequent listing command
-    $retCode = Executor::executeAWS_FG_RET ( new AWSEnvironmentPreparatorUser ($obj->getUser()), $cmd, $output, $error );
-    if ($retCode == 0) { 
-      $retText .= "<div>The execution was successful. Command was: $cmd </div>"; }
-    else {
-      return "<div>The execution failed with return value $retCode. We got the following error message: <br><div style='color:red;'>" . implode ("<br>", explode ("\n", $error)) . "</div>";  
-    }
+  $retText = "";  // accumulates this and the subsequent listing command
 
-    // running in the foreground: append result of an aws s3 ls
-    $retCode = Executor::executeAWS_FG_RET ( new AWSEnvironmentPreparatorUser ($obj->getUser()), " aws s3 ls $bucketName --human-readable ", $output, $error );
-    if ($retCode != 0) {$retText .= "<hr>ERROR ".   preg_replace ("/\n/", "<br>", $error) . "<hr>";} 
-    else {     $retText .= "<hr>".   preg_replace ("/\n/", "<br>", $output) . "<hr>";}
-    return $retText;
-  }
+  $env = self::getEnvironmentUser ($obj->getUser());
+  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
+  
+  $retText .= "<h3>Command</h3><code>$cmd</code>"; 
+  $retText .= "<h3>Information sent to <code>stdout</code></h3>" . nl2br (htmlspecialchars ($output, ENT_QUOTES, 'UTF-8')) . "";
+  $retText .= "<h3>Information sent to <code>stderr</code></h3>" . nl2br (htmlspecialchars ( $error,  ENT_QUOTES, 'UTF-8')) . "";
+  if ($retCode == 0) { $retText .= "<h3>Execution successful</h3>";}
+  else               { $retText .= "<h3 style='color:red;'>Execution failed, return code $retCode </h3>";}
 
+  $retText .= "<h3>Directory listening of $bucketName</h3>";
 
 /*
-
-public static function dumpToGITHUB_FG ( $obj, $bucketName, $zip, $enc, $aesPW ) {
-  $cmd = $obj->getCommand ( );
-  $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
-
-  $cmd "curl -X PUT -H \"Authorization: token " .$YOUR_PERSONAL_ACCESS_TOKEN. "\"  -H \"Content-Type: application/json\"   -d @- \
-  https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/contents/path/to/your/file <<EOF
-{
-  \"message\": \"Streamed file via API\",
-  \"content\": \"$(base64 -w 0 path/to/your/file)\"
-}
-EOF
-";
-
-}
-
+  $retCode = Executor::executeAWS_FG_RET ( " /opt/myenv/bin/aws s3 ls $bucketName --human-readable ", $env ,  $output, $error );
+  if ($retCode != 0) { $retText .= "<hr>ERROR ".   preg_replace ("/\n/", "<br>", $error) . "<hr>";} 
+  else               { $retText .= "<hr>".   preg_replace ("/\n/", "<br>", $output) . "<hr>";}
 */
 
+  $cmd = "/opt/myenv/bin/aws s3api list-objects-v2 --bucket {$bucketName} --query 'Contents[].[Key,LastModified,Size]' --output json";
+  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
+  $objects = json_decode($output, true);  // Decode the JSON output into a PHP array
+  if (is_array($objects)) {
+    usort($objects, function ($a, $b) {return strtotime($b[1]) - strtotime($a[1]);});    // Sort the objects by LastModified in descending order
+    $retText .= "<ul>";
+    foreach ($objects as $object) { $retText .= '<li><span style="display:inline-block;width:400px;min-width:400px;">' . $object[0] . '</span><span style="display:inline-block;width:300px;">' . $object[1] . "</span>";
+      $retText .= "<span style='display:inline-block;width:400px;'>". number_format ($object[2]/ (1024*1024), 2)  . "[MB] </span></li>\n"; }
+    $retText .= "</ul>";
+  }
+  else { $retText .= "Did not get reply from aws";}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  return $retText;
+}
 
 
 public static function dumpToServer ( $obj, $name, $zip, $enc, $aesPW, $background ) {
@@ -273,9 +220,17 @@ public static function dumpToServer ( $obj, $name, $zip, $enc, $aesPW, $backgrou
   } 
   else {  // when running in foreground 
     return "<div>Execution of $cmd return value $ret and output $output and error $error</div>";
-
    }
-  }
+}
+
+
+
+public static function getEnvironmentUser (User $user) {
+  $accessKey        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-accesskey' );
+  $secretAccessKey  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-secretaccesskey' );
+  $awsRegion        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-region' );
+  return array ("AWS_ACCESS_KEY_ID" => "$accessKey", "AWS_SECRET_ACCESS_KEY" => "$secretAccessKey", "AWS_REGION" => "$awsRegion");
+}
 
 
 
@@ -321,6 +276,3 @@ class AWSEnvironmentPreparatorUser extends AWSEnvironmentPreparator {
     parent::__construct( $accessKey, $secretAccessKey, $awsRegion );
   }
 }
-
-
-
