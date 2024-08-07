@@ -10,27 +10,43 @@ public function __construct() {parent::__construct( 'DanteRestore', 'dante-resto
 public function doesWrites() {return true;}
 
 public function execute( $par ) {
-    // TODO: test alternative of an exception 
-    if (! $this->getUser()->isAllowed ("dante-restore") ) { $this->getOutput()->addHTML ("You do not have the permission to dump."); return;}  
+    if (! $this->getUser()->isAllowed ("dante-restore") ) { $this->getOutput()->addHTML ("You do not have the permission to restore."); return;}  
 
   $this->useTransactionalTimeLimit();  // raise time limit for this operation
-  $this->setHeaders();
-  $this->outputHeader();
-  $this->checkReadOnly();  // TODO: what does this do ????
+
+//  $this->setHeaders();
+//  $this->outputHeader();
+
+//  $this->checkReadOnly();  // TODO: what does this do ????
 
   $request = $this->getRequest();
   if ( $request->wasPosted() && $request->getRawVal( 'action' ) == 'submit' ) {
     $request = $this->getRequest();
-    $sourceName = $request->getVal( 'source' );
-    danteLog ("DanteBackup", "sourcename: $sourceName \n");
-    danteLog ("DanteBackup", "ALL: " . print_r ($_FILES, true) . "\n");
-    danteLog ("DanteBackup", "name " . $_FILES['xmlimport']['name'] . "\n");
-    danteLog ("DanteBackup", "mime: " . $_FILES['xmlimport']['type'] . "\n");
-    danteLog ("DanteBackup", "size " . $_FILES['xmlimport']['size'] . "\n"); 
-    danteLog ("DanteBackup", "tmp name " . $_FILES['xmlimport']['tmp_name'] . "\n");      
-    danteLog ("DanteBackup", "error " . $_FILES['xmlimport']['error'] . "\n");
-    // danteLog ("DanteBackup", "full path " . $_FILES['xmlimport']['full_path'] . "\n");  // produces PHP  NOTICE: undefined index.
-    $this->doImport ($_FILES['xmlimport']['tmp_name']);
+    $formIdentifier = $request->getVal( 'wpFormIdentifier' );
+
+    danteLog ("DanteBackup", "Form identifier: " . print_r ($formIdentifier, true));
+    switch ($formIdentifier) {
+      case 'formLOCAL':
+        danteLog ("DanteBackup", "ALL: " . print_r ($_FILES, true) . "\n");
+        danteLog ("DanteBackup", "name " . $_FILES['xmlimport']['name'] . "\n");
+        danteLog ("DanteBackup", "mime: " . $_FILES['xmlimport']['type'] . "\n");
+        danteLog ("DanteBackup", "size " . $_FILES['xmlimport']['size'] . "\n"); 
+        danteLog ("DanteBackup", "tmp name " . $_FILES['xmlimport']['tmp_name'] . "\n");      
+        danteLog ("DanteBackup", "error " . $_FILES['xmlimport']['error'] . "\n");
+        $this->doImport ($_FILES['xmlimport']['tmp_name']);
+
+        break;
+      case 'formAWS':
+        $fileName = $request->getVal ("srces");
+        danteLog ("DanteBackup", "radio selected file is: ".$fileName. "\n");
+        $this->doImportAWS ($fileName);
+
+        break;
+      case 'formURL':
+        
+        break;
+    }
+
   }
 
   $this->showForm();
@@ -38,61 +54,74 @@ public function execute( $par ) {
 
 
 private function showForm() {
-
-//  $action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );
-
-
-
-
-//  $uploadFormDescriptor += ['intro' => [ 'type' => 'info', 'raw' => true, 'default' => $this->msg( 'importtext' )->parseAsBlock() ] ];  // only demo - not used
-
-
+  $action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );
   $user   = $this->getUser();
   $out    = $this->getOutput();
-	//	$this->addHelpLink( 'https://meta.wikimedia.org/wiki/Special:MyLanguage/Help:Import', true );
-
-//   $out->addHTML (wfMessage ("dante-page-restore-intro"));  // show some intro text
 
   $out->addHTML ("<h2>Possibility 1: Uploading a file from your local computer</h2>"); 
-
-
-// TODO: check if we can upload a gzip., aes, aes and gzip file here !
   $formLOCAL = [];
   $formLOCAL += [ 'xmlimport' => ['type' => 'file','name' => 'xmlimport', 'accept' => [ 'application/xml', 'text/xml', 'application/x-gzip-compressed', 'application/octet-stream' ], 'section' => 'select-local-file', 'required' => true, ] ];
-
   $htmlFormLOCAL = new HTMLForm( $formLOCAL, $this->getContext() );
-  // $htmlFormLOCAL->setWrapperLegendMsg( 'upload-local' );
+  $htmlFormLOCAL->setAction( $action );
+  $htmlFormLOCAL->setId( 'mw-import-upload-form' );
+  $htmlFormLOCAL->setSubmitText( 'Restore from this file' );
   $htmlFormLOCAL->setFormIdentifier( 'formLOCAL' );
   $htmlFormLOCAL->prepareForm()->displayForm( false );
 
+ // $htmlFormLOCAL->setSubmitCallback( [ $this, 'processInputLOCAL' ] );
+ // $htmlFormLOCAL->show();
+
+ 
+
+
+// TODO: check if we can upload a gzip., aes, aes and gzip file here !
+
+//   $out->addHTML (wfMessage ("dante-page-restore-intro"));  // show some intro text
+
+
+//	$this->addHelpLink( 'https://meta.wikimedia.org/wiki/Special:MyLanguage/Help:Import', true );
+
   $out->addHTML ("<h2>Possibility 2: Uploading a file from the AWS S3 storage area</h2>"); 
-
-
   $formAWS = [];
   $formAWS += [ 'source' => ['type' => 'hidden',	'name' => 'source',	'default' => 'upload',	'id' => '',] ];
   $formAWS += [ 'zradio88'  => [ 'type' => 'radio', 'section' => 'restore-from-aws', 'options' => $this->getFileArray (),   'name' => 'srces',  'default' => 'all',  ] ];
   $htmlFormAWS = new HTMLForm( $formAWS, $this->getContext() );
+  $htmlFormAWS->setAction( $action );
+  $htmlFormAWS->setId( 'mw-import-upload-form' );
+  $htmlFormAWS->setSubmitText( 'Restore from AWS' );
   $htmlFormAWS->setFormIdentifier( 'formAWS' );
   $htmlFormAWS->prepareForm()->displayForm( false );
 
   $out->addHTML ("<h2>Possibility 3: Uploading a file to be retrieved from an Internet URL</h2>"); 
-
   $form2 = [];
   $form2 += [ 'url' => [ 'type' => 'text', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
   $htmlForm2 = new HTMLForm( $form2, $this->getContext() );
-  $htmlForm2->setFormIdentifier( 'form2' );
+  $htmlForm2->setAction( $action );
+  $htmlForm2->setId( 'mw-import-upload-form' );
+  $htmlForm2->setSubmitText( 'Restore from URL' );
+  $htmlForm2->setFormIdentifier( 'formURL' );
   $htmlForm2->prepareForm()->displayForm( false );
 
-// $htmlForm->setAction( $action );
-//  $htmlForm->setId( 'mw-import-upload-form' );
+
 
 //  $htmlForm->setWrapperLegendMsg( 'import-upload' );  // this provides an entire wrapper around the form
 //  $htmlForm->setSubmitTextMsg( 'uploadbtn' );
 
-
-
+//  $uploadFormDescriptor += ['intro' => [ 'type' => 'info', 'raw' => true, 'default' => $this->msg( 'importtext' )->parseAsBlock() ] ];  // only demo - not used
+  // $htmlFormLOCAL->setWrapperLegendMsg( 'upload-local' );
 
 }
+
+
+
+// return:   true: form will not display again
+//           false: from WILL be displayed again
+//           string: show the string as error message together with the form
+public static function processInputLOCAL ( $formData ) {
+  //return true;
+   return print_r ( $formData,  true ) ;
+}
+
 
 protected function getGroupName() {return 'dante';}
 
@@ -138,34 +167,23 @@ private function getFileArray () {
     $retText .= "</ul>";
   }
   else { $retText .= "Did not get reply from aws";}
-
   return $retArray;
-
 }
 
 
 
-public static function getCommandAWS ( $accessKey, $secretAccessKey, $name, $zip, $enc ) {
-  global $IP; 
-  $cmd = array ();
-  
-    // putenv ("AWS_ACCESS_KEY_ID=$accessKey"); putenv ("AWS_SECRET_ACCESS_KEY=$secretAccessKey");  // TODO: where do we set the environment ???
-  
-  // TODO: USE $name !!!!
-  $pipe = "set -o pipefail; ";  // prefix this to every piped command
-
-  array_push ($cmd,  $pipe . " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '8' --debug 2>&1 " ); 
-  array_push ($cmd,  $pipe . " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --namespaces '10' --debug 2>&1" ); 
-  array_push ($cmd,  $pipe . " aws s3 cp s3://dantebackup.iuk.one/$name -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php $IP/maintenance/importDump.php --uploads --debug 2>&1" ); 
-  $cmd = self::addPostImport ( $cmd );
-  return $cmd;
-}
 
 
+
+
+// TODO: plug this in into doIMport and then deprecate it here.
+/*
 public static function getCommandFile ( $name, $zip, $enc ) {
   global $IP; 
   $cmd = array ();
 
+
+// TODO: WRONG SEQUENCE of zip and encrypt !!
 ///// TODO: can we allow to specify an upload pipe filter, eg for updating the timestamps ??????  and doing other filtering stuff ??????
 ///// TODO_ HOW to we import the PASSWORD fENVIRONMENT VARIABLE ???
   $prefix = "set -o pipefail; " . ($enc ? " openssl aes-256-cbc -d -salt -pass env:LOCAL_FILE_ENC | " : "" )  . ($zip ? "gunzip -c $name | " : "cat $name | ");
@@ -176,6 +194,10 @@ public static function getCommandFile ( $name, $zip, $enc ) {
   $cmd = self::addPostImport ( $cmd );                                                              // do maintenance stuff we need to do after every import
   return $cmd;
 }
+
+*/
+
+
 
 // appends to the command array $cmd all those commands required after an import and return the new command array
 private static function addPostImport ( $cmd ) {
@@ -191,12 +213,50 @@ private static function addPostImport ( $cmd ) {
 }
 
 private function doImport ($fileName) {
-  global $wgServer, $wgScript;
-  $arr =self::getCommandFile ( $fileName, false, false);
+  global $IP;
+  $enc = DanteCommon::checkSuffix ( $fileName, ".aes");
+  $zip = DanteCommon::checkSuffix ( $fileName, ".gz" );
+
+  $arr = array ();
+  array_push ( $arr,  DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --namespaces '8'  ", $zip, $enc ) );    // get MediaWiki: namespace (need Parsifal templates on board first)
+  array_push ( $arr,  DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --namespaces '10' ", $zip, $enc ) );    // get Template: namespace
+  array_push ( $arr,  DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --uploads         ", $zip, $enc ) );    // TODO: can we really merge this into "all the rest" ?????
+  $cmd = self::addPostImport ( $cmd );  // do maintenance stuff we need to do after every import
+
+  danteLog ("DanteBackup", "\n WIll now enter executor \n");
   Executor::liveExecuteX ($arr);
-  // putenv ("AWS_ACCESS_KEY_ID=A"); putenv ("AWS_SECRET_ACCESS_KEY=A");
+  danteLog ("DanteBackup", "\n Left executor \n");
   return true;
 }
+
+private function doImportAWS ($fileName) {
+  global $IP;
+  $enc = DanteCommon::checkSuffix ( $fileName, ".aes");
+  $zip = DanteCommon::checkSuffix ( $fileName, ".gz" );
+
+  danteLog ("DanteBackup", "doImportAWS: $fileName\n");
+
+  $env = DanteCommon::getEnvironmentUser ($this->getUser());
+
+  $bucketName = $env["AWS_BUCKET_NAME"];
+  danteLog ("DanteBackup", "doImportAWS: $fileName, enc:" .$enc. " zip: ". $zip."\n");
+
+  $arr = array ();
+
+// TODO aesPassword !!!!!!
+//  cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | ", " php $IP/maintenance/importDump.php --namespaces '8' --debug 2>&1 ", $zip, $enc);
+
+  array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --namespaces '8' ",  $zip, $enc ) ); 
+  array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --namespaces '10' ", $zip, $enc ) ); 
+  array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --uploads ",         $zip, $enc ) ); 
+  $arr = self::addPostImport ( $arr );
+
+
+
+  Executor::liveExecuteX ($arr, $env);
+  return true;
+}
+
 
 } // end class
 

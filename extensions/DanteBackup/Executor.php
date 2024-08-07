@@ -91,7 +91,7 @@ public static function liveExecute ( $arr ) {
 // pipes the output, as it comes up, to the web page, including stderr
 // since we are using compression on the transport layer, this is not going to work as text/html
 // thus we use text/event-stream
-public static function liveExecuteX ( $arr ) {
+public static function liveExecuteX ( $arr, $env = array() ) {
   header('Content-Type: text/event-stream');  
   header('Cache-Control: no-cache');
   header('Connection: keep-alive');
@@ -104,7 +104,8 @@ public static function liveExecuteX ( $arr ) {
 
   foreach ( $arr as $ele ) {
     echo "---- COMMAND: ". sprintf ("%3d", $count++) . " $ele"; echo "\n"; flush(); ob_flush();
-    $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes);
+    $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes, null, $env); 
+
     while (!feof ($pipes[1])) {  // first drain stdout
       $info = fgets ($pipes[1]);
       $info = trim ($info);

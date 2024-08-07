@@ -99,6 +99,14 @@ const DEBUG_FORM = [
     else      { if ($zip) { header( "Content-type: application/x-gzip" );  } else { header( "Content-type: application/xml; charset=utf-8" );}  }
   }
 
+
+
+public static function checkSuffix ( $string, $suffix) {
+  if (substr($string, -strlen($suffix)) === $suffix) { return true; } 
+  else { return false; }
+}
+
+
   public static function generateFilename ($typ, $zip, $enc) {
     global $wgSitename;
     $filename = urlencode( $wgSitename ) . wfTimestampNow();
@@ -108,15 +116,18 @@ const DEBUG_FORM = [
 
   // $obj: the object providing the getNativeExtension and generateCommand functions
 
-// TODO: where would we inject the set pipefail property ??
+// command decorator for a command $cmd which produces a stream while dumping; result then gets piped/redirected into different sinks
+public static function cmdZipEncDump ( $cmd, $zip, $enc ) {
+  return "set -o pipefail; " . $cmd . ($zip ? " | gzip " : " ") . ($enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -pass env:LOCAL_FILE_ENC " : " ") ; 
+}
+
 
   // command decorator. result then gets piped/redirected into different sinks
-  public static function cmdZipEnc ( $cmd, $zip, $enc, $aesPW ) {
-    global $IP;
-    return $cmd . ($zip ? " | gzip " : " ") . ($enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -pass pass:$aesPW " : " ") ; }
-
-  // command decorator. arguments are generated from different sources and get piped into this
-  public static function decUnzipCmd ( $dec, $aesPW, $unzip, $cmd ) { return  ($dec ? " openssl aes-256-cbc -d -salt -pbkdf2 -pass $aesPW | " : " ") .  ($zip ? " gunzip | " : "") . $cmd ; }
+//   TODO: MAYBE: openssl aes-256-cbc -e -salt -pbkdf2 -pass pass:$aesPW " : " ") ; 
+// openssl aes-256-cbc -d -salt -pbkdf2 -pass ENV:LOCAL_FILE_ENC |
+public static function cmdZipEncRestore ( $cmdGenerate, $cmdConsume, $zip, $enc ) {
+  return "set -o pipefail; " .  $cmdGenerate . ($enc ? " openssl aes-256-cbc -d -salt -pass env:LOCAL_FILE_ENC | " : "" ) . ($zip ? " gunzip -c | " : "") .  $cmdConsume;
+}
 
 
 // execute a command obtained from $obj->getCommand
@@ -124,7 +135,7 @@ const DEBUG_FORM = [
 public static function dumpToWindow ($obj, $zip, $enc, $aesPW) {
     header( "Content-type: text/plain; charset=utf-8" );
     $cmd = $obj->getCommand ();
-    $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+    $cmd = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
     $cmd = $cmd . " 2>&1 ";  // redirecting stderror gives us the chance of seeing error messages in the window 
     $result = 0; 
     $ptResult = passthru ($cmd, $result);
@@ -136,7 +147,7 @@ public static function dumpToWindow ($obj, $zip, $enc, $aesPW) {
     DanteCommon::contentTypeHeader ($zip, $enc);
     header( "Content-disposition: attachment;filename={$filename}" );
     $cmd = $obj->getCommand ();
-    $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+    $cmd = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
     $result = 0; 
     passthru ($cmd, $result);
   }
@@ -145,7 +156,7 @@ public static function dumpToWindow ($obj, $zip, $enc, $aesPW) {
 // background // TODO redo completelly
 public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
   $cmd = $obj->getCommand ();  // TODO: pipefail ß?????
-  $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+  $cmd = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
 
   $name    = "s3://$bucketName/" . DanteCommon::generateFilename(  $obj->getNativeExtension(), $zip, $enc);
   $cmd = $cmd . " | /opt/myenv/bin/aws s3 cp - $name ";
@@ -159,7 +170,7 @@ public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
 // foreground
 public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
   $cmd     = "set -o pipefail; " . $obj->getCommand ( );  // pipefail prevents masking of error conditions along the pipe
-  $cmd     = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+  $cmd     = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
   $name    = "s3://$bucketName/" . DanteCommon::generateFilename ($obj->getNativeExtension(), $zip, $enc);
   $cmd    .= " | /opt/myenv/bin/aws s3 cp - $name ";
 
@@ -193,9 +204,15 @@ public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
     $retText .= "</ul>";
   }
   else { $retText .= "Did not get reply from aws";}
-
   return $retText;
 }
+
+
+
+
+
+
+
 
 
 public static function dumpToServer ( $obj, $name, $zip, $enc, $aesPW, $background ) {
@@ -208,7 +225,7 @@ public static function dumpToServer ( $obj, $name, $zip, $enc, $aesPW, $backgrou
   $errorFileName = DanteCommon::DUMP_PATH."/DANTEDBDump_ERROR_FILE$filename";
 
   $cmd = $obj->getCommand ();
-  $cmd = DanteCommon::cmdZipEnc ($cmd, $zip, $enc, $aesPW);
+  $cmd = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
   $cmd .= " > ".DanteCommon::DUMP_PATH."/".$filename;
 
   if ($background) {$cmd = "( $cmd ) &> $errorFileName & ";}
@@ -229,7 +246,14 @@ public static function getEnvironmentUser (User $user) {
   $accessKey        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-accesskey' );
   $secretAccessKey  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-secretaccesskey' );
   $awsRegion        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-region' );
-  return array ("AWS_ACCESS_KEY_ID" => "$accessKey", "AWS_SECRET_ACCESS_KEY" => "$secretAccessKey", "AWS_REGION" => "$awsRegion");
+  $awsBucketName    = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-bucketname' );
+  $awsEncPW         = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-encpw' );
+  return array ( "AWS_ACCESS_KEY_ID"     => "$accessKey", 
+                 "AWS_SECRET_ACCESS_KEY" => "$secretAccessKey", 
+                 "AWS_REGION"            => "$awsRegion",
+                 "AWS_BUCKET_NAME"       => "$awsBucketName",
+                 "LOCAL_FILE_ENC"        => "$awsEncPW"
+               );
 }
 
 
@@ -263,6 +287,8 @@ class AWSEnvironmentPreparator implements EnvironmentPreparator {
   public function clear   () { putenv ("AWS_ACCESS_KEY_ID=NIL"); putenv ("AWS_SECRET_ACCESS_KEY=NIL"); putenv ("AWS_REGION=NIL"); }
 }
 
+
+///// TODO: deprecate the preparator everywhere !!
 
 /** An object of class AWSEnvironmentPreparatorUser obtains the necessary data from the preferences of a user in mediawiki
  */
