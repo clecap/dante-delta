@@ -11,7 +11,7 @@ public function doesWrites() {return true;}
 
 
 
-
+/*
 
 public function execute($subPage) {
     $this->setHeaders();
@@ -62,10 +62,9 @@ public function execute($subPage) {
   }
 
 
+*/
 
 
-
-/*
 
 
 public function execute( $par ) {
@@ -189,7 +188,6 @@ $out->addHTML ("<h2>Possibility 1: Uploading a file from your local computer</h2
 
 }
 
-*/
 
 // return:   true: form will not display again
 //           false: from WILL be displayed again
