@@ -9,6 +9,65 @@ public function __construct() {parent::__construct( 'DanteRestore', 'dante-resto
 
 public function doesWrites() {return true;}
 
+
+
+
+
+public function execute($subPage) {
+    $this->setHeaders();
+    $output = $this->getOutput();
+    $output->setPageTitle('Upload and Display File');
+
+    // Check if the form was submitted
+    $request = $this->getRequest();
+
+  danteLog ("DanteBackup", "Seeing FILES: ".print_r ($_FILES, true)."\n");
+
+    if ($request->wasPosted() && isset($_FILES['file'])) {
+      $this->handleUpload($request);
+    } else {
+      $this->showUploadForm();
+    }
+  }
+
+  private function showUploadForm() {
+    $output = $this->getOutput();
+    $output->addHTML(
+      '<form method="post" enctype="multipart/form-data">
+         <input type="file" name="file" required>
+         <input type="submit" value="Upload">
+       </form>'
+    );
+  }
+
+  private function handleUpload($request) {
+    $output = $this->getOutput();
+    $file = $_FILES['file'];
+
+ 
+
+
+    // Check for upload errors
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+      $output->addHTML('<p>Error uploading file.</p>');
+      return;
+    }
+
+    // Read the file content
+    $fileContent = file_get_contents($file['tmp_name']);
+    $fileContent = htmlspecialchars($fileContent); // Escape HTML characters
+
+    // Display the file content
+    $output->addHTML("<pre>$fileContent</pre>");
+  }
+
+
+
+
+
+/*
+
+
 public function execute( $par ) {
     if (! $this->getUser()->isAllowed ("dante-restore") ) { $this->getOutput()->addHTML ("You do not have the permission to restore."); return;}  
 
@@ -19,9 +78,13 @@ public function execute( $par ) {
 
 //  $this->checkReadOnly();  // TODO: what does this do ????
 
+  danteLog ("DanteBackup", "Entered execute \n");
   $request = $this->getRequest();
   if ( $request->wasPosted() && $request->getRawVal( 'action' ) == 'submit' ) {
-    $request = $this->getRequest();
+
+    danteLog ("DanteBackup", "We obtained: " . print_r ($request, true). "\n");
+      danteLog ("DanteBackup", "ALL: " . print_r ($_FILES, true) . "\n");
+
     $formIdentifier = $request->getVal( 'wpFormIdentifier' );
 
     danteLog ("DanteBackup", "Form identifier: " . print_r ($formIdentifier, true));
@@ -58,7 +121,23 @@ private function showForm() {
   $user   = $this->getUser();
   $out    = $this->getOutput();
 
-  $out->addHTML ("<h2>Possibility 1: Uploading a file from your local computer</h2>"); 
+
+
+  $out->addHTML ("<h2>Possibility 0: Uploading a file from your local computer</h2>"); 
+
+  $form0 = [];
+  $form0 += [ 'urlnull' => [ 'type' => 'text', 'label-message' => 'label-textfield', 'section' => 'restore-from-url-null',  'required' => true,  ] ];
+  $form0 += [ 'urlnullzwo' => ['type' => 'file','name' => 'nextes', 'section' => 'restore-from-url-null', 'required' => true, ] ];
+  $htmlForm0 = new HTMLForm( $form0, $this->getContext() );
+  $htmlForm0->setAction( $action );
+  $htmlForm0->setId( 'mw-import-upload-form-null' );
+  $htmlForm0->setSubmitText( 'Restore from URLNULL' );
+  $htmlForm0->setFormIdentifier( 'formURLNULL' );   // TODO: SELTSAMERWEISE IST DAs HIEr IMMER FEHLEND IM LOG ?????
+  $htmlForm0->prepareForm()->displayForm( false );
+
+
+$out->addHTML ("<h2>Possibility 1: Uploading a file from your local computer</h2>"); 
+
   $formLOCAL = [];
   $formLOCAL += [ 'xmlimport' => ['type' => 'file','name' => 'xmlimport', 'accept' => [ 'application/xml', 'text/xml', 'application/x-gzip-compressed', 'application/octet-stream' ], 'section' => 'select-local-file', 'required' => true, ] ];
   $htmlFormLOCAL = new HTMLForm( $formLOCAL, $this->getContext() );
@@ -69,9 +148,7 @@ private function showForm() {
   $htmlFormLOCAL->prepareForm()->displayForm( false );
 
  // $htmlFormLOCAL->setSubmitCallback( [ $this, 'processInputLOCAL' ] );
- // $htmlFormLOCAL->show();
-
- 
+//   $htmlFormLOCAL->show();
 
 
 // TODO: check if we can upload a gzip., aes, aes and gzip file here !
@@ -112,7 +189,7 @@ private function showForm() {
 
 }
 
-
+*/
 
 // return:   true: form will not display again
 //           false: from WILL be displayed again
