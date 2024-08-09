@@ -498,6 +498,8 @@ $( function() {
     Object.assign (document.getElementById ("content").style,          {"margin-left":  dist  } );
     Object.assign (document.getElementById ("left-navigation").style,  {"margin-left":  dist  } );
     Object.assign (document.getElementById ("footer").style,           {"margin-left":  dist  } );
+    Object.assign (document.getElementById ("mw-head-base").style,     {"margin-left":  dist  } ); // helps for the placement of the audio player in the head base
+
     Object.assign (document.getElementById ("mw-panel").style,           {"height": "100%"  } );   // needed due to a bug somewhere we do not know
     window.localStorage.setItem ("sidebar-width", dist);
   }

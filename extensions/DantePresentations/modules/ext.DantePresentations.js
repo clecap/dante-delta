@@ -267,11 +267,11 @@ function initializeToc () {  // initialize TOC functions - called by initialize 
 
 initializeToc ();
 
-//console.error ("ext.dantepresentations.js loaded");
+console.error ("ext.dantepresentations.js loaded");
 
 
 
-
+require ("./audio.js");  // necessary to load the second file of loader, see Javascript example at https://www.mediawiki.org/wiki/ResourceLoader/Developing_with_ResourceLoader
 
 
 
