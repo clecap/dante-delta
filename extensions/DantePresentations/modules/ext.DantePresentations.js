@@ -3,7 +3,7 @@
 // TODO: check if we can use a global object kind of namespace in javascript: handlers 
 
 (() => {  // scope protection
-
+   
 
 window.present = startPresentation;      // cludge for javascript: handler
 

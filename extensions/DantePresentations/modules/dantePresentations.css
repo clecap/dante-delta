@@ -16,19 +16,26 @@ aside {
 }
 
 
-#inline-edit-preview-container {
-    border: 5px solid lightgrey;
-}
+#inline-edit-preview-container {border: 5px solid lightgrey;}
 
-body.xhrPending #inline-edit-preview-container {
-    border: 5px solid red;
-}
-
-body.inputChanged #inline-edit-preview-container {
-    border: 5px solid gold;
-}
+/* UI feedback on the status of the preview area */
+body.xhrPending #inline-edit-preview-container {border: 5px solid red;}
+body.inputChanged #inline-edit-preview-container {border: 5px solid gold;}
 
 /* remove the "your edit has been saved" notification */
-.postedit {
-    display: none;
-}
+.postedit {display: none;}
+
+/* indicator notice that the page has audio */
+.audioPresent {color:red; border:1px solid red; border-radius:5px; padding:3px 10px 3px 10px;}
+
+
+
+
+
+
+
+
+
+
+
+

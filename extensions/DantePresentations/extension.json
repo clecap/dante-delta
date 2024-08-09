@@ -23,7 +23,7 @@
     "ext.DantePresentations": {
       "localBasePath":       "modules",
       "remoteExtPath":       "DantePresentations/modules",
-      "packageFiles":        ["ext.DantePresentations.js"],
+      "packageFiles":        ["ext.DantePresentations.js", "ext.audio.js"],
       "styles":              ["dantePresentations.css", "toc.css"]
   }
   },

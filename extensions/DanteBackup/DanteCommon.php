@@ -27,8 +27,6 @@ function getSubPagesFor( $titleText, $namespace ) {
 }
 
 
-
-
 class DanteCommon {
 
 const DUMP_PATH = "DUMP";
@@ -43,18 +41,18 @@ const INFO = [
 ];
 
 const FEATURES = [
-  'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check'  ],
-  'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check'  ]
+  'fil'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Filter',     'name' => 'filter',     'type' => 'check',  'help-message' => 'help-filter'  ],
+  'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'help-message' => 'help-zip' ],
+  'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc' ],
 ];
 
 
 const SOURCE_FEATURES = [
   'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
-    'options' => [ 'Only pages listed in <a href=\'./MediaWiki:Corefiles\'>MediaWiki:Corefiles</a>'                                  => "corefiles",
-                   'Only pages listed in <a href=\'./MediaWiki:Backupfiles\'>MediaWiki:Backupfiles</a>'                              => "backupfiles",
-                   'Only pages in <b>category backup</b>'                                                                            => "backupcategory",
-                   'Only pages in a category listed in <a href=\'./MediaWiki:Backupcategories\'>MediaWiki:Backupcategories</a>'      => "backupcategories",
-                    '<b>All</b> pages'                                                                                               => "all", 
+    'options' => [ 'Only pages listed in page <a href="./index.php?title=MediaWiki:Backupfiles">MediaWiki:Backupfiles</a>'                              => "backupfiles",
+                   'Only pages in <a href="./indx.php?title=Category:Backup">Category:Backup</a>'                                                       => "backupcategory",
+                   'Only pages in a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories</a>'           => "backupcategories",
+                    '<b>All</b> pages'                                                                                                                  => "all", 
                      ],   
      'name' => 'srces',  'default' => 'all', 
   ],
@@ -77,13 +75,14 @@ const DEBUG_FORM = [
     'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
         'options' => [ // "bibi".wfMessage ('somestuff')->plain() =>  "checkme",  // TODO: that's how to localize this stuff; that's why we have this as return of a function and not as a const array
            '<b>AWS S3 foreground</b> (shows error messages; may take minutes to hours)'                                                                       => "awsFore",
-           '<b>AWS S3 background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'         => "awsBack", 
+           '<b>AWS S3 background</b> (no error messages; need to check for completion by <a href=\'./index.php?title=Special:DanteListBackups\'>listing backups</a>)'         => "awsBack", 
            '<b>Github foreground</b> (shows error messages; may take minutes to hours)'                                                                       => "githubFore",
            '<b>Github background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'         => "githubBack", 
            '<b>SSH foreground</b> (shows error messages; may take minutes to hours)'                                                                          => "sshFore",
            '<b>SSH background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'            => "sshBack", 
            "<b>Client</b> (save as file on the client using the browser)"                                                                                     => "browser",
-           '<em>Window</em> (show it in the browser window; may include error messages; useful for debugging)'                                                => "window",
+           'Window (show it in the browser window; may include error messages; useful for debugging)'                                                => "window",
+           'List (only show list of files as dry-run; does <em>not</em> dump; useful for debugging)'                                                => "list",
            '<b>Server foreground</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                               => "serverFore",
            '<b>Server background</b> (no error messages; need to check for completion on server; only testing or when server accessible)'                     => "serverBack",
                      ], 
@@ -116,10 +115,7 @@ public static function checkSuffix ( $string, $suffix) {
 
   // $obj: the object providing the getNativeExtension and generateCommand functions
 
-// command decorator for a command $cmd which produces a stream while dumping; result then gets piped/redirected into different sinks
-public static function cmdZipEncDump ( $cmd, $zip, $enc ) {
-  return "set -o pipefail; " . $cmd . ($zip ? " | gzip " : " ") . ($enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -pass env:LOCAL_FILE_ENC " : " ") ; 
-}
+
 
 
   // command decorator. result then gets piped/redirected into different sinks
@@ -128,118 +124,6 @@ public static function cmdZipEncDump ( $cmd, $zip, $enc ) {
 public static function cmdZipEncRestore ( $cmdGenerate, $cmdConsume, $zip, $enc ) {
   return "set -o pipefail; " .  $cmdGenerate . ($enc ? " openssl aes-256-cbc -d -salt -pass env:LOCAL_FILE_ENC | " : "" ) . ($zip ? " gunzip -c | " : "") .  $cmdConsume;
 }
-
-
-// execute a command obtained from $obj->getCommand
-// stream the stdout of the command execution to the browser, assuming (text/plain) to show it best
-public static function dumpToWindow ($obj, $zip, $enc, $aesPW) {
-    header( "Content-type: text/plain; charset=utf-8" );
-    $cmd = $obj->getCommand ();
-    $cmd = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
-    $cmd = $cmd . " 2>&1 ";  // redirecting stderror gives us the chance of seeing error messages in the window 
-    $result = 0; 
-    $ptResult = passthru ($cmd, $result);
-    echo "ERROR: $ptResult, $result, $cmd";
-}
-
-  public static function dumpToBrowser ($obj, $zip, $enc, $aesPW) {
-    $filename = DanteCommon::generateFilename( $obj->getNativeExtension(), $zip, $enc);
-    DanteCommon::contentTypeHeader ($zip, $enc);
-    header( "Content-disposition: attachment;filename={$filename}" );
-    $cmd = $obj->getCommand ();
-    $cmd = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
-    $result = 0; 
-    passthru ($cmd, $result);
-  }
-
-
-// background // TODO redo completelly
-public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
-  $cmd = $obj->getCommand ();  // TODO: pipefail ß?????
-  $cmd = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
-
-  $name    = "s3://$bucketName/" . DanteCommon::generateFilename(  $obj->getNativeExtension(), $zip, $enc);
-  $cmd = $cmd . " | /opt/myenv/bin/aws s3 cp - $name ";
-  $cmd = "( $cmd ) &>DANTEDBDump_LOCAL_ERROR_FILE & ";  // TODO: correct redirect ?  test
-  $retCode = Executor::executeAWS_FG_RET ( new AWSEnvironmentPreparatorUser ($obj->getUser()), $cmd, $output, $error );
-  if ($retCode == 0) { return "<div>The background execution has been started. For success check listing of backups or <a href='../DANTEDBDump_LOCAL_ERROR_FILE'>Error File</a></div>"; }
-  else {return "<div>The execution failed with return value $retCode. We got the following error message: <br><div style='color:red;'>" . implode ("<br>", explode ("\n", $error)) . "</div>";   }
-}
-
-
-// foreground
-public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
-  $cmd     = "set -o pipefail; " . $obj->getCommand ( );  // pipefail prevents masking of error conditions along the pipe
-  $cmd     = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
-  $name    = "s3://$bucketName/" . DanteCommon::generateFilename ($obj->getNativeExtension(), $zip, $enc);
-  $cmd    .= " | /opt/myenv/bin/aws s3 cp - $name ";
-
-  $retText = "";  // accumulates this and the subsequent listing command
-
-  $env = self::getEnvironmentUser ($obj->getUser());
-  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
-  
-  $retText .= "<h3>Command</h3><code>$cmd</code>"; 
-  $retText .= "<h3>Information sent to <code>stdout</code></h3>" . nl2br (htmlspecialchars ($output, ENT_QUOTES, 'UTF-8')) . "";
-  $retText .= "<h3>Information sent to <code>stderr</code></h3>" . nl2br (htmlspecialchars ( $error,  ENT_QUOTES, 'UTF-8')) . "";
-  if ($retCode == 0) { $retText .= "<h3>Execution successful</h3>";}
-  else               { $retText .= "<h3 style='color:red;'>Execution failed, return code $retCode </h3>";}
-
-  $retText .= "<h3>Directory listening of $bucketName</h3>";
-
-/*
-  $retCode = Executor::executeAWS_FG_RET ( " /opt/myenv/bin/aws s3 ls $bucketName --human-readable ", $env ,  $output, $error );
-  if ($retCode != 0) { $retText .= "<hr>ERROR ".   preg_replace ("/\n/", "<br>", $error) . "<hr>";} 
-  else               { $retText .= "<hr>".   preg_replace ("/\n/", "<br>", $output) . "<hr>";}
-*/
-
-  $cmd = "/opt/myenv/bin/aws s3api list-objects-v2 --bucket {$bucketName} --query 'Contents[].[Key,LastModified,Size]' --output json";
-  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
-  $objects = json_decode($output, true);  // Decode the JSON output into a PHP array
-  if (is_array($objects)) {
-    usort($objects, function ($a, $b) {return strtotime($b[1]) - strtotime($a[1]);});    // Sort the objects by LastModified in descending order
-    $retText .= "<ul>";
-    foreach ($objects as $object) { $retText .= '<li><span style="display:inline-block;width:400px;min-width:400px;">' . $object[0] . '</span><span style="display:inline-block;width:300px;">' . $object[1] . "</span>";
-      $retText .= "<span style='display:inline-block;width:400px;'>". number_format ($object[2]/ (1024*1024), 2)  . "[MB] </span></li>\n"; }
-    $retText .= "</ul>";
-  }
-  else { $retText .= "Did not get reply from aws";}
-  return $retText;
-}
-
-
-
-
-
-
-
-
-
-public static function dumpToServer ( $obj, $name, $zip, $enc, $aesPW, $background ) {
-  global $IP;
-
-  $dirPath = $IP. "/".DanteCommon::DUMP_PATH;
-  echo "---------------------------$IP -----------".$dirPath;
-  if ( !file_exists ( $dirPath ) ) { mkdir ( $dirPath, 0755); }
-  $filename = DanteCommon::generateFilename( $obj->getNativeExtension(), $zip, $enc);
-  $errorFileName = DanteCommon::DUMP_PATH."/DANTEDBDump_ERROR_FILE$filename";
-
-  $cmd = $obj->getCommand ();
-  $cmd = DanteCommon::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
-  $cmd .= " > ".DanteCommon::DUMP_PATH."/".$filename;
-
-  if ($background) {$cmd = "( $cmd ) &> $errorFileName & ";}
-  $ret = Executor::execute ( $cmd, $output, $error, $duration);
-
-  if ($background) {
-    if ($ret == 0) { return "<div>The execution was started successful. Command was: $cmd </div>"; }
-    else {return "<div>The execution failed with return value $retCode. We got the following error message: <br><div style='color:red;'>" . implode ("<br>", explode ("\n", $error)) . "</div>"; }
-  } 
-  else {  // when running in foreground 
-    return "<div>Execution of $cmd return value $ret and output $output and error $error</div>";
-   }
-}
-
 
 
 public static function getEnvironmentUser (User $user) {

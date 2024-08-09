@@ -2,7 +2,6 @@
 
 use MediaWiki\MediaWikiServices;
 
-
 require_once ("renderers/hideRenderer.php");
 
 class DantePresentations {
@@ -51,7 +50,11 @@ class DantePresentations {
 
    $links['views']['my_view_zwo'] = ['class' => '', 'href' => $showExternalUrl, 'text' => 'Show', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'
 //     'onclick' => $jsText
-]; }  // siehe ext.DantePresentations.js
+]; 
+
+   $links['views']['audio'] = ['class' => '', 'href' => $showExternalUrl, 'text' => 'Show', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'];
+
+  }  // siehe ext.DantePresentations.js
 
   // add a new action (this is under "more")
   //  $links['actions']['my_action'] = ['class' => '', 'href' => '#/SkinTemplateNavigationLocalSettings.php', 'text' => 'SkinTemplateNavigation action' ];
@@ -121,10 +124,13 @@ $hint = "";
   }
 
 
-  // at this moment in the build process we have easy access to the current page name and we add the current page name into the crumbs for the next occasion
-  public static function onBeforePageDisplay( OutputPage $output, Skin $skin ) {
-    $output->addModules( [ "ext.DantePresentations" ] );  // injects css and js
-  }
+// at this moment in the build process we have easy access to the current page name and we add the current page name into the crumbs for the next occasion
+public static function onBeforePageDisplay( OutputPage $output, Skin $skin ) {
+  $output->addModules( [ "ext.DantePresentations" ] );  // injects css and js
+  
+//  $output->setIndicators (["a" => "<span class='audioPresent'>Audio</span>"]);
+
+}
 
 
 // Get displaytitle page property text.

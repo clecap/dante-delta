@@ -7,3 +7,7 @@
 /* necessary to get a reasonable file length displayed in the file selector in special dante restore */
 .fileselector {width:600px; min-width:600px;}
 
+#restore-form-local {margin-bottom:60px;}
+#restore-form-aws {margin-bottom:60px;}
+#restore-form-url {margin-bottom:60px;}
+#restore-form-scp {margin-bottom:60px;}

@@ -1,8 +1,5 @@
 <?php
-/**
- * Hooks for extension HideSection.
- * @ingroup Extensions
- */
+
 
 class DanteHideSectionHooks {
 

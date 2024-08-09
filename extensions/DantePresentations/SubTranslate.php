@@ -12,7 +12,7 @@
 use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\MediaWikiServices;
 
-
+use MediaWiki\Html\Html;
 
 class SubTranslate {
 
@@ -182,7 +182,16 @@ public static function onArticleViewHeader( &$article, &$outputDone, bool &$pcac
 
   danteLog ("DantePresentations", "onArticleViewHeader \n");
   $pcache = true;  // use parser cache
-  if( $article->getPage()->exists() ) {  danteLog ("DantePresentations", "SubTranslate: page exists \n"); return; }
+
+  $out = $article->getContext()->getOutput();
+
+  if( $article->getPage()->exists() ) { 
+
+//    $out->addHTML( "<div class='hello-world-notice'>Hello Worldmmmmmmmmmm</div>" );
+    danteLog ("DantePresentations", "SubTranslate: page exists \n"); 
+
+    return;
+  }
 
     /* check namespace */
     $title = $article->getTitle();

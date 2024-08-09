@@ -38,23 +38,43 @@
 
   "restform-restore-from-s3": "Select a page dump file for restoring",
 
-
-  "prefs-aws":         "Credentials for Backup to AWS S3",
+  "prefs-aws":         "Credentials for AWS Backup",
 
   "aws-prefs-key":     "Access Key of an Amazon AWS IAM User with rights to write to S3. See [[Help:DanteBackup]].",
   "aws-prefs-skey":    "Secret Access Key of that Amazon AWS IAM User. Keep confidential. See [[Help:DanteBackup]].",
-  "aws-prefs-bucket":  "Name of an AWS S3 bucket. Example: dantebackup.iuk.one",
-  "aws-prefs-region":  "Name of an AWS region. Example: eu-central-1",
-  "aws-prefs-encpw":  "Optional encryption password for user-controlled encryption before S3 upload. See [[Help:DanteBackup]].",
+  "aws-prefs-bucket":  "Name of an AWS S3 bucket. Example: dantebackup.iuk.one. See [[Help:DanteBackup]].",
+  "aws-prefs-region":  "Name of an AWS region. Example: eu-central-1. See [[Help:DanteBackup]].",
+  "aws-prefs-encpw":   "Encryption password for user-controlled encryption before S3 upload. See [[Help:DanteBackup]].",
 
   "aws-prefs-label-key":      "AWS Access Key",
   "aws-prefs-label-skey":     "AWS Secret Access Key",
   "aws-prefs-label-bucket":   "AWS S3 Bucket Name",
   "aws-prefs-label-region":   "AWS Region Code",
-  "aws-prefs-label-encpw":    "Encryption password for AWS S3",
+  "aws-prefs-label-encpw":    "Encryption Password for AWS S3",
+
+  "prefs-ssh":         "Credentials for SSH Backup",
+
+  "prefs-ssh-host":          "Name and domain (FQDN) of host used for SSH backup. See [[Help:DanteBackup]].",
+  "prefs-ssh-dump-user":     "User name for user on SSH backup host which receives the dump. See [[Help:DanteBackup]].",
+  "prefs-ssh-dump-pw":       "Password for user on SSH backup host which receives the dump. See [[Help:DanteBackup]].",
+  "prefs-ssh-restore-user":  "User name for user on SSH backup host which provides the dumped data. See [[Help:DanteBackup]].",
+  "prefs-ssh-restore-pw":    "Password for user on SSH backup host which provides the dumped data. See [[Help:DanteBackup]].",
+  "prefs-ssh-encpw":         "Encryption password for user-controlled encryption before SSH upload. See [[Help:DanteBackup]].",
+
+  "prefs-label-ssh-host":          "SSH Backup Host",
+  "prefs-label-ssh-dump-user":     "Dump User Name",
+  "prefs-label-ssh-dump-pw":       "Dump User Password",
+  "prefs-label-ssh-restore-user":  "Restore User Name",
+  "prefs-label-ssh-restore-pw":    "Restore User Password",
+  "prefs-label-ssh-encpw":         "Encryption Password for SSH",
 
   "somestuff" : "Localized <b>stuff</b>  ",
 
+  "specialpages-group-dante":  "DanteWiki",
 
-  "specialpages-group-dante":  "DanteWiki"
+  "help-filter": "Removes all hidden contents. See [[Help:Hidden Contents]]",
+  "help-zip":    "Compression reduces file size.",
+  "help-enc":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password, as without it you cannot restore the contents of the dump file."
+
+
 }
