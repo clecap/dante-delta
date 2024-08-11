@@ -185,7 +185,9 @@ private static function getSubstringAfterSeparator( $inputString, $sep ) {
 
 
 
-public static function onExtensionLoadSetup() { global $wgNamespacesWithSubpages; $wgNamespacesWithSubpages[2200] = true;}
+public static function onExtensionLoadSetup() { global $wgNamespacesWithSubpages; 
+    danteLog ("DantePresentations", "onEXTENSIONLOADSETUP \n");
+$wgNamespacesWithSubpages[2200] = true;}
 
 
 
