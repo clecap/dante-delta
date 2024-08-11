@@ -197,8 +197,14 @@ public static function onExtensionLoadSetup() { global $wgNamespacesWithSubpages
 
 
 ///////// REPLICA of Title::getsubpages here !
-public function getSubpages( $title, $limit = -1 ) {
-  if (!MediaWikiServices::getInstance()->getNamespaceInfo()->hasSubpages( $title->mNamespace )) {
+public static function getSubpages( $title, $limit = -1 ) {
+  if (!MediaWikiServices::getInstance()->getNamespaceInfo()->hasSubpages( $title->getNamespace() )) {
+
+     danteLog ("DantePresentations", "Title: ".$title."\n");
+     danteLog ("DantePresentations", "Title namespace ".$title->getNamespace()."\n");
+
+
+     danteLog ("DantePresentations", "  This namespace allows no subpages -\n");
 
 			return [];
 		}
