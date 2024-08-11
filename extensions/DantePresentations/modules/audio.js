@@ -5,21 +5,19 @@ let player;
 
 function init () {
   console.log ("ext.audio: initialized");
-  player = document.createElement ("audio");
-  player.style= "position:relative; top:0px; left:100px; width:300px;height:40px;";
-  player.src = "file";
-  player.setAttribute ("controls", "");
+  audio = document.createElement ("audio");
+  audio.style= "position:relative; top:0px; left:100px; width:300px;height:40px;";
+  audio.src = "file";
+  audio.setAttribute ("controls", "");
 
   let head = document.getElementById ("mw-head-base");
 
-  head.appendChild (player);
+  head.appendChild (audio);
 
 
 
      
- 
 
- 
 
 
 audio.controls = true; 

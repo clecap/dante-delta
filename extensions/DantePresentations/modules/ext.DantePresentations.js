@@ -270,8 +270,9 @@ initializeToc ();
 console.error ("ext.dantepresentations.js loaded");
 
 
+try {require ("./audio.js");} catch (e) { console.error (e);}  // necessary to load the second file of loader, see Javascript example at https://www.mediawiki.org/wiki/ResourceLoader/Developing_with_ResourceLoader
 
-require ("./audio.js");  // necessary to load the second file of loader, see Javascript example at https://www.mediawiki.org/wiki/ResourceLoader/Developing_with_ResourceLoader
+try{require ("./languages.js");} catch (e) {console.error (e);}
 
 
 

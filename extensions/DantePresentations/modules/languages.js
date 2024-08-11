@@ -14,4 +14,5 @@ function initLang ( lang ) {
 })(); // end scope
 
 
+console.error ("languages.js loaded");
 

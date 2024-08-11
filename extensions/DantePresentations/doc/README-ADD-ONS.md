@@ -25,6 +25,7 @@ to another language
 
 If there is any audio material we could play, autopresent an audio player.
 
+
 If there is any video material we could play, autopresent a video player.
 
 The player has a 
@@ -39,6 +40,20 @@ How do we know that material exists?
 How do we generate material? (if generated)
 How do we upload material? (if uploaded)
 How do we connect material with sections / subsections.
+
+
+
+
+Every material is a Wiki page or File.
+
+A manually translated language variant:  Unicode Hex 270d 
+
+A transcribed audio> File name and then Unicode play&pause symbol hex 23ef
+
+
+
+
+
 
 
 

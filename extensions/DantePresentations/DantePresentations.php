@@ -155,12 +155,16 @@ public static function onBeforePageDisplay( OutputPage $output, Skin $skin ) {
     return false;
   }
   
-  // defines __SLIDES__ as an additional Mediawiki magic word
-  // NOTE: reference is https://www.mediawiki.org/wiki/Manual:Magic_words
-  public static function onGetDoubleUnderscoreIDs( &$ids ) { 
-    $ids[] = 'MAG_SLIDES';
-    $ids[] = 'MAG_HIDEHEAD';
-    $ids[] = 'MAG_HIDEHL';
+// defines __SLIDES__ as an additional Mediawiki magic word
+// NOTE: reference is https://www.mediawiki.org/wiki/Manual:Magic_words
+public static function onGetDoubleUnderscoreIDs( &$ids ) { 
+  array_push ( $ids, 'MAG_SLIDES');      // a slide page
+  array_push ( $ids, 'MAG_HIDEHEAD');
+  array_push ( $ids, 'MAG_HIDEHL');
+
+
+
+  return true;
    }
 
   public static function onSkinEditSectionLinks( $skin, $title, $section, $tooltip, &$links, $lang ) {
