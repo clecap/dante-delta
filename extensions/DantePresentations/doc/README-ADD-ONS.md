@@ -46,7 +46,9 @@ How do we connect material with sections / subsections.
 
 Every material is a Wiki page or File.
 
-A manually translated language variant:  Unicode Hex 270d 
+A manually translated language variant:  Unicode Hex 270d  (writing hand)
+Machine translated   computer symbol 💻
+
 
 A transcribed audio> File name and then Unicode play&pause symbol hex 23ef
 

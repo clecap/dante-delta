@@ -9,6 +9,11 @@
 
 
 
+
+// JUST SKELETON - I will not adjust this to my own needs !!!!
+
+
+
 use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\MediaWikiServices;
 
@@ -169,6 +174,125 @@ private static function getCache( $key ) {
 }
 
 
+
+
+
+private static function getSubstringAfterSeparator( $inputString, $sep ) { 
+  $lastSlashPos = strrpos( $inputString, $sep );   // Find the suffix after the computer emoji (folloed by language code for machine translation)
+  if ( $lastSlashPos !== false ) {return substr( $inputString, $lastSlashPos + 1 );}    // If a slash is found, return the substring after it
+  return $inputString;                                                                  // If no slash is found, return the original string
+}
+
+
+
+public static function onExtensionLoadSetup() { global $wgNamespacesWithSubpages; $wgNamespacesWithSubpages[2200] = true;}
+
+
+
+
+
+
+
+
+
+
+///////// REPLICA of Title::getsubpages here !
+public function getSubpages( $title, $limit = -1 ) {
+  if (!MediaWikiServices::getInstance()->getNamespaceInfo()->hasSubpages( $title->mNamespace )) {
+
+			return [];
+		}
+
+		$options = [];
+		if ( $limit > -1 ) {
+			$options['LIMIT'] = $limit;
+		}
+
+		$pageStore = MediaWikiServices::getInstance()->getPageStore();
+		$query = $pageStore->newSelectQueryBuilder()
+			->fields( $pageStore->getSelectFields() )
+			->whereTitlePrefix( $title->getNamespace(), $title->getDBkey() . '/' )
+			->options( $options )
+			->caller( __METHOD__ );
+
+		return TitleArray::newFromResult( $query->fetchResultSet() );
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// this is my DANTE version !
+public static function onArticleViewHeader ( &$article, &$outputDone, bool &$pcache ) {
+  global $wgOut;
+  $title = $article->getTitle();    // Get the title of the current page
+
+  danteLog ("DantePresentations", "onArticleViewHeader found page:  " .$title." \n");
+
+  $titleSubs = $title->getSubpages();
+  $titleSubsNum = count ($titleSubs);
+  danteLog ("DantePresentations", "title subs:" . $titleSubsNum . "\n");
+
+
+  $translateNamespaceId = 2200;                                                      // NS_TRANSLATE 
+  $translateTitle = Title::makeTitle( $translateNamespaceId, $title->getText() );    // Check if a page with the same title exists in the Translate namespace
+
+  danteLog ("DantePresentations", "onArticleViewHeader found translate title:  " .$translateTitle." \n");
+
+  if ( ! $translateTitle->exists() ) { return true; }       // if not found, continue with normal processing
+  
+ danteLog ("DantePresentations", "onArticleViewHeader : translate title exists! \n");
+
+  $hasSubpages = $translateTitle->hasSubpages(); danteLog ("DantePresentations", "oARTICLEVIEWHEADER: hasSubpages: " . print_r ($hasSubpages, true) . "\n");
+
+  // we DO have a matching page in the Translated namespace, which means that at least some machine translation variant or human translation variant or AI production exists
+/*
+    $wgOut->redirect( $translateTitle->getFullURL() );    // issue a redirect             
+    $outputDone = true;                                   // To stop the current page from rendering
+    return false;
+*/
+
+  $subpages =   self::getSubpages ( $translateTitle ); // $translateTitle->getSubpages();  // get all subpages of the matching page
+  $num = count ($subpages);
+
+  danteLog ("DantePresentations", "onArticleViewHeader found $num subpages of $translateTitle\n");
+  foreach ( $subpages as $subpage ) {
+    $subText   = $subpage->getFullText();
+    $subTitle  = $subpage->getTitle();
+    $subSuffix = self::getSubstringAfterSeparator ( $subTitle, '💻');
+    danteLog ("DantePresentations", " subpage found. Title=" . $subTitle  . " and machine translation suffix= " .$subSuffix ."\n");
+
+  }
+
+
+
+  return true;  // continue with normal page rendering
+} // onArticleViewHeader
+
+
+
+
+
+
+
+
   /**
    * https://www.mediawiki.org/wiki/Manual:Hooks/ArticleViewHeader
    * @param Article &$article
@@ -177,7 +301,7 @@ private static function getCache( $key ) {
    *  bool &$pcache
    * return null
    */
-public static function onArticleViewHeader( &$article, &$outputDone, bool &$pcache ) {
+public static function onArticleViewHeaderSUBTRANSLATE( &$article, &$outputDone, bool &$pcache ) {
   global $wgContentNamespaces, $wgSubTranslateSuppressLanguageCaption, $wgSubTranslateRobotPolicy;
 
   danteLog ("DantePresentations", "onArticleViewHeader \n");
@@ -192,6 +316,8 @@ public static function onArticleViewHeader( &$article, &$outputDone, bool &$pcac
 
     return;
   }
+
+
 
     /* check namespace */
     $title = $article->getTitle();

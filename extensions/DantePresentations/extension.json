@@ -19,6 +19,7 @@
     "SkinAddFooterLinks":                 "DantePresentations::onSkinAddFooterLinks",
     "ArticleViewHeader":                  "SubTranslate::onArticleViewHeader"
   },
+  "ExtensionFunctions": ["SubTranslate::onExtensionLoadSetup"],
   "ResourceModules": {
     "ext.DantePresentations": {
       "localBasePath":       "modules",
@@ -29,5 +30,8 @@
   },
   "ResourceFileModulePaths": {"localBasePath": "modules", "remoteExtPath": "DantePresentations/modules"},
   "ExtensionMessagesFiles": {"CustomMagic": "custom.i18n.php"},
+   "namespaces": [ 
+     { "id": 2200,  "constant": "NS_TRANSLATE",        "name": "Translated"},
+     { "id": 2201,  "constant": "NS_TRANSLATE_TALK",   "name": "Translated_Talk" } ],
   "manifest_version": 2
 } 
