@@ -16,15 +16,16 @@ public function execute() {
 
   $contentText = '';  while ($line = fgets(STDIN)) { $contentText .= $line; }      // Read content from stdin
 
+//  myLog ("read from stdin: " . $contentText . "\n");
+
+
   $title = Title::newFromText($titleText);
   if (!$title) {$this->output("Invalid title"); return;}
 
   // if ($title->exists()) {$this->output("Page already exists.\n"); return;}
 
   $wikiPage = WikiPage::factory($title);
-
   $content = ContentHandler::makeContent($contentText, $title);
-
   $summary = "Created by a DanteWiki ai or translation script";
 
   $user = User::newSystemUser('Maintenance script');      // Get a system user to perform the page update
@@ -32,9 +33,20 @@ public function execute() {
   $pageUpdater->setContent('main', $content);
   $pageUpdater->saveRevision(CommentStoreComment::newUnsavedComment($summary));
 
-  $this->output("Page '{$titleText}' created successfully.\n");
+  $this->output("\"Page {$titleText} created successfully.\"");
   }
 }
+
+function myLog ($text) {
+  $fileName = "LOG";
+  if($tmpFile = fopen( $fileName, 'a')) {fwrite($tmpFile, $text);  fclose($tmpFile);}  // NOTE: close immediatley after writing to ensure proper flush
+  else {throw new Exception ("could not log"); }
+
+  $fileSize = filesize ($fileName);
+  if ($fileSize == false) { return; }
+  if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
+}
+
 
 $maintClass = CreatePage::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

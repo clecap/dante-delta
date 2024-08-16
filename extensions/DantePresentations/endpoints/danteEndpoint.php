@@ -14,6 +14,7 @@ require_once ("../helpers/DanteDummyUserIdentity.php");
 require_once ("../helpers/DanteDummyPageReference.php");
 require_once ("../renderers/hideRenderer.php");
 
+
 function EndpointLog ($text) {
   global $wgAllowVerbose;
   if (!$wgAllowVerbose) {return;}
@@ -36,7 +37,7 @@ function ParsifalLog ($text) {
   $fileSize = filesize ($fileName);
   if ($fileSize == false) { return; }
   if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
-  }
+}
 
 
 
@@ -57,56 +58,59 @@ class DanteEndpoint {
   protected $startTime;  
 
   // mandatory parameters (??)
-  protected ?string   $userName;    // needed for constructing the user identity
-  protected ?string   $pageName;    // needed for constructing the page reference  // TODO: not clear why we need this AND the title ??
-  protected ?int      $ns;          // number of the namespace; needed for constructing the page reference
-  protected ?string   $title;       // TODO: title name???ß of the page    // needed for constructing the page reference
-  protected ?string   $dbkey;  // TODO: not clear if needed for paghe reference since currently we use NULL for it
+  protected ?string   $userName = "uninitialized";    // needed for constructing the user identity
+  protected ?string   $pageName = "uninitialized";    // needed for constructing the page reference  // TODO: not clear why we need this AND the title ??
+  protected ?int      $ns = 0;                        // number of the namespace; needed for constructing the page reference
+  protected ?string   $title = "uninitialized";       // TODO: title name???ß of the page    // needed for constructing the page reference
+  protected ?string   $dbkey = "uninitialized";       // TODO: not clear if needed for paghe reference since currently we use NULL for it
+
+
+  // dependant entities
+  protected ?MediaWiki\User\UserIdentity $userId; // 
 
   // optional parameters of the endpoint api
   protected bool      $hiding;
-
+  protected ?string   $curRevisionId;
 
 
 function __construct () {
   $this->startTime = microtime (true);
   
-  // get API data from http headers (set in preview.js)
-   $headers  = getallheaders();                   
-  // EndpointLog ("\n Found headers: \n" . print_r ( $headers, true));
-  $this->pickupDataFromArray ( $headers );
+  $headers  = getallheaders();                                           // get API data from http headers (set them for example in preview.js)
+  $normalizedHeaders = array_change_key_case($headers, CASE_LOWER);      // Normalize the header name by converting all keys to lowercase as some browsers do this on their own
+  $this->pickupDataFromArray ( $normalizedHeaders );                     // pick up data
+  //EndpointLog ("\n Found headers: \n" . print_r ( $headers, true));    // EndpointLog ("\n Found normalized headers: \n" . print_r ( $normalizedHeaders, true)); // DEBUG
 
-  // get API data from query portion of URL - would overwrite those from the headers
-  // EndpointLog ("\nFound SERVER=" . print_r ($_SERVER, true));   
-    // EndpointLog ("\n Query String is: ". print_r ($_SERVER['QUERY_STRING'], true));
-    parse_str ($_SERVER['QUERY_STRING'], $parsed);
-    // EndpointLog ("\nParsed Query String is " . print_r ($parsed, true));  
-    $this->pickupDataFromArray ( $parsed );
+  parse_str ($_SERVER['QUERY_STRING'], $query);                        // get API data from query portion of URL - if both header and query are used: query overwrites the header
+  $normalizedQuery = array_change_key_case($query, CASE_LOWER);        // normalize
+  $this->pickupDataFromArray ( $normalizedQuery );                     // pick up data
+  EndpointLog ("\nParsed Query String is " . print_r ($query, true));  // DEBUG
+  EndpointLog ("\nParsed Query String is " . print_r ($normalizedQuery, true)); // DEBUG
 
-
+  $this->userId = new DanteDummyUserIdentity ( $this->userName );        // generate derived identity
 }
 
 
 
-// TODO: check what we inject as headers in previre.js !!!! - not all is used and / or needed any more !!!!!
+// given the array arr of keys and (string-typed) values, parse properties of this array into its place for this object
+private function pickupDataFromArray ( $arr ) {
+  // EndpointLog ("\n Pickup function sees: \n" . print_r ( $arr, true));
 
-  // given the array arr of keys and (string-typed) values, parse properties of this array into its place for this object
-  private function pickupDataFromArray ( $arr ) {
-    $this->userName            =  ( isset ($arr["Wiki-wgUserName"])             ?  $arr["Wiki-wgUserName"]                 : null ); 
-    $this->ns                  =  intval (( isset ($arr["Wiki-wgNamespaceNumber"])      ?  $arr["Wiki-wgNamespaceNumber"]  : null )); 
-    $this->pageName            =  ( isset ($arr["Wiki-wgPageName"])             ?  $arr["Wiki-wgPageName"]                 : null );     // full name of page, including localized namespace name, if namespace has a name (except 0) with spaces replaced by underscores. 
-    $this->title               =  ( isset ($arr["Wiki-wgTitle"])                ?  $arr["Wiki-wgTitle"]                    : null );   // includes blanks, no underscores, no namespace
-
-    $this->dbkey               =  ( isset ($arr["Wiki-dbkey"])                  ?  $arr["Wiki-dbkey"]                      : null ); 
+  if ( isset ( $arr["wiki-wgusername"] ) )         $this->userName  = $arr["wiki-wgusername"];
+  if ( isset ( $arr["wiki-wgnamespacenumber"] ) )  $this->ns        =  intval ( $arr["wiki-wgnamespacenumber"] ) ; 
+  if ( isset ( $arr["wiki-wgpagename"] ) )         $this->pageName  =  $arr["wiki-wgpagename"];                     // full name of page, including localized namespace name, if namespace has a name (except 0) with spaces replaced by underscores. 
+  if ( isset ( $arr["wiki-wgtitle"] ) )            $this->title     =  $arr["wiki-wgtitle"];                        // includes blanks, no underscores, no namespace
+  if ( isset ( $arr["wiki-dbkey"] ) )              $this->dbkey     =  $arr["wiki-dbkey"]; 
+  if ( isset ( $arr["wiki-wgCurRevisionId"] ) )    $this->curRevisionId     =  $arr["wiki-wgCurRevisionId"]; 
 
 //    $this->hiding              =  ( isset ($arr["Wiki-hiding"])                 ?   strcmp ($arr["Wiki-hiding"], "true")==0  :  false ); 
 //    $this->sect              =  ( isset ($arr["sect"])                 ?   $arr["sect"] :  NULL ); 
 //    if ($this->sect != NULL) {$this->sect = (int) $this->sect;}
-  }
+}
 
 
 
-  private function printData () {
+  protected function printData () {
     EndpointLog ("DanteEndpoint.php sees the following headers:\n" );
     EndpointLog ("  userName:               " . $this->userName            . "\n" );
     EndpointLog ("  ns:                     " . $this->ns                  . "\n" );
@@ -148,8 +152,9 @@ protected function getMimeType () { return "text/html"; }
  *   $text     text to be parsed
  *   $hiding   <hide>...</hide> blocks removed from the rendering   TODO: better: tags with the attribute hide shall be removed
  *
+ *   $removeTags  array of tags which are removed  eg: for translation:  array ("amstex")
  */
-public function parseText ( $text, $hiding, $section = NULL ) {
+public function parseText ( $text, $hiding, $section = NULL, $removeTags = array() ) {
 
  // TODO: add ALL affecting parameters into cache key !!!!!!!!!!!!!!!!!!!
   $cacheKey   = md5 ($text);     
@@ -161,11 +166,10 @@ public function parseText ( $text, $hiding, $section = NULL ) {
      EndpointLog ("Cache miss on $cacheKey");
   }
 
-  // get an instance of UserIdentity
-  $userId  = new DanteDummyUserIdentity ( $this->userName );
+  // get an instance of UserIdentity // $userId  = new DanteDummyUserIdentity ( $this->userName );  // TODO: this worked; if it still works with $this->userId then deprecate this !
 
   // get an instance of ParserOptions
-  $options = new ParserOptions ( $userId );                 // let the parent class provide a user identity
+  $options = new ParserOptions ( $this->userId );           // let the parent class provide a user identity
   $options->setRemoveComments (false);                      // do not remove html comments in the preprocessing phase
   $options->setSuppressTOC (true);                          // do not generate TOC; will be deprecated in 1.42
 
@@ -183,6 +187,8 @@ public function parseText ( $text, $hiding, $section = NULL ) {
 //    $parser->setHook ( "hide", [ "HideRenderer", ($hiding ? 'renderHidden' : 'renderProminent') ] );        
     if ($hiding) { $parser->setHook ( "hide", [ "HideRenderer", 'renderHidden'    ] ); }
     else         { $parser->setHook ( "hide", [ "HideRenderer", 'renderProminent' ] ); }
+
+    foreach ($removeTags as $tag) { $parser->setHook ( $tag, [ "HideRenderer", 'renderHidden' ] );}
 
     EndpointLog ("\nDanteEndpoint: Sees the section type: " . gettype ($section) . " and section value: ($section) \n");
 
@@ -255,7 +261,6 @@ public function execute () {
 
   try {
     $input    = $this->getInput();
-   ///// $params   = getParams ();
 
     $parsedText = $this->parseText ( $input, false );
     $decor   = $this->decorate ($parsedText);
@@ -335,14 +340,15 @@ public function decorate ( $text ) {
   return $ret;
 }
 
-public function getCssPaths ()    { return array(); }
-public function getJsPaths ()     { return array(); }
-public function getBodyClasses () { return array(); }
-public function getHTMLClasses () {return array (); }
+
+public function getCssPaths ()    { return array (); }
+public function getJsPaths ()     { return array (); }
+public function getBodyClasses () { return array (); }
+public function getHTMLClasses () { return array (); }
 
 
-  
 } // class
+
 
 
 class DanteConfig implements Config {

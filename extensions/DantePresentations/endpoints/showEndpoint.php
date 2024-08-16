@@ -12,6 +12,13 @@ require_once ("danteEndpoint.php");
 
 class ShowEndpoint extends DanteEndpoint {
 
+
+function __construct () {
+  parent::__construct();
+  $this->printData ();
+}
+
+
 // ShowEndpoint gets its input from header query information, which is picked up in base class DanteEndpoint and which is set in ????
 // TODO: also allow stuff in query extension of URL !!
 public function getInput () {

@@ -9,53 +9,74 @@
 
 
 
+// require '../../../vendor/autoload.php';    // needed for autoloading of DeepL code, which was installed by composer
+
+
+
+use DeepL\Translator;
+use MediaWiki\MediaWikiServices;
+
+$deeplApiKey = getenv('DEEPL_API_KEY');
+
+
+
+
+
+
 
 // JUST SKELETON - I will not adjust this to my own needs !!!!
 
-
+// TODO: rename filename
 
 use MediaWiki\Languages\LanguageNameUtils;
-use MediaWiki\MediaWikiServices;
+// use MediaWiki\MediaWikiServices;
 
 use MediaWiki\Html\Html;
 
+
+
+
 class SubTranslate {
 
-  /* accepted language codes and captions */
+
+  static $translator = null;
+
+
+  // maps language index to an array consisting of   [0]: native name of language  [1]: english name of language
+  // the index is identical to the language designators as they are understood by deepl
+  // the flag png icons we rename so as to match the deepl designators
   static $targetLangs = [
-  'BG' => "български език",  /* Bulgarian */
-  'CS' => "český jazyk",  /* Czech */
-  'DA' => "dansk",  /* Danish */
-  'DE' => "Deutsch",  /* German */
-  'EL' => "ελληνικά",  /* Greek */
-  'EN' => "English",  /* English */  /* unspecified variant for backward compatibility; please select EN-GB or EN-US instead */
-  'EN-GB' => "British English",  /* English (British) */
-  'EN-US' => "American English",  /* English (American) */
-  'ES' => "español",  /* Spanish */
-  'ET' => "eesti keel",  /* Estonian */
-  'FI' => "suomi",  /* Finnish */
-  'FR' => "français",  /* French */
-  'HU' => "magyar nyelv",  /* Hungarian */
-  'ID' => "Bahasa Indonesia",  /* Indonesian */
-  'IT' => "italiano",  /* Italian */
-  'JA' => "日本語",  /* Japanese */
-  'KO' => "한국어",  /* Korean */
-  'LT' => "lietuvių kalba",  /* Lithuanian */
-  'LV' => "latviešu",  /* Latvian */
-  'NB' => "norsk bokmål",  /* Norwegian (Bokmål) */
-  'NL' => "Dutch",  /* Dutch */
-  'PL' => "polski",  /* Polish */
-  'PT' => "português",  /* Portuguese */  /* unspecified variant for backward compatibility; please select PT-BR or PT-PT instead */
-  'PT-BR' => "português",  /* Portuguese (Brazilian) */
-  'PT-PT' => "português",  /* Portuguese (all Portuguese varieties excluding Brazilian Portuguese) */
-  'RO' => "limba română",  /* Romanian */
-  'RU' => "русский язык",  /* Russian */
-  'SK' => "slovenčina",  /* Slovak */
-  'SL' => "slovenski jezik",  /* Slovenian */
-  'SV' => "Svenska",  /* Swedish */
-  'TR' => "Türkçe",  /* Turkish */
-  'UK' => "українська мова",  /* Ukrainian */
-  'ZH' => "中文"  /* Chinese (simplified) */
+  'BG'    => ["български език",       "Bulgarian"],
+  'CS'    => ["český jazyk",          "Czech"],
+  'DA'    => ["dansk",                "Danish"],
+  'DE'    => ["Deutsch",              "German"],
+  'EL'    => ["ελληνικά",             "Greek"],
+  'EN-GB' => ["British English",      "English (British)"],
+  'EN-US' => ["American English",     "English (American)"],
+  'ES'    => ["español",              "Spanish"],
+  'ET'    => ["eesti keel",           "Estonian"],
+  'FI'    => ["suomi",                "Finnish"],
+  'FR'    => ["français",             "French"],
+  'HU'    => ["magyar nyelv",         "Hungarian"],
+  'ID'    => ["Bahasa Indonesia",     "Indonesian"],
+  'IT'    => ["italiano",             "Italian"],
+  'JA'    => ["日本語",                "Japanese"],
+  'KO'    => ["한국어",                "Korea"],
+  'LT'    => ["lietuvių kalba",       "Lithuanian"],
+  'LV'    => ["latviešu",             "Latvian"],
+  'NB'    => ["norsk bokmål",         "Norwegian (Bokmål)"],
+  'NL'    => ["Dutch",                "Dutch"],
+  'PL'    => ["polski",               "Polish"],
+  'PT-BR' => ["português",            "Portuguese (Brazilian)"],
+  'PT-PT' => ["português",            "Portuguese"],
+  'RO'    => ["limba română",         "Romanian"],
+  'RU'    => ["русский язык",         "Russian"],
+  'SK'    => ["slovenčina",           "Slovak"],
+  'SL'    => ["slovenski jezik",      "Slovenian"],
+  'SV'    => ["Svenska",              "Swedish"],
+  'TR'    => ["Türkçe",               "Turkish"],
+  'UK'    => ["українська мова",      "Ukrainian"],
+  'ZH'    => ["中文",                  "Chinese (simplified)"]
   ];
 
 
@@ -79,11 +100,6 @@ private static function getCallParams () {
   return $callParams;
 
 }
-
-
-private static function getUsage () {}
-
-private static function getLanguages () {}
 
 
 
@@ -177,7 +193,7 @@ private static function getCache( $key ) {
 
 
 
-private static function getSubstringAfterSeparator( $inputString, $sep ) { 
+private static function getSubstringAfterSeparator( string $inputString, $sep ) { 
   $lastSlashPos = strrpos( $inputString, $sep );   // Find the suffix after the computer emoji (folloed by language code for machine translation)
   if ( $lastSlashPos !== false ) {return substr( $inputString, $lastSlashPos + 1 );}    // If a slash is found, return the substring after it
   return $inputString;                                                                  // If no slash is found, return the original string
@@ -186,8 +202,13 @@ private static function getSubstringAfterSeparator( $inputString, $sep ) {
 
 
 public static function onExtensionLoadSetup() { global $wgNamespacesWithSubpages; 
-    danteLog ("DantePresentations", "onEXTENSIONLOADSETUP \n");
-$wgNamespacesWithSubpages[2200] = true;}
+  //danteLog ("DantePresentations", "onEXTENSIONLOADSETUP \n");
+  $wgNamespacesWithSubpages[2200] = true;
+  //danteLog ("DantePresentations", "HAVE: "  .print_r ( $wgNamespacesWithSubpages, true).  " \n");
+
+
+
+}
 
 
 
@@ -200,11 +221,38 @@ $wgNamespacesWithSubpages[2200] = true;}
 
 ///////// REPLICA of Title::getsubpages here !
 public static function getSubpages( $title, $limit = -1 ) {
+
+  global $wgNamespacesWithSubpages; 
+  danteLog ("DantePresentations", "In GETSUBPAGES "  .print_r ( $wgNamespacesWithSubpages, true).  " \n");
+  $nsinfo = MediaWikiServices::getInstance()->getNamespaceInfo();
+
+  $titleNs = $title->getNamespace();
+  danteLog ("DantePresentations", "TITLE NAMESPACE IS: "  .print_r ( $titleNs , true).  " \n");
+  $canName = $nsinfo->hasSubpages ($titleNs);
+  danteLog ("DantePresentations", "TITLE NAMESPACE CAn NAME IS: "  .print_r ( $canName , true).  " \n");
+
+  $has = $nsinfo->hasSubpages ($titleNs);
+  danteLog ("DantePresentations", "In GETnamespaceinfo "  . ($has ? " HAS ": " HAS-NOT ") .  " \n");
+
+  $options = [];
+  if ( $limit > -1 ) {$options['LIMIT'] = $limit;}
+
+		$pageStore = MediaWikiServices::getInstance()->getPageStore();
+		$query = $pageStore->newSelectQueryBuilder()
+			->fields( $pageStore->getSelectFields() )
+			->whereTitlePrefix( $title->getNamespace(), $title->getDBkey() . '/' )
+			->options( $options )
+			->caller( __METHOD__ );
+
+
+  $result = TitleArray::newFromResult( $query->fetchResultSet() );
+		return $result;
+
+
+
   if (!MediaWikiServices::getInstance()->getNamespaceInfo()->hasSubpages( $title->getNamespace() )) {
 
      danteLog ("DantePresentations", "Title: ".$title."\n");
-     danteLog ("DantePresentations", "Title namespace ".$title->getNamespace()."\n");
-
 
      danteLog ("DantePresentations", "  This namespace allows no subpages -\n");
 
@@ -212,9 +260,7 @@ public static function getSubpages( $title, $limit = -1 ) {
 		}
 
 		$options = [];
-		if ( $limit > -1 ) {
-			$options['LIMIT'] = $limit;
-		}
+		if ( $limit > -1 ) {$options['LIMIT'] = $limit;}
 
 		$pageStore = MediaWikiServices::getInstance()->getPageStore();
 		$query = $pageStore->newSelectQueryBuilder()
@@ -224,24 +270,9 @@ public static function getSubpages( $title, $limit = -1 ) {
 			->caller( __METHOD__ );
 
 		return TitleArray::newFromResult( $query->fetchResultSet() );
+
+
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -250,46 +281,56 @@ public static function getSubpages( $title, $limit = -1 ) {
 // this is my DANTE version !
 public static function onArticleViewHeader ( &$article, &$outputDone, bool &$pcache ) {
   global $wgOut;
-  $title = $article->getTitle();    // Get the title of the current page
-
-  danteLog ("DantePresentations", "onArticleViewHeader found page:  " .$title." \n");
-
+  $title = $article->getTitle();           // danteLog ("DantePresentations", "onArticleViewHeader found title:  " .$title." \n");
   $titleSubs = $title->getSubpages();
-  $titleSubsNum = count ($titleSubs);
-  danteLog ("DantePresentations", "title subs:" . $titleSubsNum . "\n");
-
-
-  $translateNamespaceId = 2200;                                                      // NS_TRANSLATE 
+  $titleSubsNum = count ($titleSubs);      //  danteLog ("DantePresentations", "title subs:" . $titleSubsNum . "\n");
+  $translateNamespaceId = 2200;                                                      // NS_TRANSLATED
   $translateTitle = Title::makeTitle( $translateNamespaceId, $title->getText() );    // Check if a page with the same title exists in the Translate namespace
 
   danteLog ("DantePresentations", "onArticleViewHeader found translate title:  " .$translateTitle." \n");
-
-  if ( ! $translateTitle->exists() ) { return true; }       // if not found, continue with normal processing
+  // if ( ! $translateTitle->exists() ) {     return true; }       // if not found, continue with normal processing
   
  danteLog ("DantePresentations", "onArticleViewHeader : translate title exists! \n");
 
   $hasSubpages = $translateTitle->hasSubpages(); danteLog ("DantePresentations", "oARTICLEVIEWHEADER: hasSubpages: " . print_r ($hasSubpages, true) . "\n");
 
   // we DO have a matching page in the Translated namespace, which means that at least some machine translation variant or human translation variant or AI production exists
-/*
-    $wgOut->redirect( $translateTitle->getFullURL() );    // issue a redirect             
-    $outputDone = true;                                   // To stop the current page from rendering
-    return false;
-*/
+
 
   $subpages =   self::getSubpages ( $translateTitle ); // $translateTitle->getSubpages();  // get all subpages of the matching page
   $num = count ($subpages);
 
+  $deeplTranslated    = array ();
+  $handTranslated = array ();
+ 
   danteLog ("DantePresentations", "onArticleViewHeader found $num subpages of $translateTitle\n");
   foreach ( $subpages as $subpage ) {
-    $subText   = $subpage->getFullText();
-    $subTitle  = $subpage->getTitle();
-    $subSuffix = self::getSubstringAfterSeparator ( $subTitle, '💻');
-    danteLog ("DantePresentations", " subpage found. Title=" . $subTitle  . " and machine translation suffix= " .$subSuffix ."\n");
+     $subSuffix = self::getSubstringAfterSeparator ( $subpage, '💻');    
 
+     $subText   = $subpage->getFullText();    
+     danteLog ("DantePresentations", "Offset type is " . gettype($subSuffix) . " and value is " . $subSuffix ."\n");
+
+     $deeplTranslated [$subSuffix] = $subText; 
+     $subSuffix = self::getSubstringAfterSeparator ( $subpage, '✍');     $subText   = $subpage->getFullText();       $handTranslated [$subSuffix]  = $subText; 
+ //    $subSuffix = self::getSubstringAfterSeparator ( $subpage, '🤖');       $subText   = $subpage->getFullText();       $aiProcessed [$subSuffix]     = $subText; 
+  
   }
 
+  danteLog ("DantePresentations", " DeepL  Translations found: " . print_r ($deeplTranslated, true) . "\n\n");
+  danteLog ("DantePresentations", " Manual Translations found: " . print_r ($handTranslated, true) . "\n\n");
 
+  // inform the language system about our status.
+  // BABEL_LANGUAGES.have  array of languages for which we have a deepl translation
+  //                .may   array of language for which we might offer a deepl translation
+  //                .manual     array of languages for which there exists a manual translation ?????
+
+  $BABEL = ['have' => $deeplTranslated, 'all' => array_keys ( self::$targetLangs ) ];
+  $json = json_encode ($BABEL);
+
+  danteLog ("DantePresentations", " DeepL  BABEL object" . print_r ($BABEL, true) . "\n\n");
+ danteLog ("DantePresentations", " DeepL  BABEL object as json " . $json . "\n\n");
+
+  $wgOut->addInlineScript ("window.BABEL_LANGUAGES=" . $json . ";");
 
   return true;  // continue with normal page rendering
 } // onArticleViewHeader
@@ -297,6 +338,67 @@ public static function onArticleViewHeader ( &$article, &$outputDone, bool &$pca
 
 
 
+
+// generates machine translation for title $title in language $lang
+public static function makeOneMachineTranslation ( $title, $lang) {
+
+  if (self::translator == null) { 
+    SubTranslate::$translator= new \DeepL\Translator($deeplApiKey); };
+
+  $non_splitting_tags = "";     // tags which do not break text into seperately translated portions
+  $splitting_tags = "";          // tags which do break text into seperately translated portions
+  $ignore_tags ="";               // text containing these elements is not translated
+
+  $options = [
+    'split_sentences'       => 'nonewlines',
+    'preserve_formatting'  => 'false',
+    'formality'            => 'prefer_more',
+    // glossary_id
+    'tag_handling' => 'xml',
+    "non_splitting_tags" => $non_splitting_tags,
+    "splitting_tags"     => $splitting_tags,
+    "ignore_tags"        => $ignore_tags,
+    'send_platform_info' => false,
+    'max_retries'        => 5,
+    'timeout'            => 15.0,
+  ];
+
+
+/*
+  $wikiPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // Get the associated WikiPage object
+  $article = new Article( $title );                             // Render the page as it would be displayed to a user
+  $outputPage = RequestContext::getMain()->getOutput();
+  $article->view();
+
+  $html = $outputPage->getHTML();
+  danteLog ("DantePresentations", "\n\n *** HTML IS: \n ".$html." \n");
+*/
+
+
+  $wikitext = ""; 
+  $wikiPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // Get the associated WikiPage object
+  if ( $wikiPage && $wikiPage->exists() ) {  // Ensure that the page exists
+    $content = $wikiPage->getContent();         // Get the latest revision's content
+    if ( $content instanceof TextContent ) { $wikitext = $content->getText(); }  // Get the wikitext from the content object
+    else { $wikitext = "The content is not in a wikitext format.";}
+  } 
+  else {$wikitext = "The page does not exist."; }
+
+
+  $result = $translator->translateText($wikitext, 'en', 'fr');
+  $text  = $result->text;
+  danteLog ("DantePresentations", "\n\n *** result of translation is: \n ".$text." \n");
+
+  $usage = $translator->getUsage();
+  danteLog ("DantePresentations", "\n\n USAGE is: " . print_r ($usage, true) . "\n");
+
+  //if ($usage->anyLimitReached()) {echo 'Translation limit exceeded.';}
+  //if ($usage->character) {echo 'Characters: ' . $usage->character->count . ' of ' . $usage->character->limit;}
+  //if ($usage->document) {echo 'Documents: ' . $usage->document->count . ' of ' . $usage->document->limit;}
+
+
+
+}
 
 
 
@@ -324,8 +426,6 @@ public static function onArticleViewHeaderSUBTRANSLATE( &$article, &$outputDone,
 
     return;
   }
-
-
 
     /* check namespace */
     $title = $article->getTitle();
@@ -405,4 +505,9 @@ public static function onArticleViewHeaderSUBTRANSLATE( &$article, &$outputDone,
 
   return;
 }
-}
+
+
+
+
+
+} // class

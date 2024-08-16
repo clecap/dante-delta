@@ -46,8 +46,11 @@ How do we connect material with sections / subsections.
 
 Every material is a Wiki page or File.
 
-A manually translated language variant:  Unicode Hex 270d  (writing hand)
+A manually translated language variant:  Unicode Hex 270d  (writing hand) ✍
 Machine translated   computer symbol 💻
+
+Ai Processed   🤖  / how do we deal with translations of machine processing ??? Maybe rather a seperate namespace for AI processed content ???? Maybe in a seperate namespace-like tab ?????
+   Maybe as an enrichment in discussion tab?  Maybe as namespace enriched - which could contain human AND machine processed remarks?
 
 
 A transcribed audio> File name and then Unicode play&pause symbol hex 23ef

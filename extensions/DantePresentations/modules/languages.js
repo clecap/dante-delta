@@ -1,4 +1,4 @@
-(() => { // begin scope
+var BABEL = (() => { // begin scope
 
 
 function initLangs ( ) {
@@ -12,7 +12,11 @@ function initLangs ( ) {
 
   let removeNS = (input) => {let i = input.indexOf(':'); if (i === -1) {return input;} return input.substring( i + 1); }
 
-  ["de","gb-eng"].forEach ( x => {
+  if (!window.BABEL_LANGUAGES) { console.error ("could not find babel languages"); }
+
+  console.info (window.BABEL_LANGUAGES);
+
+  window.BABEL_LANGUAGES.all.forEach ( x => {
     let a   = document.createElement ("a");
     a.href = "./index.php?title=Translate:" + removeNS (RLCONF["wgPageName"]);
 
@@ -36,23 +40,52 @@ wgPageName":"MediaWiki:Aboutpage","wgTitl
     img.style = "";
 */
 
-
 a.innerHTML = x;
 //    a.appendChild (img);
 
-
     div.appendChild (a);
-    console.log ("flag added: ", x);
+    // console.log ("flag added: ", x);
   } );
 
- 
+  let button = document.createElement ("button");
+  button.innerHTML = "Translate";
+  button.onclick = translate;
+  div.appendChild (button);
 }
 
-initLangs ();
+
+function translate () {
+  let endpoint = "./extensions/DantePresentations/endpoints/deeplEndpoint-title.php";
+
+  let info = {
+    "Wiki-wgUserName":         RLCONF.wgUserName, 
+    "Wiki-wgTitle":            RLCONF.wgTitle,
+    "Wiki-wgCurRevisionId":    RLCONF.wgCurRevisionId,
+    "Wiki-wgNamespaceNumber":  RLCONF.wgNamespaceNumber
+  };
+
+  fetch(endpoint, {headers: info} )
+    .then( response => { display ( `Endpoint replied: ${response.status} and ${response.statusText}  `); return response.text(); })
+    .then(data => { display('Data received:'+ data); } )
+    .catch(error => {display('There was a problem with the fetch operation: Endpoint sent:\n' + error);});
+}
+
+
+function display (text) {
+  alert (text);
+
+
+}
+
+
+
+
+
+
+return {initLangs}     ;  // export  // TODO: really needed ???
 
 })(); // end scope
 
+BABEL.initLangs();
 
 console.error ("languages.js loaded");
-
- 

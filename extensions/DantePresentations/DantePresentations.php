@@ -48,11 +48,15 @@ class DantePresentations {
     $showExternalUrl = $wgServer . $wgScriptPath . "/extensions/DantePresentations/externalMonitor.html?presentation=" .urlencode ($showEndpointUrl);  // works
 
 
+
+
    $links['views']['my_view_zwo'] = ['class' => '', 'href' => $showExternalUrl, 'text' => 'Show', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'
 //     'onclick' => $jsText
 ]; 
 
-   $links['views']['audio'] = ['class' => '', 'href' => $showExternalUrl, 'text' => 'Show', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'];
+
+    $fullView =  $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
+   $links['views']['audio'] = ['class' => '', 'href' => $fullView, 'text' => 'Full View', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'];
 
   }  // siehe ext.DantePresentations.js
 
@@ -116,12 +120,24 @@ $hint = "";
  }
 
 
-  // NOTE: this injects directly into the header and leads to an immediate loading - necessary since we must intercept the display of the regular TOC
-  // If we do not do this like that, we first see the regular TOC, then a load.php style sheets loads and removes it, and as soon as it is completely patched, we show it again
-  public static function onOutputPageAfterGetHeadLinksArray ( $tags, OutputPage $out ) { 
-     global $wgServer, $wgScriptPath;
-     $out->addHeadItem("tocstyle", "<style data-src='DantePresentations.php'>#toc {display:none;}</style>");
-  }
+/** Inject style directly into the header for immediate loading
+    We use this here for all cases where immediate reaction is necessary because we otherwise get a FOUC flash of unstyled content
+    where the load.php resource loader just comes too late
+    1) Intercept the display of the regular TOC
+    2) aside markings
+ */
+public static function onOutputPageAfterGetHeadLinksArray ( $tags, OutputPage $out ) { 
+  global $wgServer, $wgScriptPath;
+  $out->addHeadItem("tocstyle", "<style data-src='DantePresentations-style.php'>
+#toc {display:none;}
+aside {
+    color: red;
+    position:relative; right:-50px; top:0px;
+    float:right;
+}
+</style>");
+
+}
 
 
 // at this moment in the build process we have easy access to the current page name and we add the current page name into the crumbs for the next occasion
@@ -161,8 +177,6 @@ public static function onGetDoubleUnderscoreIDs( &$ids ) {
   array_push ( $ids, 'MAG_SLIDES');      // a slide page
   array_push ( $ids, 'MAG_HIDEHEAD');
   array_push ( $ids, 'MAG_HIDEHL');
-
-
 
   return true;
    }
