@@ -6,7 +6,7 @@ let player;
 function init () {
   console.log ("ext.audio: initialized");
   audio = document.createElement ("audio");
-  audio.style= "position:relative; top:0px; left:100px; width:300px;height:40px;";
+  audio.style= "position:relative; top:0px; left:0px; width:300px;height:40px;";
   audio.src = "file";
   audio.setAttribute ("controls", "");
 
@@ -21,7 +21,6 @@ function init () {
 
 
 audio.controls = true; 
-  audio.style.position = 'absolute'; // Make it positionable
   audio.style.cursor = 'move'; // Change cursor to indicate draggable
 
   // Append the audio element to a specified container
