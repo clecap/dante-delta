@@ -1,11 +1,12 @@
 <?php 
 
+
+
+// this endpoint will translate raw input sent to the endpoint
+
+
 /* Endpoint for integrating deepl into Dantewiki
-
    This MUST be a backend endpoint, as otherwise we would have to include the deepl api key into the javascript sent to the client
-
-
-
  */
 
 
@@ -15,15 +16,12 @@ opcache_reset(); // ONLY TODO: during development
 
 require __DIR__ . '/../../../vendor/autoload.php';
 
-require __DIR__. '/../../../mediawiki-PRIVATE.php';
+require __DIR__. '/../../../mediawiki-PRIVATE.php'; // TODO: isnt this already outdated ? not sure ?
 
 
 // need the following two lines to obtain reasonable errors from the endpoint instead of only 500 er status from webserver
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
-
-
-
 
 
 $authKey = $DEEPL_API_KEY;  
