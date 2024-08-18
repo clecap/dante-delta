@@ -14,6 +14,7 @@ require_once ("../helpers/DanteDummyUserIdentity.php");
 require_once ("../helpers/DanteDummyPageReference.php");
 require_once ("../renderers/hideRenderer.php");
 
+use MediaWiki\MediaWikiServices;
 
 function EndpointLog ($text) {
   global $wgAllowVerbose;
@@ -44,11 +45,6 @@ function ParsifalLog ($text) {
 
 class DanteEndpoint {
 
-
-  const USE_STRING      = 1;
-  const USE_FILE_NAME   = 2;
-  const USE_FILE_HANDLE = 3;
-
   // instance variables which define the interface to the endpoint
   protected $stringContent;
   protected $fileName;
@@ -60,17 +56,23 @@ class DanteEndpoint {
   // mandatory parameters (??)
   protected ?string   $userName = "uninitialized";    // needed for constructing the user identity
   protected ?string   $pageName = "uninitialized";    // needed for constructing the page reference  // TODO: not clear why we need this AND the title ??
-  protected ?int      $ns = 0;                        // number of the namespace; needed for constructing the page reference
+  protected ?int      $ns = null;                     // number of the namespace; needed for constructing the page reference
   protected ?string   $title = "uninitialized";       // TODO: title name???ß of the page    // needed for constructing the page reference
   protected ?string   $dbkey = "uninitialized";       // TODO: not clear if needed for paghe reference since currently we use NULL for it
 
 
   // dependant entities
   protected ?MediaWiki\User\UserIdentity $userId; // 
+  protected ?string   $nsName = null;    // TODO: see also above: maybe rather null than "uniniialized" ?????
 
   // optional parameters of the endpoint api
   protected bool      $hiding;
   protected ?string   $curRevisionId;
+
+  // additional information
+  protected $parserOutput = null;        // keeps the parserOutput object of the last parser run (will be used in other endpoints where we need mor info on the parse)
+
+  protected $caching = true;             // in some scenarios we must turn off caching !
 
 
 function __construct () {
@@ -88,6 +90,7 @@ function __construct () {
   EndpointLog ("\nParsed Query String is " . print_r ($normalizedQuery, true)); // DEBUG
 
   $this->userId = new DanteDummyUserIdentity ( $this->userName );        // generate derived identity
+  if ( isset ($this->ns) ) $this->nsName = MediaWikiServices::getInstance()->getNamespaceInfo()->getCanonicalName ( $this->ns );
 }
 
 
@@ -130,9 +133,7 @@ protected function setResponseHeaders () {
 // this function may use the other fields and methods of this function
 // this function is expected to be overwritten by inheritance
 // the function returns the manner in which it prepared the contents for the client. It returns:
-//   1  USE_STRING       caller should use the information in                   $this->stringContent
-//   2  USE_FILE_NAME    caller should use the information in the file of name  $this->fileName
-//   3  USE_FILE_HANDLE  caller should use the information in the file          $this->filePointer
+
 //                       assuming filePointer is to an open file and will be closed as side-effect
 //   THROWS in case of an error
 
@@ -156,14 +157,17 @@ protected function getMimeType () { return "text/html"; }
  */
 public function parseText ( $text, $hiding, $section = NULL, $removeTags = array() ) {
 
- // TODO: add ALL affecting parameters into cache key !!!!!!!!!!!!!!!!!!!
-  $cacheKey   = md5 ($text);     
-  $value      = apcu_fetch ( $cacheKey, $cacheHit);
-  if ($cacheHit) {
-    EndpointLog ("Cache hit on $cacheKey");
-    return $value;}
-  else {
-     EndpointLog ("Cache miss on $cacheKey");
+  $cacheKey = "";  // need to define outside of { } since used below as well
+  if ( $this->caching ) {
+    // TODO: add ALL affecting parameters into cache key !!!!!!!!!!!!!!!!!!!
+    $cacheKey   = md5 ($text . ($hiding ? "true": "false") . $section. print_r ($removeTags, true)) ;     
+    $value      = apcu_fetch ( $cacheKey, $cacheHit);
+    if ($cacheHit) {
+      EndpointLog ("Cache hit on $cacheKey");
+      return $value;}
+    else {
+       EndpointLog ("Cache miss on $cacheKey");
+    }
   }
 
   // get an instance of UserIdentity // $userId  = new DanteDummyUserIdentity ( $this->userName );  // TODO: this worked; if it still works with $this->userId then deprecate this !
@@ -180,11 +184,10 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
 
   $parser->danteTag    = "danteEndpoint";  // TODO: ????
 
-  $parserOutput = NULL;
   $parsedText   = NULL;
 
   try {
-//    $parser->setHook ( "hide", [ "HideRenderer", ($hiding ? 'renderHidden' : 'renderProminent') ] );        
+  //    $parser->setHook ( "hide", [ "HideRenderer", ($hiding ? 'renderHidden' : 'renderProminent') ] );        
     if ($hiding) { $parser->setHook ( "hide", [ "HideRenderer", 'renderHidden'    ] ); }
     else         { $parser->setHook ( "hide", [ "HideRenderer", 'renderProminent' ] ); }
 
@@ -192,7 +195,7 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
 
     EndpointLog ("\nDanteEndpoint: Sees the section type: " . gettype ($section) . " and section value: ($section) \n");
 
-//  $section = 0;
+  //  $section = 0;
   
   if ( strcmp (gettype ($section), "integer") == 0  ) { 
     EndpointLog ("\n DanteEndpoint: Restricted section parsing requested for section=$section");
@@ -208,7 +211,7 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
     $this->pageName                   // pagename ????
   );
 
-  $parserOutput  = $parser->parse ( 
+  $this->parserOutput  = $parser->parse ( 
     $text,       // text we want to parse
     $pageRef, 
     $options,       // the ParserOptions object generated earlier
@@ -220,10 +223,10 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
   // EndpointLog ("\nDanteEndpoint: Test has been parsed\n");
 
   // use a specific skin object for post treatment (requires internal skin name to be used)    TODO: make this selectable  // does this have an effect ???? TODO
- // $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("cologneblue");
+  // $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("cologneblue");
   $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("vector");    // EndpointLog ("DanteEndpoint: parseText: did generate skin object\n");
 
-  $parsedText =  $parserOutput->getText ( array ( 
+  $parsedText =  $this->parserOutput->getText ( array ( 
      "allowTOC"               => false, 
      "injectTOC"              => false, 
      "enableSectionEditLinks" => false, 
@@ -242,13 +245,13 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
 
   EndpointLog ("DanteEndpoint: parseTexte will leave now\n");
 
-  apcu_store ( $cacheKey, $parsedText, 1000 );
+  if ( $this->caching ) { apcu_store ( $cacheKey, $parsedText, 1000 ); }
 
   return $parsedText;
 }
 
 
-// MediawikiEndpoint gets its contents from the post body
+// default is: get content from the post body
 protected function getInput () {
   $body = file_get_contents("php://input");         // get the input; here: the raw body from the request
   $text = base64_decode ($body);                    // in an earlier version we used, unsuccessfully, some conversion, as in:   $body = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $body); 
@@ -256,59 +259,32 @@ protected function getInput () {
   return $text;
 }
 
-
-public function execute () {
-
-  try {
-    $input    = $this->getInput();
-
-    $parsedText = $this->parseText ( $input, false );
-    $decor   = $this->decorate ($parsedText);
-
-    header ("Content-Length: " . strlen ( $decor ) );
-    header("Content-type:" . $this->getMimeType ());         // set Mime Type header 
-    $this->setResponseHeaders ();                            // set other response headers
-  }
-   catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: execute: Caught exception:\n" );    $decor = "EXCEPTION: " . $e->__toString(); }
-   catch(Throwable $t)   { EndpointLog ("***** DanteEndpoint: execute: Caught Throwable:\n" );
-                           EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  }
-   finally               { EndpointLog ("DanteEndpoint: in finally block of execute\n");                     }
-
-  echo $decor;
+// This is the core function for obtaining the output of the (generic) endpoint
+public function process () : string {
+  $input         = $this->getInput();
+  $parsedText    = $this->parseText ( $input, false );
+  $decoratedText = $this->decorate ($parsedText);
+  return $decoratedText;
 }
 
-
-
-// this is the main function of an endpoint
-public function executeOLD () {
-  $VERBOSE    = false; 
-
-  $contentFlag = $this->getContent();
-
-  // Content-length header
-  if       ($contentFlag == 1) { header("Content-Length: " . strlen ($this->stringContent) ); } // strlen returns bytes not characters for UTF-8 stuff
-  else if  ($contentFlag ==2 || $contentFlag == 3) {
-    if (filesize($name) == 0) { throw new Exception ("DanteEndpoint content consists of a file of size zero at filename: " . $name); }
-    header("Content-Length: " . filesize($name));
+// This is the core function for executing an endpoint
+// It is written in a way that we (should) not need to overwrite it often
+public function execute () {
+  try {
+    $decoratedText = $this->process();
+     EndpointLog ("***** DanteEndpoint: execute sees :\n" . $decoratedText ); 
   }
+  catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: execute: Caught exception:\n" );    $decoratedText = "<pre>EXCEPTION: " . $e->__toString(). "</pre>"; }
+  catch(Throwable $t)   { EndpointLog ("***** DanteEndpoint: execute: Caught Throwable:\n" );
+                          EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  $decoratedText = "<pre>THROWABLE: " . $t->__toString()."</pre>"; }
+  finally               { EndpointLog ("DanteEndpoint: in finally block of execute\n");                     }
 
-  header("Content-type:" . $this->getMimeType ());         // set Mime Type header 
-  $this->setResponseHeaders ();                            // set other response headers
-
-  switch ( $contentFlag ) {
-    case  DanteEndpoint::USE_STRING:  echo ($this->stringContent); break;
-    case  DanteEndpoint::USE_FILE_HANDLE:
-      $this->filePointer = fopen($this->fileName, 'rb');
-      if ($this->filePointer == FALSE)         { throw new Exception ("DanteEndpoint could not open content file with filename: " . $this->fileName );  }
-       // NO BREAK
-    case  DanteEndpoint::USE_FILE_HANDLE: 
-      fpassthru($this->filePointer); 
-      fclose ($this->filePointer);
-      break;
-    default: throw new Exception ("Illegal content status received from converter");
-  }
-
-} // function
+  header ("Content-Length: " . strlen ( $decoratedText ) );
+  header ("Content-type:" . $this->getMimeType ());         // set Mime Type header 
+  header ("X-Debug-Dante:" . "START: " . $decoratedText. ":END"); 
+  $this->setResponseHeaders ();                             // set other response headers
+  echo $decoratedText;
+}
 
 
 /*
@@ -322,30 +298,33 @@ jsPaths: array('extensions/Parsifal/js/runtime.js'), bodyClasses: array('mw-body
 */
 
 public function decorate ( $text ) {
-  $ret = "";
-  $ret .= "<!DOCTYPE html>";
-  $ret .= "<html lang='en' dir='ltr' classes='";
-  $ret .= implode (' ', $this->getHtmlClasses() );
-  $ret .= "'>";
-  $ret .= "<head>";
+  $ret  = "<!DOCTYPE html>";
+  $ret .= "<html lang='en' dir='ltr' classes='" .implode (' ', $this->getHtmlClasses()) . "'>";
+  $ret .= "<head classes='"  .implode (' ', $this->getHeadClasses()) . "'>";
   $ret .= "<meta charset='UTF-8'/>";
-  foreach ( $this->getCssPaths() as &$value) { $ret .= ("<link rel='stylesheet' href='" . $value . "'>");  }
-  foreach ($this->getJsPaths() as &$value)  { $ret .= ("<script src='" . $value . "'></script>") ;        }
+  $ret .= $this->getHeadText();
+  foreach ( $this->getCssPaths()      as &$value)  { $ret .= ("<link rel='stylesheet' href='" . $value . "'>");  }
+  foreach ( $this->getAsyncJsPaths()  as &$value)  { $ret .= ("<script async src='" . $value . "'></script>") ;        }
+  foreach ( $this->getJsPaths()       as &$value)  { $ret .= ("<script src='" . $value . "'></script>") ;        }
   $ret .= "</head>";
   $ret .= "<body class='";
   $ret .= implode (' ', $this->getBodyClasses() );
   $ret .= "'>";
-  $ret .= $text;
+  $ret .= $this->decorateBody ($text);
   $ret .= "</body></html>";
   return $ret;
 }
 
 
-public function getCssPaths ()    { return array (); }
-public function getJsPaths ()     { return array (); }
-public function getBodyClasses () { return array (); }
-public function getHTMLClasses () { return array (); }
+public function getCssPaths ()      { return array (); }
+public function getJsPaths ()       { return array (); }
+public function getAsyncJsPaths ()  { return array (); }
+public function getHTMLClasses ()   { return array (); }
+public function getHeadClasses ()   { return array (); }
+public function getBodyClasses ()   { return array (); }
 
+public function getHeadText ()              : string   { return ""; }
+public function decorateBody (string $text) : string   { return $text; }
 
 } // class
 
