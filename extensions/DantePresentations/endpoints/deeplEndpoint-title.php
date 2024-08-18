@@ -1,8 +1,13 @@
 <?php
 
-/** This endpoint ppicks up a title and translates the article beloning to the title */
+/** This endpoint 
+     1) picks up a title 
+     2) translates the article beloning to the title into several languages
+     3) stores the translations as new page
 
-// NOTE: Debugging this: Apache log has error messages if we get no result by direct call to endpoint
+*/
+
+
 
 require '../../../vendor/autoload.php';
 
@@ -11,7 +16,6 @@ error_reporting(E_ALL); ini_set('display_errors', 'On'); // uncomment to obtain 
 require_once ("danteEndpoint.php");
 
 use DeepL\Translator;
-
 use MediaWiki\Revision\SlotRecord;
 
 class DeeplEndpoint_Title extends DanteEndpoint {
@@ -30,65 +34,24 @@ const DEEPL_OPTIONS =
   'timeout'            => 15.0
 ];
 
-private $translator;  // caches the translator object for all translations to be done in thios endpoint
-
-private $status = array();         // array of stati; maps a language code to a status message
-
-private $hasError = false;    // flag which checks if an error occured in any of the different language codes
+private $translator;                 // caches the translator object for all translations to be done in thios endpoint
+private $status   = array();         // array of stati; maps a language code to a status message
+private $hasError = false;           // flag which checks if an error occured in any of the different language codes
 
 
-
+// construct an instance of the endpoint
 function __construct () { 
-  parent::__construct(); 
-  $deeplApiKey      = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $this->userId, 'dante-deepl-apikey' );
-  $this->translator = new \DeepL\Translator($deeplApiKey);  
-
+  parent::__construct();                                                                                                                      // construct parent DanteEndpoint
+  $deeplApiKey      = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $this->userId, 'dante-deepl-apikey' );  // pick up API key
+  $this->translator = new \DeepL\Translator($deeplApiKey);                                                                                    // generate translator
   // TODO: error handling when api key missing or wrong !
 }
 
 
-/*
-public function getContent ( ) {
-  EndpointLog ("DeeplEndpoint-title:  getContent entered \n"); 
-
-  $titleText      =  "Algebra";
-  $targetLanguage =  "fr"; // TODO
-
-  $title = Title::newFromText( $titleText );              // Create a Title object from the text of the title
-  if ( $title instanceof Title && $title->exists() ) {    // Get the WikiPage object for the given title
-    $wikiPage = WikiPage::factory( $title );
-    $content = $wikiPage->getContent();                   // Get the wikitext content of the page
-    if ( $content instanceof TextContent ) { $wikiText = $content->getText(); } 
-    else {$wikiText = 'Content is not text';}
-  } 
-  else {  EndpointLog ("DeeplEndpoint-title: ERROR: title did not exist: " . $title . "\n"); }
-
-  $translatedWikiText = translate ( $wikiText );
-
-//  $translatedTitleText = 
-
-  $translatedTitleObject = Title::makeTitle( NS_TRANSLATED, $translatedTitleText );  // Create a Title object with the specified namespace and title
-  if ( $translatedTitleObject instanceof Title ) {
-    $translatedWikiPage = WikiPage::factory( $translatedTitleObject );    // Create a WikiPage object for the given title
-    $translatedContent = ContentHandler::makeContent( $translatedWikiText, $translatedTitleOBject );    // Create a Content object with the given text
-    $user = RequestContext::getMain()->getUser();    // Get the current user
-    $summary = "Translation of page by deepl";       // Edit summary
-    $translatedWikiPage->doEditContent( $translatedContent, $summary, 0, false, $user );    // Save the page with the provided content
-  } 
-  else {
-    throw new MWException( "Invalid title for the new page." );
-  }
-
-  EndpointLog ("DeeplEndpoint-title: sees translation: " . $translatedWikiText);
-  return 1;
-}
-*/
-
-
+// service function using external script
 // store a page under title $title with content $content
 // NOTE: a cat file | php ... did not work, it looks like the pipe construction was not working correctly somehow.
 private function storePage ( string $title, string $content, string $index) {
-  EndpointLog ("Translating $title \n");
   try {
     $cmd = 'php ../php/pageCreator.php --title "' .$title .'"';
     $proc=proc_open($cmd, array(0=>array('pipe', 'r'), 1=>array('pipe', 'w'), 2=>array('pipe', 'w')), $pipes);
@@ -106,10 +69,8 @@ private function storePage ( string $title, string $content, string $index) {
 
 
 
-
-
 public function runIt () {
-  $langs = ["de", "en-US", "fr"];     // array of languages
+  $langs = ["de", "en-US", "fr"];     // array of languages  // TODO: should be possible to input this 
 
   $titleObject = Title::newFromText( $this->title );              // Create a Title object from the text of the title
   if ( $titleObject instanceof Title ) {                          // Get the WikiPage object for the given title

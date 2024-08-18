@@ -175,7 +175,9 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
   // get an instance of ParserOptions
   $options = new ParserOptions ( $this->userId );           // let the parent class provide a user identity
   $options->setRemoveComments (false);                      // do not remove html comments in the preprocessing phase
-  $options->setSuppressTOC (true);                          // do not generate TOC; will be deprecated in 1.42
+
+  //  $options->setSuppressTOC (true);                          // do not generate TOC; will be deprecated in 1.42 
+  // CAVE: need TOC info to be set or we do not get section information in the parser output!
 
   // get an instance of the parser
   $revid         = null;
@@ -193,14 +195,13 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
 
     foreach ($removeTags as $tag) { $parser->setHook ( $tag, [ "HideRenderer", 'renderHidden' ] );}
 
-    EndpointLog ("\nDanteEndpoint: Sees the section type: " . gettype ($section) . " and section value: ($section) \n");
+    // EndpointLog ("\nDanteEndpoint: Sees the section type: " . gettype ($section) . " and section value: ($section) \n");
 
-  //  $section = 0;
   
   if ( strcmp (gettype ($section), "integer") == 0  ) { 
-    EndpointLog ("\n DanteEndpoint: Restricted section parsing requested for section=$section");
+    // EndpointLog ("\n DanteEndpoint: Restricted section parsing requested for section=$section");
     $text = $parser->getSection ($text, $section, "NOT FOUND - see danteEndpoint.php"); 
-    EndpointLog ("\n\n Sees: $text \n\n");
+    // EndpointLog ("\n\n Sees: $text \n\n");
   }
 
   $pageRef = new DanteDummyPageReference ( 
@@ -220,7 +221,9 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
     $revid
   );    
 
-  // EndpointLog ("\nDanteEndpoint: Test has been parsed\n");
+
+  //$sec = $this->parserOutput->getSections();
+  //EndpointLog ("\n-----------DanteEndpoint: ".print_r ($sec, true)."\n");
 
   // use a specific skin object for post treatment (requires internal skin name to be used)    TODO: make this selectable  // does this have an effect ???? TODO
   // $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("cologneblue");
@@ -243,7 +246,7 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
                              EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  }
      finally               { EndpointLog ("DanteEndpoint: in finally block\n");                     }
 
-  EndpointLog ("DanteEndpoint: parseTexte will leave now\n");
+  // EndpointLog ("DanteEndpoint: parseTexte will leave now\n");
 
   if ( $this->caching ) { apcu_store ( $cacheKey, $parsedText, 1000 ); }
 
@@ -272,7 +275,7 @@ public function process () : string {
 public function execute () {
   try {
     $decoratedText = $this->process();
-     EndpointLog ("***** DanteEndpoint: execute sees :\n" . $decoratedText ); 
+     // EndpointLog ("***** DanteEndpoint: execute sees :\n" . $decoratedText ); 
   }
   catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: execute: Caught exception:\n" );    $decoratedText = "<pre>EXCEPTION: " . $e->__toString(). "</pre>"; }
   catch(Throwable $t)   { EndpointLog ("***** DanteEndpoint: execute: Caught Throwable:\n" );

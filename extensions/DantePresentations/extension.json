@@ -6,7 +6,7 @@
   "description": "Adjusts many aspects of presentation, presents specially formatted Mediawiki Pages and parts of pages as slide presentations; supports external monitors; provides preview presentations and more flexible endpoints",
   "license-name": "GPL-2.0-or-later",
   "type": "other",
-  "AutoloadClasses": {"DantePresentations": "DantePresentations.php", "SubTranslate": "SubTranslate.php", "DantePresentationsPreferences": "DantePresentationsPreferences.php"},
+  "AutoloadClasses": {"DantePresentations": "DantePresentations.php", "Translate": "Translate.php", "DantePresentationsPreferences": "DantePresentationsPreferences.php"},
   "Hooks": {
     "BeforePageDisplay":                  "DantePresentations::onBeforePageDisplay",
     "SkinTemplateNavigation::Universal":  "DantePresentations::onSkinTemplateNavigationUniversal",
@@ -17,10 +17,10 @@
     "SkinEditSectionLinks":               "DantePresentations::onSkinEditSectionLinks",
     "ParserAfterParse":                   "DantePresentations::onParserAfterParse",
     "SkinAddFooterLinks":                 "DantePresentations::onSkinAddFooterLinks",
-    "ArticleViewHeader":                  "SubTranslate::onArticleViewHeader",
+    "ArticleViewHeader":                  "Translate::onArticleViewHeader",
     "GetPreferences":                     "DantePresentationsPreferences::onGetPreferences"
   },
-  "ExtensionFunctions": ["SubTranslate::onExtensionLoadSetup"],
+  "ExtensionFunctions": ["Translate::onExtensionLoadSetup"],
   "ResourceModules": {
     "ext.DantePresentations": {
       "localBasePath":       "modules",

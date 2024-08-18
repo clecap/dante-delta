@@ -46,17 +46,17 @@ class DantePresentations {
   
     $showEndpointUrl = $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
     $showExternalUrl = $wgServer . $wgScriptPath . "/extensions/DantePresentations/externalMonitor.html?presentation=" .urlencode ($showEndpointUrl);  // works
-
-
-
+ 
 
    $links['views']['my_view_zwo'] = ['class' => '', 'href' => $showExternalUrl, 'text' => 'Show', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'
 //     'onclick' => $jsText
 ]; 
 
-
     $fullView =  $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
    $links['views']['audio'] = ['class' => '', 'href' => $fullView, 'text' => 'Full View', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'];
+
+   $slideExternalUrl = $wgServer . $wgScriptPath . '/extensions/DantePresentations/endpoints/swipeEndpoint.php?' . $query;  // works
+   $links['views']['slides'] = ['class' => '', 'href' => $slideExternalUrl, 'text' => 'Swipe View', 'title' => "Show page as slideshow with slider", 'target' => '_blank'];
 
   }  // siehe ext.DantePresentations.js
 

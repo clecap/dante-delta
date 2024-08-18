@@ -1,10 +1,5 @@
 <?php
 
-
-
-///// SubTranslate.php contains fragments of a different extension which we do not use as it does not serve our needs sufficiently.
-
-
 use DeepL\Translator;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Languages\LanguageNameUtils;
@@ -12,12 +7,13 @@ use MediaWiki\Html\Html;
 
 $deeplApiKey = getenv('DEEPL_API_KEY');
 
-
-class SubTranslate {
+class Translate {
 
   static $translator = null;
 
-  // maps language index to an array consisting of   [0]: native name of language  [1]: english name of language
+  // maps language index to an array consisting of   
+  //   [0]: native name of language  
+  //   [1]: english name of language
   // the index is identical to the language designators as they are understood by deepl
   // the flag png icons we rename so as to match the deepl designators
   static $targetLangs = [
@@ -55,14 +51,13 @@ class SubTranslate {
   ];
 
 
+// FROM SUBTRANSLATE, not dante code, keep as info
 private static function getCallParams () {
   global $DEEPL_API_KEY;
  $host = "api-free.deepl.com";   // OPTIONS:    api-free.deepl.com   or    api.deepl.com
 
   $callParams = [
-    'http' => [
-      'method' => "POST",
-      'header' => [
+    'http' => [ 'method' => "POST", 'header' => [
         "Host: $host",
         "Authorization: DeepL-Auth-Key $DEEPL_API_KEY",
         "User-Agent: " . " DanteWiki",
@@ -72,11 +67,9 @@ private static function getCallParams () {
     ]
   ];
   return $callParams;
-
 }
 
-
-
+// FROM SUBTRANSLATE, not dante code, keep as info
   /**
    * @param string $text
    * string $tolang
@@ -85,13 +78,10 @@ private static function getCallParams () {
    */
 private static function callDeepL( $text, $tolang ) {
   global $DEEPL_API_KEY; 
-
-  if ( empty( $text ) )    { danteLog ("DantePresentations", "SubTranslate: empty text, not sending to deepl \n");            return "";}
-  if ( empty( $tolang ) )  { danteLog ("DantePresentations", "SubTranslate: empty target language, not sending to deepl \n"); return ""; }
-
+  if ( empty( $text ) )    { danteLog ("DantePresentations", "Translate: empty text, not sending to deepl \n");            return "";}
+  if ( empty( $tolang ) )  { danteLog ("DantePresentations", "Translate: empty target language, not sending to deepl \n"); return ""; }
   $tolang = strtoupper( $tolang );
   $host   = "api-free.deepl.com";   // OPTIONS:    api-free.deepl.com   or    api.deepl.com
-
   /* make parameter to call API */
   $data = [
     'target_lang'  => $tolang,
@@ -101,7 +91,7 @@ private static function callDeepL( $text, $tolang ) {
 
   $json = json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_IGNORE );
   if( empty( $json ) ) { /* for debug */  var_dump( json_last_error() );  return ""; }
-  if( strlen( $json ) > 131072 ) { danteLog ("DantePresentations", "SubTranslate: encode error or parameter length over 128KiB \n"); return ""; }
+  if( strlen( $json ) > 131072 ) { danteLog ("DantePresentations", "Translate: encode error or parameter length over 128KiB \n"); return ""; }
 
   $callParams = self::getCallParams();
   $callParams['http']['content'] = $json;
@@ -112,14 +102,14 @@ private static function callDeepL( $text, $tolang ) {
 
   $ret = file_get_contents( "https://$host/v2/translate", false, $stream );
 
-  if( empty( $ret ) ) {  danteLog ("DantePresentations", "SubTranslate: deepl returned empty \n"); return ""; }
-  danteLog ("DantePresentations", "SubTranslate: deepl returned: --------------------------- \n " . print_r($ret, true) . " \n\n------------------------------\n");
+  if( empty( $ret ) ) {  danteLog ("DantePresentations", "Translate: deepl returned empty \n"); return ""; }
+  danteLog ("DantePresentations", "Translate: deepl returned: --------------------------- \n " . print_r($ret, true) . " \n\n------------------------------\n");
   $json = json_decode( $ret, true );
 
   return $json['translations'][0]['text'] ?? "";
 }
 
-
+// FROM SUBTRANSLATE, not dante code, keep as info
   /**
    * store cache data in MediaWiki ObjectCache mechanism
    * https://www.mediawiki.org/wiki/Object_cache
@@ -143,7 +133,7 @@ private static function storeCache( $key, $value, $exptime = 0 ) {
     return $cache->set( $cachekey, $value, $exptime );
 }
 
-
+// FROM SUBTRANSLATE, not dante code, keep as info
   /**
    * get cached data from MediaWiki ObjectCache mechanism
    * https://www.mediawiki.org/wiki/Object_cache
@@ -167,23 +157,14 @@ private static function getCache( $key ) {
 
 
 private static function getSubstringAfterSeparator( string $inputString, $sep ) { 
-  $lastSlashPos = strrpos( $inputString, $sep );   // Find the suffix after the computer emoji (folloed by language code for machine translation)
+  $lastSlashPos = strrpos( $inputString, $sep );   // Find the suffix after the computer emoji (followed by language code for machine translation)
   if ( $lastSlashPos !== false ) {return substr( $inputString, $lastSlashPos + 1 );}    // If a slash is found, return the substring after it
   return $inputString;                                                                  // If no slash is found, return the original string
 }
 
 
-
-public static function onExtensionLoadSetup() { global $wgNamespacesWithSubpages; 
-  //danteLog ("DantePresentations", "onEXTENSIONLOADSETUP \n");
-  $wgNamespacesWithSubpages[2200] = true;
-  //danteLog ("DantePresentations", "HAVE: "  .print_r ( $wgNamespacesWithSubpages, true).  " \n");
-
-
-
-}
-
-
+// dynamic definition - CHECK - not sure if we still need this TODO !!
+public static function onExtensionLoadSetup() { global $wgNamespacesWithSubpages;  $wgNamespacesWithSubpages[2200] = true; }
 
 
 ///////// REPLICA of Title::getsubpages here !
@@ -216,11 +197,8 @@ public static function getSubpages( $title, $limit = -1 ) {
 		return $result;
 
 
-
   if (!MediaWikiServices::getInstance()->getNamespaceInfo()->hasSubpages( $title->getNamespace() )) {
-
      danteLog ("DantePresentations", "Title: ".$title."\n");
-
      danteLog ("DantePresentations", "  This namespace allows no subpages -\n");
 
 			return [];
@@ -240,9 +218,6 @@ public static function getSubpages( $title, $limit = -1 ) {
 
 
 	}
-
-
-
 
 
 // this is my DANTE version !
@@ -310,7 +285,7 @@ public static function onArticleViewHeader ( &$article, &$outputDone, bool &$pca
 public static function makeOneMachineTranslation ( $title, $lang) {
 
   if (self::translator == null) { 
-    SubTranslate::$translator= new \DeepL\Translator($deeplApiKey); };
+    Translate::$translator= new \DeepL\Translator($deeplApiKey); };
 
   $non_splitting_tags = "";     // tags which do not break text into seperately translated portions
   $splitting_tags = "";          // tags which do break text into seperately translated portions

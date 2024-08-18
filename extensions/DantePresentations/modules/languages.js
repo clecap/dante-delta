@@ -2,10 +2,9 @@ var BABEL = (() => { // begin scope
 
 
 function initLangs ( ) {
-
   let div = document.createElement ("div");
   div.id="dante-language-bar";
-  div.style = "position: absolute; top:5px; left:500px; border:1px solid blue;z-index:500;";
+  div.style = "position: absolute; top:10px; left:600px; border:1px solid blue;z-index:500; display:inline-block; min-width:10px; min-height:10px;";
   let head = document.getElementById ("mw-head-base");
   head.appendChild (div);
   console.log ("lang div added");
@@ -19,9 +18,7 @@ function initLangs ( ) {
   window.BABEL_LANGUAGES.all.forEach ( x => {
     let a   = document.createElement ("a");
     a.href = "./index.php?title=Translate:" + removeNS (RLCONF["wgPageName"]);
-
     a.onclick = "alert (1);";
-
 
 /*
 wgPageName":"MediaWiki:Aboutpage","wgTitl
@@ -73,13 +70,7 @@ function translate () {
 
 function display (text) {
   alert (text);
-
-
 }
-
-
-
-
 
 
 return {initLangs}     ;  // export  // TODO: really needed ???

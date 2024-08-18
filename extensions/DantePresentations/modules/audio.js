@@ -23,6 +23,10 @@ function init () {
 audio.controls = true; 
   audio.style.cursor = 'move'; // Change cursor to indicate draggable
 
+
+//  window.localStorage.getItem ("sidebar-width", dist);
+
+
   // Append the audio element to a specified container
   var container = document.getElementById(containerId);
   if (!container) {

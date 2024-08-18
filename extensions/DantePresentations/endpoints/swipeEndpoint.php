@@ -5,6 +5,12 @@
  * This endpoint provides swipeable content
  */
 
+
+
+
+// TODO: we need a feature that clicking on (internal) links on a swipe endpoint presented page stays in the swipe endpoint theming and does not go back to normal theming !!!
+
+
 error_reporting(E_ALL); ini_set('display_errors', 'On');
 
 require_once ("danteEndpoint.php");
@@ -32,9 +38,40 @@ drawIOPatch ();
 
 // css code required for the small swiper, see https://intizarahmad.github.io/swipe/
 const SWIPER_CSS = "<style data-src='showEndpoint.php'>
-.swipe             { overflow: hidden; visibility: hidden; position: relative;}
-.swipe-wrap        { overflow: hidden;  position: relative;}
-.swipe-wrap > div  { float: left; width: 100%;  position: relative; }
+
+html {height:100vh;width:100%;}
+body {height:100vh; }
+
+html, body {padding:0px; margin:0px; box-sizing:border-box;} /* reset */
+div {box-sizing:border-box;} /* enforce proper box behavior */
+/* Architecture:
+
+body
+  .swipe
+     .swipe-wrap
+       .bodyContent
+          .mw-content-text
+*/
+
+
+.swipe             { overflow-x: hidden; overflow-y:hidden; visibility: hidden; position: relative;}
+.swipe-wrap        { overflow-x: hidden; overflow-y:hidden; position: relative; border:0px solid green;}
+
+.swipe-wrap > div  { float: left; width: 100%;  position: relative;;}
+
+.bodyContent { height:100vh; border:1px solid blue;  border:0px solid magenta; overflow-x: hidden; overflow-y:scroll;}
+
+.mw-content-text {height:100%; min-height:100%;                      border:0px solid cyan; }
+
+body {overflow:hidden;}
+
+.bodyContent {padding:100px;}
+
+
+/* Override parsifal settings for presentation */
+.parsifalContainer {border:0px;}
+.logWrap {display:none;}
+
 </style>";
 
 // js code required for the small swiper, see https://intizarahmad.github.io/swipe/
@@ -74,11 +111,15 @@ drawIOPatch ();
 
 
 
+
+
+
+
+
 class SwipeEndpoint extends DanteEndpoint {
 
 
 function __construct () {
-   EndpointLog ("***** SwipeEndpoint constructed \n" );  
   parent::__construct(); 
   $this->caching = false;     // must turn off caching for this endpoint - at least as it is implemented in the base class - we will TODO need a separate caching here maybe ?!?!?!?
 }
@@ -102,30 +143,47 @@ public function getInput () {
 }
 
 
+
+
 public function processSlide () : string {
   $input         = $this->getInput();
+  $this->parseText ($input, false);
 
-//  $this->parse ($input, false);
-//  $sections = $this->parserOutput->getSections();
-//  $num = count ( $sections);
+  $sections = $this->parserOutput->getSections();                   // that is not the number of sections but the number of section entry points in below structure !!
+  EndpointLog ("***** Sections: ".print_r ($sections, true)."\n" );  
 
-  $num = 2;
+  $num = count ( $sections) + 1;  // +1 since number 0 shows the portion before the first section
+
+/*
+The section number 0 pulls the text before the first heading; other numbers will pull the given section along with its lower-level subsections. 
+If the section is not found, $mode=get will return $newtext, and $mode=replace will return $text.
+
+Section 0 is always considered to exist, even if it only contains the empty string. If $text is the empty string and section 0 is replaced, $newText is returned.
+*/
 
   $ret = "<div id='mySwipe' class='swipe'><div class='swipe-wrap'>"; // open the swiper
 
-  for ($secnum = 0; $secNum < $num; $secNum++) {
+  for ($secNum = 1; $secNum < $num; $secNum++) {  // start at 1 to jump over the page prefix
     $parsedText    = $this->parseText ( $input, false, $secNum );
    // $ret .= "<div>" . $parsedText . "</div>";
-    $ret .= "<div><div id='bodyContent' class='vector-body'><div id='mw-content-text' class='mx-body-content mw-content-ltr'><span>This is number ${secNum}</span></div></div></div>";
+   // $ret .= "<div><div id='bodyContent' class='vector-body'><div id='mw-content-text' class='mx-body-content mw-content-ltr'><span>This is number ${secNum}</span></div></div></div>"; // works
+
+     $index  = $sections[$secNum]["index"];
+     $number = $sections[$secNum]["number"];
+     $line   = $sections[$secNum]["line"];
+
+  // below we have what in vector usually is id=bodyContent and id=mw-content-text , but here we need to use it as class since we have this element for EVERY slide portion of the page
+
+  //   $ret .= "<div class='bodyContent vector-body'><div class='mw-content-text mx-body-content mw-content-ltr'>".$secNum." of ".$num. " is  index=".$index." number=".$number." line='".$line."'  ".$parsedText."</div></div>";
+
+  $ret .= "<div class='bodyContent'>".$secNum." of ".$num. " is  index=".$index." number=".$number." line='".$line."'  ".$parsedText."</div>";
+
   }
   $ret .= "</div></div>";  // close the swiper
   $ret = $this->decorate ( $ret );
 
-
   return $ret;
 }
-
-
 
 
 // shows only the number seciont (without heading of the section)
@@ -141,9 +199,8 @@ public function processOne ( $secNum ) : string {
 // here we use it to switch between different process variants
 public function process () : string {
   return $this->processSlide ();
-  //return $this->processOne (1);
+  //return $this->processOne (2);
 }
-
 
 public function getCssPaths () {
   return [
@@ -154,7 +211,6 @@ public function getCssPaths () {
   ];
 }
 
-
 public function getAsyncJsPaths() { return [ '../../../load.php?lang=en&amp;modules=startup&amp;only=scripts&amp;raw=1&amp;skin=vector']; }
 
 public function getJsPaths () { global $wgExtensionAssetsPath;  return ["$wgExtensionAssetsPath/Parsifal/js/runtime.js",
@@ -163,15 +219,7 @@ public function getJsPaths () { global $wgExtensionAssetsPath;  return ["$wgExte
 public function getHeadText () : string { return "<style> body {transform:scale(".$this->transformScale."); transform-origin:top left;</style>"; }
 
 public function decorateBody ( string $text ) : string {
-  return  SWIPER_CSS .
-     "<div id='bodyContent' class='vector-body'>"  .
-       "<div id='mw-content-text' class='mx-body-content mw-content-ltr'>" .
-       $text .  
-        "</div>" .
-    "</div>" . 
-    DRAWIO_SIZE_PATCH .
-    SWIPER_JS;
-;
+  return  SWIPER_CSS . $text .  DRAWIO_SIZE_PATCH . SWIPER_JS;
 }
 
 

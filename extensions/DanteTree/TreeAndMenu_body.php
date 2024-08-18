@@ -186,12 +186,15 @@ private static function getCatConfig () {
 public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
   global $wgExtensionAssetsPath;
   $out->addHeadItem("earlyIcons",    "<link rel='preload' as='image' href='{$wgExtensionAssetsPath}/DanteTree/fancytree/icons.gif'>");  // preload the DanteTree images (does work on Chrome)
+
+  // NOTE: below setting  mw-head-base margin-left is needed for getting a proper initialization of the position of DantePresentations / audio.js element
   $out->addHeadItem ("sidebarstyle", <<<EOT
 <script data-src="TreeAndMenu_body.php">
   let pers = window.localStorage.getItem ("sidebar-width");
   if (pers) {
     let style = `<style data-src="TreeAndMenu_body.php">`+
       `#mw-panel {width: \${pers} ; height: 100%;}
+       #mw-head-base {margin-left: \${pers};}
       #content   {margin-left: \${pers};}
       #left-navigation  {margin-left: \${pers};}
       #footer {margin-left: \${pers};}
