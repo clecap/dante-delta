@@ -179,7 +179,7 @@ Section 0 is always considered to exist, even if it only contains the empty stri
 
   return $ret;
 }
-
+ 
 
 // shows only the number seciont (without heading of the section)
 public function processOne ( $secNum ) : string {
