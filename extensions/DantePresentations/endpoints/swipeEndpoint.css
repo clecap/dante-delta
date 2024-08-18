@@ -1,0 +1,38 @@
+
+
+/* css code required for the small swiper, see https://intizarahmad.github.io/swipe/  */
+
+html {height:100vh;width:100%;}
+body {height:100vh; }
+
+html, body {padding:0px; margin:0px; box-sizing:border-box;} /* reset */
+div {box-sizing:border-box;} /* enforce proper box behavior */
+/* Architecture:
+
+body
+  .swipe
+     .swipe-wrap
+       .bodyContent
+          .mw-content-text
+*/
+
+
+.swipe             { overflow-x: hidden; overflow-y:hidden; visibility: hidden; position: relative;}
+.swipe-wrap        { overflow-x: hidden; overflow-y:hidden; position: relative; border:0px solid green;}
+
+.swipe-wrap > div  { float: left; width: 100%;  position: relative;;}
+
+.bodyContent { height:100vh; border:1px solid blue;  border:0px solid magenta; overflow-x: hidden; overflow-y:scroll;}
+
+.mw-content-text {height:100%; min-height:100%;                      border:0px solid cyan; }
+
+body {overflow:hidden;}
+
+.bodyContent {padding:100px;}
+
+
+/* Override parsifal settings for presentation */
+.parsifalContainer {border:0px;}
+.logWrap {display:none;}
+
+

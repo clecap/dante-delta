@@ -6,11 +6,6 @@
  */
 
 
-
-
-// TODO: we need a feature that clicking on (internal) links on a swipe endpoint presented page stays in the swipe endpoint theming and does not go back to normal theming !!!
-
-
 error_reporting(E_ALL); ini_set('display_errors', 'On');
 
 require_once ("danteEndpoint.php");
