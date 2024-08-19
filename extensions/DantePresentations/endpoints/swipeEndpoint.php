@@ -43,6 +43,14 @@ window.mySwipe = new Swipe(element, {
   callback: function(index, element) {},
   transitionEnd: function(index, element) {}
 });
+
+
+window.setSwipePositioner = (text) => {
+  let ele = document.getElementById ('swipe-positioner');
+  ele.innerHTML = '';
+  let node = document.createTextNode (text);
+  ele.appendChild (node);
+};
 </script>";
 
 
@@ -128,16 +136,20 @@ Section 0 is always considered to exist, even if it only contains the empty stri
      $number = $sections[$secNum]["number"];
      $line   = $sections[$secNum]["line"];
 
-     $position = "<div class='swipe-positioner'>Index: ".$index." number ".$secNum." of " . $num . " line: ".$line."</div>";
+     $posText = "Index: ".$index." number ".$secNum." of " . $num . " line: ".$line;
+     $posJS =  "<script> window.setSwipePositioner ('".$posText."')</script>";
 
   // below we have what in vector usually is id=bodyContent and id=mw-content-text , but here we need to use it as class since we have this element for EVERY slide portion of the page
 
   //   $ret .= "<div class='bodyContent vector-body'><div class='mw-content-text mx-body-content mw-content-ltr'>".$parsedText."</div></div>";
 
-  $ret .= "<div class='bodyContent'>".$parsedText."</div>" . $position;
+  $ret .= "<div class='bodyContent'>".$parsedText."</div>";
 
   }
-  $ret .= "</div></div>";  // close the swiper
+
+   $position = "<div id='swipe-positioner'></div>";
+
+  $ret .= "</div></div>".$position;  // close the swiper
   $ret = $this->decorate ( $ret );
 
   return $ret;
