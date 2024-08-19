@@ -195,13 +195,13 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
 
     foreach ($removeTags as $tag) { $parser->setHook ( $tag, [ "HideRenderer", 'renderHidden' ] );}
 
-    // EndpointLog ("\nDanteEndpoint: Sees the section type: " . gettype ($section) . " and section value: ($section) \n");
+  //  EndpointLog ("\nDanteEndpoint: Sees the section type: " . gettype ($section) . " and section value: ($section) \n");
 
   
-  if ( strcmp (gettype ($section), "integer") == 0  ) { 
-    // EndpointLog ("\n DanteEndpoint: Restricted section parsing requested for section=$section");
+  if ( $section !== NULL  ) { 
+  //  EndpointLog ("\n DanteEndpoint: Restricted section parsing requested for section=$section");
     $text = $parser->getSection ($text, $section, "NOT FOUND - see danteEndpoint.php"); 
-    // EndpointLog ("\n\n Sees: $text \n\n");
+  //  EndpointLog ("\n\n DanteEndpoint sees: $text \n\n");
   }
 
   $pageRef = new DanteDummyPageReference ( 
@@ -244,7 +244,8 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
      catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: Parser: Caught exception:\n" );    $parsedText = "EXCEPTION: " . $e->__toString(); }
      catch(Throwable $t)   { EndpointLog ("***** DanteEndpoint: Parser: Caught Throwable:\n" );
                              EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  }
-     finally               { EndpointLog ("DanteEndpoint: in finally block\n");                     }
+     finally               { //EndpointLog ("DanteEndpoint: in finally block\n");                 
+      }
 
   // EndpointLog ("DanteEndpoint: parseTexte will leave now\n");
 
