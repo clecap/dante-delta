@@ -1,7 +1,5 @@
 
 
-/* css code required for the small swiper, see https://intizarahmad.github.io/swipe/  */
-
 html {height:100vh;width:100%;}
 body {height:100vh; }
 
@@ -17,6 +15,8 @@ body
 */
 
 
+/* css code required for the small swiper, see https://intizarahmad.github.io/swipe/  */
+
 .swipe             { overflow-x: hidden; overflow-y:hidden; visibility: hidden; position: relative;}
 .swipe-wrap        { overflow-x: hidden; overflow-y:hidden; position: relative; border:0px solid green;}
 
@@ -29,9 +29,6 @@ body
 body {overflow:hidden;}
 
 .bodyContent {padding:100px;}
-
-
-
 
 
 
@@ -57,6 +54,11 @@ html.sizeLimit  .parsifalContainer {max-width: none !important;}
 .vector-body {font-size:40pt;}
 ul           {list-style-image:none;}
 
+
+/* TODO: do we really have vector.body active as class ?? */
+
+
+
 /* Have a bit more separation in showendpoint and allow growth of the diagrams to full breadth of the window */
 img.drawioShowendpoint {
   max-width:5000px !important;
@@ -75,14 +77,6 @@ script + p { line-height:0.1;}
 
 /* do not show handle to error messages in showEndpoint */
 .errorWrap {display:none;}
-
-
-
-
-
-
-
-
 
 
 

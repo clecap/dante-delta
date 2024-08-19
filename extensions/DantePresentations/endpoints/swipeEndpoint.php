@@ -30,45 +30,6 @@ drawIOPatch ();
 ";
 
 
-
-// css code required for the small swiper, see https://intizarahmad.github.io/swipe/
-const SWIPER_CSS = "<style data-src='showEndpoint.php'>
-
-html {height:100vh;width:100%;}
-body {height:100vh; }
-
-html, body {padding:0px; margin:0px; box-sizing:border-box;} /* reset */
-div {box-sizing:border-box;} /* enforce proper box behavior */
-/* Architecture:
-
-body
-  .swipe
-     .swipe-wrap
-       .bodyContent
-          .mw-content-text
-*/
-
-
-.swipe             { overflow-x: hidden; overflow-y:hidden; visibility: hidden; position: relative;}
-.swipe-wrap        { overflow-x: hidden; overflow-y:hidden; position: relative; border:0px solid green;}
-
-.swipe-wrap > div  { float: left; width: 100%;  position: relative;;}
-
-.bodyContent { height:100vh; border:1px solid blue;  border:0px solid magenta; overflow-x: hidden; overflow-y:scroll;}
-
-.mw-content-text {height:100%; min-height:100%;                      border:0px solid cyan; }
-
-body {overflow:hidden;}
-
-.bodyContent {padding:100px;}
-
-
-/* Override parsifal settings for presentation */
-.parsifalContainer {border:0px;}
-.logWrap {display:none;}
-
-</style>";
-
 // js code required for the small swiper, see https://intizarahmad.github.io/swipe/
 const SWIPER_JS = "<script>
 var element = document.getElementById('mySwipe');
@@ -167,11 +128,13 @@ Section 0 is always considered to exist, even if it only contains the empty stri
      $number = $sections[$secNum]["number"];
      $line   = $sections[$secNum]["line"];
 
+     $position = "<div class='swipe-positioner'>Index: ".$index." number ".$secNum." of " . $num . " line: ".$line."</div>";
+
   // below we have what in vector usually is id=bodyContent and id=mw-content-text , but here we need to use it as class since we have this element for EVERY slide portion of the page
 
-  //   $ret .= "<div class='bodyContent vector-body'><div class='mw-content-text mx-body-content mw-content-ltr'>".$secNum." of ".$num. " is  index=".$index." number=".$number." line='".$line."'  ".$parsedText."</div></div>";
+  //   $ret .= "<div class='bodyContent vector-body'><div class='mw-content-text mx-body-content mw-content-ltr'>".$parsedText."</div></div>";
 
-  $ret .= "<div class='bodyContent'>".$secNum." of ".$num. " is  index=".$index." number=".$number." line='".$line."'  ".$parsedText."</div>";
+  $ret .= "<div class='bodyContent'>".$parsedText."</div>" . $position;
 
   }
   $ret .= "</div></div>";  // close the swiper
@@ -202,7 +165,7 @@ public function getCssPaths () {
     "../../../load.php?lang=en&modules=ext.Parsifal%7Cskins.vector.styles.legacy&only=styles&skin=vector",
     // my own bundle MUST be here as only this includes latex.ccss from PARSIFAL  // TODO: HOWEVER this only is reauired for the tex endpoint - and how we include this for the Parsifal endpoint still is very ???????????????????????????
     // "load.php?lang=en&modules=skins.vector.styles.legacy&only=styles&skin=vector"
-    "showEndpoint.css"
+    "swipeEndpoint.css"
   ];
 }
 
@@ -214,7 +177,7 @@ public function getJsPaths () { global $wgExtensionAssetsPath;  return ["$wgExte
 public function getHeadText () : string { return "<style> body {transform:scale(".$this->transformScale."); transform-origin:top left;</style>"; }
 
 public function decorateBody ( string $text ) : string {
-  return  SWIPER_CSS . $text .  DRAWIO_SIZE_PATCH . SWIPER_JS;
+  return  $text .  DRAWIO_SIZE_PATCH . SWIPER_JS;
 }
 
 
