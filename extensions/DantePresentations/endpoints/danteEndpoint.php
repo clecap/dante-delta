@@ -61,6 +61,7 @@ class DanteEndpoint {
   protected ?string   $dbkey = "uninitialized";       // TODO: not clear if needed for paghe reference since currently we use NULL for it
 
 
+
   // dependant entities
   protected ?MediaWiki\User\UserIdentity $userId; // 
   protected ?string   $nsName = null;    // TODO: see also above: maybe rather null than "uniniialized" ?????

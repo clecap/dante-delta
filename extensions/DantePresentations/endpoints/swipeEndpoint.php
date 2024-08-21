@@ -41,8 +41,11 @@ window.mySwipe = new Swipe(element, {
   disableScroll: true,
   stopPropagation: true,
   callback: function(index, element) {},
-  transitionEnd: function(index, element) {}
+  transitionEnd: function(index, element) { }
 });
+
+
+
 
 
 </script>";
@@ -70,10 +73,6 @@ drawIOPatch ();
 
 
 
-
-
-
-
 class SwipeEndpoint extends DanteEndpoint {
 
 
@@ -83,7 +82,6 @@ function __construct () {
 }
 
 private $transformScale = 1;
-
 
 
 // TODO: also allow stuff in query extension of URL !!
@@ -104,22 +102,23 @@ public function getInput () {
 
 
 public function processSlide () : string {
+  global $wgServer, $wgScriptPath;
+
   $input         = $this->getInput();
   $this->parseText ($input, false);
-
-  $sections = $this->parserOutput->getSections();                   // that is not the number of sections but the number of section entry points in below structure !!
+  $sections      = $this->parserOutput->getSections();                   // that is not the number of sections but the number of section entry points in below structure !!
   EndpointLog ("***** Sections: ".print_r ($sections, true)."\n" );  
 
   $arrNumMax = count ( $sections ); 
 
-/*
+/* 
 The section number 0 pulls the text before the first heading; other numbers will pull the given section along with its lower-level subsections. 
 If the section is not found, $mode=get will return $newtext, and $mode=replace will return $text.
 
 Section 0 is always considered to exist, even if it only contains the empty string. If $text is the empty string and section 0 is replaced, $newText is returned.
 */
 
-  $ret = "<div id='mySwipe' class='swipe'><div class='swipe-wrap'>"; // open the swiper
+  $ret = "<div id='mySwipe' class='swipe'><div id='swipe-wrap' class='swipe-wrap'>"; // open the swiper
 
   $linear = 0;  // linear counter of all slide elements
 
@@ -139,8 +138,20 @@ Section 0 is always considered to exist, even if it only contains the empty stri
     EndpointLog ("Using  slide with line ". $sections[$arrNum]['line']." as slide sequence $linear, picking for parser secNum=$secNum\n");
 
     $parsedText  = $this->parseText ( $input, false, $secNum );
+
     $posText     = "<div class='swipe-positioner'><span class='swipe-num'>".$linear."</span> of <span class='total-num-slides'></span>: <b>" .$sections[$arrNum]['line']. "</b></div>";
-    $myLine      = "<div class='bodyContent'>".$posText.$parsedText."</div>";    
+
+    // build a navigation element
+    $mainLink = "<a class='swipe-link' href='".$wgServer.$wgScriptPath."/index.php?title=".$this->dbkey."' title='Go back to main article'>".$this->title."</a>";
+    $nextLink = "<button>&#8594;</button>";
+    $prevLink = "<button>&#8592; </button>";
+    $navigator   = "<div class='swipe-navigator'>".$prevLink.$mainLink.$nextLink."</div>";
+
+//    $myLine      = "<div class='bodyContent'>".$posText.$navigator.$parsedText."</div>";    // works
+
+
+  $myLine      = "<div class='bodyContent'><div class='swipe-line'>".$posText.$navigator."</div><div class='swipe-stuff'>".$parsedText."</div></div>";    
+
 
     $ret .= $myLine;
 
@@ -156,29 +167,6 @@ Section 0 is always considered to exist, even if it only contains the empty stri
 }
 
 
-/*
-// for input $input build the next swipe portion using $secNum
-private function makeSwipePortion ( $input, $secNum, $sections, $line, $linear) {
-  $parsedText    = $this->parseText ( $input, false, $secNum );
-  EndpointLog ("\n\n Parsed section $secNum is:".$parsedText."\n\n");
-
-  // $ret .= "<div>" . $parsedText . "</div>";
-  // $ret .= "<div><div id='bodyContent' class='vector-body'><div id='mw-content-text' class='mx-body-content mw-content-ltr'><span>This is number ${secNum}</span></div></div></div>"; // works
-
-  //$index  = $sections[$secNum]["index"];
-  //$number = $sections[$secNum]["number"];
-  //$line   = $sections[$secNum]["line"];
-
-  $posText = "<div class='swipe-positioner'><span class='swipe-num'>".$linear."</span> of " . $num . ": <b>" .$line. "</b></div>";
-  $ret     = "<div class='bodyContent'>".$posText.$parsedText."</div>";
-   return $ret;
-}
-
-*/
-
-
-
-
 
 // shows only the number seciont (without heading of the section)
 public function processOne ( $secNum ) : string {
@@ -192,8 +180,12 @@ public function processOne ( $secNum ) : string {
 // This is the core function for obtaining the output of the (generic) endpoint
 // here we use it to switch between different process variants
 public function process () : string {
-  return $this->processSlide ();
-  //return $this->processOne (2);
+  $ret = "";
+  try { $ret .= $this->processSlide ();
+    // $ret = $this->processOne (2);
+  }
+  catch (Throwable $t) { $ret .= $t->__toString(); }
+  return $ret;
 }
 
 public function getCssPaths () {
@@ -207,8 +199,7 @@ public function getCssPaths () {
 
 public function getAsyncJsPaths() { return [ '../../../load.php?lang=en&amp;modules=startup&amp;only=scripts&amp;raw=1&amp;skin=vector']; }
 
-public function getJsPaths () { global $wgExtensionAssetsPath;  return ["$wgExtensionAssetsPath/Parsifal/js/runtime.js",
-"$wgExtensionAssetsPath/DantePresentations/js/swipe.min.js"]; }
+public function getJsPaths () { global $wgExtensionAssetsPath;  return ["$wgExtensionAssetsPath/Parsifal/js/runtime.js", "$wgExtensionAssetsPath/DantePresentations/js/swipe.min.js"]; }
 
 public function getHeadText () : string { return "<style> body {transform:scale(".$this->transformScale."); transform-origin:top left;</style>"; }
 

@@ -40,7 +40,7 @@ class DantePresentations {
                "Wiki-wgUserId="           .urlencode ($userId)     . "&" .
                "Wiki-wgNamespaceNumber="  .urlencode ($namespaceIndex)  . "&" .
                "Wiki-wgNamespaceName="  .urlencode ($namespaceName)  . "&" .
-               "Wiki-titleText=" .urlencode ($titleText) . "&".
+               "Wiki-wgtitle=" .urlencode ($titleText) . "&".
                "Wiki-dbkey="              .urlencode ($dbkey) . "&".
                "Wiki-hiding=true";
   

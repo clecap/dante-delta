@@ -212,6 +212,19 @@ $wgWikEdDiffUnitTesting = false;          # Run unit tests to prove correct work
 
 
 
+
+##
+## COnfigure interwiki and transwiki
+##
+
+wfLoadExtension( 'Interwiki' );
+$wgGroupPermissions['sysop']['interwiki'] = true;    // To grant sysops permissions to edit interwiki data
+$wgImportSources = [ 'sourcewiki', 'commons', 'arxiv' ];
+
+
+
+
+
 /* DEBUG code
 
 if (false) {

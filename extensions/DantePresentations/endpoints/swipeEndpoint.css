@@ -1,46 +1,54 @@
-
-
 html {height:100vh;width:100%;}
 body {height:100vh; }
-
 html, body {padding:0px; margin:0px; box-sizing:border-box;} /* reset */
 div {box-sizing:border-box;} /* enforce proper box behavior */
+
+
 /* Architecture:
 
 body
   .swipe
      .swipe-wrap
-       .bodyContent
-          .mw-content-text
+       .swipe-wrap > div  == .bodyContent
+         .swipe-line
+         .swipe-stuff
+
 */
 
 
 /* css code required for the small swiper, see https://intizarahmad.github.io/swipe/  */
 
-.swipe             { overflow-x: hidden; overflow-y:hidden; visibility: hidden; position: relative;}
-.swipe-wrap        { overflow-x: hidden; overflow-y:hidden; position: relative; border:0px solid green;}
+.swipe             { overflow:hidden; position:relative; visibility: hidden;}
+.swipe-wrap        { overflow:hidden; position: relative;}
+.swipe-wrap > div  { float: left; width: 100%;  position: relative; height:100vh;  overflow-x: hidden; }
 
-.swipe-wrap > div  { float: left; width: 100%;  position: relative;;}
-
-.bodyContent { height:100vh; border:1px solid blue;  border:0px solid magenta; overflow-x: hidden; overflow-y:scroll;}
-
-.mw-content-text {height:100%; min-height:100%;                      border:0px solid cyan; }
+.swipe-wrap > div  {overflow-y:hidden;}
 
 body {overflow:hidden;}
-
-.bodyContent {padding:100px;}
-
-
 
 
 .swipe-positioner {position:absolute; top:0px; left:100px; z-index:10; padding:5px; border:1px solid blue; border-radius:5px; color:blue;}
 .swipe-num  {font-weight:bold; color: blue;}
 
-/* style stuff from showEndpoint.css  - TODO: fix and check if we want ti like that  */
+.swipe-navigator {position:absolute; top:0px; right:100px; z-index:10; padding:5px; border:0px solid blue; border-radius:5px; color:blue;}
+
+.swipe-stuff {margin-top:1px; padding:50px 140px 50px 140px;  height:100vh; width:100vw;min-height:100vh; overflow-y:scroll;}
+
+.swipe-line {background-color: AliceBlue;height:30px;}
+
+.swipe-positioner, .swipe-navigator {height:30px; min-height:30px;}
+
+a.swipe-link {margin-left:10px; margin-right:10px; font-weight:bold; color:blue;position:relative;top:-3px;;}
+
+button {height:28px; position:relative;top:-5px; margin-left:5px; margin-right:5px; cursor:pointer;}
+
+
 
 body {background-color: white;}
 
-body {margin: 0pt 10pt 0pt 10pt;}
+
+body {cursor:grab;}
+body:active {cursor:grabbing;}
 
 
 h1, h2, h3, h4, h5, h6 {display:none;}
@@ -51,46 +59,22 @@ h1, h2, h3, h4, h5, h6 {display:none;}
 /* remove size limitation in showEndpoint */
 html.sizeLimit  .parsifalContainer {max-width: none !important;}
 
-
 /* adaptations for projection and casting */
 .vector-body {font-size:40pt;}
 ul           {list-style-image:none;}
 
-
-/* TODO: do we really have vector.body active as class ?? */
-
-
-
 /* Have a bit more separation in showendpoint and allow growth of the diagrams to full breadth of the window */
-img.drawioShowendpoint {
-  max-width:5000px !important;
-  margin:20px 20px 20px 20px;
-}
+img.drawioShowendpoint {max-width:5000px !important; margin:20px 20px 20px 20px;}
 
 /* have a bit more separation between parsifal containers*/
-.parsifalContainer {
-  margin:40px 0px 40px 0px;
-  border: 1px dotted grey;
-}
+.parsifalContainer { margin:40px 0px 40px 0px;}
 
 /* reduce distance between two amsmath elements seperated by a paragraph */
 script + p { line-height:0.1;}
 
-
-/* do not show handle to error messages in showEndpoint */
-.errorWrap {display:none;}
-
-
-
-
-
-
-
-
-
-
-/* Override parsifal settings for presentation */
+/* Override some parsifal settings for presentation/slide mode */
 .parsifalContainer {border:0px;}
 .logWrap {display:none;}
+.errorWrap {display:none;}
 
 

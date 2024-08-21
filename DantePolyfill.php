@@ -11,13 +11,17 @@
 // The idea is to have 
 //   1) Configuration files, usually in the MediaWiki namespace, show their content in preview
 //   2) Allow some comments on the purpose and the format of these files as part of these files (before and after the pre tags)
-
 function extractPreContents ($code) {
   $start = strpos ($code, "<pre>") + 5;
   $end   = strpos ($code, "</pre>");
   $code  = substr ($code, $start, $end - $start);
-  $code  = trim   ($code);
-  return $code;
+  $code  = trim   ($code);                                                               // removes white space at the beginning and at the end
+  $lines = explode("\n", $code);                                                         // Split the string into an array of lines
+  $filteredLines = array_filter($lines, function($line) {return trim($line) !== '';});   // Use array_filter to remove empty lines
+  $result = implode("\n", $filteredLines);                                               // Join the filtered lines back into a single string
+
+  $result .= "\n";    // append one \n so that counting the newlines also counts the lines we have
+  return $result;
 }
 
 function danteLog ($extension, $text) {
@@ -37,3 +41,110 @@ function danteLog ($extension, $text) {
 
 
 
+
+
+
+
+// bundles some utility functions
+class DanteUtil {
+
+
+/** Store content to github
+ * $owner    Repository owner name (in my case clecap)
+ * $repo     Name of repository (in my case dante-wiki)
+ * $path     Path of the filename to be uploaded
+ * $token    Access token for github
+ * $content  Content to be uploaded
+ */
+static public function storeToGithub ($owner, $repo, $path, $token, $content) {
+   $apiUrl = "https://api.github.com/repos/$owner/$repo/contents/$path";    // GitHub API URL to create/update a file
+
+
+// TODO: must trhow an exception if something goes wrong wrt storing so the user is informed !
+
+  // Get the current contents of the file (need the SHA for updating)
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $apiUrl);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_USERAGENT, $owner);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: token ' . $token));
+  $response = curl_exec($ch);
+  curl_close($ch);
+  $responseData = json_decode($response, true);
+  $fileSha = isset($responseData['sha']) ? $responseData['sha'] : null;
+
+  // Prepare data for GitHub API
+  $data = ['message' => "Updating $path with new data", 'content' => base64_encode($content), 'sha' => $fileSha, ];
+
+  // Send the data to GitHub
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $apiUrl);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_USERAGENT, $owner);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: token ' . $token, 'Content-Type: application/json'));
+  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  return $response;
+}
+
+
+
+/**
+ * Given the name $cat of a category, return the list of files belonging to this category (this includes category files)
+ */
+static public function catList ( $cat ) {
+  // Get the list of pages which are in the given category $cat
+  $dbr           = wfGetDB( DB_REPLICA );
+  $categoryTitle = Title::newFromText( $cat, NS_CATEGORY );
+  if ( !$categoryTitle ) { throw new Exception ("Cannot find category $cat"); }
+
+  $res = $dbr->select(
+    array( 'categorylinks',   'page' ),
+    array( 'page_namespace',  'page_title' ),
+    array( 'cl_from = page_id', 'cl_to' => $categoryTitle->getDBkey() ),
+      __METHOD__
+    );
+
+  $filepath = tempnam ("/tmp", "DanteInitialStore");   // getting a fresh file name helps us to avoid race conditions of parallel invocations; so we do not need locks
+  $file = fopen( $filepath, 'w' );
+  foreach ( $res as $row ) {
+    $title = Title::makeTitle( $row->page_namespace, $row->page_title );
+    fwrite( $file, $title->getFullText() . PHP_EOL );
+  }
+
+  fclose( $file );
+  return $filepath;
+}
+
+
+
+/**
+ * Given the name of a title (which may include a namespace prefix) an returns the contents of this file in the first <pre> element to be found there
+ * Where every line is terminated by a newline.
+ *
+ *
+ */
+static public function listOfListed ($name) {
+  $title      = Title::newFromText( $name  );                             
+  if ($title == null) { throw new Exception ("Title $name not found");}       
+  $wikipage   = new WikiPage ($title);                                                      
+  if ($wikipage == null) { throw new Exception ("Could not generate Wikipage for title $name");}                                   // signal the caller that we did not get a WikiPage
+  $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
+  if ($contentObject ) {                                                                      // IF we have found a content object for this thing
+    $contentText = ContentHandler::getContentText( $contentObject );    
+    $contentText = extractPreContents ($contentText);
+    $filepath = tempnam ("/tmp", "DanteInitialStore");
+    file_put_contents ($filepath, $contentText); 
+    return $filepath;
+  }
+  throw new Exception ("Could not get content object for $name");
+}
+
+
+
+
+
+}

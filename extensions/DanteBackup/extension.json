@@ -14,7 +14,9 @@
     "DanteDBRestore":           "DanteDBRestore.php",
     "DanteListBackups":         "DanteListBackups.php",
     "DanteBackupPreferences":   "DanteBackupPreferences.php",
-    "DanteInitialStore":        "DanteInitialStore.php"
+    "DanteInitialStore":        "DanteInitialStore.php",
+    "DanteInitialLoad":         "DanteInitialStore.php"
+
   },
   "SpecialPages": {
     "DanteDump":          { "class": "DanteDump"  },
@@ -22,7 +24,8 @@
     "DanteDBDump":        { "class": "DanteDBDump"  },
     "DanteDBRestore":     { "class": "DanteDBRestore"  },
     "DanteListBackups":   { "class": "DanteListBackups"},
-    "DanteInitialStore":  { "class": "DanteInitialStore"}
+    "DanteInitialStore":  { "class": "DanteInitialStore"},
+    "DanteInitialLoad":   { "class": "DanteInitialLoad"}
   },
   "ExtensionMessagesFiles": {"DanteDumpAlias": "DanteDumpAlias.i18n.alias.php"},
   "Hooks": {

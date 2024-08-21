@@ -3,14 +3,81 @@
 require_once ("DanteCommon.php");
 require_once ("Executor.php");
 
+
+const COMPRESS = false;
+
+
+// a memo is a single record for controlling the functionality of uploading DanteWiki system contents files
+class Memo {
+
+public string $name;        // name of the collection of contents
+public string $filename;    // temporary file name used as pagelist for this collection
+public string $contents;    // contents
+public string $num;         // number of elements of the collection
+public string $label;       // label for the collection
+public string $url;         // url for looking uo by user
+
+public static function getConfig () {
+ $config = [
+    new Memo ( "Cat_DanteInitialContents",         DanteUtil::catList      ("DanteInitialContents"),              "Category:DanteInitialContents" ),
+    new Memo ( "Cat_DanteInitialCustomize",        DanteUtil::catList      ("DanteInitialCustomize"),             "Category:DanteInitialCustomize"),
+    new Memo ( "MediaWiki_DanteInitialContents",   DanteUtil::listOfListed ("MediaWiki:DanteInitialContents"),    "MediaWiki:DanteInitialcomntents" ),
+    new Memo ( "Mediawiki_DanteInitialCustomize",  DanteUtil::listOfListed ("MediaWiki:DanteInitialCustomize"),   "MediaWiki:DanteInitialCustomize" )
+  ];
+  return $config;
+}
+
+public function __construct ( string $name, string $filename, string $url ) {
+  global $wgServer, $wgScriptPath;
+  $this->name      = $name;
+  $this->filename  = $filename;
+  $this->url       = $url;
+  $this->contents  = file_get_contents ($this->filename);
+  $this->num       = substr_count($this->contents, "\n");
+
+  $this->label = "<li>All $this->num pages belonging to <a href='$wgServer/$wgScriptPath/index.php?title=$this->url'>$this->url</a>
+    <div style='max-height:200px; overflow-y:scroll; overflow-x:hidden; margin:20px;'><pre style='margin:0px; padding:0px;'>$this->contents</pre></div></li>";
+
+}
+
+public function execute ( $owner, $repository, $token, $path, $out=false ) {
+  global $IP;
+
+  // generate a manifest file and upload that manifest file
+  $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->filename-manifest.txt", $token, $this->contents);
+  if ($out) $out->addHTML( '<h3>got filepath:</h3><p><pre>' . $this->filename . '</pre></p>' );
+
+  // dump the contents as requested into into variable $output
+  $cmd = "php  $IP/maintenance/dumpBackup.php --current --uploads  --include-files  --pagelist=$this->filename";
+  $ret = Executor::execute ( $cmd, $output, $error, $duration );
+
+  if ($out) $out->addHTML ( "<h3>dumpBackup wrote to stderr:</h3><p><pre>" .$error. "</pre></p>");
+
+//  if (COMPRESS) { 
+    $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name..xml.gz",   $token,   gzencode ($output) ); 
+//   }
+//    else          { 
+     $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml",    $token,   $output );            
+//}
+
+  $json = json_decode ($response);
+ // if ($json->status != 200) { throw new Exception ("PROBLEM");}
+  $json_indented_by_4 = json_encode($json, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+  $json_indented_by_2 = preg_replace('/^(  +?)\\1(?=[^ ])/m', '$1', $json_indented_by_4);
+  if ($out) $out->addHTML( '<h3>Github server replied to API call:</h3><p><pre>' . $json_indented_by_2 . '</pre></p>' );
+  @unlink ($filepath);
+}
+
+} // end class
+
+
 class DanteInitialStore extends SpecialPage {
 
-public function __construct () {parent::__construct( 'DanteInitialStore' ); }
+public function __construct () { parent::__construct( 'DanteInitialStore' ); }
 
 public function getGroupName() {return 'dante';}
   
 public function execute ( $subPage ) {
-  global $IP;
   $this->setHeaders();
   $this->outputHeader();
   $out = $this->getOutput();
@@ -20,129 +87,102 @@ public function execute ( $subPage ) {
   $owner         = $request->getText ('owner');
   $repository    = $request->getText ('repository');
   $path          = $request->getText ('path');
-  $filename      = $request->getText ('filename');
   $token         = $request->getText ('token');
+
+  $config = Memo::getConfig();   // get the configuration data from the one place where we configure it
 
   // Add explanatory text and form
   $text = <<<EOT
-<p>This special page uploads the current content of the Dante Initialization Pages to the dante-wiki github repository</p>
-<p>It is meant for use only by dante-wiki maintainers</p>
-<form method="post" action="">
-  <table>
-    <tr><td><label>Owner</label></td>            <td><input type="text" name="owner"       size="80"  value="clecap"/></td></tr>
-    <tr><td><label>Repository</label></td>       <td><input type="text" name="repository"  size="80"  value="dante-wiki"/></td></tr>
-    <tr><td><label>Path</label></td>             <td><input type="text" name="path"        size="80"  value="assets/initial-contents"/></td></tr>
-    <tr><td><label>Filename</label></td>         <td><input type="text" name="filename"    size="80"  value="initial-content-saved.xml"></td></tr>
-    <tr><td><label>Access Token</label></td>     <td><input type="text" name="token"       size="80"  value="must-enter-a-valid-github-authorization-token-here"/></td></tr>
-  </table>
-  <input type="submit" value="Submit"/>
-</form>
-EOT;
+  <p>This special page uploads the current content of Dante System Pages to the dante-wiki github repository.</p>
+  <p>It is meant as service function for use (only) by the maintainers of the dante-wiki system.</p>
+  <p>Its purpose is to allow the maintainer direct amendment of a Dante System Page from whatever installation.</p>
+
+  <form method="post" action="">
+    <table>
+      <tr><td><label>Owner</label></td>            <td><input type="text" name="owner"       size="80"  readonly value="clecap"/></td></tr>
+      <tr><td><label>Repository</label></td>       <td><input type="text" name="repository"  size="80"  readonly value="dante-wiki"/></td></tr>
+      <tr><td><label>Path</label></td>             <td><input type="text" name="path"        size="80"  readonly value="assets/initial-contents"/></td></tr>
+      <tr><td><label>Access Token</label></td>     <td><input type="text" name="token"       size="80"  value="must-enter-a-valid-github-authorization-token-here"/></td></tr>
+    </table>
+    <input type="submit" value="Submit"/>
+  </form>
+  <p>Update processes in existing DanteWikis may overwrite some of those pages. If owners of a DanteWiki want to prevent this for certain files,
+  they only have to remove the category links in the respective pages or remove the page from MediaWiki:InitialContents.</p>
+  <h3>Details</h3>
+  <p>Currently the following pages are uploaded:</p>
+  EOT;
+
+  $text .= "<ol>";
+  foreach ( $config as $val ) { $text .= $val->label; }
+  $text .= "</ol>";
 
   $out->addHTML( $text );
 
+  $out->addHTML ("<h3>Details of Script Execution </h3>");
 
-// NOTE: for the github upload api we need the contents in a shell variable (max 2MB)
-// Two strategies: Size restriction or iterating over individual files
+  // NOTE: for the github upload api we need the contents in a shell variable (max 2MB)
+  // Should this prove insufficient, we must iterate over chunks or individual files (or activate compression for the storage on github
 
-  // Display submitted input
+  // Display submitted input - only in case we really submitted a token 
   if ( $token !== '' ) {
-    $filepath = self::makeList ("DanteInitialContents");
+    foreach ( $config as $val ) { $val->execute( $owner, $repository, $token, $path, $out);}
+  }
+} // end function execute
 
-    $response = self::storeToGithub ($owner, $repository, "$path/$filename-manifest.txt", $token, $output);
 
-    $out->addHTML( '<h3>got filepath:</h3><p><pre>' . $filepath . '</pre></p>' );
+} // end class
 
-    $cmd = "php  $IP/maintenance/dumpBackup.php --current --uploads  --include-files  --pagelist=$filepath";
-    $ret = Executor::execute ( $cmd, $output, $error, $duration );
+// TODO; MUST clear /tmp files afterwrds - we still do not do so !!
 
-    //  $out->addHTML( '<h3>dumpBackup said as output:</h3><p><pre>' . $output . '</pre></p>' );
+class DanteInitialLoad extends SpecialPage {
 
-    $out->addHTML( '<h3>dumpBackup said to stderror:</h3><p><pre>' . $error . '</pre></p>' );
+public function __construct () { parent::__construct( 'DanteInitialLoad' ); }
+
+public function getGroupName() {return 'dante';}
   
-    $response = self::storeToGithub ($owner, $repository, "$path/$filename", $token, $output);
-    $json = json_decode ($response);
-    $json_indented_by_4 = json_encode($json, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
-    $json_indented_by_2 = preg_replace('/^(  +?)\\1(?=[^ ])/m', '$1', $json_indented_by_4);
-    $out->addHTML( '<h3>Github server replied to API call:</h3><p><pre>' . $json_indented_by_2 . '</pre></p>' );
-    @unlink ($filepath);
+public function execute ( $subPage ) {
+  //  if (! $this->getUser()->isAllowed ("dante-restore") ) { $this->getOutput()->addHTML ("You do not have the permission to restore."); return;}  
+
+  danteLog ("DanteBackup", "Dante InitialLoad:execute called\n");
+
+  $user   = $this->getUser();
+  $out    = $this->getOutput();
+
+  $text = <<<EOT
+  <h1>Special:DanteInitialLoad: Loading or Updating Initial or Default DanteWiki Contents</h1>
+  <form method="post" action="">
+    <table>
+      <tr><td><label>URL Path to Directory</label></td>  <td><input type="text" name="urlpath"       size="80"  value="https://github.com/clecap/dante-wiki/raw/master/assets/initial-contents/"/></td></tr>
+    </table>
+    <input type="hidden" name="was-sent" value="4" />
+    <input type="submit" value="Submit"/>
+  </form>
+  EOT;
+
+  $out->addHTML ( $text );
+  $request    = $this->getRequest();
+  $urlpath    = $request->getText ('urlpath');
+  $wasSent    = $request->getText ('was-sent');
+
+  danteLog ("DanteBackup", "Will request produced: $wasSent\n");
+  if ( $wasSent == "4" ) {
+    danteLog ("DanteBackup", "Dante InitialLoad:execute Was submitted\n");
+    $this->useTransactionalTimeLimit();  // raise time limit for this operation
+    $config = Memo::getConfig();   // get the configuration data from the one place where we configure it
+    danteLog ("DanteBackup", "Dante InitialLoad:execute will now loop\n");
+    foreach ($config as $val) { 
+      // danteLog ("DanteBackup", "Dante InitialLoad: will now do ".$val->url."\n");
+      DanteRestore::doImportURL ( $urlpath . "/". $val->name.".xml.gz", $this->getUser());
+    }
+
+   
   }
+
+
+
 }
 
 
-
-static private function makeList ( $cat ) {
-  // Get the list of pages in the category
-  $dbr = wfGetDB( DB_REPLICA );
-  $categoryTitle = Title::newFromText( $cat, NS_CATEGORY );
-  if ( !$categoryTitle ) {  // illegal category ??
-    return -1;   }
-
-  $categoryId = $categoryTitle->getArticleID();
-  $res = $dbr->select(
-    array( 'categorylinks',   'page' ),
-    array( 'page_namespace',  'page_title' ),
-    array( 'cl_from = page_id', 'cl_to' => $categoryTitle->getDBkey() ),
-      __METHOD__
-    );
-
-  $filepath = tempnam ("/tmp", "DanteInitialStore");   // getting a fresh file name helps us to avoid race conditions of parallel invocations; so we do not need locks
-  $file = fopen( $filepath, 'w' );
-  foreach ( $res as $row ) {
-    $title = Title::makeTitle( $row->page_namespace, $row->page_title );
-    fwrite( $file, $title->getFullText() . PHP_EOL );
-  }
-
-
-  // Get the list of pages in the MediaWiki namespace
-  //  $dbr = wfGetDB( DB_REPLICA );
-  $res = $dbr->select(
-    'page',
-    array( 'page_namespace', 'page_title' ),
-    array( 'page_namespace' => NS_MEDIAWIKI ),
-      __METHOD__
-    );
-
-  foreach ( $res as $row ) {
-    $title = Title::makeTitle( $row->page_namespace, $row->page_title );
-    fwrite( $file, $title->getFullText() . PHP_EOL );
-  }
-
-    fclose( $file );
-  return $filepath;
-}
-
-
-static private function storeToGithub ($owner, $repo, $path, $token, $content) {
-   $apiUrl = "https://api.github.com/repos/$owner/$repo/contents/$path";    // GitHub API URL to create/update a file
-
-  // Get the current contents of the file (need the SHA for updating)
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $apiUrl);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_USERAGENT, $owner);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: token ' . $token));
-  $response = curl_exec($ch);
-  curl_close($ch);
-  $responseData = json_decode($response, true);
-  $fileSha = isset($responseData['sha']) ? $responseData['sha'] : null;
-
-  // Prepare data for GitHub API
-  $data = ['message' => 'Updating $path with new data', 'content' => base64_encode($content), 'sha' => $fileSha, ];
-
-  // Send the data to GitHub
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $apiUrl);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_USERAGENT, $owner);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: token ' . $token, 'Content-Type: application/json'));
-  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-  $response = curl_exec($ch);
-  curl_close($ch);
-
-  return $response;
-}
 
 } // end class
 
