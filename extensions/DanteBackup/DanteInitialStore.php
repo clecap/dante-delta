@@ -4,9 +4,6 @@ require_once ("DanteCommon.php");
 require_once ("Executor.php");
 
 
-const COMPRESS = false;
-
-
 // a memo is a single record for controlling the functionality of uploading DanteWiki system contents files
 class Memo {
 
@@ -52,16 +49,11 @@ public function execute ( $owner, $repository, $token, $path, $out=false ) {
   $ret = Executor::execute ( $cmd, $output, $error, $duration );
 
   if ($out) $out->addHTML ( "<h3>dumpBackup wrote to stderr:</h3><p><pre>" .$error. "</pre></p>");
-
-//  if (COMPRESS) { 
-    $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name..xml.gz",   $token,   gzencode ($output) ); 
-//   }
-//    else          { 
-     $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml",    $token,   $output );            
-//}
+  $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml.gz",  $token,   gzencode ($output) );   // upload a .xml.gz variant
+  $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml",    $token,   $output );               // upload a .xml variant
 
   $json = json_decode ($response);
- // if ($json->status != 200) { throw new Exception ("PROBLEM");}
+  // if ($json->status != 200) { throw new Exception ("PROBLEM");}  // TODO: fix ?!?
   $json_indented_by_4 = json_encode($json, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
   $json_indented_by_2 = preg_replace('/^(  +?)\\1(?=[^ ])/m', '$1', $json_indented_by_4);
   if ($out) $out->addHTML( '<h3>Github server replied to API call:</h3><p><pre>' . $json_indented_by_2 . '</pre></p>' );
