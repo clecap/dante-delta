@@ -18,7 +18,7 @@ public static function getConfig () {
  $config = [
     new Memo ( "Cat_DanteInitialContents",         DanteUtil::catList      ("DanteInitialContents"),              "Category:DanteInitialContents" ),
     new Memo ( "Cat_DanteInitialCustomize",        DanteUtil::catList      ("DanteInitialCustomize"),             "Category:DanteInitialCustomize"),
-    new Memo ( "MediaWiki_DanteInitialContents",   DanteUtil::listOfListed ("MediaWiki:DanteInitialContents"),    "MediaWiki:DanteInitialcomntents" ),
+    new Memo ( "MediaWiki_DanteInitialContents",   DanteUtil::listOfListed ("MediaWiki:DanteInitialContents"),    "MediaWiki:DanteInitialContents" ),
     new Memo ( "Mediawiki_DanteInitialCustomize",  DanteUtil::listOfListed ("MediaWiki:DanteInitialCustomize"),   "MediaWiki:DanteInitialCustomize" )
   ];
   return $config;
