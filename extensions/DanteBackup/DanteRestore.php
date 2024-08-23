@@ -214,7 +214,7 @@ private function doImportAWS ($fileName) {
   } 
 
   array_push ( $arr, "echo $fileName");
-  array_push ( $arr, "/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | php $IP/extensions/DanteBackup/countFilter.php " );  // TODO LACKS unzp and decrypt 
+  array_push ( $arr, DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/extensions/DanteBackup/countFilter.php ",                   $zip, $enc ) ); 
   array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '8' ",  $zip, $enc ) ); 
   array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '10' ", $zip, $enc ) ); 
   array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --uploads ",         $zip, $enc ) ); 
@@ -239,19 +239,20 @@ public static function doImportURL ($url, $user) {
 
   $env = DanteCommon::getEnvironmentUser ( $user ); // TODO: needed ?? password ???  // TODO: hopefully not. CAVE: DanteInitialStore.php uses this as well
 
-  danteLog ("DanteBackup", "doImportURL: $url, enc:" .$enc. " zip: ". $zip."\n");
+  danteLog ("DanteBackup", "doImportURL: $url, enc:" .$enc. " gz: ". $zip."\n");
 
   $arr = array ();
   array_push ( $arr, "echo $url");
-  array_push ( $arr, "curl -L $url | php $IP/extensions/DanteBackup/countFilter.php " );  // TODO LACKS unzp and decrypt 
+  array_push ( $arr, DanteCommon::cmdZipEncRestore ("curl -L $url  | ", " php $IP/extensions/DanteBackup/countFilter.php ",                   $zip, $enc ) );   
   array_push ($arr,  DanteCommon::cmdZipEncRestore ("curl -L $url  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '8' ",  $zip, $enc ) ); 
   array_push ($arr,  DanteCommon::cmdZipEncRestore ("curl -L $url  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '10' ", $zip, $enc ) ); 
   array_push ($arr,  DanteCommon::cmdZipEncRestore ("curl -L $url  | ", " php $IP/maintenance/importDump.php --report=10 --uploads ",         $zip, $enc ) ); 
   $arr = self::addPostImport ( $arr );
 
-  danteLog ("DanteBackup", "\n doImportAWS will now enter executor \n");
+  danteLog ("DanteBackup", "\n doImportURL will now enter executor \n");
+  danteLog ("DanteBackup", "\n Commands are: ".print_r ($arr, true)." \n");
   Executor::liveExecuteX ($arr, $env);
-  danteLog ("DanteBackup", "\n doImportAWS left executor \n");
+  danteLog ("DanteBackup", "\n doImportURL left executor \n");
   return true;
 }
 

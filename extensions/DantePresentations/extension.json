@@ -27,11 +27,12 @@
       "remoteExtPath":       "DantePresentations/modules",
       "packageFiles":        ["ext.DantePresentations.js", "audio.js", "languages.js"],
       "styles":              ["dantePresentations.css", "toc.css"]
-  }
+    }
   },
   "ResourceFileModulePaths": {"localBasePath": "modules", "remoteExtPath": "DantePresentations/modules"},
   "ExtensionMessagesFiles": {"CustomMagic": "custom.i18n.php"},
-   "namespaces": [ 
+  "MessagesDirs": { "DantePresentations": [ "i18n" ] },
+  "namespaces": [ 
      { "id": 2200,  "constant": "NS_TRANSLATED",        "name": "Translated"},
      { "id": 2201,  "constant": "NS_TRANSLATED_TALK",   "name": "Translated_Talk" } ],
   "manifest_version": 2

@@ -76,13 +76,11 @@ $wgJobRunRate = 10;             ## Job queue run rate
 
 
 
-// DantePresentations - SubTranslate.php settings
-// see https://www.mediawiki.org/wiki/Extension:SubTranslate
-
+// TODO: we are no longer using subtranslate - deprecate all this stuff
 // MAIN must allow namespaces or no translation will work
 $wgNamespacesWithSubpages[NS_MAIN] = true;
 
-/* if you use DeepL API Free plan */
+/* if you use DeepL API Free plan */ // TODO: deprecate this stuff
 $wgSubTranslateAPIKey['api-free.deepl.com'] = $DEEPL_API_KEY;
 /* if you use DeepL API Pro plan */
 // $wgSubTranslateAPIKey['api.deepl.com'] = "<your auth-key here>";
@@ -93,12 +91,21 @@ $wgSubTranslateRobotPolicy  = "noindex,nofollow";
 
 
 
+/* configure permissions */
+$wgGroupPermissions['*']['edit'] = false;             # No anonymous editing
+$wgGroupPermissions['docent']['edit'] = true;         # only used to generate the group docent
+$wgGroupPermissions['*']['createaccount'] = false;    # currently prevent account creation
 
-$wgGroupPermissions['*']['edit'] = false;         # No anonymous editing
 
-$wgGroupPermissions['docent']['edit'] = true;    # only used to generate the group docent
+/* configure new namespace for hosting Test cases */
+define("NS_TEST", 3000); 
+define("NS_TEST_TALK", 3001);
+$wgExtraNamespaces[NS_TEST]      = "Test";
+$wgExtraNamespaces[NS_TEST_TALK] = "Test_talk";
+$wgContentNamespaces[] = NS_TEST;                 // Allow content to be created in the custom namespace
+$wgNamespaceProtection[NS_TEST] = ['edit'];       // Require edit permission for this namespace
+$wgNamespaceProtection[NS_TEST_TALK] = ['edit'];
 
-$wgGroupPermissions['*']['createaccount'] = false; # currently prevent account creation
 
 
 $wgEditPageFrameOptions ="SAMEORIGIN";                // required to allow the preview iframe in the edit view to navigate to pages of the same 

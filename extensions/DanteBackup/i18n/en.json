@@ -61,6 +61,7 @@
   "prefs-ssh-restore-user":  "User name for user on SSH backup host which provides the dumped data. See [[Help:DanteBackup]].",
   "prefs-ssh-restore-pw":    "Password for user on SSH backup host which provides the dumped data. See [[Help:DanteBackup]].",
   "prefs-ssh-encpw":         "Encryption password for user-controlled encryption before SSH upload. See [[Help:DanteBackup]].",
+  "prefs-git":               "Token to write initial contents to the respective github repository. For developer use only.",
 
   "prefs-label-ssh-host":          "SSH Backup Host",
   "prefs-label-ssh-dump-user":     "Dump User Name",
@@ -68,6 +69,7 @@
   "prefs-label-ssh-restore-user":  "Restore User Name",
   "prefs-label-ssh-restore-pw":    "Restore User Password",
   "prefs-label-ssh-encpw":         "Encryption Password for SSH",
+  "prefs-label-git":               "Initial Contents Github Token",
 
   "somestuff" : "Localized <b>stuff</b>  ",
 

@@ -1,3 +1,6 @@
+// Modifications by CHC: line 171 changed to local
+
+
 /*!
  * jquery.fancytree.persist.js
  *
@@ -92,7 +95,7 @@ function _loadLazyNodes(tree, local, keyList, mode, dfd) {
 		}
 	});
 	return dfd;
-}
+}  // end _loadLazyNodes
 
 
 /**
@@ -165,7 +168,7 @@ $.ui.fancytree.registerExtension({
 		},
 		expandLazy: false,     // true: recursively expand and load lazy nodes
 		overrideSource: true,  // true: cookie takes precedence over `source` data attributes.
-		store: "auto",         // 'cookie': force cookie, 'local': force localStore, 'session': force sessionStore
+		store: "local",         // 'cookie': force cookie, 'local': force localStore, 'session': force sessionStore // CHC: set to local
 		types: "active expanded focus selected"
 	},
 
@@ -212,6 +215,7 @@ $.ui.fancytree.registerExtension({
 	},
 
 	treeInit: function(ctx){
+    // console.error ("treeInit called", ctx, this.options.persist, this._local);
 		var tree = ctx.tree,
 			opts = ctx.options,
 			local = this._local,
@@ -230,6 +234,8 @@ $.ui.fancytree.registerExtension({
 		} else {
 			local.localStorage = (instOpts.store === "local") ? window.localStorage : window.sessionStorage;
 		}
+
+   // console.error ("persisting technique is ", instOpts);
 
 		// Bind init-handler to apply cookie state
 		tree.$div.bind("fancytreeinit", function(event){

@@ -19,7 +19,10 @@ public static function getConfig () {
     new Memo ( "Cat_DanteInitialContents",         DanteUtil::catList      ("DanteInitialContents"),              "Category:DanteInitialContents" ),
     new Memo ( "Cat_DanteInitialCustomize",        DanteUtil::catList      ("DanteInitialCustomize"),             "Category:DanteInitialCustomize"),
     new Memo ( "MediaWiki_DanteInitialContents",   DanteUtil::listOfListed ("MediaWiki:DanteInitialContents"),    "MediaWiki:DanteInitialContents" ),
-    new Memo ( "Mediawiki_DanteInitialCustomize",  DanteUtil::listOfListed ("MediaWiki:DanteInitialCustomize"),   "MediaWiki:DanteInitialCustomize" )
+    new Memo ( "Mediawiki_DanteInitialCustomize",  DanteUtil::listOfListed ("MediaWiki:DanteInitialCustomize"),   "MediaWiki:DanteInitialCustomize" ),
+    new Memo ( "Test",                             DanteUtil::listOfNamespace (NS_TEST),                          "Special:AllPages&from=&to=&namespace=3000" ),
+    new Memo ( "MainPage",                         DanteUtil::singleList ("Main Page"),                            "Main_Page" ), 
+    new Memo ( "MediaWiki_Sidebar",                DanteUtil::singleList ("MediaWiki:Sidebar"),                   "MediaWiki:Sidebar" )
   ];
   return $config;
 }
@@ -80,28 +83,34 @@ public function execute ( $subPage ) {
   $repository    = $request->getText ('repository');
   $path          = $request->getText ('path');
   $token         = $request->getText ('token');
+  $check         = $request->getText ('check');           // used to check for submission
 
   $config = Memo::getConfig();   // get the configuration data from the one place where we configure it
 
+  $user   = $this->getUser();
+  $token        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
+
   // Add explanatory text and form
   $text = <<<EOT
-  <p>This special page uploads the current content of Dante System Pages to the dante-wiki github repository.</p>
+  <p>This special page uploads the current content of Dante System Pages to the dante-wiki-contents github repository.</p>
   <p>It is meant as service function for use (only) by the maintainers of the dante-wiki system.</p>
   <p>Its purpose is to allow the maintainer direct amendment of a Dante System Page from whatever installation.</p>
-
+  <p style='max-width:800px;'>Update processes in existing DanteWikis may overwrite some of those pages.
+  Owners of a DanteWiki wanting to prevent this for selected files,
+    can remove the category links in the respective pages or remove the page from MediaWiki:InitialContents.</p>
+  <h3>Data used in the process</h3>
   <form method="post" action="">
     <table>
       <tr><td><label>Owner</label></td>            <td><input type="text" name="owner"       size="80"  readonly value="clecap"/></td></tr>
-      <tr><td><label>Repository</label></td>       <td><input type="text" name="repository"  size="80"  readonly value="dante-wiki"/></td></tr>
+      <tr><td><label>Repository</label></td>       <td><input type="text" name="repository"  size="80"  readonly value="dante-wiki-contents"/></td></tr>
       <tr><td><label>Path</label></td>             <td><input type="text" name="path"        size="80"  readonly value="assets/initial-contents"/></td></tr>
-      <tr><td><label>Access Token</label></td>     <td><input type="text" name="token"       size="80"  value="must-enter-a-valid-github-authorization-token-here"/></td></tr>
+      <tr><td><label>Access Token</label></td>     <td><input type="text" name="token"       size="80"  readonly value="$token"/></td></tr>
     </table>
     <input type="submit" value="Submit"/>
+    <input type="hidden" name="check" value="12345" />
   </form>
-  <p>Update processes in existing DanteWikis may overwrite some of those pages. If owners of a DanteWiki want to prevent this for certain files,
-  they only have to remove the category links in the respective pages or remove the page from MediaWiki:InitialContents.</p>
-  <h3>Details</h3>
-  <p>Currently the following pages are uploaded:</p>
+
+  <h3>List of Pages Uploaded</h3>
   EOT;
 
   $text .= "<ol>";
@@ -115,8 +124,8 @@ public function execute ( $subPage ) {
   // NOTE: for the github upload api we need the contents in a shell variable (max 2MB)
   // Should this prove insufficient, we must iterate over chunks or individual files (or activate compression for the storage on github
 
-  // Display submitted input - only in case we really submitted a token 
-  if ( $token !== '' ) {
+  if ( $check === '12345' ) {  // Display submitted input - only in case we really submitted a token 
+ 
     foreach ( $config as $val ) { $val->execute( $owner, $repository, $token, $path, $out);}
   }
 } // end function execute
@@ -125,6 +134,7 @@ public function execute ( $subPage ) {
 } // end class
 
 // TODO; MUST clear /tmp files afterwrds - we still do not do so !!
+
 
 class DanteInitialLoad extends SpecialPage {
 
@@ -144,7 +154,7 @@ public function execute ( $subPage ) {
   <h1>Special:DanteInitialLoad: Loading or Updating Initial or Default DanteWiki Contents</h1>
   <form method="post" action="">
     <table>
-      <tr><td><label>URL Path to Directory</label></td>  <td><input type="text" name="urlpath"       size="80"  value="https://github.com/clecap/dante-wiki/raw/master/assets/initial-contents/"/></td></tr>
+      <tr><td><label>URL Path to Directory</label></td>  <td><input type="text" name="urlpath"       size="80"  value="https://github.com/clecap/dante-wiki-contents/raw/master/assets/initial-contents/"/></td></tr>
     </table>
     <input type="hidden" name="was-sent" value="4" />
     <input type="submit" value="Submit"/>

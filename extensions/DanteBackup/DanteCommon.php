@@ -122,7 +122,10 @@ public static function checkSuffix ( $string, $suffix) {
 //   TODO: MAYBE: openssl aes-256-cbc -e -salt -pbkdf2 -pass pass:$aesPW " : " ") ; 
 // openssl aes-256-cbc -d -salt -pbkdf2 -pass ENV:LOCAL_FILE_ENC |
 public static function cmdZipEncRestore ( $cmdGenerate, $cmdConsume, $zip, $enc ) {
-  return "set -o pipefail; " .  $cmdGenerate . ($enc ? " openssl aes-256-cbc -d -salt -pass env:LOCAL_FILE_ENC | " : "" ) . ($zip ? " gunzip -c | " : "") .  $cmdConsume;
+  danteLog ("DanteBackup", "\n DanteCommon::cmdZipEncRestore generate: $cmdGenerate \n $cmdConsume \n  " . ($zip ? "  compressed": "  UNcompressed")."\n   $enc \n\n");
+  $ret = "set -o pipefail; " .  $cmdGenerate . ($enc ? " openssl aes-256-cbc -d -salt -pass env:LOCAL_FILE_ENC | " : "" ) . ($zip ? " gunzip -c | " : "") .  $cmdConsume;
+  danteLog ("DanteBackup", "\n DanteCommon::cmdZipEncRestore returns $ret \n\n");
+  return $ret;
 }
 
 
@@ -139,8 +142,6 @@ public static function getEnvironmentUser (User $user) {
                  "LOCAL_FILE_ENC"        => "$awsEncPW"
                );
 }
-
-
 
 } // end CLASS
 

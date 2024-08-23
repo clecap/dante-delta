@@ -21,6 +21,9 @@ public static function onGetPreferences ( $user, &$preferences ) {
     $preferences['ssh-restore-pw']      = ['type' => 'text',  'section' => 'dante/ssh', 'label-message' => 'prefs-label-ssh-restore-pw',   'help-message' => 'prefs-ssh-restore-pw'];
     $preferences['ssh-encpw']           = ['type' => 'text',  'section' => 'dante/ssh', 'label-message' => 'prefs-label-ssh-encpw',        'help-message' => 'prefs-ssh-encpw'];
 
+   $preferences['github-dante-wiki-contents']  = ['type' => 'text',  'section' => 'dante/keys', 'label-message' => 'prefs-label-git',        'help-message' => 'prefs-git'];
+
+
     // NOTE: secretaccesskey should stay text and not be password. It looks like mediawiki does not fill the field in when opening the dialogue (which is more secure) but then
     //       a subsequent store also stores an empty password. This is a problem. 
   }

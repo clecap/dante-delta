@@ -267,7 +267,7 @@ public static function onArticleViewHeader ( &$article, &$outputDone, bool &$pca
   //                .manual     array of languages for which there exists a manual translation ?????
 
   $BABEL = ['have' => $deeplTranslated, 'all' => array_keys ( self::$targetLangs ) ];
-  $json = json_encode ($BABEL);
+  $json = json_encode ($BABEL, JSON_INVALID_UTF8_SUBSTITUTE ); // TODO: some of our fancy encodings with emojis do not work in PHP encoding
 
   danteLog ("DantePresentations", " DeepL  BABEL object" . print_r ($BABEL, true) . "\n\n");
  danteLog ("DantePresentations", " DeepL  BABEL object as json " . $json . "\n\n");

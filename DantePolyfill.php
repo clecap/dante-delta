@@ -41,10 +41,6 @@ function danteLog ($extension, $text) {
 
 
 
-
-
-
-
 // bundles some utility functions
 class DanteUtil {
 
@@ -144,6 +140,36 @@ static public function listOfListed ($name) {
 }
 
 
+// given a namespace index such as NS_TEST, return an arrayy of pages in the namespace
+static public function getPagesInNamespace( $namespaceIndex ) {
+  // Query to get all pages in the specified namespace
+  $dbr = wfGetDB( DB_REPLICA );
+  $res = $dbr->select(
+    'page',  // The table to select from
+    'page_title',  // The column to select
+    [ 'page_namespace' => $namespaceIndex ],  // The condition (where clause)
+    __METHOD__  // The name of the calling function, for logging purposes
+  );
+
+  $pages = [];  // Initialize an array to hold the page titles
+  foreach ( $res as $row ) {$pages[] = $row->page_title;}   // Iterate over the results and add each page title to the array
+  return $pages;
+}
+
+// returns name of a temporary file containing all parges contained in the given namespace
+static public function listOfNamespace ( $nsIndex ) {
+  $filepath = tempnam ("/tmp", "DanteInitialStore");
+  $arr = DanteUtil::getPagesInNamespace ( $nsIndex );
+  file_put_contents ($filepath, implode ("\n",$arr)."\n");
+  return $filepath;
+}
+
+// returns name of a temporary file
+static public function singleList ( $name ) {
+  $filepath = tempnam ("/tmp", "DanteInitialStore");
+  file_put_contents ( $filepath, $name . "\n");
+  return $filepath;
+}
 
 
 
