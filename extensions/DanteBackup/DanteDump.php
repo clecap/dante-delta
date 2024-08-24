@@ -81,6 +81,7 @@ public function execute( $par ) {
   $htmlForm2->setSubmitText( 'Dump Pages' );
   $htmlForm2->setSubmitCallback( [ $this, 'processInput' ] );
   $htmlForm2->show();
+
 }
 
 
@@ -124,6 +125,7 @@ private static function dumpToWindow () {
 // obj go away 
 // background // TODO redo completelly
 public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
+
   $cmd = $obj->getCommand ();  // TODO: pipefail ß?????
   $cmd = self::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
 
@@ -139,6 +141,7 @@ public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
 
 // foreground
 public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
+  danteLog ("DanteBackup", "DanteDump::dumpToAWS_FG called \n"); 
   $cmd     = "set -o pipefail; " . $obj->getCommand ( );  // pipefail prevents masking of error conditions along the pipe
   $cmd     = self::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
   $name    = "s3://$bucketName/" . DanteCommon::generateFilename ($obj->getNativeExtension(), $zip, $enc);
@@ -146,7 +149,10 @@ public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
 
   $retText = "";  // accumulates this and the subsequent listing command
 
-  $env = self::getEnvironmentUser ($obj->getUser());
+  danteLog ("DanteBackup", "DanteDump::dumpToAWS_FG will now get environment \n"); 
+  $env = DanteCommon::getEnvironmentUser ($obj->getUser());
+
+  danteLog ("DanteBackup", "DanteDump::dumpToAWS_FG will now call executor for dump commands \n"); 
   $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
   
   $retText .= "<h3>Command</h3><code>$cmd</code>"; 
@@ -164,6 +170,7 @@ public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
 */
 
   $cmd = "/opt/myenv/bin/aws s3api list-objects-v2 --bucket {$bucketName} --query 'Contents[].[Key,LastModified,Size]' --output json";
+  danteLog ("DanteBackup", "Will now call executor \n"); 
   $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
   $objects = json_decode($output, true);  // Decode the JSON output into a PHP array
   if (is_array($objects)) {
@@ -230,9 +237,8 @@ public function getCommand (  ) {
     case "all":               $srcOpt = " ";  break;
   }
 
-
   $command = " php $IP/maintenance/dumpBackup.php $fullOpt $includeFilesOpt $filesOpt $srcOpt";
-  danteLog ("DanteBackup", "\nCommand for dumping is: " . $command);
+  danteLog ("DanteBackup", "\nDanteDump: getCommand: Command for dumping is: " . $command);
 
   return $command;
 }
