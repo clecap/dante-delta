@@ -81,14 +81,14 @@ $wgJobRunRate = 10;             ## Job queue run rate
 $wgNamespacesWithSubpages[NS_MAIN] = true;
 
 /* if you use DeepL API Free plan */ // TODO: deprecate this stuff
-$wgSubTranslateAPIKey['api-free.deepl.com'] = $DEEPL_API_KEY;
+// $wgSubTranslateAPIKey['api-free.deepl.com'] = $DEEPL_API_KEY;
 /* if you use DeepL API Pro plan */
 // $wgSubTranslateAPIKey['api.deepl.com'] = "<your auth-key here>";
 
-$wgSubTranslateCaching      = true;
-$wgSubTranslateCachingTime  = 604800;	/* 60(s) * 60(m) * 24(h) * 7 days */
-$wgSubTranslateRobotPolicy  = "noindex,nofollow";
+//$wgSubTranslateCaching      = true;
+//$wgSubTranslateCachingTime  = 604800;	/* 60(s) * 60(m) * 24(h) * 7 days */
 
+// $wgSubTranslateRobotPolicy  = "noindex,nofollow";  // TODO: IMPLEMENT THIS IN OUR OWN SYSTEM
 
 
 /* configure permissions */

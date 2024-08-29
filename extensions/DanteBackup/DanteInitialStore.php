@@ -19,7 +19,7 @@ public static function getConfig () {
     new Memo ( "Cat_DanteInitialContents",         DanteUtil::catList      ("DanteInitialContents"),              "Category:DanteInitialContents" ),
     new Memo ( "Cat_DanteInitialCustomize",        DanteUtil::catList      ("DanteInitialCustomize"),             "Category:DanteInitialCustomize"),
     new Memo ( "MediaWiki_DanteInitialContents",   DanteUtil::listOfListed ("MediaWiki:DanteInitialContents"),    "MediaWiki:DanteInitialContents" ),
-    new Memo ( "Mediawiki_DanteInitialCustomize",  DanteUtil::listOfListed ("MediaWiki:DanteInitialCustomize"),   "MediaWiki:DanteInitialCustomize" ),
+    new Memo ( "MediaWiki_DanteInitialCustomize",  DanteUtil::listOfListed ("MediaWiki:DanteInitialCustomize"),   "MediaWiki:DanteInitialCustomize" ),
     new Memo ( "Test",                             DanteUtil::listOfNamespace (NS_TEST),                          "Special:AllPages&from=&to=&namespace=3000" ),
     new Memo ( "MainPage",                         DanteUtil::singleList ("Main Page"),                            "Main_Page" ), 
     new Memo ( "MediaWiki_Sidebar",                DanteUtil::singleList ("MediaWiki:Sidebar"),                   "MediaWiki:Sidebar" )
