@@ -5,7 +5,11 @@ function initLangs ( ) {
   let div = document.createElement ("div");
   div.id="dante-language-bar";
   div.style = "position: absolute; top:10px; left:600px; border:1px solid blue;z-index:500; display:inline-block; min-width:10px; min-height:10px;";
-  let head = document.getElementById ("mw-head-base");
+  
+
+  div.style.display="none";  // current version does not have this
+
+let head = document.getElementById ("mw-head-base");
   head.appendChild (div);
   console.log ("lang div added");
 
@@ -46,6 +50,7 @@ a.innerHTML = x;
 
   let button = document.createElement ("button");
   button.innerHTML = "Translate";
+  botton.addAttribute ("data-source","DantePresentations/modules/languages.js");
   button.onclick = translate;
   div.appendChild (button);
 }
