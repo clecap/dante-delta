@@ -24,6 +24,7 @@ static function debugLog ($text) {
   else {throw new Exception ("debugLog could not log"); }
 }
 
+
 public static function onSkinBuildSidebar ($skin, &$bar ) {
   global $wgOut;
   global $IP;
@@ -34,12 +35,13 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
   $entryTime = hrtime(true);
 
   // when served from the cache on MacPro this takes less than 1 ms, when served by generating it may take some 60 ms. Thus a cache here is helpful.
-  if (file_exists ( $IP . "/sidebarcache" )) {
+  if (file_exists ( $IP . "/sidebarcache" )) {             // if the file sidebarcache exists, then serve sidebar from this file
     $stored = file_get_contents ( $IP. "/sidebarcache" );
     $bar = unserialize ($stored); 
     // echo "" . (hrtime(true)-$entryTime)/1000 . " mu-sec";   // development: measuring cache hit time
     return true;
   }
+  // ELSE: if the file does not exist, construct the sidebar and store it in the cache
 
   foreach ($arrKeys as $key) {
     if (in_array ( $key,  array ("SEARCH", "TOOLBOX", "LANGUAGES") ) )  { continue; }  // ignore these standard sidebar items 
@@ -102,12 +104,16 @@ HERE;
   return true;
 }
 
-
-// ensure that after editing a sidebar relevant page in the MediaWiki namespace, the sidebar cache is deleted
 // ensure that editing the page Sidebar (and Mainpage) also generates a copy of it in directory assets so we can later pick it up again
+// ensure that after editing a sidebar relevant page in the MediaWiki namespace, the sidebar cache is deleted
 //   this is necessary since Sidebar (and Mainpage) are the only pages we need to inject separately apart from the xml backup archive
 public static function onEditPageattemptSaveafter( EditPage $editPage, Status $status, $details ) {
   global $IP;
+
+  // ensure that when a page is saved, the sidebar cache is invalidated. we need this because a page has now been created and thus a link cached in the
+  // sidebar might no longer be a new link (preseted in red) but an existant link (presented in blue)
+  $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); }
+
   // danteLog ("DanteTree", "oneditpageattempt \n" );
   if ( $editPage->getTitle()->getNamespace() == NS_MAIN) {     
     $titleText = $editPage->getTitle()->getText();
@@ -121,12 +127,12 @@ public static function onEditPageattemptSaveafter( EditPage $editPage, Status $s
   }
   else if ( $editPage->getTitle()->getNamespace() == NS_MEDIAWIKI) {            // only if the edit takes place in the MediaWiki namespace
     $titleText = $editPage->getTitle()->getText();
-    if ( str_starts_with($titleText, "Sidebar") ) { $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); } }
     if ( $titleText == "Sidebar" ) {
       $textData = $editPage->getArticle()->getPage()->getContent()->getNativeData();
       file_put_contents ($IP."/assets/Sidebar", $textData);
     }
-  }
+  }  
+
 }  // end function afterAttemptSave
 
 

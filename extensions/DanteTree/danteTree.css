@@ -6,12 +6,30 @@
 
 /* adjust the size to our logo */
 
+/*
 .mw-wiki-logo {vertical-align:middle;}
+
 #p-logo {width: 300px;  height:60px;}
+
 #p-logo a {height:60px; width:60px; background-size:60px 60px; display:inline-block;}
+
 #p-logo {margin-bottom:0.5em;}
 
 .personal-wiki-name-logo {margin-left:10px; font-weight:bold;}
+
+*/
+
+#p-logo {width: 300px;  height:60px; 
+ display: flex;
+  align-items: center;   
+}
+
+.mw-wiki-logo { height:60px !important; width:60px !important; background-size:60px 60px; display:inline-block !important;}
+.personal-wiki-name-logo {margin-left:10px; font-weight:bold; display:inline-block !important; 
+  height:60px !important; margin-top:30px;
+
+}
+
 
 .ui-resizable-e   {width:20px !important;}
 
