@@ -221,11 +221,6 @@ function dantePositionAtSection ( e ) {
 
 
 
-
-
-
-
-
 // function for persisting the resize of the table of contents in localstore
 function initializeToc () {  // initialize TOC functions - called by initialize in here
   const toggleMyToc = () => { 
@@ -266,6 +261,27 @@ function initializeToc () {  // initialize TOC functions - called by initialize 
 }
 
 initializeToc ();
+
+
+
+
+$(document).ready(function() {
+  $(document).on('dblclick', '.mw-parser-output', function(event) {
+    var pageTitle = mw.config.get('wgPageName');
+    var sectionName = $(event.target).closest('h2, h3, h4, h5, h6').text() || 'No section clicked';
+
+    console.log ("ext.DantePresentations: found pageTitle ", pageTitle, " section ", sectionName);
+
+    $.post(mw.config.get('DoubleClickEmailSection').apiEndpoint, 
+      {action: 'doubleclickemailsection',  pageTitle: pageTitle,  sectionName: sectionName,  format: 'json' })
+     .done(function(data) {
+      if (data.error) {console.error(data.error);} else {alert('Email sent successfully!');}
+    });
+  });
+});
+
+
+
 
 console.error ("ext.dantepresentations.js loaded");
 
