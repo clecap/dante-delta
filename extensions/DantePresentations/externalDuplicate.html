@@ -119,6 +119,18 @@ window.placeFrame = function placeFrame (num) {
     .catch ( err => {console.error ("Fullscreen error", err);});
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 // when we come back from fullscreen, adjust a class and redo the initialization since we might have new monitors
 document.onfullscreenchange = (event) => {
   if (document.fullscreenElement)  { document.body.classList.add("fullscreen"); }
@@ -147,6 +159,51 @@ select {font-size:20pt;}
     <option class="none" value="-1">Select monitor to place window</option>
   </select>
   <button id="goFullscreen">Go Fullscreen</button>
+
+<button onclick="main();">DO</button>
+
+<button onclick="move();">MOVE</button>
+
+<video id="myVideo" content="width=device-width, initial-scale=1" autoplay playsinline></video>
+
+<script>
+async function captureScreen() {
+  const displayMediaOptions = { 
+    video: {cursor: "motion"},
+    preferCurrentTab: true,
+//    selfBrowserSurface: "exclude",
+    surfaceSwitching: "include",
+    monitorTypeSurfaces: "exclude",    // do not allow sharing of an entire window
+   audio: false };
+    return await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+}
+
+async function main () {
+  var media = await captureScreen();
+  console.log (media);
+  console.log( media.getVideoTracks()[0].getSettings() );
+  const videoElement = document.querySelector('video');
+  window.stream = media; // Make variable available to the browser console
+  videoElement.srcObject = media;
+
+  var details = await window.getScreenDetails ();
+  console.log (details);
+
+//  await document.body.requestFullscreen();
+}
+
+async function move () {
+  var details = await window.getScreenDetails ();
+  console.log (details);
+
+  window.moveTo (200, 200);
+
+}
+
+</script>
+
+
+
 
 
 
