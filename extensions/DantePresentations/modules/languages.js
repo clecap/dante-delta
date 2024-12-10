@@ -50,7 +50,7 @@ a.innerHTML = x;
 
   let button = document.createElement ("button");
   button.innerHTML = "Translate";
-  botton.addAttribute ("data-source","DantePresentations/modules/languages.js");
+  button.addAttribute ("data-source","DantePresentations/modules/languages.js");
   button.onclick = translate;
   div.appendChild (button);
 }
