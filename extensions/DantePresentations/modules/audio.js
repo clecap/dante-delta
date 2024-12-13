@@ -4,12 +4,11 @@
 let player;
 
 function init () {
-  console.log ("ext.audio: initialized");
+  // console.log ("ext.audio: initialized");
+
   audio = document.createElement ("audio");
   audio.style= "position:relative; top:0px; left:0px; width:300px;height:40px;";
-
   audio.style.display="none";   // we need no audio element currently
-
   audio.src = "file";
   audio.setAttribute ("controls", "");
 
@@ -20,11 +19,8 @@ function init () {
   audio.controls = true; 
   audio.style.cursor = 'move'; // Change cursor to indicate draggable
 
-//  window.localStorage.getItem ("sidebar-width", dist);
-
-
   // Append the audio element to a specified container
-  var container = document.getElementById(containerId);
+  var container = document.getElementById("containerId");
   if (!container) {
     container = document.body; // Default to body if containerId not found
   }
@@ -58,13 +54,12 @@ function init () {
     document.removeEventListener('mouseup', stopDrag);
   }
 
-
 }
 
 init ();
 
 
-console.log ("audio: loaded");
+// console.log ("audio: loaded");
 
 
 

@@ -34,7 +34,7 @@ class BreadCrumbs {
   }
 
   static insert () {
-    let bc = BreadCrumbs.get ();    console.info ("breadCrumbs.insert: found ", bc);
+    let bc = BreadCrumbs.get ();  //  console.info ("breadCrumbs.insert: found ", bc);
     var vc = [];
     for ( let index = bc.length - 1; index >= 0; index-- ) {    // step backwards through the crumbs
       var link = '<a href="' + bc[index].prefix + '/index.php?title=' + bc[index].pageKey + '" title="Go to: ' + bc[index].pageName + '" >';

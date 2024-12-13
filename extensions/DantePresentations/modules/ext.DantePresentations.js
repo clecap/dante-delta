@@ -244,7 +244,7 @@ function initializeToc () {  // initialize TOC functions - called by initialize 
     if (!toc) {return;}                          // bail out: there are some situations where we have no toc
     initTocSize ();
     new ResizeObserver( () => {
-      console.log ("ext.dantePresentations.js: storing toc width: " + toc.style.width + " clientWidth:" + toc.clientWidth);
+      //console.log ("ext.dantePresentations.js: storing toc width: " + toc.style.width + " clientWidth:" + toc.clientWidth);
       localStorage.setItem ("tocWidth", parseInt (toc.style.width));
     } ).observe(toc);
     
@@ -283,12 +283,11 @@ $(document).ready(function() {
 
 
 
-console.error ("ext.dantepresentations.js loaded");
+// console.error ("ext.dantepresentations.js loaded");
 
 
-try {require ("./audio.js");} catch (e) { console.error (e);}  // necessary to load the second file of loader, see Javascript example at https://www.mediawiki.org/wiki/ResourceLoader/Developing_with_ResourceLoader
-
-try{require ("./languages.js");} catch (e) {console.error (e);}
+try { require ("./audio.js");}      catch (e) { console.error (e);}  // necessary to load the second file of loader, see Javascript example at https://www.mediawiki.org/wiki/ResourceLoader/Developing_with_ResourceLoader
+try { require ("./languages.js");}  catch (e) {console.error (e);}
 
 
 

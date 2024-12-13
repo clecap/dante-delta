@@ -11,35 +11,18 @@ function initLangs ( ) {
 
 let head = document.getElementById ("mw-head-base");
   head.appendChild (div);
-  console.log ("lang div added");
+  //console.log ("lang div added");
 
   let removeNS = (input) => {let i = input.indexOf(':'); if (i === -1) {return input;} return input.substring( i + 1); }
 
   if (!window.BABEL_LANGUAGES) { console.error ("could not find babel languages"); }
 
-  console.info (window.BABEL_LANGUAGES);
+  // console.info (window.BABEL_LANGUAGES);
 
   window.BABEL_LANGUAGES.all.forEach ( x => {
     let a   = document.createElement ("a");
     a.href = "./index.php?title=Translate:" + removeNS (RLCONF["wgPageName"]);
     a.onclick = "alert (1);";
-
-/*
-wgPageName":"MediaWiki:Aboutpage","wgTitl
-    
-"wgCurRevisionId":1357,
-"wgRevisionId":1357,
-"wgArticleId":1261,
-
-*/
-
-/*
-    let img = document.createElement ("img");
-    img.src = `./dante-assets/flags/${x}.png`;
-    img.title = `Translate to ${x}`;
-    img.alt   = `${x}`;
-    img.style = "";
-*/
 
 a.innerHTML = x;
 //    a.appendChild (img);
@@ -50,7 +33,7 @@ a.innerHTML = x;
 
   let button = document.createElement ("button");
   button.innerHTML = "Translate";
-  button.addAttribute ("data-source","DantePresentations/modules/languages.js");
+  button.setAttribute ("data-source","DantePresentations/modules/languages.js");
   button.onclick = translate;
   div.appendChild (button);
 }
@@ -84,4 +67,4 @@ return {initLangs}     ;  // export  // TODO: really needed ???
 
 BABEL.initLangs();
 
-console.error ("languages.js loaded");
+// console.error ("languages.js loaded");
