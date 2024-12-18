@@ -133,10 +133,10 @@ function getSnipFrame ( id, width, height ) {
 // CAVE: attributes are not case sensitive in html!
 // CAVE: we need the Math.random below since otherwise we have the same name for the target window and this may lead to some spurous "about:" window opening somewhere else. do not know why.
 $(function() {
-    console.log ("DanteLinks instrumentation is now done!");
-    $('a[target=_window]').click( (e)  => { console.log ("_window ", e.currentTarget.href); e.preventDefault();  window.open(e.currentTarget.href, "_"+Math.random(), "noopener=1,noreferrer=1,width=100");    return false; });
-    $('a[target=_sside]').click( (e)   => { console.log ("_side", e.currentTarget.href);    e.preventDefault();  window.open(e.currentTarget.href, "_"+Math.random(), "height=800,width=800");                 return false; });
-    $('a[target=_lside]').click( (e)   => { console.log ("_Side", e.currentTarget.href);    e.preventDefault();  window.open(e.currentTarget.href, "_"+Math.random(), "height=1200,width=1000");               return false; });
+    // console.log ("DanteLinks instrumentation is now done!");
+    $('a[target=_window]').click( (e)  => { /* console.log ("_window ", e.currentTarget.href); */  e.preventDefault();  window.open(e.currentTarget.href, "_"+Math.random(), "noopener=1,noreferrer=1,width=100");    return false; });
+    $('a[target=_sside]').click( (e)   => { /* console.log ("_side", e.currentTarget.href);    */  e.preventDefault();  window.open(e.currentTarget.href, "_"+Math.random(), "height=800,width=800");                 return false; });
+    $('a[target=_lside]').click( (e)   => { /* console.log ("_Side", e.currentTarget.href);    */  e.preventDefault();  window.open(e.currentTarget.href, "_"+Math.random(), "height=1200,width=1000");               return false; });
 
     // external links always open in a fresh tab
     $('a[class*="external"]').click( () => {  window.open(this.href, "_blank", "noopener=1,noreferrer=1");  return false; });

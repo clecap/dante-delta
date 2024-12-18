@@ -283,20 +283,26 @@ $(document).ready(function() {
 
 
 // report this page to the shared worker
+// not yet working - not used
 function reportPage () {
-  const worker = new SharedWorker('../js/allWindowsSharedWorker.js');
-  worker.port.start();
-  worker.port.postMessage('getWindows'); // Request list of open windows
+  let sp = mw.config.get('wgScriptPath');
 
+  const worker = new SharedWorker(sp + '/extensions/DantePresentations/js/allWindowsSharedWorker.js');  // Connect to the SharedWorker
 
-// Handle response
+  worker.port.start(); // Start the communication channel
 
-worker.port.onmessage = (event) => {
-  console.log('List of windows:', event.data);
-};
+  // Listen for messages from the worker
+  worker.port.onmessage = (event) => {
+    const data = event.data;
+    if       (data.type === 'tabConnected') {console.log(`A new tab connected. Total tabs: ${data.connectionsCount}`);} 
+    else if  (data.type === 'tabDisconnected') {console.log(`A tab disconnected. Total tabs: ${data.connectionsCount}`);} 
+    else if  (data.type === 'connectionsList') {console.log(`Current number of tabs: ${data.connectionsCount}`); }
+  };
 
+  worker.port.postMessage('getWindows'); // Request the current number of windows (tabs) from the shared worker
 }
 
+// reportPage();  // not working reliably
 
 
 // console.error ("ext.dantepresentations.js loaded");
