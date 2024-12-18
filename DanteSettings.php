@@ -8,6 +8,8 @@ require_once ("DanteSettings-used.php");
 
 require ("mediawiki-PRIVATE.php");
 
+
+
 date_default_timezone_set( $wgLocaltimezone );
 
 // protocol specifiers which are accepted for external links
