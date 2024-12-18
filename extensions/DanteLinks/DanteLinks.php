@@ -99,10 +99,10 @@ public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attrib
          str_starts_with ($url, "javascript:")
     ) { $attribs["class"] = str_replace ("external", "", $attribs["class"]); }
 
+  // implement some shorthand notations for the target
   if ( str_ends_with ($text, "\w")) { $attribs["target"] = "_window"; $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
-  if ( str_ends_with ($text, "\s")) { $attribs["target"] = "_side";   $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
-  if ( str_ends_with ($text, "\S")) { $attribs["target"] = "_Side";   $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
-
+  if ( str_ends_with ($text, "\s")) { $attribs["target"] = "_sside";   $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
+  if ( str_ends_with ($text, "\S")) { $attribs["target"] = "_lside";   $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
 
   $text = str_replace ("\\|", "¦", $text);  //    \| is treated the same as a broken pipe symbol
 
@@ -112,7 +112,7 @@ public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attrib
   if ($flag) {
     $aText ="";
     foreach ($attribs as $key => $value) {  $aText .= $key."='".$value."'";}
-    $link="<a href='$link' " .$aText. ">$text</a>  ";
+    $link="<a href='$url' " .$aText. ">$text</a>  ";
   return false;                                    // modify the link
 }
    else {return true;}                             // do not modify the link

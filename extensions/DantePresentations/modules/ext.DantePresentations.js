@@ -282,6 +282,22 @@ $(document).ready(function() {
 
 
 
+// report this page to the shared worker
+function reportPage () {
+  const worker = new SharedWorker('../js/allWindowsSharedWorker.js');
+  worker.port.start();
+  worker.port.postMessage('getWindows'); // Request list of open windows
+
+
+// Handle response
+
+worker.port.onmessage = (event) => {
+  console.log('List of windows:', event.data);
+};
+
+}
+
+
 
 // console.error ("ext.dantepresentations.js loaded");
 

@@ -25,9 +25,6 @@ function checkPopup(e) {
   let spaceToTheTop    =   e.pageY;
   let spaceToTheBottom = window.innerHeight - e.pageY;
 
-//  console.log ("event at ", e.pageX, e.pageY);
-//  console.log ("space to top bottom left  right ", spaceToTheTop, spaceToTheBottom, spaceToTheLeft, spaceToTheRight);
-
   if (spaceToTheRight > spaceToTheLeft) { 
     //console.log ("placing to the right of the cursor, .left=", e.pageX);
     ifra.parentNode.style.left =   e.pageX + "px";} 
@@ -128,18 +125,18 @@ function getSnipFrame ( id, width, height ) {
 }
 
 
-
-
-
 // this JS snippet implements correct and new treatment of target attributes in anchors
 //
 // target=_window    opens in a new window, similar size as opener
-// target=_side      opens on the left side in a reasonable size
-// target=_Side      open in a larger window
+// target=_sside      opens on the left side in a reasonable small size
+// target=_lside      open in a larger window
+// CAVE: attributes are not case sensitive in html!
+// CAVE: we need the Math.random below since otherwise we have the same name for the target window and this may lead to some spurous "about:" window opening somewhere else. do not know why.
 $(function() {
-    $('a[target=_window]').click( () => { window.open(this.href, "_", "noopener=1,noreferrer=1,width=100"); return false; });
-    $('a[target=_side]').click( () => { window.open(this.href, "_", "height=800,width=800");  return false; });
-    $('a[target=_Side]').click( () => { window.open(this.href, "_", "height=1200,width=1000"); return false; });
+    console.log ("DanteLinks instrumentation is now done!");
+    $('a[target=_window]').click( (e)  => { console.log ("_window ", e.currentTarget.href); e.preventDefault();  window.open(e.currentTarget.href, "_"+Math.random(), "noopener=1,noreferrer=1,width=100");    return false; });
+    $('a[target=_sside]').click( (e)   => { console.log ("_side", e.currentTarget.href);    e.preventDefault();  window.open(e.currentTarget.href, "_"+Math.random(), "height=800,width=800");                 return false; });
+    $('a[target=_lside]').click( (e)   => { console.log ("_Side", e.currentTarget.href);    e.preventDefault();  window.open(e.currentTarget.href, "_"+Math.random(), "height=1200,width=1000");               return false; });
 
     // external links always open in a fresh tab
     $('a[class*="external"]').click( () => {  window.open(this.href, "_blank", "noopener=1,noreferrer=1");  return false; });
