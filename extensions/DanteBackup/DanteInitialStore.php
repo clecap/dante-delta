@@ -83,12 +83,18 @@ public function execute ( $subPage ) {
   $repository    = $request->getText ('repository');
   $path          = $request->getText ('path');
   $token         = $request->getText ('token');
-  $check         = $request->getText ('check');           // used to check for submission
+  $check         = $request->getText ('check');           // used to check if this invocation is from a submission or not
 
-  $config = Memo::getConfig();   // get the configuration data from the one place where we configure it
+  $config        = Memo::getConfig();   // get the configuration data from the one place where we configure it
 
   $user   = $this->getUser();
   $token        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
+
+  if ( $check === '12345' ) {  // Display submitted input - only in case we really submitted a token 
+    $out->addHTML ("<h3>Details of Script Execution </h3>");
+    foreach ( $config as $val ) { $val->execute( $owner, $repository, $token, $path, $out);}
+  }
+  else {
 
   // Add explanatory text and form
   $text = <<<EOT
@@ -106,28 +112,23 @@ public function execute ( $subPage ) {
       <tr><td><label>Path</label></td>             <td><input type="text" name="path"        size="80"  readonly value="assets/initial-contents"/></td></tr>
       <tr><td><label>Access Token</label></td>     <td><input type="text" name="token"       size="80"  readonly value="$token"/></td></tr>
     </table>
-    <input type="submit" value="Submit"/>
-    <input type="hidden" name="check" value="12345" />
-  </form>
 
-  <h3>List of Pages Uploaded</h3>
   EOT;
 
-  $text .= "<ol>";
-  foreach ( $config as $val ) { $text .= $val->label; }
-  $text .= "</ol>";
+    $text .= "<h3>List of Pages we will upload</h3> <ol>";
+    foreach ( $config as $val ) { $text .= $val->label; }
+    $text .= "</ol>";
+    $text .= '<input type="submit" value="Submit and wait for result"/>';
+    $text .= '<input type="hidden" name="check" value="12345" />';
+    $text .= '</form>';
+    $out->addHTML( $text );
 
-  $out->addHTML( $text );
+  }
 
-  $out->addHTML ("<h3>Details of Script Execution </h3>");
 
   // NOTE: for the github upload api we need the contents in a shell variable (max 2MB)
   // Should this prove insufficient, we must iterate over chunks or individual files (or activate compression for the storage on github
-
-  if ( $check === '12345' ) {  // Display submitted input - only in case we really submitted a token 
  
-    foreach ( $config as $val ) { $val->execute( $owner, $repository, $token, $path, $out);}
-  }
 } // end function execute
 
 
