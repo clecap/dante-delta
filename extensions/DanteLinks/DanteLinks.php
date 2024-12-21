@@ -82,16 +82,18 @@ public static function onSkinAfterPortlet ( $skin, $portlet, &$html ) {
 // &$link: The link HTML if you choose to override the default.
 // &$attribs: Link attributes (added in MediaWiki 1.15, r48223)
 // $linktype: Type of external link, e.g. 'free', 'text', 'autonumber'. Gets added to the css classes. (added in MediaWiki 1.15, r48226)
-public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attribs, $linktype ) {
+public static function onLinkerMakeExternalLink(  &$url, &$text, &$link, &$attribs, $linktype ) {
   global $wgServer, $wgScriptPath;
-  global $wgAllowVerbose; $VERBOSE = true && $wgAllowVerbose;
+  global $wgAllowVerbose; $VERBOSE = false && $wgAllowVerbose;
 
+  if ($VERBOSE) {
     self::debugLog ("onLinkerMakeExternalLink called, parameters seen are: \n");
     self::debugLog ("  url      =" . $url ."\n"); 
     self::debugLog ("  text     =" . HtmlArmor::getHtml ($text) ."\n"); 
     self::debugLog ("  link     =" . $link ."\n");     
     self::debugLog ("  attribs  =" . print_r ($attribs, true) ."\n");  
     self::debugLog ("  linktype =" . $linktype ."\n\n\n");  
+  }
 
     // some links might have looked like external hmlt links to the mediawiki parser, since they started as a normal URL
     // however, we do not want them to display the markup used for external links (ie the specific icon for it)
@@ -100,9 +102,9 @@ public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attrib
     ) { $attribs["class"] = str_replace ("external", "", $attribs["class"]); }
 
   // implement some shorthand notations for the target
-  if ( str_ends_with ($text, "\w")) { $attribs["target"] = "_window"; $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
-  if ( str_ends_with ($text, "\s")) { $attribs["target"] = "_sside";   $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
-  if ( str_ends_with ($text, "\S")) { $attribs["target"] = "_lside";   $attribs["class"] .= " windowlink";  $text= rtrim (substr ($text,0, strlen($text)-2));  }
+  if ( str_ends_with ($text, "\w")) { $attribs["target"] = "_window";    $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ◾' ;  }
+  if ( str_ends_with ($text, "\s")) { $attribs["target"] = "_sside";     $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ▪' ;  }
+  if ( str_ends_with ($text, "\S")) { $attribs["target"] = "_lside";     $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ▮';  }
 
   $text = str_replace ("\\|", "¦", $text);  //    \| is treated the same as a broken pipe symbol
 
@@ -113,10 +115,13 @@ public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attrib
     $aText ="";
     foreach ($attribs as $key => $value) {  $aText .= $key."='".$value."'";}
     $link="<a href='$url' " .$aText. ">$text</a>  ";
-  return false;                                    // modify the link
-}
+    return false;                                    // modify the link
+  }
    else {return true;}                             // do not modify the link
 }
+
+
+
 
 // Called when generating internal and interwiki links in LinkRenderer
 // $text        what Mediawiki believes should be shown as text inside of the anchor
@@ -125,41 +130,54 @@ public static function onLinkerMakeExternalLink( &$url, &$text, &$link, &$attrib
 // [[target | text]]  overwrites $text with the given text, some special stuff with underlines however.
 //public static function onHtmlPageLinkRendererBegin( MediaWiki\Linker\LinkRenderer $linkRenderer, &$target,  &$text, &$attribs, &$query, &$ret ) {
 //public static function onHtmlPageLinkRendererBegin( MediaWiki\Linker\LinkRenderer $linkRenderer, &$target,  &$text, &$attribs, &$query, &$ret ) {  
-public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
+public static function onHtmlPageLinkRendererEnd ( MediaWiki\Linker\LinkRenderer $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
   global $wgScript;
+  global $wgAllowVerbose; $VERBOSE = true && $wgAllowVerbose;
 
-  self::debugLog ("HtmlPageLinkRendererEnd: (internal and interwiki links) 1 \n");
-  self::debugLog ("  text    =" . HtmlArmor::getHtml ($text) ."\n");  
-  self::debugLog ("  target  =" . $target ."\n");   
-  self::debugLog ("  isKnown =" . $isKnown ."\n");
-  self::debugLog ("  attribs =" . print_r ($attribs, true) ."\n");
-  self::debugLog ("  ret     =" . $isKnown ."\n\n\n");
+  if ($VERBOSE) {
+    self::debugLog ("HtmlPageLinkRendererEnd: (internal and interwiki links) 1 \n");
+    self::debugLog ("  text    =" . HtmlArmor::getHtml ($text) ."\n");  
+    self::debugLog ("  target  =" . $target ."\n");   
+    self::debugLog ("  isKnown =" . $isKnown ."\n");
+    self::debugLog ("  attribs =" . print_r ($attribs, true) ."\n");
+  }
 
+  $text   = HtmlArmor::getHtml($text);        // the text of the anchor 
+  $text   = str_replace ("\\|", "¦", $text);  //    \| is treated the same as a broken pipe symbol
 
-//  return true;  // Do not modify
+  $endPos   = strpos ( $text, "¦");          // search for a broken pipe extension symbol
+  $snipInfo = self::getSnipInfo ($target);     // search for snippet info
 
+  if ($VERBOSE) { self::debugLog ("FIRST Analysis: endPos=$endPos snipInfo=$snipInfo \n");}
 
-  $myText = HtmlArmor::getHtml($text);       // the text of the anchor 
-  $endPos = strpos ( $myText, "¦");          // search for a broken pipe extension symbol
-  $snipInfo = self::getSnipInfo ($target);   // search for snippet info
+  if (trim ($text) == "\w") { $attribs["target"] = "_window";  $text = $target . ' ◾'; return true;} 
+  if (trim ($text) == "\s") { $attribs["target"] = "_sside";   $text = $target . ' ▪'; return true;} 
+  if (trim ($text) == "\S") { $attribs["target"] = "_lside";   $text = $target . ' ▮'; return true;} 
 
-  if ( $endPos === false && strlen ( $snipInfo ) == 0 ) {return true; }  // return unmodified link
+  // implement some shorthand notations for the target
+  if ( str_ends_with ($text, "\w")) { $attribs["target"] = "_window";  /* $attribs["class"] .= " windowlink"; */  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ◾';  }
+  if ( str_ends_with ($text, "\s")) { $attribs["target"] = "_sside";   /* $attribs["class"] .= " windowlink"; */  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ▪';  }
+  if ( str_ends_with ($text, "\S")) { $attribs["target"] = "_lside";   /* $attribs["class"] .= " windowlink"; */  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ▮';  }
+
+//   $isKnown      = self::doesExist ($text);
+//   if ($isKnown) { $attribs["class"] = ""; }
+
+  if ( $endPos === false && strlen ( $snipInfo ) == 0 ) {
+    if ($VERBOSE) {
+      self::debugLog ("NO broken pipe extension and NO snippet info found: returning with those values:\n\n");
+      self::debugLog ("  text    =" . $text ."\n");  
+      self::debugLog ("  isKnown =" . $isKnown ."\n");
+      self::debugLog ("  attribs =" . print_r ($attribs, true) ."\n");
+    }
+
+    return true; }   // return modified link
 
   // we must adjust the notion of isKnown, since the check if we have this page already must focus on the title without the broken pipe
   // we must go from the target (with broken pipe) to the target without the broken pipe
   $targetEndPos = strpos ( $target, "¦");
-  $myTarget = substr ( $target, 0, $targetEndPos );
-  $myTarget = trim ( $myTarget );                  // target without any broken pip portion
-  $targetTitle = Title::newFromText( $myTarget );  // according to doc: uses the namespace encoded into the target
-
-  if ($targetTitle === null) { 
-    $isKnown = false;
-    self::debugLog ("DanteLinks: targetTitle not found for: " . $myTarget);
-  }
-  else {
-    $targetWP =  WikiPage::factory( $targetTitle );
-    if ($targetWP->exists ()) {$isKnown = true;}
-  }
+  $myTarget     = substr ( $target, 0, $targetEndPos );
+  $myTarget     = trim ( $myTarget );                  // target without any broken pip portion
+  $isKnown      = self::doesExist ($myTarget);
 
   self::debugLog ("  isKnown =" . $isKnown . "   (after correction)\n");
 
@@ -168,14 +186,11 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
 
   $flag = self::extractAttributes ($text, $attribs); // did we obtain additional attributes ?
   // self::debugLog ("LinkRendererBegin: after text=" . HtmlArmor::getHtml ($text) ."\n"); self::debugLog ("LinkRendererBegin: after target=" . $target ."\n\n");     
-  
-  self::debugLog ("  BEFORE flag test\n");
 
-  if ($flag) {
-    self::debugLog ("  did find some attributes\n\n\n");
+  if ($flag) {             if ($VERBOSE) {self::debugLog ("  did find some attributes\n\n\n");}
     $attribText = "";      // collect the attribute values
     $title = $target;      // what we want to show as title in the 
-    $anchorText = substr ( $myText, 0, $endPos );         // what we want to show as anchor(text) portion inside of the <a> link.
+    $anchorText = substr ( $myTarget, 0, $endPos );         // what we want to show as anchor(text) portion inside of the <a> link.
     $anchorText = trim ( $anchorText );
 
     foreach ($attribs as $key => $value) {
@@ -185,7 +200,7 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
     }
 
     if (!$isKnown) {  // for unknown internal links we need a special formatting
-      self::debugLog ("  Writing for unknown page\n");
+      if ($VERBOSE) {self::debugLog ("  Writing for unknown page\n");}
       $ret = "<a href='".$wgScript."?title=".$target."&action=edit&redlink=1' class='new'  $snipInfo  title='". $target. " (page does not exist!)'>".$anchorText."</a> ";  }
     else           { 
         self::debugLog ("  Writing for KNOWN page\n");
@@ -195,27 +210,47 @@ public static function onHtmlPageLinkRendererEnd( MediaWiki\Linker\LinkRenderer 
     return false;           // false: use our new, dante-patched link
   }
 
-  else {  self::debugLog ("  did NOT find any attributes\n\n\n");
+  else {                    if ($VERBOSE) {self::debugLog ("  did NOT find any attributes\n\n\n");}
     $anchorText = $myText;
     $ret = "<a href='".$wgScript."?title=".$target."&action=edit&redlink=1' class='new'  $snipInfo  title='". $target. " (page does not exist!!)' >".$anchorText."</a> ";
+    
 
-    return false;  // use our new anchor form
+    return false;     // use our new anchor form
     return true;      // true: keep the original anchor as it is 
   }
-
 }
+
+// given a text $myTarget for a Dantewiki page, return true if this is known and false if not
+private static function doesExist ( $myTarget ) {
+  global $wgAllowVerbose; $VERBOSE = true && $wgAllowVerbose;
+  $targetTitle  = Title::newFromText( $myTarget );     // according to doc: uses the namespace encoded into the target
+  if ($targetTitle === null) {        if ($VERBOSE) {self::debugLog ("DanteLinks: Title not found for: " . $myTarget. "\n");}
+     return false;
+  }
+  else {                             if ($VERBOSE) {self::debugLog ("DanteLinks: Title found for: " . $myTarget. "\n");}
+    $targetWP =  WikiPage::factory( $targetTitle );
+    if ($targetWP->exists ()) {      if ($VERBOSE) {self::debugLog ("DanteLinks: WikiPage found for: " . $myTarget. "\n");}
+      return true;}
+    else {                           if ($VERBOSE) {self::debugLog ("DanteLinks: WikiPage not found for: " . $myTarget. "\n");}
+      return false;
+    }
+  }
+}
+
+
 
 
 // TODO: check for injection problems. can the string injected into data-* do some rubbish somehow when containing quotes?
 private static function getSnipInfo ($target) {
+  global $wgAllowVerbose; $VERBOSE = true && $wgAllowVerbose;
   if (str_starts_with ($target, "Snip:") ) { return "data-snip='$target'";}         // target starts with Snip:  as namespace indication
 
   // Ok, we are not linking to Snip: explicitely but there still might be a snip page for where we are linking to
   $title = Title::newFromText("Snip:" . $target);
-  if ( !$title )             { self::debugLog ("Title not valid error for target=Snip:$target");  return ""; }
-  if ( !$title->isKnown() )  { self::debugLog ("Title not known for target=Snip:$target");        return ""; }
+  if ( !$title )             { if ($VERBOSE) {self::debugLog ("Page Snip:$target is not valid\n");}        return ""; }
+  if ( !$title->isKnown() )  { if ($VERBOSE) {self::debugLog ("Page Snip:$target is not known\n");}        return ""; }
   $wikiPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle($title);
-  if (!$wikiPage->exists())  { self::debugLog ("Snip Page does not exist for Snip:$target"); return "";}
+  if (!$wikiPage->exists())  { if ($VERBOSE) {self::debugLog ("WikiPage Snip:$target does not exist\n");}  return "";}
   return "data-snip='$title'"; 
 }
 
@@ -252,14 +287,12 @@ private static function extractAttributes ( &$text, &$attribs ) {
 }
 
 
-
-
-
 public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) { 
   global $wgServer, $wgScriptPath;
   $out->addModules('ext.dantelinks');
-  $out->addHeadItem ("dantelink", "<style>a.windowlink {background-image: url({$wgServer}{$wgScriptPath}/skins/Vector/resources/common/images/link-external-small-rtl-progressive.svg?30a3a) !important;}</style>");
-}
+ 
+// $out->addHeadItem ("dantelink", $text);
 
+}
 
 }
