@@ -2,6 +2,7 @@
 
 use MediaWiki\MediaWikiServices;
 require_once ("renderers/hideRenderer.php");
+require_once ("helpers/Common.php");
 
 class DantePresentations {
 
@@ -25,7 +26,7 @@ public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktempl
       $links['views']['my_view'] = ['class' => '', 'href' => 'javascript:window.present("' .$wgScriptPath. '")', 'text' => 'Present'];   // siehe ext.DantePresentations.js
   }
 
-  $query = DantePresentations::makeQuery ($user, $title, true);
+  $query = DPCommon\makeQuery ($user, $title, true);
 
   $showEndpointUrl = $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
   $showExternalUrl = $wgServer . $wgScriptPath . "/extensions/DantePresentations/externalMonitor.html?presentation=" .urlencode ($showEndpointUrl);  // works
@@ -41,27 +42,6 @@ public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktempl
 
   }  // siehe ext.DantePresentations.js
 }
-
-
-
-// generate query portion for DantePresentation endpoints
-// input: $user   user Object
-//        $title  title Object
-public static function makeQuery ( $user, $title, $hiding=truie ) {
-  $userName           = $user->getName();                       // user name or (in case of anonymous user) the IP address
-  $userId             = $user->getId();                         // 0 if not existant or anonymous
-  $namespaceIndex     = $title->getNamespace();                 // get number of namespace
-  $dbkey              = $title->getDBKey();
-
-  $query =     "Wiki-wgUserName="         .urlencode($userName)         . "&" .
-               "Wiki-wgUserId="           .urlencode ($userId)          . "&" .
-               "Wiki-wgNamespaceNumber="  .urlencode ($namespaceIndex)  . "&" .
-               "Wiki-dbkey="              .urlencode ($dbkey)           . "&" .
-               "Wiki-hiding=true";
-
-  return $query;
-}
-
 
   public static function onParserFirstCallInit( Parser $parser ) {
     $parser->setHook( 'aside', [ self::class, 'renderTag' ] );        
@@ -174,7 +154,7 @@ public static function onGetDoubleUnderscoreIDs( &$ids ) {
     $user        = $skin->getUser();               
    $url =        $wgServer."/".$wgScriptPath . "/extensions/DantePresentations/endpoints/showEndpoint.php?" .
 
-  $query = DantePresentations::makeQuery ($user, $title, true);
+  $query = DPCommon\makeQuery ($user, $title, true);
   $query .=   "&" . "sect="                    .urlencode ($section);
 
 // https://localhost:4443/wiki-dir/extensions/DantePresentations/endpoints/showEndpoint.php?
