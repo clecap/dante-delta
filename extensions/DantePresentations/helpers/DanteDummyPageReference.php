@@ -20,7 +20,7 @@ function __construct ( $wikiId, $ns, $dbkey, $title, $pageName ) {
   if ($wikiId   === null) {$this->wikiId = self::LOCAL;}     else {$this->wikiId = $wikiId;}    // default is: local wiki
 
   if ($ns       === null) {$this->ns     = 0;}               else {$this->ns = $ns;}            // default is: MAIN namespace
-  $nsName = MediaWikiServices::getInstance()->getNamespaceInfo()->getCanonicalName ( $this->ns );  // CAVE: PUT THIS IN PRODUCES EXCEPTION SOMEWHERE IN CASE USE ABOVE IS MISSING TODO: Problem is that we do not have a proper way of finding this error source currently 
+  $nsName = MediaWikiServices::getInstance()->getNamespaceInfo()->getCanonicalName ( $this->ns );  
 
 
     if ($dbkey    === null) {
