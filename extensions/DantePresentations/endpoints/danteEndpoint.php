@@ -28,20 +28,6 @@ function EndpointLog ($text) {
   if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
   }
 
-function ParsifalLog ($text) {
-  global $wgAllowVerbose;
-  //if (!$wgAllowVerbose) {return;}
-  $fileName = "../../Parsifal/LOGFILE";
-  if($tmpFile = fopen( $fileName, 'a')) {fwrite($tmpFile, "DanteEndpoint: ".$text);  fclose($tmpFile);}  // NOTE: close immediatley after writing to ensure proper flush
-  else {throw new Exception ("parsifalLog in danteEndpoint.php could not log"); }
-
-  $fileSize = filesize ($fileName);
-  if ($fileSize == false) { return; }
-  if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
-}
-
-
-
 
 class DanteEndpoint {
 
@@ -51,7 +37,7 @@ class DanteEndpoint {
   protected $filePointer;
 
   // operational parameters
-  protected $startTime;  
+  protected $startTime;                               // microtime when this object was constructed
 
   // mandatory parameters (??)
   protected ?string   $userName = "uninitialized";    // needed for constructing the user identity
@@ -59,8 +45,6 @@ class DanteEndpoint {
   protected ?int      $ns = null;                     // number of the namespace; needed for constructing the page reference
   protected ?string   $title = "uninitialized";       // TODO: title name???ß of the page    // needed for constructing the page reference
   protected ?string   $dbkey = "uninitialized";       // TODO: not clear if needed for paghe reference since currently we use NULL for it
-
-
 
   // dependant entities
   protected ?MediaWiki\User\UserIdentity $userId; // 
@@ -79,24 +63,27 @@ class DanteEndpoint {
 function __construct () {
   $this->startTime = microtime (true);
   
-  $headers  = getallheaders();                                           // get API data from http headers (set them for example in preview.js)
+  // pickup API data first from headers (we set them for example in preview.js)
+  $headers  = getallheaders();                                           // get all http headers
   $normalizedHeaders = array_change_key_case($headers, CASE_LOWER);      // Normalize the header name by converting all keys to lowercase as some browsers do this on their own
   $this->pickupDataFromArray ( $normalizedHeaders );                     // pick up data
   //EndpointLog ("\n Found headers: \n" . print_r ( $headers, true));    // EndpointLog ("\n Found normalized headers: \n" . print_r ( $normalizedHeaders, true)); // DEBUG
 
-  parse_str ($_SERVER['QUERY_STRING'], $query);                        // get API data from query portion of URL - if both header and query are used: query overwrites the header
-  $normalizedQuery = array_change_key_case($query, CASE_LOWER);        // normalize
-  $this->pickupDataFromArray ( $normalizedQuery );                     // pick up data
-  EndpointLog ("\nParsed Query String is " . print_r ($query, true));  // DEBUG
-  EndpointLog ("\nParsed Query String is " . print_r ($normalizedQuery, true)); // DEBUG
+  parse_str ($_SERVER['QUERY_STRING'], $query);                          // get API data from query portion of URL - if both header and query are used: query overwrites the header
+  $normalizedQuery = array_change_key_case($query, CASE_LOWER);          // normalize
+  $this->pickupDataFromArray ( $normalizedQuery );                       // pick up data
+  // EndpointLog ("\nParsed Query String is " . print_r ($query, true));    // DEBUG
+  // EndpointLog ("\nParsed Query String is " . print_r ($normalizedQuery, true)); // DEBUG
 
   $this->userId = new DanteDummyUserIdentity ( $this->userName );        // generate derived identity
   if ( isset ($this->ns) ) $this->nsName = MediaWikiServices::getInstance()->getNamespaceInfo()->getCanonicalName ( $this->ns );
 }
 
 
-
 // given the array arr of keys and (string-typed) values, parse properties of this array into its place for this object
+// these values are set in DantePresentations.php or as header elements in preview.js or similar
+// TODO: this is not yet completely harmonized between the different places which use these fields - some have more some less
+// preview.js und DantePresentations.php must be harmonized TODO: make a common php file for this !!
 private function pickupDataFromArray ( $arr ) {
   // EndpointLog ("\n Pickup function sees: \n" . print_r ( $arr, true));
 
@@ -111,17 +98,6 @@ private function pickupDataFromArray ( $arr ) {
 //    $this->sect              =  ( isset ($arr["sect"])                 ?   $arr["sect"] :  NULL ); 
 //    if ($this->sect != NULL) {$this->sect = (int) $this->sect;}
 }
-
-
-
-  protected function printData () {
-    EndpointLog ("DanteEndpoint.php sees the following headers:\n" );
-    EndpointLog ("  userName:               " . $this->userName            . "\n" );
-    EndpointLog ("  ns:                     " . $this->ns                  . "\n" );
-    EndpointLog ("  pageName:               " . $this->pageName            . "\n" );
-    EndpointLog ("  title:                  " . $this->title               . "\n" );
-  }
-
 
 // may be used by an endpoint to add further headers
 protected function setResponseHeaders () {
@@ -147,7 +123,6 @@ protected function setResponseHeaders () {
 
 // function used to obtain the mime type generated by an endpoint; may be overridden by derived classes
 protected function getMimeType () { return "text/html"; }
-
 
 
 /* interface to the parser
@@ -255,8 +230,7 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
   return $parsedText;
 }
 
-
-// default is: get content from the post body
+// get input for this endpoint; default is: get content from the post body
 protected function getInput () {
   $body = file_get_contents("php://input");         // get the input; here: the raw body from the request
   $text = base64_decode ($body);                    // in an earlier version we used, unsuccessfully, some conversion, as in:   $body = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $body); 
@@ -302,6 +276,7 @@ jsPaths: array('extensions/Parsifal/js/runtime.js'), bodyClasses: array('mw-body
 
 */
 
+
 public function decorate ( $text ) {
   $ret  = "<!DOCTYPE html>";
   $ret .= "<html lang='en' dir='ltr' classes='" .implode (' ', $this->getHtmlClasses()) . "'>";
@@ -311,6 +286,12 @@ public function decorate ( $text ) {
   foreach ( $this->getCssPaths()      as &$value)  { $ret .= ("<link rel='stylesheet' href='" . $value . "'>");  }
   foreach ( $this->getAsyncJsPaths()  as &$value)  { $ret .= ("<script async src='" . $value . "'></script>") ;        }
   foreach ( $this->getJsPaths()       as &$value)  { $ret .= ("<script src='" . $value . "'></script>") ;        }
+
+// "<script>CONF=      </script>"
+
+
+
+
   $ret .= "</head>";
   $ret .= "<body class='";
   $ret .= implode (' ', $this->getBodyClasses() );

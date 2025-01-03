@@ -283,19 +283,12 @@ function processAll() {
 }
 else {body = b64EncodeUnicode ( document.getElementById ( "wpTextbox1" ).value );}
 
-
   // console.info ("DantePresentation: calling processAll with body", body);
   const xhr = new XMLHttpRequest();
   xhr.open ("POST", "./extensions/DantePresentations/endpoints/mediawikiEndpoint.php", true);   //////// TODO: how do we select the specific endpoitn : reveal or parsifal or markdwon or whatever ????
   xhr.setRequestHeader ("Content-Type", "text/plain;charset=UTF-8");
 
-  // set specific header information for the preview endpoint
-  xhr.setRequestHeader ("Wiki-wgUserName",            RLCONF.wgUserName);
-  xhr.setRequestHeader ("Wiki-wgUserId",              RLCONF.wgUserId);
-  xhr.setRequestHeader ("Wiki-wgNamespaceNumber",     RLCONF.wgNamespaceNumber);
-  xhr.setRequestHeader ("Wiki-wgPageName",            RLCONF.wgPageName);                     // full name of page, including localized namespace name, if namespace has a name (except 0) with spaces replaced by underscores. 
-  xhr.setRequestHeader ("Wiki-wgTitle",               RLCONF.wgTitle);                        // includes blanks, no underscores, no namespace
-  xhr.setRequestHeader ("Wiki-wpPageContentLanguage", RLCONF.wgPageContentLanguage);
+  setDanteHeaderInfo ( xhr ); 
 
   // header and xhr object gets a timestamp when the request was made and sent to the server
   xhr.timeRequestMade = Date.now();
@@ -311,6 +304,20 @@ else {body = b64EncodeUnicode ( document.getElementById ( "wpTextbox1" ).value )
   document.body.classList.remove ("inputChanged");
   document.body.classList.add ("xhrPending");        // signal in UI that a request from the server is pending
 }
+
+
+
+// set specific header information for the preview endpoint
+function setDanteHeaderInfo ( xhr ) {
+  xhr.setRequestHeader ("Wiki-wgUserName",            RLCONF.wgUserName);
+  xhr.setRequestHeader ("Wiki-wgUserId",              RLCONF.wgUserId);
+  xhr.setRequestHeader ("Wiki-wgNamespaceNumber",     RLCONF.wgNamespaceNumber);
+  xhr.setRequestHeader ("Wiki-wgPageName",            RLCONF.wgPageName);                     // full name of page, including localized namespace name, if namespace has a name (except 0) with spaces replaced by underscores. 
+  xhr.setRequestHeader ("Wiki-wgTitle",               RLCONF.wgTitle);                        // includes blanks, no underscores, no namespace
+  xhr.setRequestHeader ("Wiki-wpPageContentLanguage", RLCONF.wgPageContentLanguage);
+}
+
+
 
 
 

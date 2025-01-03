@@ -4,9 +4,6 @@ function checkPopup(e) {
 
   url = "./index.php?title=" + e.target.dataset.snip;
 
-
- // url = "https://www.spiegel.de"; // refuses to connect 
-
   // get and normalize snip size
   let snipWidth  = localStorage.getItem ("snipWidth");    snipWidth = parseInt (snipWidth); console.log ("snipWidth found: ", snipWidth);
   let snipHeight = localStorage.getItem ("snipHeight");   snipHeight = parseInt (snipHeight);
@@ -128,7 +125,7 @@ function getSnipFrame ( id, width, height ) {
 // this JS snippet implements correct and new treatment of target attributes in anchors
 //
 // target=_window    opens in a new window, similar size as opener
-// target=_sside      opens on the left side in a reasonable small size
+// target=_sside      opens on the left side in a reasonable small sizehttps://localhost:4443/wiki-dir/index.php?title=Special:RecentChanges
 // target=_lside      open in a larger window
 // CAVE: attributes are not case sensitive in html!
 // CAVE: we need the Math.random below since otherwise we have the same name for the target window and this may lead to some spurous "about:" window opening somewhere else. do not know why.
@@ -144,6 +141,33 @@ $(function() {
     $('a[data-snip]').on("mouseover", function(e) { // only instrument links with a data-snip attribute !
         checkPopup(e);
     });
+
+
+  let startX, startY;
+  let img; let imgR;
+
+  $("a").on("dragstart", function(event) {startX = event.originalEvent.pageX; startY = event.originalEvent.pageY; });
+
+ $("a").on("drag", function(event) {
+    let endX = event.originalEvent.pageX; let endY = event.originalEvent.pageY;
+   if (Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)) > 20) {
+      event.originalEvent.target.style.border= "3px solid red";
+   }
+
+  } );
+
+
+  $("a").on("dragend",   function(event) {let endX = event.originalEvent.pageX; let endY = event.originalEvent.pageY;
+
+  event.originalEvent.target.style.border= "0px solid red";
+
+    if (Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)) > 20) {
+     window.open(event.currentTarget.href, "_"+Math.random(), "height=800,width=800"); 
+
+
+    }
+  });
+
 
 });
 

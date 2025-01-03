@@ -1,69 +1,67 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
-
 require_once ("renderers/hideRenderer.php");
 
 class DantePresentations {
 
-  public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktemplate, array &$links ) {
-    global $wgServer, $wgScriptPath;
+public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktemplate, array &$links ) {
+  global $wgServer, $wgScriptPath;
 
-    // add a new view/UI element to open a presentation view via a javascript function defined in ext.DantePresentations.js
-    // do this only in 1) main namespace AND 2) if the page carries a __SLIDES__ magic word SLIDES
+  // add a new view/UI element to open a presentation view via a javascript function defined in ext.DantePresentations.js
+  // do this only in 1) main namespace AND 2) if the page carries a __SLIDES__ magic word SLIDES
 
-    $title       = $sktemplate->getTitle();                 
-    $dbkey       = $title->getDBKey();
-    $titleText   = $title->getText ();
-    $namespaceIndex   = $title->getNamespace();                 // get number of namespace
-    $namespaceInfo = MediaWikiServices::getInstance()->getNamespaceInfo();
-    $namespaceName    = $namespaceInfo->getCanonicalName	( $namespaceIndex );
+  $title       = $sktemplate->getTitle();                 
+  $user        = $sktemplate->getUser();                 // defined in class ContextSource
+   danteLog ("DantePresentations", "onSkinTemplateNavigationUniversal \n");
 
-    $user        = $sktemplate->getUser();                 // defined in class ContextSource
-    $userId      = $user->getId();                         // 0 if not existant or anonymous
-    $userName    = $user->getName();                       // user name or (in case of anonymous user) the IP address
+  if (true) {                                                // add only on pages in the Main: namespace  // TODO currently everywhere since we have Help pages with parsifal we want to see as slides
+    if (!$sktemplate->canUseWikiPage ()) {return;}
+    $parserOutput = $sktemplate->getWikiPage ()->getParserOutput();
+    if (!$parserOutput) {return;}
+    $action = $sktemplate->getContext()->getActionName();         // get the current action
+    if ($parserOutput->getPageProperty ( 'MAG_SLIDES' ) !== null && strcmp ($action, "view") == 0 )  {  // add only when we are viewing the page
+      danteLog ("DantePresentations", "injecting stuff \n");
+      $links['views']['my_view'] = ['class' => '', 'href' => 'javascript:window.present("' .$wgScriptPath. '")', 'text' => 'Present'];   // siehe ext.DantePresentations.js
+  }
 
-     danteLog ("DantePresentations", "onSkinTemplateNavigationUniversal \n");
+  $query = DantePresentations::makeQuery ($user, $title, true);
 
-    if (true) {                                                // add only on pages in the Main: namespace  // TODO currently everywhere since we have Help pages with parsifal we want to see as slides
-      if (!$sktemplate->canUseWikiPage ()) {return;}
-      $parserOutput = $sktemplate->getWikiPage ()->getParserOutput();
-      if (!$parserOutput) {return;}
-      $action = $sktemplate->getContext()->getActionName();         // get the current action
-      if ($parserOutput->getPageProperty ( 'MAG_SLIDES' ) !== null && strcmp ($action, "view") == 0 )  {  // add only when we are viewing the page
-        danteLog ("DantePresentations", "injecting stuff \n");
-        $links['views']['my_view'] = ['class' => '', 'href' => 'javascript:window.present("' .$wgScriptPath. '")', 'text' => 'Present'];   // siehe ext.DantePresentations.js
+  $showEndpointUrl = $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
+  $showExternalUrl = $wgServer . $wgScriptPath . "/extensions/DantePresentations/externalMonitor.html?presentation=" .urlencode ($showEndpointUrl);  // works
 
-      }
+  $links['views']['my_view_zwo'] = ['class' => '', 'href' => $showExternalUrl, 'text' => 'Show', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank' ]; 
 
-    $query =   "Wiki-wgUserName="         .urlencode($userName)    . "&" .
-               "Wiki-wgUserId="           .urlencode ($userId)     . "&" .
-               "Wiki-wgNamespaceNumber="  .urlencode ($namespaceIndex)  . "&" .
-               "Wiki-wgNamespaceName="  .urlencode ($namespaceName)  . "&" .
-               "Wiki-wgtitle=" .urlencode ($titleText) . "&".
-               "Wiki-dbkey="              .urlencode ($dbkey) . "&".
-               "Wiki-hiding=true";
+  $fullView =  $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
   
-    $showEndpointUrl = $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
-    $showExternalUrl = $wgServer . $wgScriptPath . "/extensions/DantePresentations/externalMonitor.html?presentation=" .urlencode ($showEndpointUrl);  // works
- 
-
-   $links['views']['my_view_zwo'] = ['class' => '', 'href' => $showExternalUrl, 'text' => 'Show', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'
-//     'onclick' => $jsText
-]; 
-
-    $fullView =  $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
-   $links['views']['audio'] = ['class' => '', 'href' => $fullView, 'text' => 'Full View', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'];
+  $links['views']['audio'] = ['class' => '', 'href' => $fullView, 'text' => 'Full View', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'];
 
    $slideExternalUrl = $wgServer . $wgScriptPath . '/extensions/DantePresentations/endpoints/swipeEndpoint.php?' . $query;  // works
    $links['views']['slides'] = ['class' => '', 'href' => $slideExternalUrl, 'text' => 'Swipe View', 'title' => "Show page as slideshow with slider", 'target' => '_blank'];
 
   }  // siehe ext.DantePresentations.js
+}
 
-  // add a new action (this is under "more")
-  //  $links['actions']['my_action'] = ['class' => '', 'href' => '#/SkinTemplateNavigationLocalSettings.php', 'text' => 'SkinTemplateNavigation action' ];
 
-  }
+
+// generate query portion for DantePresentation endpoints
+// input: $user   user Object
+//        $title  title Object
+public static function makeQuery ( $user, $title, $hiding=truie ) {
+  $userName           = $user->getName();                       // user name or (in case of anonymous user) the IP address
+  $userId             = $user->getId();                         // 0 if not existant or anonymous
+  $namespaceIndex     = $title->getNamespace();                 // get number of namespace
+  $dbkey              = $title->getDBKey();
+
+  $query =     "Wiki-wgUserName="         .urlencode($userName)         . "&" .
+               "Wiki-wgUserId="           .urlencode ($userId)          . "&" .
+               "Wiki-wgNamespaceNumber="  .urlencode ($namespaceIndex)  . "&" .
+               "Wiki-dbkey="              .urlencode ($dbkey)           . "&" .
+               "Wiki-hiding=true";
+
+  return $query;
+}
+
 
   public static function onParserFirstCallInit( Parser $parser ) {
     $parser->setHook( 'aside', [ self::class, 'renderTag' ] );        
@@ -71,29 +69,19 @@ class DantePresentations {
   }
 
 
-
-public static function onSkinAddFooterLinks( Skin $skin, string $key, array &$footerlinks ) { 
+public static function onSkinAddFooterLinks( Skin $skin, string $key, array &$footerlinks ) {
   global $wgDanteOperatingMode, $wgServer, $wgScriptPath;
-
   if ( strcmp ($key, 'places') == 0 ) {
-
-    $footerlinks['imprint'] = Html::element( 'a',
-      ['href' => $wgServer.$wgScriptPath."/index.php/"."Project:Imprint", 'rel' => 'noreferrer noopener' ], "Imprint");
-
-    $footerlinks['parsifaldebug'] = Html::element( 'a',
-      ['href' => $wgServer.$wgScriptPath."/index.php/"."Special:ParsifalDebug", 'rel' => 'noreferrer noopener' ], "Mode: " . $wgDanteOperatingMode);
+    $footerlinks['imprint']       = Html::element( 'a', ['href' => $wgServer.$wgScriptPath."/index.php/"."Project:Imprint", 'rel' => 'noreferrer noopener' ], "Imprint");
+    $footerlinks['parsifaldebug'] = Html::element( 'a',  ['href' => $wgServer.$wgScriptPath."/index.php/"."Special:ParsifalDebug", 'rel' => 'noreferrer noopener' ], "Mode: " . $wgDanteOperatingMode);
 
     $freeSpace = "Free Space: " . floor ( disk_free_space ("/var/www/html") / 1000000000 ) . " GB";
-    $footerlinks['space'] = Html::element( 'a',
-      ['href' =>   $wgServer. $wgScriptPath . "/index.php/" .  "Special:ParsifalReset", 'rel' => 'noreferrer noopener'], $freeSpace);
-
+    $footerlinks['space'] = Html::element( 'a',  ['href' =>   $wgServer. $wgScriptPath . "/index.php/" .  "Special:ParsifalReset", 'rel' => 'noreferrer noopener'], $freeSpace);
   } // end if
 } // end function
 
 
-  public static function renderTag ( $input, array $args, Parser $parser, PPFrame $frame ) {
-    return "<aside>".$input."</aside>" ;
-  }
+public static function renderTag ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<aside>".$input."</aside>" ;}
 
 
 /*
@@ -177,31 +165,17 @@ public static function onGetDoubleUnderscoreIDs( &$ids ) {
   array_push ( $ids, 'MAG_SLIDES');      // a slide page
   array_push ( $ids, 'MAG_HIDEHEAD');
   array_push ( $ids, 'MAG_HIDEHL');
-
   return true;
    }
 
+
   public static function onSkinEditSectionLinks( $skin, $title, $section, $tooltip, &$links, $lang ) {
     global $wgServer, $wgScriptPath;
-
-    $dbkey       = $title->getDBKey();
-    $namespaceIndex   = $title->getNamespace();                 // get number of namespace
-    $namespaceInfo = MediaWikiServices::getInstance()->getNamespaceInfo();
-    $namespaceName    = $namespaceInfo->getCanonicalName	( $namespaceIndex );
-    $titleText   = $title->getText ();
-
     $user        = $skin->getUser();               
-    $userId      = $user->getId();                         // 0 if not existant or anonymous
-    $userName    = $user->getName();                       // user name or (in case of anonymous user) the IP address
-
    $url =        $wgServer."/".$wgScriptPath . "/extensions/DantePresentations/endpoints/showEndpoint.php?" .
-                 "Wiki-wgUserName="         .urlencode($userName)    . "&" .
-                 "Wiki-wgUserId="           .urlencode ($userId)     . "&" .
-                 "Wiki-wgNamespaceNumber="  .urlencode ($namespaceIndex)  . "&" .
-                 "Wiki-wgNamespaceName="    .urlencode ($namespaceName)  . "&" .
-                 "Wiki-titleText="          .urlencode ($titleText) . "&".
-                 "Wiki-dbkey="              .urlencode ($dbkey) . "&" .
-                 "sect="                    .urlencode ($section);
+
+  $query = DantePresentations::makeQuery ($user, $title, true);
+  $query .=   "&" . "sect="                    .urlencode ($section);
 
 // https://localhost:4443/wiki-dir/extensions/DantePresentations/endpoints/showEndpoint.php?
 

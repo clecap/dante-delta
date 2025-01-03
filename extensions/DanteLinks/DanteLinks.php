@@ -95,6 +95,11 @@ public static function onLinkerMakeExternalLink(  &$url, &$text, &$link, &$attri
     self::debugLog ("  linktype =" . $linktype ."\n\n\n");  
   }
 
+
+//  $attribs["draggable"]="true";
+
+
+
     // some links might have looked like external hmlt links to the mediawiki parser, since they started as a normal URL
     // however, we do not want them to display the markup used for external links (ie the specific icon for it)
     if ( str_starts_with ($url, $wgServer.$wgScriptPath."/" ) ||
@@ -150,6 +155,10 @@ public static function onHtmlPageLinkRendererEnd ( MediaWiki\Linker\LinkRenderer
 
   if ($VERBOSE) { self::debugLog ("FIRST Analysis: endPos=$endPos snipInfo=$snipInfo \n");}
 
+
+//  $attribs["draggable"]="true";
+
+  /* shorthands in title */
   if (trim ($text) == "\w") { $attribs["target"] = "_window";  $text = $target . ' ◾'; return true;} 
   if (trim ($text) == "\s") { $attribs["target"] = "_sside";   $text = $target . ' ▪'; return true;} 
   if (trim ($text) == "\S") { $attribs["target"] = "_lside";   $text = $target . ' ▮'; return true;} 
