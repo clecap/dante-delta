@@ -26,6 +26,7 @@ function makeQuery ( $user, $title, $hiding=truie ) {
 }
 
 
+/*
 // given the array arr of keys and (string-typed) values, parse properties of this array into its place for this object
 // these values are set in DantePresentations.php or as header elements in preview.js or similar
 // TODO: this is not yet completely harmonized between the different places which use these fields - some have more some less
@@ -45,6 +46,6 @@ function pickupDataFromArray ( $arr ) {
 //    if ($this->sect != NULL) {$this->sect = (int) $this->sect;}
 }
 
-
+*/
 
 ?>

@@ -1,21 +1,28 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 // The parser needs a PageReference interface to function correctly. Here we build a dummy PageReference from the information the DanteEndpoint has received via headers
 class DanteDummyPageReference implements MediaWiki\Page\PageReference {
   
-  private $wikiId;      // the wikiId                                 - needed for getWikiId()
-  private $ns;          // number of the namespace of the page        - needed for getNamespace()
-  private $dbkey;       // the page title in db key form  -    the title excluding namespace with underscores, according to https://www.mediawiki.org/wiki/Manual:Title.php   - needed for getDBkey()
+private $wikiId;      // the wikiId                                 - needed for getWikiId()
+private $ns;          // number of the namespace of the page        - needed for getNamespace()
+private $dbkey;       // the page title in db key form  -    the title excluding namespace with underscores, according to https://www.mediawiki.org/wiki/Manual:Title.php   - needed for getDBkey()
 
 
-  private $title;       // TODO: do we really need that ?
-  private $pageName;    // TODO: do we really need that ?
+private $title;       // TODO: do we really need that ?
+private $pageName;    // TODO: do we really need that ?
 
 
-  // construction function is built on the principle: null means: dynamically pick a default
-  function __construct ( $wikiId, $ns, $dbkey, $title, $pageName ) {
-    if ($wikiId   === null) {$this->wikiId = self::LOCAL;}     else {$this->wikiId = $wikiId;}    // default is: local wiki
-    if ($ns       === null) {$this->ns     = 0;}               else {$this->ns = $ns;}            // default is: MAIN namespace
+// construction function is built on the principle: null means: dynamically pick a default
+function __construct ( $wikiId, $ns, $dbkey, $title, $pageName ) {
+
+  if ($wikiId   === null) {$this->wikiId = self::LOCAL;}     else {$this->wikiId = $wikiId;}    // default is: local wiki
+
+  if ($ns       === null) {$this->ns     = 0;}               else {$this->ns = $ns;}            // default is: MAIN namespace
+  $nsName = MediaWikiServices::getInstance()->getNamespaceInfo()->getCanonicalName ( $this->ns );  // CAVE: PUT THIS IN PRODUCES EXCEPTION SOMEWHERE IN CASE USE ABOVE IS MISSING TODO: Problem is that we do not have a proper way of finding this error source currently 
+
+
     if ($dbkey    === null) {
       $titleObject = Title::newFromText ( $title, $ns );
       if ($titleObject == null) { $this->dbkey  = "Main_Page"; }

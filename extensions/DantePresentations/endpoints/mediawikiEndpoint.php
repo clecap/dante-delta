@@ -25,8 +25,5 @@ public function getHTMLClasses () {return array (); }
 
 
 
-
-
-
 $point = new MediawikiEndpoint ();
 $point->execute();

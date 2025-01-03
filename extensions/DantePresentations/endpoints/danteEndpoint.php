@@ -198,7 +198,6 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
     $revid
   );    
 
-
   //$sec = $this->parserOutput->getSections();
   //EndpointLog ("\n-----------DanteEndpoint: ".print_r ($sec, true)."\n");
 
@@ -218,15 +217,16 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
   ) ); 
 
   }
-     catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: Parser: Caught exception:\n" );    $parsedText = "EXCEPTION: " . $e->__toString(); }
+     catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: Parser: Caught exception:\n" );     $parsedText = "EXCEPTION: " . $e->__toString(); }
      catch(Throwable $t)   { EndpointLog ("***** DanteEndpoint: Parser: Caught Throwable:\n" );
-                             EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  }
+                             EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  $parsedText = "THROWABLE: " . $t->__toString()."\n";}
      finally               { //EndpointLog ("DanteEndpoint: in finally block\n");                 
       }
 
   // EndpointLog ("DanteEndpoint: parseTexte will leave now\n");
-
   if ( $this->caching ) { apcu_store ( $cacheKey, $parsedText, 1000 ); }
+
+  if ($parsedText == null) { throw new Exception ("Parser returned null instead of string, might want to check ENDPOINT_LOG ");}  // to prevent 
 
   return $parsedText;
 }
@@ -252,7 +252,7 @@ public function process () : string {
 public function execute () {
   try {
     $decoratedText = $this->process();
-     // EndpointLog ("***** DanteEndpoint: execute sees :\n" . $decoratedText ); 
+    EndpointLog ("***** DanteEndpoint: execute sees :\n" . $decoratedText ); 
   }
   catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: execute: Caught exception:\n" );    $decoratedText = "<pre>EXCEPTION: " . $e->__toString(). "</pre>"; }
   catch(Throwable $t)   { EndpointLog ("***** DanteEndpoint: execute: Caught Throwable:\n" );
