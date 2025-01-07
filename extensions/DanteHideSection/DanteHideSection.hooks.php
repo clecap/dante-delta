@@ -1,6 +1,5 @@
 <?php
 
-
 class DanteHideSectionHooks {
 
     public static function onBeforePageDisplay( OutputPage &$out, Skin &$skin ) {

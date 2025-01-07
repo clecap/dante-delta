@@ -49,7 +49,6 @@ function hidesection (e, $link) {
 
 
 function hideall (e) {
-
   // console.error ("HIDEALL");
 
   e.preventDefault();
@@ -82,8 +81,12 @@ $('#mw-content-text h1').each(function() {
 
 
 
-	mw.hook( 'wikipage.content' ).add( function () {
-		$('.hidesection-link, .hidesection-image').click( hidesection );
-		$('.hidesection-all').click( hideall );
-	} );
+mw.hook( 'wikipage.content' ).add( function () {  // as soon as the relevant content has been loaded
+  $('.hidesection-link, .hidesection-image').click( hidesection );
+  $('.hidesection-all').click( hideall );
+  $('.mw-headline').on('click', function () { console.log ("DanteHideSection: delegating"); $(this).next().children('.hidesection-link').trigger('click');}); // delegate clicks on section headlines to clicks on show/hide links
+
+});
+
+
 }( jQuery, mediaWiki ) );
