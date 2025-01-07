@@ -35,7 +35,7 @@ public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktempl
 
   $fullView =  $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
   
-  $links['views']['audio'] = ['class' => '', 'href' => $fullView, 'text' => 'Full View', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank'];
+  $links['views']['audio'] = ['class' => '', 'href' => $fullView, 'text' => 'Full View', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank', 'data-fullview-query' => $query, 'data-fullview-endpoint' => $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?'];
 
    $slideExternalUrl = $wgServer . $wgScriptPath . '/extensions/DantePresentations/endpoints/swipeEndpoint.php?' . $query;  // works
    $links['views']['slides'] = ['class' => '', 'href' => $slideExternalUrl, 'text' => 'Swipe View', 'title' => "Show page as slideshow with slider", 'target' => '_blank'];
