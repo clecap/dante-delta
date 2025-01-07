@@ -19,34 +19,6 @@
 
   let ALL_HIDDEN = false;      // status switch for toggeling top level via click on title
 
-// e is the event which triggered the call
-// $link is the anchor which was clicked
-function hidesection (e, $link) {
-  if (e) e.preventDefault();
-  $link ||= $( this );
-
-  var $editlinks = $link.parents('.mw-editsection').first();
-  var $textlink  = $link.attr('class') == "hidesection-link"  ? $link : $editlinks.find('.hidesection-link');
-
-  var $show =  $textlink.html() == $link.data('show');
-
-
-  if ($show) {  $(this).closest("h1,h2,h3,h4,h5").children().first().remove();} else {$( this ).closest( "h1,h2,h3,h4,h5").prepend("<span>+</span>");}
-
-  var $toggleClass = $show ? 'removeClass' : 'addClass';  // name of function to be used for toggeling class membership
-  var $actionFunctions = $show ? 'slideDown' : 'slideUp';  // CHC added
-  $textlink.text( $textlink.data ( $show ? 'hide' : 'show' ) );     // set the text to be displayed in UI action link
-
-  // Toggle visibility
-  var $header  = $link.parents('h1,h2,h3,h4,h5,h6,h7').first();
-  var headtype = $header.prop('tagName');
-
-  // include <tag> in class name, so section can be hidden by more than one link
-  //  $header.nextUntil( non_nesting[headtype] )[$actionFunctions]('hs-hide-' + headtype); 
-  $header.nextUntil( non_nesting[headtype] )[$toggleClass]('hs-hide-' + headtype);
-}
-
-
 /*
 for (let i = 0; i < localStorage.length; i++) {
   const key = localStorage.key(i);
@@ -60,8 +32,6 @@ function storeStatus () {
   $('[data-section]').each( (num,ele) => { arr.push ( ele.dataset.hidden ); });
   localStorage.setItem (TITLE, JSON.stringify(arr));
 }
-
-
 
 function  setStatus () {
   let arr = localStorage.getItem (TITLE);
@@ -114,7 +84,7 @@ function doShowAllLevels () { // switch all levels to visible
 function doHideSection ( sectionNumber ) {
   sectionNumber = parseInt (sectionNumber);
   let $header = $('[data-section="'+sectionNumber+'"]');                     // find the header according to the numbering
-  $header.prepend("<span>+</span>");                                         // prepend a plus elment to this header element
+  $header.prepend("<span class='DHSpan'>+</span>");                                         // prepend a plus elment to this header element
   $header.attr("data-hidden", "true");
   let headtype = $header.prop('tagName');                                    // get tagname of that header
   $header.nextUntil( non_nesting[headtype] )["addClass"]('hs-hide-' + headtype);    // iterate down the hierarchy for hiding everything below
@@ -134,42 +104,6 @@ function doToggleSection ( sectionNumber) {
   let $header = $('[data-section="'+sectionNumber+'"]');                     // find the header according to the numbering
   if ( $header.attr("data-hidden") == "true" ) { doShowSection (sectionNumber); }  else { doHideSection (sectionNumber); }
 }
-
-
-
-// TODO: deprecate
-function hideall (e) {
-  // console.error ("HIDEALL");
-
-  e.preventDefault();
-
-  var $link = $( '.hidesection-all' );
-  // Toggle text shown in the menu portion of the section links
-  var $show = 0;
-  if ( $link.html() == $link.data('hide') ) {$link.text( $link.data('show') );} 
-  else {$link.text( $link.data('hide') ); $show = 1;}
-
-  var $textlink = $(".hidesection-link");
-//  var $imglink  = $(".hidesection-image");
-
-  if ($show) {
-			// just brute-force through this
-			$('.hs-hide-H1,.hs-hide-H2,.hs-hide-H3,.hs-hide-H4,.hs-hide-H5,.hs-hide-H6,.hs-hide-H7').removeClass( hide_classes );
-			$textlink.text( $textlink.data('hide') );
-			// $imglink.attr( 'src', $imglink.data('hide') );
-
-    //  $("h1").children().first().remove();
-
-$('#mw-content-text h1').each(function() {
-  $(this).children().first().remove();
-});
-
-		} else {
-			$('.hidesection-link').each( function (i,el) { hidesection( undefined, $(el)) });
-      $( "#mw-content-text h1" ).prepend("<span>+</span>");
-		}
-}
-
 
 $.fn.longpress = function(longCallback, shortCallback, duration) {   // install longpress plugin for jquery
   if (typeof duration === "undefined") {duration = 500;}
@@ -208,17 +142,14 @@ mw.hook( 'wikipage.content' ).add( function () {  // as soon as the relevant con
   $('.mw-headline').on ('click', (e) => { 
     doToggleSection (e.target.parentNode.dataset.section );
     storeStatus ();
- });
+ })
 
-  $('#firstHeading >span').longpress (  (e) => { doShowAllLevels (); } , (e) => { doToggleAll (); } );   // longpress like this, NOT via .on handler
+  $('#firstHeading >span')
+    .longpress (  (e) => { doShowAllLevels (); } , (e) => { doToggleAll (); } )   // longpress like this, NOT via .on handler
+    .attr("title", "Click to toggle top-level section visibility, longpress to show entire page.");
 
   setStatus ();
 
-//  $('.hidesection-link').click( hidesection );
-//  $('.hidesection-all').click( hideall );
-//  $('.mw-headline').on('click', function () { console.log ("DanteHideSection: delegating"); $(this).next().children('.hidesection-link').trigger('click');}); // delegate clicks on section headlines to clicks on show/hide links
-
-//  $('#firstHeading').click( hideall );  // click on the title invokes hiding all top level sections
 
 
 });

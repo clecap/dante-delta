@@ -7,7 +7,9 @@
 span.mw-headline {cursor:pointer;}
 
 
-#firstHeading {cursor:pointer;}}
+#firstHeading {cursor:pointer;}
 
 
+span.DHSpan {display:none;}
+[data-hidden="true"] span.DHSpan {display:inline-block;}
 

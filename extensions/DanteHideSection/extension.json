@@ -7,9 +7,7 @@
   "MessagesDirs": {"DanteHideSection": ["i18n"]},
   "AutoloadClasses": {"DanteHideSection": "DanteHideSection.php"},
   "Hooks": {
-    "BeforePageDisplay":                 "DanteHideSection::onBeforePageDisplay",
-    "SkinEditSectionLinks":              "DanteHideSection::onSkinEditSectionLinks",
-    "OutputPageParserOutput":            "DanteHideSection::onOutputPageParserOutput" 
+    "BeforePageDisplay":                 "DanteHideSection::onBeforePageDisplay"
   },
   "ResourceModules": {
     "ext.dantehideSection": {
