@@ -36,7 +36,6 @@ function storeStatus () {
 function  setStatus () {
   let arr = localStorage.getItem (TITLE);
   arr = JSON.parse (arr);
-  console.log ("DanteLinks found status: ", arr);
   arr.forEach ( (ele, idx) => { 
     if      (ele === "true" )  { doHideSection (idx); }
     // else if (ele === "false")  { doShowSection (idx); }
@@ -77,14 +76,11 @@ function doShowAllLevels () { // switch all levels to visible
  $('[data-section]').each( (idx,ele) => { if (ele.dataset.hidden == "true") {doShowSection ( ele.dataset.section );} } )
 }
 
-
-
-
 // hide the section contents below the section heading identified by the given sectionNumber
 function doHideSection ( sectionNumber ) {
   sectionNumber = parseInt (sectionNumber);
   let $header = $('[data-section="'+sectionNumber+'"]');                     // find the header according to the numbering
-  $header.prepend("<span class='DHSpan'>+</span>");                                         // prepend a plus elment to this header element
+  $header.prepend("<span class='DHSpan'>&gt;</span>");                                         // prepend a plus elment to this header element
   $header.attr("data-hidden", "true");
   let headtype = $header.prop('tagName');                                    // get tagname of that header
   $header.nextUntil( non_nesting[headtype] )["addClass"]('hs-hide-' + headtype);    // iterate down the hierarchy for hiding everything below
