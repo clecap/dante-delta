@@ -264,7 +264,8 @@ initializeToc ();
 
 
 
-
+// probably deprecate; not compatible with the DanteLinks click UI
+/*
 $(document).ready(function() {
   $(document).on('dblclick', '.mw-parser-output', function(event) {
     var pageTitle = mw.config.get('wgPageName');
@@ -279,7 +280,7 @@ $(document).ready(function() {
     });
   });
 });
-
+*/
 
 
 // report this page to the shared worker

@@ -1,15 +1,15 @@
 {
   "name":     "DanteHideSection",
-  "version":  "3.0",
-  "author":   "Brent Laabs and Clemens H. Cap",
-  "url": "//mediawiki.org/wiki/Extension:HideSection",
+  "version":  "1.0",
+  "author":   "Clemens H. Cap",
+  "url":      "//github.com/clecap/dante-delta",
   "descriptionmsg": "hidesection-desc",
   "MessagesDirs": {"DanteHideSection": ["i18n"]},
-  "AutoloadClasses": {"DanteHideSectionHooks": "DanteHideSection.hooks.php"},
+  "AutoloadClasses": {"DanteHideSection": "DanteHideSection.php"},
   "Hooks": {
-    "BeforePageDisplay":                 ["DanteHideSectionHooks::onBeforePageDisplay"],
-    "SkinEditSectionLinks":              ["DanteHideSectionHooks::onSkinEditSectionLinks"],
-    "SkinTemplateOutputPageBeforeExec":  ["DanteHideSectionHooks::onSkinTemplateOutputPageBeforeExec"]
+    "BeforePageDisplay":                 "DanteHideSection::onBeforePageDisplay",
+    "SkinEditSectionLinks":              "DanteHideSection::onSkinEditSectionLinks",
+    "OutputPageParserOutput":            "DanteHideSection::onOutputPageParserOutput" 
   },
   "ResourceModules": {
     "ext.dantehideSection": {
