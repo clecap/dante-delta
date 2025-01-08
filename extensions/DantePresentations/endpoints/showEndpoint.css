@@ -4,8 +4,9 @@ body {background-color: white;}
 
 body {margin: 0pt 10pt 0pt 10pt;}
 
-
+/*
 h1, h2, h3, h4, h5, h6 {display:none;}
+*/
 
 /* class seHide is showendpoint hidden */
 .seHidden {display:none;}

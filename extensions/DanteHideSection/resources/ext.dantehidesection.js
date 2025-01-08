@@ -141,7 +141,7 @@ mw.hook( 'wikipage.content' ).add( function () {  // as soon as the relevant con
  })
 
   $('#firstHeading >span')
-    .longpress (  (e) => { doShowAllLevels (); } , (e) => { doToggleAll (); } )   // longpress like this, NOT via .on handler
+    .longpress (  (e) => { doShowAllLevels (); storeStatus();} , (e) => { doToggleAll (); storeStatus();} )   // longpress like this, NOT via .on handler; must have first longpress handler, then shortpress handler.
     .attr("title", "Click to toggle top-level section visibility, longpress to show entire page.");
 
   setStatus ();

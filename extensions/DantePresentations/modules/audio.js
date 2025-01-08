@@ -8,8 +8,10 @@ function init () {
 
   audio = document.createElement ("audio");
   audio.style= "position:relative; top:0px; left:0px; width:300px;height:40px;";
+
   audio.style.display="none";   // we need no audio element currently
-  audio.src = "file";
+  audio.src = "audiosrcfile";
+
   audio.setAttribute ("controls", "");
 
   let head = document.getElementById ("mw-head-base");

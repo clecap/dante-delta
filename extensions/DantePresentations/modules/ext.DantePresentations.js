@@ -224,12 +224,12 @@ function dantePositionAtSection ( e ) {
 // function for persisting the resize of the table of contents in localstore
 function initializeToc () {  // initialize TOC functions - called by initialize in here
   const toggleMyToc = () => { 
-    console.log ("toggleMyToc called");
+    // console.log ("toggleMyToc called");
     const toc = document.getElementById ("toc"); toc.classList.toggle ("showtoc");}  // service function for toggeling the table of contents
   const initTocSize = () => { 
     const toc = document.getElementById ("toc");
     var width = parseInt (localStorage.getItem ("tocWidth"));
-    console.log ("tocWidth found in localStorage is: " + width);
+    // console.log ("tocWidth found in localStorage is: " + width);
     if (width !== null) {
       if (width <=18) {width = 0;}          // correct for the browser not really properly reacting with Resize Observer for small sizes
       toc.style.width = width + "px";}
@@ -285,6 +285,7 @@ $(document).ready(function() {
 
 // report this page to the shared worker
 // not yet working - not used
+/*
 function reportPage () {
   let sp = mw.config.get('wgScriptPath');
 
@@ -302,6 +303,7 @@ function reportPage () {
 
   worker.port.postMessage('getWindows'); // Request the current number of windows (tabs) from the shared worker
 }
+*/
 
 // reportPage();  // not working reliably
 
@@ -310,7 +312,7 @@ function reportPage () {
 
 
 try { require ("./audio.js");}      catch (e) { console.error (e);}  // necessary to load the second file of loader, see Javascript example at https://www.mediawiki.org/wiki/ResourceLoader/Developing_with_ResourceLoader
-try { require ("./languages.js");}  catch (e) {console.error (e);}
+try { require ("./languages.js");}  catch (e) { console.error (e);}
 
 
 
