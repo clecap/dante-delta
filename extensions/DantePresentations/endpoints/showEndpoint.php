@@ -67,7 +67,9 @@ public function getCssPaths () {
 
 public function getAsyncJsPaths() {
 
-  //return [ '../../../load.php?lang=en&amp;modules=startup%7Cmediawiki.util%7Cjquery%7Cext.dantehideSection&amp;only=scripts&amp;raw=1&amp;skin=vector&amp;debug=2']; 
+  return [ '../../../load.php?lang=en&amp;modules=startup%7Cmediawiki.util%7Cjquery%7Cext.dantehideSection&amp;only=scripts&amp;raw=1&amp;skin=vector&amp;debug=2']; 
+
+  return [ '../../../load.php?lang=en&amp;modules=startup%7Cmediawiki.util%7Cjquery%7Cext.dantehideSection&amp;only=scripts&amp;raw=1&amp;skin=vector&amp;debug=2']; 
   return [''];
 }    // load startup and jquery in minified form // TODO: remove debug !
 

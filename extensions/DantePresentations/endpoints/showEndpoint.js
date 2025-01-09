@@ -4,8 +4,7 @@
 (function() {  // trick suggested by https://chatgpt.com/c/677ee8a0-0dec-800f-b236-341faf304fd9
 
 
-  return;
-
+return;
 
   const LOADER_URL = '/wiki-dir/load.php?modules=startup&only=scripts';
 
@@ -50,9 +49,9 @@
 
       console.log ("Completed original implement, result was: ", res);
       if (moduleName.startsWith ('jquery') ) {
-        console.log ("jquery loaded, dollar is: ", $);
-        mw.loader.require ("jquery");
-       console.log ("jquery required, dollar is: ", $);
+        //console.log ("jquery loaded, dollar is: ", $);
+       // mw.loader.require ("jquery");
+       //console.log ("jquery required, dollar is: ", $);
 
 
         jqueryLoaded = true;
@@ -138,8 +137,9 @@ window.addEventListener('resize', () => {
 
 
 window.addEventListener('load', () => {
+  console.log ("onload fired+++++++");
   console.log('All scripts and resources have been loaded.');
-  console.log (  "mw keys are: ", Object.keys (mw));
+  //console.log (  "mw: ", mw);
 
   window.setTimeout ( () => {
 
@@ -149,12 +149,35 @@ window.addEventListener('load', () => {
   console.log ( "mw hook is:", mw.hook );
 
   console.log ("mw.loader is: ", Object.keys (mw.loader));
+  console.log ("$ is: ", $);
+
 
 }, 2000);
 
 
-  let bo = $("body");
-  console.log (bo);
+//  let bo = $("body");
+//  console.log (bo);
 });
+
+
+let counter = 0;
+
+function waitForMwHook (callback) {
+  if (typeof mw !== 'undefined' && mw.hook) { callback(); } 
+  else  { setTimeout(function() { counter++; waitForMwHook (callback); }, 50); }
+}
+
+function continuation () {
+  console.error ("Loader is now present after counted steps: ", counter);
+
+}
+
+
+waitForMwHook ( continuation );
+
+
+
+
+
 
 console.info ("showEndpoint.js loaded");
