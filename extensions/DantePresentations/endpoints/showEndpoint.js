@@ -3,6 +3,10 @@
 
 (function() {  // trick suggested by https://chatgpt.com/c/677ee8a0-0dec-800f-b236-341faf304fd9
 
+
+  return;
+
+
   const LOADER_URL = '/wiki-dir/load.php?modules=startup&only=scripts';
 
   function loadStartupModule (callback) {
