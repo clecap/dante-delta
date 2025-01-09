@@ -1,3 +1,6 @@
+
+console.info ("ext.dantehidesction.js will be loading");
+
 ( function ( $, mw ) {
 	'use strict';
 
@@ -133,6 +136,23 @@ $.fn.longpress = function(longCallback, shortCallback, duration) {   // install 
  };
 
 
+
+/*
+console.log ("BEFORE ", Object.keys (mw));
+
+console.log ("BEFORE loader ", Object.keys (mw.loader));
+
+
+mw.loader.using('mediawiki.util').then(function () {
+  console.log('mediawiki.util module is loaded');
+});
+*/
+
+
+
+
+/*
+
 mw.hook( 'wikipage.content' ).add( function () {  // as soon as the relevant content has been loaded execute this function
   $('.mw-headline').parent().each( function (num, ele) { ele.dataset.section=num+1; ele.title="Section number "+(num+1)+". Click to toggle visibility."; } );  // number the sections h_ elements
   $('.mw-headline').on ('click', (e) => { 
@@ -141,7 +161,7 @@ mw.hook( 'wikipage.content' ).add( function () {  // as soon as the relevant con
  })
 
   $('#firstHeading >span')
-    .longpress (  (e) => { doShowAllLevels (); storeStatus();} , (e) => { doToggleAll (); storeStatus();} )   // longpress like this, NOT via .on handler; must have first longpress handler, then shortpress handler.
+    .longpress (  (e) => { console.log ("longpress");doShowAllLevels (); storeStatus();} , (e) => { console.log ("shortpress");doToggleAll (); storeStatus();} )   // longpress like this, NOT via .on handler; must have first longpress handler, then shortpress handler.
     .attr("title", "Click to toggle top-level section visibility, longpress to show entire page.");
 
   setStatus ();
@@ -151,30 +171,19 @@ mw.hook( 'wikipage.content' ).add( function () {  // as soon as the relevant con
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+*/
 
 
 }( jQuery, mediaWiki ) );
+
+
+
+console.log ("mediawiki", Object.keys (mediaWiki));
+console.log ("mw", Object.keys (mw));
+
+console.log ("mw.loader", Object.keys (mw.loader));
+
+
+
+
+console.info ("dantehideSection module is loaded");

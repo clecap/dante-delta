@@ -4,9 +4,16 @@ body {background-color: white;}
 
 body {margin: 0pt 10pt 0pt 10pt;}
 
-/*
-h1, h2, h3, h4, h5, h6 {display:none;}
-*/
+
+
+
+
+
+
+
+
+
+
 
 /* class seHide is showendpoint hidden */
 .seHidden {display:none;}
@@ -16,8 +23,10 @@ html.sizeLimit  .parsifalContainer {max-width: none !important;}
 
 
 /* adaptations for projection and casting */
-.vector-body {font-size:40pt;}
+/*
+.vector-body {font-size:40pt;} */
 ul           {list-style-image:none;}
+
 
 /* Have a bit more separation in showendpoint and allow growth of the diagrams to full breadth of the window */
 img.drawioShowendpoint {
@@ -37,3 +46,37 @@ script + p { line-height:0.1;}
 
 /* do not show handle to error messages in showEndpoint */
 .errorWrap {display:none;}
+
+
+/*
+h1, h2, h3, h4, h5, h6 {display:none;} 
+*/
+
+
+
+.mw-parser-output h1 {counter-reset: h2-counter; counter-increment: h1-counter; }
+.mw-parser-output h1::before {content: counter(h1-counter) ". "; }
+.mw-parser-output h2 {counter-reset: h3-counter; counter-increment: h2-counter; }
+.mw-parser-output h2::before {content: counter(h1-counter) "." counter(h2-counter) ". "; }
+.mw-parser-output h3 { counter-reset: h4-counter; counter-increment: h3-counter; }
+.mw-parser-output h3::before { content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) ". ";  }
+.mw-parser-output h4 {  counter-reset: h5-counter;   counter-increment: h4-counter; }
+.mw-parser-output h4::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) ". "; }
+.mw-parser-output h5 {counter-increment: h5-counter;}
+.mw-parser-output h5::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) "." counter(h5-counter) ". "; }
+#mw-toc-heading::before {content: "";}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
