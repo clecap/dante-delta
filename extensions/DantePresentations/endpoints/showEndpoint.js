@@ -35,8 +35,6 @@
     mw.loader.implement = function(moduleName, script, ...args) {   // temporarily override the mw.loader.implement function which is used internally to load modules
       console.log ("Just entered patched implement ", moduleName, script, typeof (script));
 
-      
-
       let res = originalDefine.call(this, moduleName, script, ...args);       // call the original implement function
       console.log ("Completed original implement, result was: ", res);
       if (moduleName.startsWith ('jquery') ) {
