@@ -13,10 +13,15 @@
     script.onload = function() {
       console.log ("Startup JS script tag has loaded");
       if (typeof mw !== 'undefined' && mw.loader) {
-        console.log ("mw and mw.loader are present", Object.keys (mw.loader));
+        console.log ("mw and mw.loader are present");
+        console.log ("mw.loader is ", Object.keys (mw.loader));
+        console.log ("mw is ", Object.keys (mw));
         console.log ("state ", mw.loader.state);
+        console.log ("require ", mw.loader.require);
+       console.log ("Calling initialization function");
         initializeWhenReady (callback);
         console.log ("Returned from initalization function");
+
       } else {
         console.error('mw or mw.loader is not available after loading the startup module.');
       }
@@ -33,16 +38,26 @@
     console.log ("Just entered initialization function");
     const originalDefine = mw.loader.implement;                     // save the original mw.loader.implement function
     mw.loader.implement = function(moduleName, script, ...args) {   // temporarily override the mw.loader.implement function which is used internally to load modules
-      console.log ("Just entered patched implement ", moduleName, script, typeof (script));
+      console.log ("Just entered patched implement with moduleName: ", moduleName, "and script type: " + typeof (script));
+      console.log ("Just entered patched implement found script ", script);
 
       let res = originalDefine.call(this, moduleName, script, ...args);       // call the original implement function
+
+
       console.log ("Completed original implement, result was: ", res);
       if (moduleName.startsWith ('jquery') ) {
-        console.log ("jquery loaded", jQuery, $);
+        console.log ("jquery loaded, dollar is: ", $);
+        mw.loader.require ("jquery");
+       console.log ("jquery required, dollar is: ", $);
+
+
         jqueryLoaded = true;
       }
       if (moduleName.startsWith ('mediawiki.base') ) {
         console.log ("mediawiki.base loaded");
+      
+
+
         baseLoaded = true;
       }
       if ( baseLoaded && jqueryLoaded) {

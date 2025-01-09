@@ -94,12 +94,12 @@ public function decorateBody ( string $text ) : string {
     "</div>" . 
     DRAWIO_SIZE_PATCH .
 "<script>
-console.log ('final', Object.keys (mw));
-console.log ('final', Object.keys (mw.loader));
+//console.log ('final', Object.keys (mw));
+//console.log ('final', Object.keys (mw.loader));
 
-var loaderResult = mw.loader.load ('" .$wgExtensionAssetsPath. "/Parsifal/js/runtime.js');
-console.log ('final 3', Object.keys (mw.loader));
-console.log ('loaderResult ', loaderResult)
+//var loaderResult = mw.loader.load ('" .$wgExtensionAssetsPath. "/Parsifal/js/runtime.js');
+//console.log ('final 3', Object.keys (mw.loader));
+//console.log ('loaderResult ', loaderResult)
 
 
 </script>
