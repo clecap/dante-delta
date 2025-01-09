@@ -66,8 +66,8 @@ public function getCssPaths () {
 }
 
 public function getAsyncJsPaths() {
-
-  return [ '../../../load.php?lang=en&amp;modules=startup%7Cmediawiki.util%7Cjquery%7Cext.dantehideSection&amp;only=scripts&amp;raw=1&amp;skin=vector&amp;debug=2']; 
+ // return [];
+  return [ '../../../load.php?lang=en&amp;modules=startup%7Cmediawiki.util%7Cjquery%7Cext.dantehideSection&amp;only=scripts&amp;skin=vector']; 
 
   return [ '../../../load.php?lang=en&amp;modules=startup%7Cmediawiki.util%7Cjquery%7Cext.dantehideSection&amp;only=scripts&amp;raw=1&amp;skin=vector&amp;debug=2']; 
   return [''];
@@ -80,11 +80,12 @@ public function getJsPaths () { global $wgExtensionAssetsPath;
  //"../../../load.php?lang=en&amp;modules=startup&amp;only=scripts&amp;skin=vector",
 //  "../../../load.php?lang=en&amp;modules=startup%7Cmediawiki.util%7Cjquery&amp;only=scripts&amp;skin=vector",    // TODO: remove raw=1
 //"../../../load.php?lang=en&amp;modules=ext.dantehideSection&amp;only=scripts&amp;skin=vector",
+// '../../../load.php?lang=en&amp;modules=startup%7Cmediawiki.util%7Cjquery%7Cext.dantehideSection&amp;only=scripts&amp;skin=vector',
   "$wgExtensionAssetsPath/DantePresentations/endpoints/showEndpoint.js", 
  // "$wgExtensionAssetsPath/Parsifal/js/runtime.js"
  ]; }  // TODO: go to min.js
 
-public function getHeadText () : string { return "<style> body {transform:scale(".$this->transformScale."); transform-origin:top left;</style>"; }
+public function getHeadText () : string { return "<style> body {transform:scale(".$this->transformScale."); transform-origin:top left;</style><script>console.time('start');</script>"; }
 
 public function decorateBody ( string $text ) : string {
   global $wgExtensionAssetsPath;

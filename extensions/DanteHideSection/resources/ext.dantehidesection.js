@@ -177,12 +177,12 @@ mw.hook( 'wikipage.content' ).add( function () {  // as soon as the relevant con
 }( jQuery, mediaWiki ) );
 
 
-
+/*
 console.log ("mediawiki", Object.keys (mediaWiki));
 console.log ("mw", Object.keys (mw));
 
 console.log ("mw.loader", Object.keys (mw.loader));
-
+*/
 
 
 

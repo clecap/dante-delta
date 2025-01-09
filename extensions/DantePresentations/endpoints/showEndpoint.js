@@ -169,6 +169,7 @@ function waitForMwHook (callback) {
 
 function continuation () {
   console.error ("Loader is now present after counted steps: ", counter);
+  console.timeEnd('start');
 
 }
 
