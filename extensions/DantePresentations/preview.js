@@ -6,7 +6,7 @@
 //       The rest is in Parsifal runtime.js !!
 
 
-// console.warn ("preview starts loading");
+console.error ("+++++++++ preview starts loading");
 
 const DOUBLEBUFFERED = true;     // switch betwwen double buffered operation and single buffered operation
 
@@ -324,7 +324,7 @@ function setDanteHeaderInfo ( xhr ) {
 
 
 // Apply path to the edit page of Mediawiki. Called by <script> tag injected in DantePresentations.php:onEditPageshowEditForminitial
-function initializeTextarea() { 
+function initializeTextareaDP() {
   var storeResize = true;                                   // shall the resize observer store the resize values?
 
   var textarea = document.getElementById ( "wpTextbox1" );     // pick up the textarea
@@ -410,6 +410,7 @@ newEditContainer.appendChild (previewContainer);
 }
 
 
+console.error ("preview: after initializeTextareaDP ", initializeTextareaDP);
 
 
 
@@ -471,10 +472,12 @@ let codemirrorFlag = false;
 
 
 function editPreviewPatch () {  // the clutch to PHP; we may adapat it to use CodeMirror, textarea or whatever client side editor we desire  
-  initializeTextarea();
+  console.log ("preview: editPreviewPatch before initializeTextareaDP");
+  initializeTextareaDP();
+  console.log ("preview: editPreviewPatch after initializeTextareaDP");
   codemirrorFlag = false;
   let params = (new URL (document.location)).searchParams;
-    if (params.get("editormode") == "codemirror") {
+    if (true || params.get("editormode") == "codemirror") {  // TODO: STUCK to TRUE. ok??
     initializeCodeMirror ();  // additionally initialize a code mirror instance
     codemirrorFlag = true;
   }
@@ -537,4 +540,4 @@ function waitBeforeInvoke (ms) { // this MUST be used when the preview area is r
 
 
 
-// console.warn ("preview.js is loaded");
+console.error ("***** preview.js is loaded");

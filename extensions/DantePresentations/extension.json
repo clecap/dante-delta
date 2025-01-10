@@ -6,7 +6,13 @@
   "description": "Adjusts many aspects of presentation, presents specially formatted Mediawiki Pages and parts of pages as slide presentations; supports external monitors; provides preview presentations and more flexible endpoints",
   "license-name": "GPL-2.0-or-later",
   "type": "other",
-  "AutoloadClasses": {"DantePresentations": "DantePresentations.php", "Translate": "Translate.php", "DantePresentationsPreferences": "DantePresentationsPreferences.php"},
+  "AutoloadClasses": {
+    "DantePresentations":              "DantePresentations.php", 
+    "Translate":                       "Translate.php", 
+    "DantePresentationsPreferences":   "DantePresentationsPreferences.php",
+    "AudioRenderer":                   "php/AudioRenderer.php",
+    "VideoRenderer":                   "php/VideoRenderer.php"
+  },
   "Hooks": {
     "BeforePageDisplay":                  "DantePresentations::onBeforePageDisplay",
     "SkinTemplateNavigation::Universal":  "DantePresentations::onSkinTemplateNavigationUniversal",

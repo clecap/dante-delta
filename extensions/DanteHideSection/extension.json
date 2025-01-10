@@ -11,9 +11,9 @@
   },
   "ResourceModules": {
     "ext.dantehideSection": {
-      "scripts": ["ext.dantehidesection.js"],
-      "styles":  ["ext.dantehidesection.css"],
-      "dependencies": ["mediawiki.util"]
+      "scripts":      ["ext.dantehidesection.js"],
+      "styles":       ["ext.dantehidesection.css"],
+      "dependencies": []
     }
   },
   "ResourceFileModulePaths": {"localBasePath": "resources", "remoteExtPath": "DanteHideSection/resources"},

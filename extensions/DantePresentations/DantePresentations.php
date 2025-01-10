@@ -44,8 +44,10 @@ public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktempl
 }
 
   public static function onParserFirstCallInit( Parser $parser ) {
-    $parser->setHook( 'aside', [ self::class, 'renderTag' ] );        
-    $parser->setHook( 'hide', [ "HideRenderer", 'renderProminent' ] );
+    $parser->setHook ( 'aside', [ self::class,      'renderTag' ]        );        
+    $parser->setHook ( 'hide',  [ "HideRenderer",   'renderProminent' ]  );
+    $parser->setHook ( 'audio', [ "AudioRenderer",  'renderTag']         );      
+    $parser->setHook ( 'video', [ "VideoRenderer",  'renderTag']         );      
   }
 
 
@@ -81,10 +83,23 @@ $hint = "";
   }
 */
 
-  // when we edit a page, intercept the edit process via javascript and insert an edit preview (if appropriate)
-  public static function onEditPageshowEditForminitial ( EditPage &$editPage, OutputPage $output) {
-   $output->addHeadItem ("preview", "<script src='extensions/DantePresentations/preview.js'></script>");  // TODO: go to preview-min.js
-   $editPage->editFormTextBottom     = "<script>window.editPreviewPatch();</script>";
+// when we edit a page, intercept the edit process via javascript and insert an edit preview (if appropriate)
+public static function onEditPageshowEditForminitial ( EditPage &$editPage, OutputPage $output) {
+  $output->addHeadItem ("preview", "<script src='extensions/DantePresentations/preview.js'></script>");  // TODO: go to preview-min.js
+
+  $codeMirror  = "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/lib/codemirror.js'></script>";
+  $codeMirror .=  "<link rel='stylesheet' href='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/lib/codemirror.css'></script>";
+  $codeMirror .=  "<link rel='stylesheet' href='extensions/Parsifal/codemirror/codemirror-parsifal.css'></script>";      
+  $codeMirror .=  "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/mode/stex/stex.js'></script>";
+  $codeMirror .=  "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/addon/edit/matchbrackets.js'></script>";   
+
+  $codeMirror .=  "<script src='extensions/Parsifal/codemirror/search.js'></script>";   
+  $codeMirror .=  "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/addon/search/searchcursor.js'></script>"; 
+  $codeMirror .=  "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/addon/dialog/dialog.js'></script>"; 
+  $codeMirror .=  "<link rel='stylesheet' href='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/addon/dialog/dialog.css'></script>";  
+
+   $editPage->editFormTextBottom  = $codeMirror . "<script data-src='DantePresentations.php'>DPRES.editPreviewPatch();</script>";
+
  }
 
 

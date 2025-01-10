@@ -135,21 +135,14 @@ $.fn.longpress = function(longCallback, shortCallback, duration) {   // install 
   });
  };
 
-
+console.log ("dante hidesection mw is ", Object.keys (mw));
+console.log ("dante hidesection mw.loader is", Object.keys (mw.loader));
 
 /*
-console.log ("BEFORE ", Object.keys (mw));
-
-console.log ("BEFORE loader ", Object.keys (mw.loader));
-
-
 mw.loader.using('mediawiki.util').then(function () {
   console.log('mediawiki.util module is loaded');
 });
 */
-
-
-
 
 /*
 
