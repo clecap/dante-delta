@@ -36,8 +36,8 @@ const PROCESS = (() => {  // OPEN local scope for local variables
   let getDelay = () => MAX_EVENT_WAIT;
 
   const VERBOSE = false;
-  let queueing = false;    // we have at least one preview request which has not yet been served
-  let timeout  = null;     // a scheduled task to run the processing at any cost
+  let queueing  = false;    // we have at least one preview request which has not yet been served
+  let timeout   = null;     // a scheduled task to run the processing at any cost
   let fct;                 // the payload function to be called for execution
   let oldestUnservedTS;
 
@@ -60,7 +60,7 @@ const PROCESS = (() => {  // OPEN local scope for local variables
   let setFct = (f) => { fct = f; };  // setter for fct
 
   let process = ( eventObject ) => { // the raw service function as it is called from the outside
-
+    console.log ("process called");
     if (VERBOSE) {
       if      ( eventObject == "INIT"   )           { console.info  ("preview.js: process called at initialization ");}
       else if ( eventObject == "RESIZE" )           { console.info  ("preview.js: process called after resize" );}
@@ -278,10 +278,8 @@ function processAll() {
 
   var body;
 
-  if (codemirrorFlag) {
-     body = b64EncodeUnicode ( myCodeMirror.getValue() );
-}
-else {body = b64EncodeUnicode ( document.getElementById ( "wpTextbox1" ).value );}
+  if (codemirrorFlag) {body = b64EncodeUnicode ( myCodeMirror.getValue() ); }
+  else {body = b64EncodeUnicode ( document.getElementById ( "wpTextbox1" ).value );}
 
   // console.info ("DantePresentation: calling processAll with body", body);
   const xhr = new XMLHttpRequest();
@@ -321,10 +319,18 @@ function setDanteHeaderInfo ( xhr ) {
 
 
 
+// with a dirty editor we have to deliver a warning message to the user when he is leaving the page
+// normally MediaWiki does so, but when we use CodeMirror it looks like this feature is overridden by CodeMirror somehow
+// thus we impelement it here again
+let isEditorDirty = false;
+window.addEventListener('beforeunload', (event) => { if (isEditorDirty) { event.preventDefault(); return ''; } });
+
 
 
 // Apply path to the edit page of Mediawiki. Called by <script> tag injected in DantePresentations.php:onEditPageshowEditForminitial
 function initializeTextareaDP() {
+  console.warn ("initializeTextareaDP called");
+
   var storeResize = true;                                   // shall the resize observer store the resize values?
 
   var textarea = document.getElementById ( "wpTextbox1" );     // pick up the textarea
@@ -359,10 +365,6 @@ function initializeTextareaDP() {
 
   var parent = textarea.parentNode; parent.replaceChild (newEditContainer, textarea);
   newEditContainer.appendChild (textarea);
-
- 
- 
-  
   
 
  var previewContainer = document.createElement ("div");          // generate a container for the preview
@@ -382,21 +384,21 @@ function initializeTextareaDP() {
 
   previewContainer.appendChild (previewFrames[0]);   
   if (DOUBLEBUFFERED) {previewContainer.appendChild (previewFrames[1]);}
-newEditContainer.appendChild (previewContainer);
-
-
+  newEditContainer.appendChild (previewContainer);
 
   let editform = document.getElementById ("editform"); 
 
   PROCESS.setFct ( processAll );                                       // define which function to use for processing for previewing
 
-  editform.addEventListener ("input", PROCESS.process );               // install an event listener for changes in the textarea
+  editform.addEventListener ("input", (e) => { isEditorDirty=true; PROCESS.process(e); } );               // install an event listener for changes in the textarea
   window.setTimeout ( () => { PROCESS.process ( "INIT" );} , 0);       // kick off display of first preview
 
-  editform.addEventListener ("input", () => {document.body.classList.add ("inputChanged");});  
+  editform.addEventListener ("input", () => { document.body.classList.add ("inputChanged");});  
+
+
 
  // keyboard based resizing inside of textarea only resizes the textarea font size itself
-  textarea.addEventListener ("keydown", (e) => { // console.log ("Key pressed: ", e.key);
+  textarea.addEventListener ("keydown", (e) => {  // console.log ("Key pressed: ", e.key);
     if (e.metaKey && (e.key=="+" || e.key=="-") ) {e.preventDefault (); e.stopPropagation(); textarea.myFontSize += ( e.key=="+" ? 2 : -2 ); textarea.style.fontSize = textarea.myFontSize + "pt"; return;} 
     switch (e.key) {
       // case "Escape":   console.log ("removing input listener");  editform.removeEventListener ("input", PROCESS.process );  break;
@@ -410,9 +412,7 @@ newEditContainer.appendChild (previewContainer);
 }
 
 
-console.error ("preview: after initializeTextareaDP ", initializeTextareaDP);
-
-
+//console.error ("preview: after initializeTextareaDP ", initializeTextareaDP);
 
 let myCodeMirror;
 
@@ -426,8 +426,9 @@ function initializeCodeMirror () {
   cmElement.myFontSize = 14; 
   cmElement.style.fontSize = cmElement.myFontSize + "pt";  
   cmElement.CodeMirror.refresh();
-  cmElement.addEventListener ("keydown", (e) => { // console.log ("CMirror Key pressed: ", e.key);
-    if (e.metaKey && (e.key=="+" || e.key=="-") ) {e.preventDefault (); e.stopPropagation(); 
+  cmElement.addEventListener ("keydown", (e) => { console.log ("CMirror Key pressed: ", e.key);
+    if (e.metaKey && (e.key=="+" || e.key=="-") ) {  // handle zoom changes of the browser
+      e.preventDefault (); e.stopPropagation(); 
       cmElement.myFontSize += ( e.key=="+" ? 2 : -2 ); cmElement.style.fontSize = cmElement.myFontSize + "pt"; 
       cmElement.CodeMirror.refresh();            // needed by code mirror after a font change
     }  
@@ -436,6 +437,7 @@ function initializeCodeMirror () {
       // case "Control":  console.log ("CM re-adding input listener"); editform.addEventListener ("input", PROCESS.process);  PROCESS.process ( "INIT" );   break;
       case "Control":      console.log ("CM immediate processing");     PROCESS.toggleImmediate ();  PROCESS.process ( "INIT" );   break;
       //case "Ctrl":    console.log ("toggeling immediate");      PROCESS.changeMode ();   break;
+      case "Backspace": PROCESS.process (e); document.body.classList.add ("inputChanged"); isEditorDirty=true;  break;  // CodeMirror prevents input event from being sent to the textarea, but also need this to take place when deleting text
     }
 
   } );
@@ -467,8 +469,11 @@ function initializeCodeMirror () {
 
 }
 
-
 let codemirrorFlag = false;
+
+const USE_CM = false;  // if this is true, then code mirror is always used, independently from the URL request
+
+// TODO: add a UI link into sidebar for the editor type !!
 
 
 function editPreviewPatch () {  // the clutch to PHP; we may adapat it to use CodeMirror, textarea or whatever client side editor we desire  
@@ -477,7 +482,7 @@ function editPreviewPatch () {  // the clutch to PHP; we may adapat it to use Co
   console.log ("preview: editPreviewPatch after initializeTextareaDP");
   codemirrorFlag = false;
   let params = (new URL (document.location)).searchParams;
-    if (true || params.get("editormode") == "codemirror") {  // TODO: STUCK to TRUE. ok??
+    if ( USE_CM || params.get("editormode") == "codemirror") {  
     initializeCodeMirror ();  // additionally initialize a code mirror instance
     codemirrorFlag = true;
   }
@@ -492,7 +497,6 @@ function editPreviewPatch () {  // the clutch to PHP; we may adapat it to use Co
 
 
 window.DPRES = DPRES;
-
 
 window.editPreviewPatch = DPRES.editPreviewPatch;
 
