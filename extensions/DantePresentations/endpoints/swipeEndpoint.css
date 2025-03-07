@@ -27,12 +27,34 @@ body
 body {overflow:hidden;}
 
 
-.swipe-positioner {position:absolute; top:0px; left:100px; z-index:10; padding:5px; border:1px solid blue; border-radius:5px; color:blue;}
-.swipe-num  {font-weight:bold; color: blue;}
+/* functionality */
+.swipe-positioner {position:absolute; top:0px; left:100px; z-index:10;}
+
+.swipe-num {cursor:pointer;}
+
+
+/* theming */
+.swipe-positioner {padding:5px; border:1px solid blue; border-radius:5px; color:blue;}
+
+.swipe-num  {font-weight:bold; color: blue;min-width:25px;display:inline-block; text-align:center; }
+.total-num-slides {color: blue;min-width:25px;display:inline-block; text-align:center;}
+
+
+.swipe-zoom {position:absolute; top:0px; right:400px; z-index:10; padding:5px; border:0px solid blue; border-radius:5px; color:blue;}
 
 .swipe-navigator {position:absolute; top:0px; right:100px; z-index:10; padding:5px; border:0px solid blue; border-radius:5px; color:blue;}
 
 .swipe-stuff {margin-top:1px; padding:50px 140px 50px 140px;  height:100vh; width:100vw;min-height:100vh; overflow-y:scroll;}
+
+.swipe-stuff {  border:1px solid red;}
+
+.content {  border: 1px solid magenta; width:fit-content;}
+.innerContent { zoom:1;}
+
+/* selector and options */
+.selectPage {z-index:200; position: absolute; top:0px; left:250px; height:30px; border-radius:5px;
+min-width:230px; max-width:230px; white-space: nowrap;  overflow: hidden;   text-overflow: ellipsis; display:inline-block;}
+
 
 .swipe-line {background-color: AliceBlue;height:30px;}
 
@@ -40,7 +62,12 @@ body {overflow:hidden;}
 
 a.swipe-link {margin-left:10px; margin-right:10px; font-weight:bold; color:blue;position:relative;top:-3px;;}
 
-button {height:28px; position:relative;top:-5px; margin-left:5px; margin-right:5px; cursor:pointer;}
+button {height:30px; width:36px; position:relative;top:-5px; margin-left:5px; margin-right:5px; cursor:pointer;}
+
+button.zoomShow {width:80px;}
+
+
+
 
 
 
@@ -67,7 +94,7 @@ ul           {list-style-image:none;}
 img.drawioShowendpoint {max-width:5000px !important; margin:20px 20px 20px 20px;}
 
 /* have a bit more separation between parsifal containers*/
-.parsifalContainer { margin:40px 0px 40px 0px;}
+/* .parsifalContainer { margin:40px 0px 40px 0px;} */
 
 /* reduce distance between two amsmath elements seperated by a paragraph */
 script + p { line-height:0.1;}

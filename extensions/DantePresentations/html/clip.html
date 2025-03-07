@@ -6,13 +6,15 @@
 </head>
 <body>
 
+Tet program for checking contents of clipboard.
+
+
 <script>
 navigator.clipboard.readText().then(text => {
     console.log('Clipboard contains text: ', text);
 }).catch(err => {
     console.log('Failed to read clipboard contents: ', err);
 });
-
 
 async function analyze (items) {
   console.log ("items: ", items);
@@ -27,17 +29,9 @@ async function analyze (items) {
   }
 }
 
-
-
 navigator.clipboard.read()
   .then ( items => { analyze (items); } )
   .catch(err => {console.log('Failed to read clipboard contents: ', err); });
-
-
-
-
-
-
 
 </script>
 

@@ -26,6 +26,8 @@ error_reporting (E_ALL & ~E_DEPRECATED );  # report all errors but not deprecati
 ini_set( 'display_errors', 1 );
 
 
+$wgRawHtml=true;
+
 opcache_reset();
 
 # how long are we caching responses from the ressource loader. values in seconds

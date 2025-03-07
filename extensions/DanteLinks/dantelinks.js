@@ -1,27 +1,39 @@
-function checkPopup(e) {
-  let url = e.target.dataset.snip;
-  if (!url) {return;}  // nothing to do for this link
 
-  url = "./index.php?title=" + e.target.dataset.snip;
+// console.error ("dantelinks.js loading now");
 
-  // get and normalize snip size
-  let snipWidth  = localStorage.getItem ("snipWidth");    snipWidth = parseInt (snipWidth); console.log ("snipWidth found: ", snipWidth);
-  let snipHeight = localStorage.getItem ("snipHeight");   snipHeight = parseInt (snipHeight);
+
+
+function checkPopup(e) {    // could be an internal or an external link !!!
+  const VERBOSE = true;
+
+//  let endpoint  = "./index.php
+
+  let endpoint = e.target.dataset.useendpoint;
+
+  let target    = e.target.dataset.snip;
+  if (!target) {return;}  // nothing to do for this link
+
+//  let url = endpoint + "?" + "title=" + target;  // url to show in frame  // WORKS
+
+  let url = endpoint + "?" + "wiki-wgtitle=" + target;
+
+  // determine snip size: get and normalize snip size
+  let snipWidth  = localStorage.getItem ("snipWidth");    snipWidth = parseInt (snipWidth);     if (VERBOSE) {console.log ("snipWidth found: ", snipWidth);}
+  let snipHeight = localStorage.getItem ("snipHeight");   snipHeight = parseInt (snipHeight);   if (VERBOSE) {console.log ("snipHeight found: ", snipHeight);}
   if (typeof snipWidth  !== 'number' || isNaN(snipWidth)  || snipWidth < 100  || snipWidth > window.innerWidth   ) { console.warn ("snipWidth is reset" );  snipWidth  = 600;}
   if (typeof snipHeight !== 'number' || isNaN(snipHeight) || snipHeight < 100 || snipHeight > window.innerHeight ) { console.warn ("snipHeight is reset");  snipHeight = 800;}
-  // TODO: it might also be an approach just to set it fixed. must see how it works
+
 
   let ifra = document.getElementById ( url );
   if (ifra) {return;} else {ifra = getSnipFrame ( e.target.dataset.snip, snipWidth, snipHeight );}
 
-
-
-  // calculate the space we have to the boundaries of the window
+  // *** calculate the space we have to the boundaries of the window
   let spaceToTheRight  = window.innerWidth - e.pageX;
   let spaceToTheLeft   = e.pageX;
   let spaceToTheTop    =   e.pageY;
   let spaceToTheBottom = window.innerHeight - e.pageY;
 
+  // *** place snip frame
   if (spaceToTheRight > spaceToTheLeft) { 
     //console.log ("placing to the right of the cursor, .left=", e.pageX);
     ifra.parentNode.style.left =   e.pageX + "px";} 
@@ -38,7 +50,7 @@ function checkPopup(e) {
     let d = e.pageY -snipHeight;
     ifra.parentNode.style.top   = (d > 0 ? d : 0 ) + "px"; }
 
-    // open the requested URL
+    // *** open the requested URL
   if (ifra.checkSrc != url) { // ensure we only load it once even though iframe resolves the src
     ifra.checkSrc = url;
     ifra.src = url;
@@ -131,6 +143,7 @@ function getSnipFrame ( id, width, height ) {
 
 let windowList = [];
 
+// slots for positions of externally opened windows
 let slots = new Array (null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
 // implement proper opening of links by the user
@@ -142,19 +155,40 @@ let slots = new Array (null, null, null, null, null, null, null, null, null, nul
 // CAVE: we need the Math.random below since otherwise we have the same name for the target window and this may lead to some spurous "about:" window opening somewhere else. do not know why.
 
 function onReady () {
-  const GAP = 30;
+  const GAP = 30;     // distance for distinguishing different slot positions
+  const SKIP = 80;    // distance which we skip for menu area in MacOS
 
-  const SKIP = 80;
+  const WINDOW     = 0;
+  const SMALL_SIDE = 1;
+  const LARGE_SIDE = 2;
 
-  const helper2 = () => {
-    const index = slots.findIndex ( entry => entry === null || (entry && entry.closed === true) );
-    let left = -1000 + index * GAP;   // -1000 for the left monitor
-    let top  = SKIP + index * GAP;
-    let h = window.screen.availHeight - SKIP - index * GAP;
-    let w = 800;
-    //if (h===null) {h = window.screen.availHeight-100-windowList.length*GAP;}
-    //  if (h < 100) {h=100;}
-    // top=200; h=300; w=300;left=100;
+//  console.error ("dantelinks: onReady called");
+
+  // helper function for positioning externally opened windows
+  const helper2 = (mode) => {
+    const index = slots.findIndex ( entry => entry === null || (entry && entry.closed === true) );  // find the first slot which is unused or has been closed
+    let left, top, h, w;
+    switch (mode) {
+      case WINDOW:
+       left = -1000 + index * GAP;   // -1000 for the left monitor
+        top  = SKIP + index * GAP;
+        h    = window.screen.availHeight - SKIP - index * GAP ;
+        w    = window.width;
+        break;
+      case SMALL_SIDE:
+        left = -1000 + index * GAP;   // -1000 for the left monitor
+        top  = SKIP + index * GAP;
+        h    = window.screen.availHeight/2 - SKIP ;
+        w    = 800;
+        break;
+
+      case LARGE_SIDE:
+        left = -1000 + index * GAP;   // -1000 for the left monitor
+        top  = SKIP + index * GAP;
+        h    = window.screen.availHeight - SKIP - index * GAP ;
+        w    = 800;
+        break;
+    }
     let ret = `left=${left},top=${top},height=${h},width=${w}`;  // note: if we add noopener here then window.open returns null and we cannot determine the closing status of the window any longer
     console.log ("helper2 returning: " + ret);
   return ret;
@@ -179,32 +213,41 @@ function onReady () {
     const pathComponents = urlObj.pathname.split('/').filter(Boolean);
     const lastComponent = pathComponents.length > 0 ? pathComponents[pathComponents.length - 1] : null;      // Return the last component, or null if there is none
 
-  // derive meta data as set in DantePresentations.pgp full view link for the entire page
-    const elementQ         = document.querySelector('[data-fullview-query]');
-    const fullviewQuery    = elementQ ? elementQ.getAttribute('data-fullview-query') : null;
-    const elementE         = document.querySelector('[data-fullview-query]');
-    const fullviewEndpoint = elementE ? elementE.getAttribute('data-fullview-endpoint') : null;
+    // use a fallback 
+    let fullviewEndpoint = t.getAttribute ("data-useendpoint") ||   mw.config.get('wgServer') + "/" + mw.config.get('wgScriptPath') + "/extensions/DantePresentations/endpoints/showEndpoint.php";  // 
+ 
+//      let scriptPath = mw.config.get('wgScriptPath'); // TODO
+//      let scer = mw.config.get('wgServer);
 
-    const finalist = fullviewEndpoint + "?" + fullviewQuery + "&" + title;
+//fullviewEndpoint =  $wgServer."/".$wgScriptPath . "/extensions/DantePresentations/endpoints/showEndpoint.php";
 
-    if (fullviewQuery === null || fullviewEndpoint === null ) {console.error ("Could not properly form DanteLink endpoint" ); return t.href;}
+
+    console.log ("fullviewEndpoint=", fullviewEndpoint);
+    console.log ("title=", title);
+
+    // const finalist = fullviewEndpoint + "?" + fullviewQuery + "&" + title;
+    const finalist = fullviewEndpoint + "?" + "wiki-wgtitle=" + title;
+
+//    if (fullviewQuery === null || fullviewEndpoint === null ) {console.error ("Could not properly form DanteLink endpoint" ); return t.href;}
     if (action !== null) {console.warn ("non-view action found for DanteLink mechanism"); return t.href;}
 
-   return finalist; 
-  };
+    console.log ("getEndpoint returning: ", finalist);
+    return finalist; 
+  };  // *** END getEndpoint
 
 
-    // console.log ("DanteLinks instrumentation is now done!");
-    $('a[target=_window]').click( (e)  => {  e.preventDefault();   var win = window.open( getEndpoint (e.currentTarget) , "_"+Math.random(), helper2 () ) ;  ins (win);  return false; });
-    $('a[target=_sside]').click( (e)   => {  e.preventDefault();   var win = window.open( getEndpoint (e.currentTarget) , "_"+Math.random(), helper2 () ) ;  ins (win);  return false; });
-    $('a[target=_lside]').click( (e)   => {  e.preventDefault();   var win = window.open( getEndpoint (e.currentTarget) , "_"+Math.random(), helper2 () ) ;  ins (win);  return false; });
+  $('a[target=_window]').click( (e)  => {  e.preventDefault();   var win = window.open( getEndpoint (e.currentTarget) , "_"+Math.random(), helper2 (WINDOW) )     ;  ins (win);  return false; });
+  $('a[target=_sside]').click( (e)   => {  e.preventDefault();   var win = window.open( getEndpoint (e.currentTarget) , "_"+Math.random(), helper2 (SMALL_SIDE) ) ;  ins (win);  return false; });
+  $('a[target=_lside]').click( (e)   => {  e.preventDefault();   var win = window.open( getEndpoint (e.currentTarget) , "_"+Math.random(), helper2 (LARGE_SIDE) ) ;  ins (win);  return false; });
 
     // external links always open in a fresh tab
    // $('a[class*="external"]').click( () => { e.preventDefault (); window.open(this.href, "_blank", "noopener=1,noreferrer=1");  return false; });
 
-    $('a[data-snip]').on("mouseover", function(e) { // only instrument links with a data-snip attribute !
+
+
+  $('a[data-snip]').on("mouseover", function(e) { // only instrument links with a data-snip attribute !
         checkPopup(e);
-    });
+  });
 
   let startX, startY;  // for the detection of the drag distance
   $("a").on("dragstart", async function(event) {startX = event.originalEvent.pageX; startY = event.originalEvent.pageY; 
@@ -227,6 +270,9 @@ function onReady () {
      else if ( dist >= 40)        { var win = window.open (getEndpoint (e.currentTarget.href, true), "_"+Math.random(), helper2 () ); ins (win); }
 
   });
+
+//  console.error ("dantelinks:onready completed");
+
 }
 
 

@@ -55,6 +55,7 @@ $wgFooterIcons = [
 
 
 
+
 // Remove the patrol right from all user groups - this clears the 
 $wgGroupPermissions['*']['patrol'] = false;
 $wgGroupPermissions['user']['patrol'] = false;
@@ -169,7 +170,6 @@ wfLoadExtension( 'DanteSnippets' );
 # $wgParserCacheType       = CACHE_DB;
 
 $wgTopDante = new stdClass();  // a generic top level object helper for parsifal and dante, must be defined here, before loading Parsifal
-
 
 $wgGroupPermissions['sysop']['resetParsifal']=true;
 

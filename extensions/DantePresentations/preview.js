@@ -6,7 +6,7 @@
 //       The rest is in Parsifal runtime.js !!
 
 
-console.error ("+++++++++ preview starts loading");
+
 
 const DOUBLEBUFFERED = true;     // switch betwwen double buffered operation and single buffered operation
 
@@ -109,6 +109,9 @@ const PROCESS = (() => {  // OPEN local scope for local variables
 
 // define namespace DPRES for extension DantePresentations to ensure proper separation from other components
 const DPRES = (() => {
+
+
+let myCodeMirror = null;      // null or the abstract CodeMirror object, if Code mirror is active
 
 
 // when the client receives any response from the preview endpoint: patch the information into the area where we show the preview
@@ -278,7 +281,7 @@ function processAll() {
 
   var body;
 
-  if (codemirrorFlag) {body = b64EncodeUnicode ( myCodeMirror.getValue() ); }
+  if (myCodeMirror) {body = b64EncodeUnicode ( myCodeMirror.getValue() ); }
   else {body = b64EncodeUnicode ( document.getElementById ( "wpTextbox1" ).value );}
 
   // console.info ("DantePresentation: calling processAll with body", body);
@@ -307,8 +310,6 @@ function processAll() {
 
 // set specific header information for the preview endpoint
 function setDanteHeaderInfo ( xhr ) {
-  xhr.setRequestHeader ("Wiki-wgUserName",            RLCONF.wgUserName);
-  xhr.setRequestHeader ("Wiki-wgUserId",              RLCONF.wgUserId);
   xhr.setRequestHeader ("Wiki-wgNamespaceNumber",     RLCONF.wgNamespaceNumber);
   xhr.setRequestHeader ("Wiki-wgPageName",            RLCONF.wgPageName);                     // full name of page, including localized namespace name, if namespace has a name (except 0) with spaces replaced by underscores. 
   xhr.setRequestHeader ("Wiki-wgTitle",               RLCONF.wgTitle);                        // includes blanks, no underscores, no namespace
@@ -321,15 +322,14 @@ function setDanteHeaderInfo ( xhr ) {
 
 // with a dirty editor we have to deliver a warning message to the user when he is leaving the page
 // normally MediaWiki does so, but when we use CodeMirror it looks like this feature is overridden by CodeMirror somehow
-// thus we impelement it here again
+// thus we impelement it here again - but activate it only if codemirror is used
 let isEditorDirty = false;
-window.addEventListener('beforeunload', (event) => { if (isEditorDirty) { event.preventDefault(); return ''; } });
 
 
 
-// Apply path to the edit page of Mediawiki. Called by <script> tag injected in DantePresentations.php:onEditPageshowEditForminitial
+// Apply path to the edit page of Mediawiki. Called by editPreviewPatch
 function initializeTextareaDP() {
-  console.warn ("initializeTextareaDP called");
+  // console.log ("initializeTextareaDP called");
 
   var storeResize = true;                                   // shall the resize observer store the resize values?
 
@@ -340,7 +340,7 @@ function initializeTextareaDP() {
   textarea.myFontSize = 14; textarea.style.fontSize = textarea.myFontSize + "pt";
 
   const wasResized = () => {
-    const VERBOSE = true;
+    const VERBOSE = false;
     var textareaWrapper = document.getElementById ("textarea-wrapper");
     shouldReset   = true;  // next time we call the processing function, do a complete reset of all images (due to the changed resolution in the reset
     if (storeResize) {
@@ -358,7 +358,6 @@ function initializeTextareaDP() {
 
   if (window.localStorage.getItem ("textareaWidth"))  {textarea.style.width = window.localStorage.getItem ("textareaWidth") + "px";}
 
-
   var newEditContainer = document.createElement ("div");   // container of (textarea for editing) and (preview area)
   newEditContainer.id  = "new-edit-container";
   Object.assign (newEditContainer.style, {display: "flex", height: "calc(100vh - 540px)"} ); 
@@ -366,8 +365,7 @@ function initializeTextareaDP() {
   var parent = textarea.parentNode; parent.replaceChild (newEditContainer, textarea);
   newEditContainer.appendChild (textarea);
   
-
- var previewContainer = document.createElement ("div");          // generate a container for the preview
+  var previewContainer = document.createElement ("div");          // generate a container for the preview
   previewContainer.id = "inline-edit-preview-container";
   Object.assign (previewContainer.style, {minWidth: "18px", display: "inline-block", flex:"1 1 auto", "box-sizing": "border-box", position: "relative"} ); 
 
@@ -387,15 +385,12 @@ function initializeTextareaDP() {
   newEditContainer.appendChild (previewContainer);
 
   let editform = document.getElementById ("editform"); 
-
   PROCESS.setFct ( processAll );                                       // define which function to use for processing for previewing
 
   editform.addEventListener ("input", (e) => { isEditorDirty=true; PROCESS.process(e); } );               // install an event listener for changes in the textarea
   window.setTimeout ( () => { PROCESS.process ( "INIT" );} , 0);       // kick off display of first preview
 
   editform.addEventListener ("input", () => { document.body.classList.add ("inputChanged");});  
-
-
 
  // keyboard based resizing inside of textarea only resizes the textarea font size itself
   textarea.addEventListener ("keydown", (e) => {  // console.log ("Key pressed: ", e.key);
@@ -408,25 +403,27 @@ function initializeTextareaDP() {
     }
 
    });
-
 }
 
 
-//console.error ("preview: after initializeTextareaDP ", initializeTextareaDP);
 
-let myCodeMirror;
-
-
-
-function initializeCodeMirror () {
+function initializeCodeMirror () {  // called by editPreviewPatch
+  console.error ("Initializing code mirror!!");
   var myTextArea   = document.getElementById("wpTextbox1");
-  myCodeMirror = CodeMirror.fromTextArea ( myTextArea, { lineNumbers:true, matchBrackets:true} );    // returns an abstract CodeMirror object
 
-  var cmElement = document.querySelector (".CodeMirror");
-  cmElement.myFontSize = 14; 
+  myCodeMirror     = CodeMirror.fromTextArea ( myTextArea, { 
+    lineNumbers:true, matchBrackets:true, lineWrapping:true
+  } );    // returns an abstract CodeMirror object
+
+
+
+
+  var cmElement            = document.querySelector (".CodeMirror");
+  cmElement.myFontSize     = 14; 
   cmElement.style.fontSize = cmElement.myFontSize + "pt";  
   cmElement.CodeMirror.refresh();
-  cmElement.addEventListener ("keydown", (e) => { console.log ("CMirror Key pressed: ", e.key);
+
+  cmElement.addEventListener ("keydown", (e) => {  // console.log ("CMirror Key pressed: ", e.key);
     if (e.metaKey && (e.key=="+" || e.key=="-") ) {  // handle zoom changes of the browser
       e.preventDefault (); e.stopPropagation(); 
       cmElement.myFontSize += ( e.key=="+" ? 2 : -2 ); cmElement.style.fontSize = cmElement.myFontSize + "pt"; 
@@ -439,8 +436,13 @@ function initializeCodeMirror () {
       //case "Ctrl":    console.log ("toggeling immediate");      PROCESS.changeMode ();   break;
       case "Backspace": PROCESS.process (e); document.body.classList.add ("inputChanged"); isEditorDirty=true;  break;  // CodeMirror prevents input event from being sent to the textarea, but also need this to take place when deleting text
     }
-
   } );
+
+
+  // code mirror somehow tempers with mediawiki leave-site warning, so we should reimplement it here ourselves, but not when we are leaving the page using a submit
+  let formSubmitting = false;
+  document.addEventListener("submit", () => {formSubmitting = true;});
+  window.addEventListener('beforeunload', (event) => { if (isEditorDirty && !formSubmitting ) { event.preventDefault(); return ''; } }); // TODO: NO, do no use this. still not clear why??
 
   if (window.localStorage.getItem ("textareaWidth"))  {cmElement.style.width = window.localStorage.getItem ("textareaWidth") + "px";}
 
@@ -469,25 +471,30 @@ function initializeCodeMirror () {
 
 }
 
-let codemirrorFlag = false;
 
-const USE_CM = false;  // if this is true, then code mirror is always used, independently from the URL request
+/* we want that the editing help link in the footer
+   1) Does not show (opens in new window)
+   2) Behaves and displays as an open to the side link by DanteLinks
+*/
+function patchEditingHelp () {
+  let win = document.querySelector('a[target="helpwindow"]');
+  win.nextSibling.remove();
+  win.setAttribute ("target", "_lside");
+  win.innerHTML += " ▮";
+  win.setAttribute ("title", "Open help in fresh window");
+}
 
-// TODO: add a UI link into sidebar for the editor type !!
 
 
 function editPreviewPatch () {  // the clutch to PHP; we may adapat it to use CodeMirror, textarea or whatever client side editor we desire  
-  console.log ("preview: editPreviewPatch before initializeTextareaDP");
   initializeTextareaDP();
-  console.log ("preview: editPreviewPatch after initializeTextareaDP");
-  codemirrorFlag = false;
+  patchEditingHelp();
   let params = (new URL (document.location)).searchParams;
-    if ( USE_CM || params.get("editormode") == "codemirror") {  
+  let usingCodeMirror = window.localStorage.getItem ("Dante-use-codemirror") === "true";  
+    if ( usingCodeMirror || params.get("editormode") == "codemirror") {  
     initializeCodeMirror ();  // additionally initialize a code mirror instance
-    codemirrorFlag = true;
   }
 }
-
 
   return {editPreviewPatch};  // export into DPRES
 
@@ -497,6 +504,8 @@ function editPreviewPatch () {  // the clutch to PHP; we may adapat it to use Co
 
 
 window.DPRES = DPRES;
+
+console.error ("PREVIEW LOADED");
 
 window.editPreviewPatch = DPRES.editPreviewPatch;
 
@@ -542,6 +551,4 @@ function waitBeforeInvoke (ms) { // this MUST be used when the preview area is r
 }
 
 
-
-
-console.error ("***** preview.js is loaded");
+// console.error ("***** preview.js is loaded");

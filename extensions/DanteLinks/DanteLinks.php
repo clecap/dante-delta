@@ -9,72 +9,7 @@ static function debugLog ($text) {
   if (!$wgAllowVerbose) {return;}
   if($tmpFile = fopen( __DIR__."/DANTELINKS-LOGFILE", 'a')) {fwrite($tmpFile, $text);  fclose($tmpFile); }    // __DIR__ is important so this works for Dante-ndpoints and mediawiki calls
   else {throw new Exception ("debugLog could not log");}
-  
 }
-
-// TODO: if necessary, add this in later for selection of one out of several Dante wikis.
-/*
-// inject a selector for other dantewikis provided MediaWiki:Dantewikis is properly populated
-public static function onSkinAfterPortlet ( $skin, $portlet, &$html ) {
-  global $wgSitename, $wgOut;  
-
-  // self::debugLog ("\n\n---------- Portlet: " . $portlet);
-
-  // inject a selector to other sites depending on the configuration of the page Mediawiki:Dantewikis
-  // window.selectorChanged (event) in kundry.js takes care of this in Javascscript side
-  if ( strcmp ("personal", $portlet) == 0) {
-    $selector = "<select class='personal-wiki-select' onchange='window.selectorChanged(event);' title='Name of the specific dantewiki to distinguish multiple variants. Click to display links to others as registered in MediaWiki:DanteWikis'>";    
-    $configPage = "Dantewikis";                                                                 // name of the MediaWiki:Dantewikis configuration page of this thing
-    $title      = Title::newFromText( $configPage, NS_MEDIAWIKI );                              // build title object for MediaWiki:DanteWikis
-
-//// see: DanteTree Categories how to fix this
-
-
-    $wikipage   = new WikiPage ($title);                                                        // get the WikiPage for that title
-    $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
-    if ($contentObject ) {                                                                      // IF we have found a content object for this thing
-      $parserOutputObject = $contentObject->getParserOutput ($title, null, null, true);         // parse the content object on this page
-      $options = array( 'unwrap' =>true, 'wrapperDivClass' => "myWRAPPER" );
-      $code = $parserOutputObject->getText ( $options );  
-       
-     self::debugLog ("Before matching: " . $code . "\n");  
-      preg_match ('/<pre>(.*)<\/pre>/ism', $code, $matches);  
-      self::debugLog ("MATCH: " . print_r ($matches, true). "\n");
-      
-      $arr = json_decode ($matches[1], true);
-      
-      // ensure that array contains the current site
-      $found = false;
-      foreach ($arr as $val) {if (strcmp ($val["name"], $wgSitename) == 0) {$found = true;}}
-        if (!$found) {      
-        $obj = array();
-        $obj["name"] = $wgSitename;       $obj["class"] = "";   $obj["base"] = "";
-        array_unshift ( $arr, $obj );      
-      }
-            
-      if (is_array ($arr) && count ($arr) > 0) {
-        foreach ($arr as $val) {
-          $name  = $val["name"];
-          $class = $val["class"];
-          $base  = $val["base"];
-          $selected = ($name == $wgSitename ? "selected"  : "");
-          $selector .= "<option data-class='$class' data-base='$base' data-name='$name' value='$name' $selected>$name</option>";
-        }
-        $selector .= "</select>";    
-        $html =  $selector . $html;
-        return true;
-      }
-      else {
-        return false;
-      }
-    }  
-  }
-}
-
-*/
-
-
-
 
 
 // &$url: The URL of the external link
@@ -94,11 +29,6 @@ public static function onLinkerMakeExternalLink(  &$url, &$text, &$link, &$attri
     self::debugLog ("  attribs  =" . print_r ($attribs, true) ."\n");  
     self::debugLog ("  linktype =" . $linktype ."\n\n\n");  
   }
-
-
-//  $attribs["draggable"]="true";
-
-
 
     // some links might have looked like external hmlt links to the mediawiki parser, since they started as a normal URL
     // however, we do not want them to display the markup used for external links (ie the specific icon for it)
@@ -136,7 +66,7 @@ public static function onLinkerMakeExternalLink(  &$url, &$text, &$link, &$attri
 //public static function onHtmlPageLinkRendererBegin( MediaWiki\Linker\LinkRenderer $linkRenderer, &$target,  &$text, &$attribs, &$query, &$ret ) {
 //public static function onHtmlPageLinkRendererBegin( MediaWiki\Linker\LinkRenderer $linkRenderer, &$target,  &$text, &$attribs, &$query, &$ret ) {  
 public static function onHtmlPageLinkRendererEnd ( MediaWiki\Linker\LinkRenderer $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
-  global $wgScript;
+  global $wgScript, $wgServer, $wgScriptPath;
   global $wgAllowVerbose; $VERBOSE = true && $wgAllowVerbose;
 
   if ($VERBOSE) {
@@ -155,18 +85,25 @@ public static function onHtmlPageLinkRendererEnd ( MediaWiki\Linker\LinkRenderer
 
   if ($VERBOSE) { self::debugLog ("FIRST Analysis: endPos=$endPos snipInfo=$snipInfo \n");}
 
+  // internal links, when clicked for opening in a side or smaller window must be opened by a different endpoint, as we do not want to see the entire DanteWiki page
+  // but a reduced skin DanteWiki page. The relevant information is provided in attribute data-useendpoint of the link
+  $attribs["data-useendpoint"] = $wgServer."/".$wgScriptPath . "/extensions/DantePresentations/endpoints/showEndpoint.php";
 
-//  $attribs["draggable"]="true";
 
   /* shorthands in title */
   if (trim ($text) == "\w") { $attribs["target"] = "_window";  $text = $target . ' ◾'; return true;} 
   if (trim ($text) == "\s") { $attribs["target"] = "_sside";   $text = $target . ' ▪'; return true;} 
   if (trim ($text) == "\S") { $attribs["target"] = "_lside";   $text = $target . ' ▮'; return true;} 
+  if (trim ($text) == "\t") { $attribs["data-snip"] = "_lside";   $text = $target . ' ONE'; return true;}    // tooltip
+
 
   // implement some shorthand notations for the target
   if ( str_ends_with ($text, "\w")) { $attribs["target"] = "_window";  /* $attribs["class"] .= " windowlink"; */  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ◾';  }
   if ( str_ends_with ($text, "\s")) { $attribs["target"] = "_sside";   /* $attribs["class"] .= " windowlink"; */  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ▪';  }
   if ( str_ends_with ($text, "\S")) { $attribs["target"] = "_lside";   /* $attribs["class"] .= " windowlink"; */  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ▮';  }
+
+  if ( str_ends_with ($text, "\\t")) { $attribs["data-snip"] = $target;  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ♢'; }    // tooltip
+
 
 //   $isKnown      = self::doesExist ($text);
 //   if ($isKnown) { $attribs["class"] = ""; }
@@ -301,7 +238,6 @@ public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
   $out->addModules('ext.dantelinks');
  
 // $out->addHeadItem ("dantelink", $text);
-
 }
 
 }

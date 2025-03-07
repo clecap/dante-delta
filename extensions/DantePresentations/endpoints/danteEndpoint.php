@@ -8,26 +8,13 @@
 require_once ("../../../includes/WebStart.php");
 require_once ("../../../DanteSettings-used.php");  // also needed to pick up production or development conventions in the endpoint
 
+
 error_reporting(E_ALL); error_reporting (0); ini_set('display_errors', 'On');  // NOTE: uncomment this for debugging in case server delivers a 500 error
 
-require_once ("../helpers/DanteDummyUserIdentity.php");
 require_once ("../helpers/DanteDummyPageReference.php");
 require_once ("../renderers/hideRenderer.php");
 
 use MediaWiki\MediaWikiServices;
-
-function EndpointLog ($text) {
-  global $wgAllowVerbose;
-  if (!$wgAllowVerbose) {return;}
-  $fileName = "ENDPOINT_LOG";
-  if($tmpFile = fopen( $fileName, 'a')) {fwrite($tmpFile, $text);  fclose($tmpFile);}  // NOTE: close immediatley after writing to ensure proper flush
-  else {throw new Exception ("debugLog in danteEndpoint.php could not log"); }
-
-  $fileSize = filesize ($fileName);
-  if ($fileSize == false) { return; }
-  if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
-  }
-
 
 class DanteEndpoint {
 
@@ -40,19 +27,22 @@ class DanteEndpoint {
   protected $startTime;                               // microtime when this object was constructed
 
   // mandatory parameters (??)
-  protected ?string   $userName = "uninitialized";    // needed for constructing the user identity
   protected ?string   $pageName = "uninitialized";    // needed for constructing the page reference  // TODO: not clear why we need this AND the title ??
   protected ?int      $ns = null;                     // number of the namespace; needed for constructing the page reference
   protected ?string   $title = "uninitialized";       // TODO: title name???ß of the page    // needed for constructing the page reference
   protected ?string   $dbkey = "uninitialized";       // TODO: not clear if needed for paghe reference since currently we use NULL for it
 
+  // derived entity 
+  protected ?MediaWiki\User\UserIdentity $userId;     // object with interface type UserIdentity
+
   // dependant entities
-  protected ?MediaWiki\User\UserIdentity $userId; // 
   protected ?string   $nsName = null;    // TODO: see also above: maybe rather null than "uniniialized" ?????
 
   // optional parameters of the endpoint api
   protected bool      $hiding;
   protected ?string   $curRevisionId;
+  protected float     $scale = 1;
+
 
   // additional information
   protected $parserOutput = null;        // keeps the parserOutput object of the last parser run (will be used in other endpoints where we need mor info on the parse)
@@ -67,18 +57,33 @@ function __construct () {
   $headers  = getallheaders();                                           // get all http headers
   $normalizedHeaders = array_change_key_case($headers, CASE_LOWER);      // Normalize the header name by converting all keys to lowercase as some browsers do this on their own
   $this->pickupDataFromArray ( $normalizedHeaders );                     // pick up data
-  //EndpointLog ("\n Found headers: \n" . print_r ( $headers, true));    // EndpointLog ("\n Found normalized headers: \n" . print_r ( $normalizedHeaders, true)); // DEBUG
+  //self::Log ("\n Found headers: \n" . print_r ( $headers, true));    
+  // self::Log ("\n Found normalized headers: \n" . print_r ( $normalizedHeaders, true)); // DEBUG
 
   parse_str ($_SERVER['QUERY_STRING'], $query);                          // get API data from query portion of URL - if both header and query are used: query overwrites the header
   $normalizedQuery = array_change_key_case($query, CASE_LOWER);          // normalize
   $this->pickupDataFromArray ( $normalizedQuery );                       // pick up data
-  // EndpointLog ("\nParsed Query String is " . print_r ($query, true));    // DEBUG
-  // EndpointLog ("\nParsed Query String is " . print_r ($normalizedQuery, true)); // DEBUG
+  // self::Log ("\nParsed Query String is " . print_r ($query, true));    // DEBUG
+  // self::Log ("\nParsed Query String is " . print_r ($normalizedQuery, true)); // DEBUG
 
-  $this->userId = new DanteDummyUserIdentity ( $this->userName );        // generate derived identity
+    $this->userId = User::newFromSession();  // derive userId object from the current session into which we might be logged in (or not)
+
   if ( isset ($this->ns) ) $this->nsName = MediaWikiServices::getInstance()->getNamespaceInfo()->getCanonicalName ( $this->ns );
 }
 
+
+public function Log ($text) {
+  global $wgAllowVerbose;
+  if (!$wgAllowVerbose) {return;}
+  $fileName = "ENDPOINT_LOG";
+  $text = "\n*** " . get_called_class() . " says:\n".$text."\n---------\n";
+  if($tmpFile = fopen( $fileName, 'a')) {fwrite($tmpFile, $text);  fclose($tmpFile);}  // NOTE: close immediatley after writing to ensure proper flush
+  else {throw new Exception ("debugLog in danteEndpoint.php could not log"); }
+
+  $fileSize = filesize ($fileName);
+  if ($fileSize == false) { return; }
+  if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
+}
 
 
 // given the array arr of keys and (string-typed) values, parse properties of this array into its place for this object
@@ -86,19 +91,41 @@ function __construct () {
 // TODO: this is not yet completely harmonized between the different places which use these fields - some have more some less
 // preview.js und DantePresentations.php must be harmonized TODO: make a common php file for this !!
 private function pickupDataFromArray ( $arr ) {
-  // EndpointLog ("\n Pickup function sees: \n" . print_r ( $arr, true));
+  // self::Log ("\n Pickup function sees: \n" . print_r ( $arr, true));
 
-  if ( isset ( $arr["wiki-wgusername"] ) )         $this->userName  = $arr["wiki-wgusername"];
+  if ( isset ( $arr["nocache"] ) )                 $this->caching = false;
   if ( isset ( $arr["wiki-wgnamespacenumber"] ) )  $this->ns        =  intval ( $arr["wiki-wgnamespacenumber"] ) ; 
   if ( isset ( $arr["wiki-wgpagename"] ) )         $this->pageName  =  $arr["wiki-wgpagename"];                     // full name of page, including localized namespace name, if namespace has a name (except 0) with spaces replaced by underscores. 
   if ( isset ( $arr["wiki-wgtitle"] ) )            $this->title     =  $arr["wiki-wgtitle"];                        // includes blanks, no underscores, no namespace
   if ( isset ( $arr["wiki-dbkey"] ) )              $this->dbkey     =  $arr["wiki-dbkey"]; 
   if ( isset ( $arr["wiki-wgCurRevisionId"] ) )    $this->curRevisionId     =  $arr["wiki-wgCurRevisionId"]; 
 
+  if ( isset ( $arr["scale"] ) )                   $this->scale     =  floatval  ( $arr["scale"] ); 
+
 //    $this->hiding              =  ( isset ($arr["Wiki-hiding"])                 ?   strcmp ($arr["Wiki-hiding"], "true")==0  :  false ); 
 //    $this->sect              =  ( isset ($arr["sect"])                 ?   $arr["sect"] :  NULL ); 
 //    if ($this->sect != NULL) {$this->sect = (int) $this->sect;}
+
+
 }
+
+
+protected function dumpStatus () {
+
+  $text = "\nDUMPING STATUS:\n";
+  $text .= "  caching=" . $this->caching . "\n";
+  $text .= "  dbkey="   . $this->dbkey . "\n";
+  $text .= "  ns="      . $this->ns . "\n";
+  $text .= "  title="  . $this->title . "\n";
+
+  $text .= "\n\n";
+  return $text;
+}
+
+
+
+
+
 
 // may be used by an endpoint to add further headers
 protected function setResponseHeaders () {
@@ -116,7 +143,7 @@ protected function setResponseHeaders () {
 //   THROWS in case of an error
 
   public function getContent ( ) {
-    // EndpointLog ("DanteEndpoint: getContent\n");
+    // self::Log ("DanteEndpoint: getContent\n");
     $this->stringContent = "Hello World: This function getContent is defined in danteEndpoint.php and should be overwritten by extending this class ";
     return 1;
   }
@@ -140,14 +167,12 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
     $cacheKey   = md5 ($text . ($hiding ? "true": "false") . $section. print_r ($removeTags, true)) ;     
     $value      = apcu_fetch ( $cacheKey, $cacheHit);
     if ($cacheHit) {
-      EndpointLog ("Cache hit on $cacheKey");
+      self::Log ("Cache hit on $cacheKey");
       return $value;}
     else {
-       EndpointLog ("Cache miss on $cacheKey");
+       self::Log ("Cache miss on $cacheKey");
     }
   }
-
-  // get an instance of UserIdentity // $userId  = new DanteDummyUserIdentity ( $this->userName );  // TODO: this worked; if it still works with $this->userId then deprecate this !
 
   // get an instance of ParserOptions
   $options = new ParserOptions ( $this->userId );           // let the parent class provide a user identity
@@ -172,13 +197,13 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
 
     foreach ($removeTags as $tag) { $parser->setHook ( $tag, [ "HideRenderer", 'renderHidden' ] );}
 
-  //  EndpointLog ("\nDanteEndpoint: Sees the section type: " . gettype ($section) . " and section value: ($section) \n");
+  //  self::Log ("\nDanteEndpoint: Sees the section type: " . gettype ($section) . " and section value: ($section) \n");
 
   
   if ( $section !== NULL  ) { 
-  //  EndpointLog ("\n DanteEndpoint: Restricted section parsing requested for section=$section");
+  //  self::Log ("\n DanteEndpoint: Restricted section parsing requested for section=$section");
     $text = $parser->getSection ($text, $section, "NOT FOUND - see danteEndpoint.php"); 
-  //  EndpointLog ("\n\n DanteEndpoint sees: $text \n\n");
+  //  self::Log ("\n\n DanteEndpoint sees: $text \n\n");
   }
 
   $pageRef = new DanteDummyPageReference ( 
@@ -190,8 +215,8 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
   );
 
   $this->parserOutput  = $parser->parse ( 
-    $text,       // text we want to parse
-    $pageRef, 
+    $text,           // text we want to parse
+    $pageRef,        
     $options,       // the ParserOptions object generated earlier
     true,           // lineStart:  should the text be treated as starting at the beginning of a line
     true,           // clearState: should we clear the parser state before parsing
@@ -199,11 +224,11 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
   );    
 
   //$sec = $this->parserOutput->getSections();
-  //EndpointLog ("\n-----------DanteEndpoint: ".print_r ($sec, true)."\n");
+  //self::Log ("\n-----------DanteEndpoint: ".print_r ($sec, true)."\n");
 
   // use a specific skin object for post treatment (requires internal skin name to be used)    TODO: make this selectable  // does this have an effect ???? TODO
   // $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("cologneblue");
-  $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("vector");    // EndpointLog ("DanteEndpoint: parseText: did generate skin object\n");
+  $skinObject = MediaWiki\MediaWikiServices::getInstance()->getSkinFactory()->makeSkin ("vector");    // self::Log ("DanteEndpoint: parseText: did generate skin object\n");
 
   $parsedText =  $this->parserOutput->getText ( array ( 
      "allowTOC"               => false, 
@@ -217,16 +242,15 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
   ) ); 
 
   }
-     catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: Parser: Caught exception:\n" );     $parsedText = "EXCEPTION: " . $e->__toString(); }
-     catch(Throwable $t)   { EndpointLog ("***** DanteEndpoint: Parser: Caught Throwable:\n" );
-                             EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  $parsedText = "THROWABLE: " . $t->__toString()."\n";}
-     finally               { //EndpointLog ("DanteEndpoint: in finally block\n");                 
+     catch (\Exception $e) { self::Log ("***** DanteEndpoint: Parser: Caught exception:\n" );     $parsedText = "EXCEPTION: " . $e->__toString(); }
+     catch(Throwable $t)   { self::Log ("***** DanteEndpoint: Parser: Caught Throwable:\n" );
+                             self::Log ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  $parsedText = "THROWABLE: " . $t->__toString()."\n";}
+     finally               { //self::Log ("DanteEndpoint: in finally block\n");                 
       }
 
-  // EndpointLog ("DanteEndpoint: parseTexte will leave now\n");
+  // self::Log ("DanteEndpoint: parseTexte will leave now\n");
   if ( $this->caching ) { apcu_store ( $cacheKey, $parsedText, 1000 ); }
-
-  if ($parsedText == null) { throw new Exception ("Parser returned null instead of string, might want to check ENDPOINT_LOG ");}  // to prevent 
+  if ($parsedText == null) { $parsedText = "Parser for preview returned null instead of string.";}  // to prevent 
 
   return $parsedText;
 }
@@ -235,11 +259,44 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
 protected function getInput () {
   $body = file_get_contents("php://input");         // get the input; here: the raw body from the request
   $text = base64_decode ($body);                    // in an earlier version we used, unsuccessfully, some conversion, as in:   $body = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $body); 
-  // EndpointLog ("MediawikiEndpoint: getInput sees text: ".$text . "\n");
+  // self::Log ("danteEndpoint: getInput sees text: ".$text . "\n");
   return $text;
 }
 
-// This is the core function for obtaining the output of the (generic) endpoint
+
+
+protected function getInputNSKey () {
+  // self::log ("Title=" . $this->title."\n");  self::log ("Dbkey=" . $this->dbkey."\n");  self::log ("NS=" . $this->ns."\n");  self::log ("NS-NAME=" . $this->nsName."\n");
+
+  $searchKey =  $this->nsName . ":".  $this->dbkey;
+  $title      =  Title::newFromDBkey ( $searchKey );  // TODO: lacks optional interwiki prefix   -   see documentaiton of class Title
+  if ($title === null) {
+    throw new Exception ("ShowEndpoint: could not generate title from dbkey: (" . $this->dbkey . ")\n");
+  }
+
+  $wikipage    = new WikiPage ($title);                              // get the WikiPage for that title
+  $contob      = $wikipage->getContent();                            // and obtain the content object for that
+  $contenttext = ContentHandler::getContentText( $contob );
+  return $contenttext;
+}
+
+
+
+
+protected function getInputTitle () {
+  $pageIdentity      =  Title::newFromDBkey ( $this->title );
+  $wikipage    = new WikiPage ($pageIdentity);                              // get the WikiPage for that title
+  $contob      = $wikipage->getContent();                            // and obtain the content object for that
+  $contenttext = ContentHandler::getContentText( $contob );
+  return $contenttext;
+}
+
+
+
+
+
+
+// This is the core function for obtaining the output of a (generic) endpoint
 public function process () : string {
   $input         = $this->getInput();
   $parsedText    = $this->parseText ( $input, false );
@@ -252,12 +309,14 @@ public function process () : string {
 public function execute () {
   try {
     $decoratedText = $this->process();
-    EndpointLog ("***** DanteEndpoint: execute sees :\n" . $decoratedText ); 
+    self::Log ("***** DanteEndpoint: execute sees :\n" . $decoratedText ); 
   }
-  catch (\Exception $e) { EndpointLog ("***** DanteEndpoint: execute: Caught exception:\n" );    $decoratedText = "<pre>EXCEPTION: " . $e->__toString(). "</pre>"; }
-  catch(Throwable $t)   { EndpointLog ("***** DanteEndpoint: execute: Caught Throwable:\n" );
-                          EndpointLog ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  $decoratedText = "<pre>THROWABLE: " . $t->__toString()."</pre>"; }
-  finally               { EndpointLog ("DanteEndpoint: in finally block of execute\n");                     }
+  catch (\Exception $e) { self::Log ("***** DanteEndpoint: execute: Caught exception:\n" );    $decoratedText = "<pre>EXCEPTION: " . $e->__toString(). "</pre>"; }
+  catch(Throwable $t)   { self::Log ("***** DanteEndpoint: execute: Caught Throwable:\n" );
+                          self::Log ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  $decoratedText = "<pre>THROWABLE: " . $t->__toString()."</pre>"; }
+  finally               { self::Log ("DanteEndpoint: in finally block of execute\n");                     
+                          self::Log ( self::dumpStatus() );
+                        }
 
   header ("Content-Length: " . strlen ( $decoratedText ) );
   header ("Content-type:" . $this->getMimeType ());         // set Mime Type header 
@@ -287,12 +346,6 @@ public function decorate ( $text ) {
   foreach ( $this->getCssPaths()      as &$value)  { $ret .= ("<link rel='stylesheet' href='" . $value . "'>");  }
   foreach ( $this->getAsyncJsPaths()  as &$value)  { $ret .= ("<script async src='" . $value . "'></script>") ;        }
   foreach ( $this->getJsPaths()       as &$value)  { $ret .= ("<script src='" . $value . "'></script>") ;        }
-
-// "<script>CONF=      </script>"
-
-
-
-
   $ret .= "</head>";
   $ret .= "<body class='";
   $ret .= implode (' ', $this->getBodyClasses() );
@@ -303,13 +356,12 @@ public function decorate ( $text ) {
 }
 
 
-public function getCssPaths ()      { return array (); }
-public function getJsPaths ()       { return array (); }
-public function getAsyncJsPaths ()  { return array (); }
-public function getHTMLClasses ()   { return array (); }
-public function getHeadClasses ()   { return array (); }
-public function getBodyClasses ()   { return array (); }
-
+public function getCssPaths ()                         { return array (); }
+public function getJsPaths ()                          { return array (); }
+public function getAsyncJsPaths ()                     { return array (); }
+public function getHTMLClasses ()                      { return array (); }
+public function getHeadClasses ()                      { return array (); }
+public function getBodyClasses ()                      { return array (); }
 public function getHeadText ()              : string   { return ""; }
 public function decorateBody (string $text) : string   { return $text; }
 
@@ -318,6 +370,6 @@ public function decorateBody (string $text) : string   { return $text; }
 
 
 class DanteConfig implements Config {
-  public function get( $name ) { EndpointLog ("DanteConfig was queried for:     " .$name. "\n");   return "";}
-  public function has( $name ) { EndpointLog ("DanteConfig was asked if it had: " .$name. "\n");   return false;}
+  public function get( $name ) { self::Log ("DanteConfig was queried for:     " .$name. "\n");   return "";}
+  public function has( $name ) { self::Log ("DanteConfig was asked if it had: " .$name. "\n");   return false;}
 }

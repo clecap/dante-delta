@@ -2,7 +2,41 @@
 
 use MediaWiki\MediaWikiServices;
 require_once ("renderers/hideRenderer.php");
-require_once ("helpers/Common.php");
+
+
+// TODO: is this used???
+const STYLE = '
+ .mw-parser-output h1 {counter-reset: h2-counter; counter-increment: h1-counter; }
+  .mw-parser-output h1::before {content: counter(h1-counter) ". "; }
+  .mw-parser-output h2 {counter-reset: h3-counter; counter-increment: h2-counter; }
+  .mw-parser-output h2::before {content: counter(h1-counter) "." counter(h2-counter) ". "; }
+  .mw-parser-output h3 { counter-reset: h4-counter; counter-increment: h3-counter; }
+  .mw-parser-output h3::before { content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) ". ";  }
+  .mw-parser-output h4 {  counter-reset: h5-counter;   counter-increment: h4-counter; }
+  .mw-parser-output h4::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) ". "; }
+  .mw-parser-output h5 {counter-increment: h5-counter;}
+  .mw-parser-output h5::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) "." counter(h5-counter) ". "; }
+  #mw-toc-heading::before {content: "";}
+';
+
+// TODO: is this used???
+const MAG_HIDE_HEAD_STYLE = '<style data-src="DantePresentations:MAG_HIDE_HEAD_STYLE">
+  html.mag-hide-head h2, html.mag-hide-head h3, html.mag-hide-head h4, html.mag-hide-head h5, html.mag-hide-head h6 {display:none;}
+  html.mag-hide-head .mw-parser-output h1 .mw-headline::before {content: "" !important; }
+  html.mag-hide-head .mw-parser-output h2 .mw-headline::before {content: "" !important; }
+  html.mag-hide-head .mw-parser-output h3 .mw-headline::before {content: "" !important; }
+  html.mag-hide-head .mw-parser-output h4 .mw-headline::before {content: "" !important; }
+  html.mag-hide-head .mw-parser-output h5 .mw-headline::before {content: "" !important; } </style>
+';
+
+// TODO: is this used???
+const MAG_HIDE_NUMBERING_STYLE = '<style data-src="DantePresentations:MAG_HIDE_NUMBERING_STYLE">
+  html.mag-hide-head .mw-parser-output h1::before, 
+  html.mag-hide-head .mw-parser-output h2::before, 
+  html.mag-hide-head .mw-parser-output h3::before, 
+  html.mag-hide-head .mw-parser-output h4::before, 
+  html.mag-hide-head .mw-parser-output h5::before {content: "" !important; } </style>
+';
 
 class DantePresentations {
 
@@ -26,7 +60,16 @@ public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktempl
       $links['views']['my_view'] = ['class' => '', 'href' => 'javascript:window.present("' .$wgScriptPath. '")', 'text' => 'Present'];   // siehe ext.DantePresentations.js
   }
 
-  $query = DPCommon\makeQuery ($user, $title, true);
+
+// TODO: THE BELOW STUFF MUST BE IMPROVED AND REFACTORED
+
+  $namespaceIndex     = $title->getNamespace();                 // get number of namespace
+  $dbkey              = $title->getDBKey();                     // convert title to dbkey format
+
+  $query =   "Wiki-wgNamespaceNumber="  .urlencode ($namespaceIndex)  . "&" ."Wiki-dbkey="              .urlencode ($dbkey)           . "&" . "Wiki-hiding=true";
+
+ $query =   "wiki-wgtitle=" . $title->getPrefixedDBKey();
+
 
   $showEndpointUrl = $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
   $showExternalUrl = $wgServer . $wgScriptPath . "/extensions/DantePresentations/externalMonitor.html?presentation=" .urlencode ($showEndpointUrl);  // works
@@ -35,10 +78,11 @@ public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktempl
 
   $fullView =  $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?' . $query;  // works
   
-  $links['views']['audio'] = ['class' => '', 'href' => $fullView, 'text' => 'Full View', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank', 'data-fullview-query' => $query, 'data-fullview-endpoint' => $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php?'];
+  $links['views']['audio'] = ['class' => '', 'href' => $fullView, 'text' => 'Full View', 'title' => "Opens a window for selecting content for presentations and tab chrome casting", 'target' => '_blank', 
+    'data-fullview-endpoint' => $wgScriptPath. '/extensions/DantePresentations/endpoints/showEndpoint.php'];
 
    $slideExternalUrl = $wgServer . $wgScriptPath . '/extensions/DantePresentations/endpoints/swipeEndpoint.php?' . $query;  // works
-   $links['views']['slides'] = ['class' => '', 'href' => $slideExternalUrl, 'text' => 'Swipe View', 'title' => "Show page as slideshow with slider", 'target' => '_blank'];
+   $links['views']['slides'] = ['class' => '', 'href' => $slideExternalUrl, 'text' => 'Swipe', 'title' => "Show page as slideshow with slider", 'target' => '_blank'];
 
   }  // siehe ext.DantePresentations.js
 }
@@ -48,7 +92,30 @@ public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktempl
     $parser->setHook ( 'hide',  [ "HideRenderer",   'renderProminent' ]  );
     $parser->setHook ( 'audio', [ "AudioRenderer",  'renderTag']         );      
     $parser->setHook ( 'video', [ "VideoRenderer",  'renderTag']         );      
+
+
+    // we want to prevent h1 ... h6 to be modified by the parser
+    $parser->setHook ( 'h1',    [ self::class,  'renderh1']               );      
+    $parser->setHook ( 'h2',    [ self::class,  'renderh2']               );      
+    $parser->setHook ( 'h3',    [ self::class,  'renderh3']               );      
+    $parser->setHook ( 'h4',    [ self::class,  'renderh4']               );      
+    $parser->setHook ( 'h5',    [ self::class,  'renderh5']               );      
+    $parser->setHook ( 'h6',    [ self::class,  'renderh6']               );      
   }
+
+
+
+public static function renderTag ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<aside>".$input."</aside>" ;}
+
+public static function renderh1 ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<h1>".$input."</h1>" ;}
+public static function renderh2 ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<h2>".$input."</h2>" ;}
+public static function renderh3 ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<h3>".$input."</h3>" ;}
+public static function renderh4 ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<h4>".$input."</h4>" ;}
+public static function renderh5 ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<h5>".$input."</h5>" ;}
+public static function renderh6 ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<h6>".$input."</h6>" ;}
+
+
+
 
 
 public static function onSkinAddFooterLinks( Skin $skin, string $key, array &$footerlinks ) {
@@ -63,10 +130,10 @@ public static function onSkinAddFooterLinks( Skin $skin, string $key, array &$fo
 } // end function
 
 
-public static function renderTag ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<aside>".$input."</aside>" ;}
 
 
-/*
+
+/* 
   public static function renderHidden ( $input, array $args, Parser $parser, PPFrame $frame ) {
     $output = $parser->recursiveTagParse( $input, $frame );                                   // the tag works recursively, 
       // see https://stackoverflow.com/questions/7639863/mediawiki-tag-extension-chained-tags-do-not-get-processed 
@@ -154,6 +221,7 @@ public static function onBeforePageDisplay( OutputPage $output, Skin $skin ) {
     return false;
   }
   
+
 // defines __SLIDES__ as an additional Mediawiki magic word
 // NOTE: reference is https://www.mediawiki.org/wiki/Manual:Magic_words
 public static function onGetDoubleUnderscoreIDs( &$ids ) { 
@@ -164,56 +232,24 @@ public static function onGetDoubleUnderscoreIDs( &$ids ) {
    }
 
 
+
+// we can use this hook for adding or adjusting links to the individual secions
+// TODO: currently this is not used
   public static function onSkinEditSectionLinks( $skin, $title, $section, $tooltip, &$links, $lang ) {
     global $wgServer, $wgScriptPath;
-    $user        = $skin->getUser();               
-   $url =        $wgServer."/".$wgScriptPath . "/extensions/DantePresentations/endpoints/showEndpoint.php?" .
-
-  $query = DPCommon\makeQuery ($user, $title, true);
-  $query .=   "&" . "sect="                    .urlencode ($section);
-
-// https://localhost:4443/wiki-dir/extensions/DantePresentations/endpoints/showEndpoint.php?
-
-/*
-    $links['presentPart'] = [
-      'targetTitle' => $title,
-      'text' => "present",
-      'attribs' => ["href" => "javascript:alert(1);",   // href does not work here
-       "class" => "section-show-link internal", "data-section" => $section, "data-href" => $url, "title" => "Sect ".$section ],
-      'query' => array( ), 'options' => array() ];
-*/
-
-// LINK is activated via jQuery in ex.DantePresentations.js focusing on the class name of the link
-
-/*
-  $links['positionPart'] = [
-      'targetTitle' => $title,
-      'text' => "position",
-      'attribs' => [  
-       "class" => "section-present-link internal", "data-section" => $section, "data-section-marker" => $section, "title" => "Sect ".$section ],
-      'query' => array( ), 'options' => array() ];
-
-  // annotation link
-  // activated in ex.DantePresentations.js
-  $links['annotationPart'] = [
-        'targetTitle' => $title,
-        'text' => "anno",
-        'attribs' => [  
-         "class" => "section-annotation-link internal", "data-section" => $section, "data-section-marker" => $section, "title" => "Sect ".$section ],
-        'query' => array( ), 'options' => array() ];
-*/
-
   }  // end onSkinEditSectionLinks
 
 
 // implement __HIDEHEAD__  and __HIDEHL__ magic word
 public static function onParserAfterParse( Parser $parser, &$text, StripState $stripState ) {
+
   if ( $parser->getOutput()->getPageProperty( 'MAG_HIDEHEAD' ) !== null ) {
     $parser->getOutput()->addHeadItem (
-      "<script>document.documentElement.classList.add('mag-hide-head');</script>" .
-      "<style>html.mag-hide-head h2 .mw-headline, html.mag-hide-head h3 .mw-headline, html.mag-hide-head h4 .mw-headline, html.mag-hide-head h5 .mw-headline, html.mag-hide-head h6 .mw-headline {display:none;}</style>"
+      "<script>document.documentElement.classList.add('mag-hide-head');</script>" . MAG_HIDE_HEAD_STYLE
+//      "<style>html.mag-hide-head h2 .mw-headline, html.mag-hide-head h3 .mw-headline, html.mag-hide-head h4 .mw-headline, html.mag-hide-head h5 .mw-headline, html.mag-hide-head h6 .mw-headline {display:none;}</style>"
       , "hidehead");
   }
+
   if ( $parser->getOutput()->getPageProperty( 'MAG_HIDEHL' ) !== null ) {
     $parser->getOutput()->addHeadItem (
       "<script>document.documentElement.classList.add('mag-hide-hl');</script>" .
@@ -221,9 +257,26 @@ public static function onParserAfterParse( Parser $parser, &$text, StripState $s
       "html.mag-hide-hl h2, html.mag-hide-hl h3, html.mag-hide-hl h4, html.mag-hide-hl h5, html.mag-hide-hl h6 {border-bottom:0px;}   </style>"
       , "hidehead");
   }
+
+
+
  
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

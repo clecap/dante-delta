@@ -43,7 +43,7 @@ function translate () {
   let endpoint = "./extensions/DantePresentations/endpoints/deeplEndpoint-title.php";
 
   let info = {
-    "Wiki-wgUserName":         RLCONF.wgUserName, 
+   //  "Wiki-wgUserName":         RLCONF.wgUserName,  // TODO: deprecate
     "Wiki-wgTitle":            RLCONF.wgTitle,
     "Wiki-wgCurRevisionId":    RLCONF.wgCurRevisionId,
     "Wiki-wgNamespaceNumber":  RLCONF.wgNamespaceNumber
