@@ -1,0 +1,45 @@
+<html>
+<head>
+
+
+
+</head>
+<body>
+
+<script>
+navigator.clipboard.readText().then(text => {
+    console.log('Clipboard contains text: ', text);
+}).catch(err => {
+    console.log('Failed to read clipboard contents: ', err);
+});
+
+
+async function analyze (items) {
+  console.log ("items: ", items);
+  for (const item of items) {
+    console.log ("Types: ", item.types);
+    if (item.types.includes("text/html")) {
+      const blob = await item.getType("text/html");
+      const blobText = await blob.text();
+      console.log ("text/html", blobText);
+    }
+
+  }
+}
+
+
+
+navigator.clipboard.read()
+  .then ( items => { analyze (items); } )
+  .catch(err => {console.log('Failed to read clipboard contents: ', err); });
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>
