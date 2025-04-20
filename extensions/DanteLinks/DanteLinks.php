@@ -79,11 +79,14 @@ public static function onHtmlPageLinkRendererEnd ( MediaWiki\Linker\LinkRenderer
 
   $text   = HtmlArmor::getHtml($text);        // the text of the anchor 
   $text   = str_replace ("\\|", "¦", $text);  //    \| is treated the same as a broken pipe symbol
+  // if ($VERBOSE) { self::debugLog ("After replace text is: $text \n");}
 
-  $endPos   = strpos ( $text, "¦");          // search for a broken pipe extension symbol
+  $parts = explode('¦', $text, 2);
+  $beforeBrokenPipe = $parts[0];
+  $afterBrokenPipe = isset($parts[1]) ? $parts[1] : '';
   $snipInfo = self::getSnipInfo ($target);     // search for snippet info
 
-  if ($VERBOSE) { self::debugLog ("FIRST Analysis: endPos=$endPos snipInfo=$snipInfo \n");}
+  self::debugLog ("beforeBrokenPipe=($beforeBrokenPipe) afterBrokenPipe=($afterBrokenPipe) \n\n");
 
   // internal links, when clicked for opening in a side or smaller window must be opened by a different endpoint, as we do not want to see the entire DanteWiki page
   // but a reduced skin DanteWiki page. The relevant information is provided in attribute data-useendpoint of the link
@@ -96,7 +99,6 @@ public static function onHtmlPageLinkRendererEnd ( MediaWiki\Linker\LinkRenderer
   if (trim ($text) == "\S") { $attribs["target"] = "_lside";   $text = $target . ' ▮'; return true;} 
   if (trim ($text) == "\t") { $attribs["data-snip"] = "_lside";   $text = $target . ' ONE'; return true;}    // tooltip
 
-
   // implement some shorthand notations for the target
   if ( str_ends_with ($text, "\w")) { $attribs["target"] = "_window";  /* $attribs["class"] .= " windowlink"; */  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ◾';  }
   if ( str_ends_with ($text, "\s")) { $attribs["target"] = "_sside";   /* $attribs["class"] .= " windowlink"; */  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ▪';  }
@@ -104,38 +106,44 @@ public static function onHtmlPageLinkRendererEnd ( MediaWiki\Linker\LinkRenderer
 
   if ( str_ends_with ($text, "\\t")) { $attribs["data-snip"] = $target;  $text= rtrim (substr ($text,0, strlen($text)-2)) . ' ♢'; }    // tooltip
 
-
-//   $isKnown      = self::doesExist ($text);
-//   if ($isKnown) { $attribs["class"] = ""; }
-
-  if ( $endPos === false && strlen ( $snipInfo ) == 0 ) {
+  if ( $afterBrokenPipe === '' && strlen ( $snipInfo ) == 0 ) {
     if ($VERBOSE) {
       self::debugLog ("NO broken pipe extension and NO snippet info found: returning with those values:\n\n");
       self::debugLog ("  text    =" . $text ."\n");  
       self::debugLog ("  isKnown =" . $isKnown ."\n");
       self::debugLog ("  attribs =" . print_r ($attribs, true) ."\n");
     }
-
     return true; }   // return modified link
 
-  // we must adjust the notion of isKnown, since the check if we have this page already must focus on the title without the broken pipe
-  // we must go from the target (with broken pipe) to the target without the broken pipe
-  $targetEndPos = strpos ( $target, "¦");
-  $myTarget     = substr ( $target, 0, $targetEndPos );
-  $myTarget     = trim ( $myTarget );                  // target without any broken pip portion
-  $isKnown      = self::doesExist ($myTarget);
+  // if we arrive here then there is either a SNIP or a broken pipe situation
 
-  self::debugLog ("  isKnown =" . $isKnown . "   (after correction)\n");
+ 
+
 
   unset ($attribs['href']);   // remove from MediaWiki attribs the attribute href, as it will be set here
   unset ($attribs['class']);  // remove from MediaWiki attribs the attribute class, as it might be a "new", which is no longer correct after this processing
 
-  $flag = self::extractAttributes ($text, $attribs); // did we obtain additional attributes ?
-  // self::debugLog ("LinkRendererBegin: after text=" . HtmlArmor::getHtml ($text) ."\n"); self::debugLog ("LinkRendererBegin: after target=" . $target ."\n\n");     
+  $attribs['data-snip'] = $snipInfo;
 
+  $flag = self::extractAttributes ($text, $attribs); // did we obtain additional attributes ?
+  
+
+ if ($beforeBrokenPipe==='') { if ($VERBOSE) { self::debugLog ("beforeBrokenPipe there is no text so using target as anchor text\n");}
+    $text=$target; }
+  else {  if ($VERBOSE) { self::debugLog ("beforeBrokenPipe has text - using this as anchor text \n");}
+    $text=$beforeBrokenPipe;
+  }
+
+
+  if ($VERBOSE) {  self::debugLog ("extractAttributes returned: $flag and we have $text and " . print_r ($attribs, true) . "\n");}
+  
+  return true; // use the anchor with the modified attributes and variables
+               // return false would mean: use value of ret as anchor
+
+/*
   if ($flag) {             if ($VERBOSE) {self::debugLog ("  did find some attributes\n\n\n");}
     $attribText = "";      // collect the attribute values
-    $title = $target;      // what we want to show as title in the 
+    $title = $target;      // what we want to show as title
     $anchorText = substr ( $myTarget, 0, $endPos );         // what we want to show as anchor(text) portion inside of the <a> link.
     $anchorText = trim ( $anchorText );
 
@@ -164,6 +172,11 @@ public static function onHtmlPageLinkRendererEnd ( MediaWiki\Linker\LinkRenderer
     return false;     // use our new anchor form
     return true;      // true: keep the original anchor as it is 
   }
+
+
+*/
+
+
 }
 
 // given a text $myTarget for a Dantewiki page, return true if this is known and false if not
@@ -186,18 +199,24 @@ private static function doesExist ( $myTarget ) {
 
 
 
+
+
+// given the target of a link, extract snippet information
+
 // TODO: check for injection problems. can the string injected into data-* do some rubbish somehow when containing quotes?
 private static function getSnipInfo ($target) {
   global $wgAllowVerbose; $VERBOSE = true && $wgAllowVerbose;
-  if (str_starts_with ($target, "Snip:") ) { return "data-snip='$target'";}         // target starts with Snip:  as namespace indication
 
-  // Ok, we are not linking to Snip: explicitely but there still might be a snip page for where we are linking to
+  // CASE 1: The target is itself a Snip target in the Snip namespace - we directly link to a snippet
+  if (str_starts_with ($target, "Snip:") ) { return $target;}         // target starts with Snip:  as namespace indication
+
+  // CASE 2: The target is not by itself a Snip target but the target itself might HAVE a snip page
   $title = Title::newFromText("Snip:" . $target);
   if ( !$title )             { if ($VERBOSE) {self::debugLog ("Page Snip:$target is not valid\n");}        return ""; }
   if ( !$title->isKnown() )  { if ($VERBOSE) {self::debugLog ("Page Snip:$target is not known\n");}        return ""; }
   $wikiPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle($title);
   if (!$wikiPage->exists())  { if ($VERBOSE) {self::debugLog ("WikiPage Snip:$target does not exist\n");}  return "";}
-  return "data-snip='$title'"; 
+  return $target; 
 }
 
 
@@ -208,6 +227,8 @@ private static function getSnipInfo ($target) {
 private static function extractAttributes ( &$text, &$attribs ) {
   $text = HtmlArmor::getHtml ($text);                    // need a text here but text might also be an HtmlArmor object.
   if ( $text === null ) {return false;} 
+
+
 
   $arr  = preg_split( '/¦/u', $text );     // split the input text on the broken pipe symbol;  need u for unicode matching
   //self::debugLog ("*** extractAttributes: preg_split input:  ".$text."\n");
