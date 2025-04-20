@@ -2,46 +2,107 @@
 /** TABLE OF CONTENTS **/
 /***********************/
 
+/* the main elements of the side chicks */
+#toc, .sideChick {float:right; position:fixed; right:-1px;
+   overflow:hidden; 
+  min-height:55px;
+  max-height: calc(100vh - 120px); 
+  z-index:60000;       /*  Toc remains clickable and is not covered by a parsifal container*/
+  margin: 14px 0px 160px 0px; 
+  padding:0px 0px 0px 22px;     /* leave space for header line */
+  border-width: 1px 1px 1px 1px; border-style: solid;
+  border-radius:10px 0px 0px 0px;
+  resize:both; direction: rtl;  /* make resizable and have resize handle on the left side */
+  cursor:pointer;
+}
 
-#toc         {float:right;position:fixed;right:-1px; top:59pt;width:30%;  overflow-y:scroll;  
-  overflow-x:hidden;
-  max-height: calc(100vh - 120px); }
-       
+
+/* the handle used for opening / closing and labeling the side chick */
+.sideHandle {
+  box-sizing:border-box;
+  writing-mode:vertical-rl; transform: rotate(180deg);  /* writing sideways */
+  position:absolute;top:0px; left:0px; 
+  height:calc(100% - 20px); /*  adjust to leave enough space for the resize handle in the lower left*/
+  text-align:center;
+  z-index:60000; 
+  border-width:1px 0px 0px 0px; border-style:solid; /* lower boundary of handle to the resizer */
+  padding:0px 0px 0px 0px;
+  display:inline-block;
+  user-select:none;
+}
 
 
-/* adjust size */
-
-/* needed so that the ToC remains clickable and is not covered by some parsifal container */
-#toc {z-index:60000;}
-
-#toc{border:1px solid #a7d7f9}
+.pinUi {position:absolute; top:4px; left:10px; width:14px; height:14px; z-index:60001; }
 
 /* remove stupid architectural part from mediawiki */
 .toctogglespan {display:none;}
 
-div.toctitle    {user-select: none; cursor:pointer;}
 
-/* hovering over the "Contents" title of the ToC */
-div.toctitle:hover {background:lightblue;}
+/* correcting for a one-pixel error whose reason we do not understand yet */
+.toctitle, .sideTitle {position:relative; left:-1px;}
 
-/* the look and feel of the entire TOC */
-/* direction: rtl ensures that the resize handle is on the left, where there is space for the resize */
-/* display: none:  prevents displaying toc before we have resized it to dynamic size - this is done in helper.js */
+/* border-bottom required to override a mediawiki setting */
+div.toctitle  h2, div.sideTitle h2  {user-select: none; cursor:pointer; border-bottom:0px;}
 
-/* background-color:   #ffee99 */
+.toc div.toctitle h2, .toc div.sideTitle h2 {font-weight:bold !important;}
 
-#toc         {width:550px; margin: 0px 0px 160px 0px; background-color:#ffee98; resize:horizontal; direction: rtl;}  
+.sideTitle {text-align:center;}
+.sideTitle h2, .toctitle h2 {padding:0px 30px 0px 30px; white-space:pre;}
+
+
+/* .toc MOVE */
+
+html .vector-body .sideChick h2 {font-family: sans-serif; font-size: 16px; font-weight: bold; display:inline;}
+
+
+/** COLOR THEMING of SIDECHICKS **/
+
+.sideChick {background-color:aliceblue; outline:1px solid hsl(51, 10%, 80%);  outline-offset:-1px;}
+
+
+#toc-handle                {background: white;}
+.has_tocs #toc-handle      {background: yellow;}
+#toc-handle:hover          {background: red;}
+
+.sideHandle {border-color: hsl(51, 10%, 80%);  }
+
+
+.sideHandle                          {background:white;}            /* normally handles are white */
+.sideHandle:hover, .sideTitle:hover  {background:red !important;}   /* when hovering they are red */
+
+/* the handles are colored when they include content; the title bars always are colored */
+.has_bcks #bck-handle, #bck-title     {background: khaki;}
+.has_fwds #fwd-handle, #fwd-title     {background: lightsteelblue;}
+.has_cats #cat-handle, #cat-title     {background: orange;}
+.has_subs #sub-handle, #sub-title     {background: fuchsia;}
+.has_cols #col-handle, #col-title     {background: palegreen;}
+.has_acts #act-handle, #act-title     {background: pink;}
+
+
+/* styling the content inside of a sideChick */
+
+.sideChick ul {
+  list-style: none;
+  text-align: left;
+  margin: 6px 0px 3px 8px; overflow:auto;
+  max-height:calc(100% - 30px);  /* need for proper appearance of scoll bars in overflow auto */
+}
+
+.sideChick li {margin-top:0px; margin-bottom:0px; }
+
 
 /* not compensate again to have the correct place for the numbering */
-#toc > * {direction: ltr;}
+#toc > * , #bck > * {direction: ltr;}
 
- /* ensure initial invisibility without flicker */
-#toc > ul    {display:none;}
+#toc.showtoc > ul {display:block;} /* TODO: do we need this still? actually maybe only for the true TOC of wiki ??? */
 
-#toc.showtoc > ul {display:block;}
 
-.toclevel-1 > a {color:red !important; font-weight:bold;}
-.toclevel-2 > a {color:green !important; font-weight:bold;}
+/* code specific for TOC */
+
+/* coloring inside of the table of contents */
+/* same as the coloring of the headings, defined in latex.css */
+.toclevel-1 > a {color: blue !important; font-weight:bold;}
+.toclevel-2 > a {color: rebeccapurple!important; font-weight:bold;}
 .toclevel-3 > a {}
 
 
@@ -50,8 +111,5 @@ div.toctitle:hover {background:lightblue;}
   #toc { display:none !important;}
   #mw-panel {display:none !important;}
   #content {margin-left:0px !important;}
+  .sideChicks {display:none !important;}
 }
-
-
-
-

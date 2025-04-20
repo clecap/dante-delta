@@ -40,6 +40,9 @@
   "MessagesDirs": { "DantePresentations": [ "i18n" ] },
   "namespaces": [ 
      { "id": 2200,  "constant": "NS_TRANSLATED",        "name": "Translated"},
-     { "id": 2201,  "constant": "NS_TRANSLATED_TALK",   "name": "Translated_Talk" } ],
+     { "id": 2201,  "constant": "NS_TRANSLATED_TALK",   "name": "Translated_Talk" },
+     { "id": 2202,  "constant": "NS_COLLECTION",        "name": "Collection" },
+     { "id": 2203,  "constant": "NS_COLLECTION_TALK",   "name": "Collection_Talk" }
+ ],
   "manifest_version": 2
 } 

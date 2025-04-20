@@ -14,7 +14,7 @@ require '../../../vendor/autoload.php';
 error_reporting(E_ALL); ini_set('display_errors', 'On'); // uncomment to obtain reasonable errors from the endpoint instead of only 500 er status from webserver
 
 require_once ("danteEndpoint.php");
-
+ 
 use DeepL\Translator;
 use MediaWiki\Revision\SlotRecord;
 

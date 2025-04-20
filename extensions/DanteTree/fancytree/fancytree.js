@@ -1,8 +1,25 @@
 // glue code, connecting this extension to fancytree
 
-/*** CATAEGORY HANDLING CODE ***/
 
-// given a category name <categ> returns a regular expression which for matching the respective category link
+
+// adds a smoke screen to the wiki so that no user interaction is possible any more (until the edit process is completed)
+// removal of the smoke screen will happen through the reload after the edit process
+const SMOKE = {
+  screen: null,
+  add: () => {
+    SMOKE.screen = document.createElement ("div");
+    SMOKE.screen.id = "smokescreen";
+    Object.assign (SMOKE.screen.style, {"background-color": "LightGrey", "opacity": 0.5, position:"absolute", top:"0px", left:"0px", width: "100vw", height:"100vh"});
+    document.body.appendChild (SMOKE.screen);
+  },
+  remove: () => { SMOKE.screen.remove();}
+};
+
+
+
+/*** CATEGORY HANDLING CODE ***/
+
+// given a category name <categ> return a regular expression which for matching the respective category link
 const buildRegex = (categ) => new RegExp ( "\\[\\[\\s*Category\\s*\\:\\s*" + categ + "\\s*\\]\\]", 'g'); 
 
 // return the <text> but without a mention of category link <categ> ; assume links in text have blanks, not underscores
@@ -34,7 +51,7 @@ function promiseStoreText (txt) {
     var params = {action: 'edit', title:  mw.config.get('wgPageName'), text: txt, format: 'json', summary: "Automated change: Category Edit by TreeAndMenu new generation, file: fancytree.js"};
     var api = new mw.Api();
     // console.log ("promiseStoreText: will now post");
-    api.postWithToken( 'csrf', params ).done( function ( data ) {console.log( "promiseStoreText received: ", JSON.stringify(data) );  resolve (); } );    
+    api.postWithToken( 'csrf', params ).done( function ( data ) { /* console.log( "promiseStoreText received: ", JSON.stringify(data) ); */ resolve (); } );    
     // console.log ("promiseStoreText; past api.postWithToken");
   });
   // console.log ("promiseStoreTet will return: ", prom);
@@ -47,7 +64,7 @@ function promiseStoreText (txt) {
 async function addCat (cat) {
   const VERBOSE = false; 
   if (VERBOSE) {console.log ("fancytree.js: addCat: "  , cat);}
-  addSmokeScreen ();
+  SMOKE.add();
   var content = await promiseGetContent (  mw.config.get('wgPageName') );  // wgTitle  is without namespace prefix
  // var content = await contentPromise;
   var wikiContent = content.query.pages[0].revisions[0].content;    if (VERBOSE) {console.log ("addCat sees this content before editing: ", wikiContent);}
@@ -60,7 +77,7 @@ async function addCat (cat) {
 async function delCat (cat) {
   const VERBOSE = false;  
   if (VERBOSE) {console.log ("------------------------ delCat: "  , cat);}
-  addSmokeScreen ();
+  SMOKE.add();
   var content = await promiseGetContent (  mw.config.get('wgPageName') );  // wgTitle  is without namespace prefix
   //var content = await contentPromise;
   var wikiContent = content.query.pages[0].revisions[0].content;           // if (VERBOSE) {console.log ("delCat sees content preedit: ", wikiContent);}
@@ -72,32 +89,25 @@ async function delCat (cat) {
 async function modCat (add, del) {
   const VERBOSE = false;
   if (VERBOSE) console.log ("DanteTree: Called modCat with ", add, del);
-  addSmokeScreen ();
+  SMOKE.add();
   var content = await promiseGetContent (  mw.config.get('wgPageName') );  // wgTitle  is without namespace prefix
     if (VERBOSE) console.log ("DanteTree: Got content from: ", mw.config.get ('wgPageName'));
     if (VERBOSE) console.log ( Object.keys (content.query.pages) );
     if (VERBOSE) console.log ( Object.keys (content.query.pages[0]) );
     if (VERBOSE) console.log ( Object.keys (content.query.pages[0].revisions[0]) );
 
-  var wikiContent = content.query.pages[0].revisions[0].content;    
+    if (! content.query.pages ) {console.error ("modCat found no pages"); return;}
+    if (! content.query.pages[0].revisions ) {console.error ("modCat found no page revisions"); SMOKE.remove(); return;}
+
+  var wikiContent = content.query.pages[0].revisions[0].content;
   add.forEach ( ele => {wikiContent = addTextCategory (wikiContent, ele);} );
   del.forEach ( ele => {wikiContent = removeTextCategory (wikiContent, ele); } );
-    if (VERBOSE) console.log ("will store", wikiContent);
-  await promiseStoreText (wikiContent);
+    if (VERBOSE) {console.log ("will store", wikiContent);}
+  await promiseStoreText (wikiContent); 
     if (VERBOSE) console.log ("will reload");
   window.location.reload();
 }
 
-
-// adds a smoke screen to the wiki so that no user interaction is possible any more (until the edit process is completed)
-// removal of the smoke screen will happen through the reload after the edit process
-function addSmokeScreen () {
-  //console.log ("adding smoke screen");
-  var div = document.createElement ("div");
-  div.id = "smokescreen";
-  Object.assign (div.style, {"background-color": "LightGrey", "opacity": 0.5, position:"absolute", top:"0px", left:"0px", width: "100vw", height:"100vh"});
-  document.body.appendChild (div);
-}
 
 
 function addPendingDecoration () {
@@ -114,11 +124,9 @@ function addPendingDecoration () {
 // 
 
 
-
 var catWindow = null;
 
-// function which can be added as onclick attribute to a link and then it opens a link in a popup or at a gven place
-// used in the tree menu in the 
+// function which is added in TreeAndMenu.php as onclick attribute to some links. It opens a link in a popup or at a gven place
 window.openAsPopup = function (event) {
   if (event.shiftKey) {
     event.preventDefault();
@@ -213,16 +221,16 @@ function promiseGetCat (title) {
 */
 
 // instrument the checkboxes of the category tree
+// TODO: here this is done dynamically - we might also do this statically as part of the rendered tree code which then can be cached - should be faster
 function instrumentCatCheckBoxes () {
   // console.log ("called instrumentCatCheckBoxes");
   const VERBOSE = false;
-  if ( !RLCONF.wgUserName || document.body.classList.contains("action-edit") ) {  // when not logged on or when in edit view (probably of a page part only) we do not want this 
+  if ( !RLCONF.wgUserName || !RLCONF.wgRevisionId || document.body.classList.contains("action-edit") ) {  // when not logged on or when in edit view (probably of a page part only) or not having a revision id (ie. generated not stored page) we do not want this 
     $("span.fancytree-checkbox").not(".fancytree-is-instrumented").each( (idx, val) =>  {
        val.style.opacity = "0.3";
-       val.addEventListener ("click", (e) => {                                  
-          e.preventDefault(); e.stopPropagation(); 
-         // alert ("Please do not edit categories in the Edit mode of a page. Do so in Read mode. There is a good reason for this design decision.");
-     });
+       val.setAttribute ("title","bs");
+       console.info ("++++++++++++++++++++++++++", val);
+       val.addEventListener ("click", (e) => { e.preventDefault(); e.stopPropagation(); });
     }).addClass("fancytree-is-instrumented"); 
   }
 
@@ -230,6 +238,7 @@ function instrumentCatCheckBoxes () {
     let addCats = new Set();  // categories we should add
     let delCats = new Set();  // categoires we should delete
     $("span.fancytree-checkbox").not(".fancytree-is-instrumented").each( (idx, val) =>  {
+    val.setAttribute ("title","Click checkbox to add or remove category. For multiple categories press shift key.");
       val.addEventListener ("click", (e) => {
         let flag =  e.target.parentNode.classList.contains("fancytree-selected");
         let cat =   e.target.nextSibling.textContent; 
@@ -299,7 +308,8 @@ window.prepareTAMX = function prepareTAMX (id) {
 };
 
 
-function adjustToPersistence (name) {  // get portal area show/hide status from store and adjust it accordingly; called for all portlets
+
+function adjustToPersistence (name) {  // get portal area show/hide status from localstore and adjust it accordingly; called for all portlets
   // console.log ("fancytree.js: adjustToPresistence: called at name=", name);
   name = name + "-label";
   var status = localStorage.getItem (name);
@@ -312,7 +322,7 @@ function adjustToPersistence (name) {  // get portal area show/hide status from 
   else                   { 
     // console.log ("fancytree.js: opening: ", name);
     $("#switcher-"+name).removeClass("img-negative").parent().parent().siblings(":first").show(); }
-} 
+}
 
 const installSidebarScroll = () => { $("#mw-panel").scroll ( () => {localStorage.setItem ("panelScroll", $("#mw-panel").scrollTop() );} ) }; // install the feature that persists the scrolling status of the sidebar to localStorage
 
@@ -324,7 +334,6 @@ const installPortletToggle = () => {
       var newFlag = (flag == "open" ? "close" : "open");       // console.log ("toggleSidebar function setting name=", name, " to ",  newFlag);
       localStorage.setItem (shortName, newFlag);                                                                                                          // make area visibility persistant across reloads
       // console.log ("fancytree.js: setting ", shortName, "to ", flag);
-
 
       $("#"+name).toggleClass ("img-negative");    // toggles the plus / minus icon of the opener   
       // console.log ("Shortened name: ", name );    
@@ -357,7 +366,7 @@ const installPropagate = () => {
   const VERBOSE = false;
   $(".fancytree-icon").each( (idx,ele) => {
     if (ele.parentNode.classList.contains ("fancytree-has-children")) {
-      ele.classList.add ("clickable-icon");  // and show a clickable cursor
+      ele.classList.add ("clickable-icon");  // show a clickable cursor
       $(ele).click( () => { if (VERBOSE) {console.log ("saw a folder click");} $(ele.previousElementSibling).click(); });
     }       
   });  
@@ -375,9 +384,8 @@ const installPropagate = () => {
 };
 
 
-const logoPatcher = () => {     //** patches the logo a bit  */
+const logoPatcher = () => {     //** patches the logo a bit so as to show the name of the specific DanteWIki */
   const logo = document.getElementById ("p-logo");   
-  //logo.innerHTML = ""; 
   var ele = document.createElement ('a');
   ele.innerHTML = mw.config.get('wgSiteName'); 
   ele.className='personal-wiki-name-logo'; 
@@ -405,29 +413,14 @@ const logoPatcher = () => {     //** patches the logo a bit  */
 
 // patch headers or the portlets in the sidebar so that they show an open/close icon next to their label
 const patchPortletHeaders = () => {
-  $("#mw-panel").find(".vector-menu-heading-label").each ( (idx, ele) =>   {  // was: only label
-    // console.log ("TreeAndMenu: patchPortletHeaders: ", ele.parentNode.id);
-    // console.log ("OO:" + ele.textContent);
-      //$(ele).attr(  "data-sidebar-src", ele.textContent);
+  $("#mw-panel").find(".vector-menu-heading-label").each ( (idx, ele) =>   {  
+    // console.log ("TreeAndMenu: patchPortletHeaders: ", ele.parentNode.id);  $(ele).attr(  "data-sidebar-src", ele.textContent);
     $(ele).prepend ("<span class='img-switcher' id='switcher-"+ele.parentNode.id+"'></span>");
-  if (ele.textContent == "Tools") {} else {ele.setAttribute ("title", "shift.click to edit tree contents");}
-
-    }  
-  );      
+    if (ele.textContent == "Tools") {} else {ele.setAttribute ("title", "shift.click to edit tree contents");}
+    } );      
 };
 
 
-// there are some links which need a reference to the current page in their reference. Mediawiki thus generates them dynamically in their TOOLBOX mechanism. We want to use them 
-// in any place but in this case we have to patch them in. This is done in below function. The function is not time crtical and should be called after the page has been rendered as it does not effect the rendering
-const patchMagicLinks = () => {
-  /*
-  $('a[href*="/index.php/Special:MagicWhatLinksHere"]').attr(        "href", "/index.php/Special:WhatLinksHere/" + mw.config.get ('wgPageName'));
-  $('a[href="/index.php/MagicSpecial:RecentChangesLinked"]').attr(  "href", "/index.php/Special:RecentChangesLinked/" + mw.config.get ('wgPageName'));
-  $('a[href="/index.php/MagicSpecial:PermanentLink"]').attr(        "href", "/index.php?title=" + mw.config.get ('wgPageName') + "&oldid=" + mw.config.get ("wgArticleId") );  
-  $('a[href="/index.php/MagicSpecial:PageInformation"]').attr(      "href", "/index.php?title=" + mw.config.get ('wgPageName') + "&action=info" );  
-  $('a[href="/index.php/MagicSpecial:CiteThisPage"]').attr(         "href", "/index.php?title=" + mw.config.get ('wgPageName') + "&page=Manual%3AInterface%2FJavaScript&id="+mw.config.get("wgCurRevisionId")+"&wpFormIdentifier=titleform" );    
-*/
-};
 
 
 window.initializeCatTree = () => {
@@ -453,17 +446,23 @@ var sidebarIsPatched = false;  // used to make patchSidebar idempotent; needed s
 
 
 function patchSidebar () {
-  const VERBOSE = false;    if (VERBOSE) {console.error ("TreeAndMenu: doTreeFinalizer called");}
-  if (sidebarIsPatched) { if (VERBOSE) {console.info ("fancytree.js: sidebar is already patched");}    return;}       // only do it once, may be called several times - function made idempotent by this
+  const VERBOSE = false;     if (VERBOSE) {console.log("DanteTree: patchSidebar called");}
 
-  logoPatcher ();        // not used currently
+  if (document.documentElement.classList.contains("nosidebar")) { if (VERBOSE) {console.info ("fancytree.js: not showing a sidebar in this view");}  return;}
+  if (sidebarIsPatched)                                         { if (VERBOSE) {console.info ("fancytree.js: sidebar is already patched");}          return;}       // only do it once, may be called several times - function made idempotent by this
+
+ $("#mw-panel").show();                                                      // only now show the sidepanel (prevent flicker during build up)
 
   initializeCatTree ();     // must be done before we show the sidebar (involves tree modifications) and before we patchPortletHeaders
-  patchPortletHeaders();    // patch headers or the portlets in the sidebar so that they show an open/close icon next to their label
+//  patchPortletHeaders();    // patch headers or the portlets in the sidebar so that they show an open/close icon next to their label
   prepareTAMX ();           // convert the invisible data structure prepared for fancytree into a true tree
  
   $("#mw-panel").show();                                                      // only now show the sidepanel (prevent flicker during build up)
-  $("#mw-panel").scrollTop( localStorage.getItem ("panelScroll") ) ;          // adjust the sidepanel to the persisted scroll position - MUST be done AFTER making it visible !
+
+  patchPortletHeaders();    // patch headers or the portlets in the sidebar so that they show an open/close icon next to their label
+  logoPatcher ();        
+
+  $("#mw-panel").scrollTop( localStorage.getItem ("panelScroll") ) ;                    // scroll the sidepanel to the persisted scroll position - MUST be done AFTER making it visible !
   $("#mw-panel .mw-portlet").each ( (idx, ele) => { adjustToPersistence (ele.id);});    // ensures that all side-bar portlets adjust their own open/hide state according to what is made persistent with localStorage
 
   sidebarIsPatched = true;
@@ -477,7 +476,6 @@ function patchSidebar () {
     installSidebarScroll();
     installPortletToggle ();
     installPropagate();
-    patchMagicLinks ();
   });
 };
 
@@ -485,9 +483,20 @@ function patchSidebar () {
 
 ////////////////////////////  DO tree finalization as early as possible - but we cannot be sure that the script is loaded and all trees are parsed at the same time so we currently do it twice.
 
-// the load sequence due to mediawiki js asynchronous loading is not completely clear; $(document).ready comes quite late and executing it here directly may be too early: do it twice and ensure the function i idempotent
+// the load sequence due to mediawiki js asynchronous loading is not completely clear; $(document).ready comes quite late and executing it here directly may be too early: do it twice and ensure the function is idempotent
 patchSidebar ();
 $(document).ready( patchSidebar );
+
+
+
+const implementSidebarWidth = (dist) => {
+  Object.assign (document.getElementById ("content").style,          {"margin-left":  dist  } );
+  Object.assign (document.getElementById ("left-navigation").style,  {"margin-left":  dist  } );
+  Object.assign (document.getElementById ("footer").style,           {"margin-left":  dist  } );
+  Object.assign (document.getElementById ("mw-head-base").style,     {"margin-left":  dist  } ); // helps for the placement of the audio player in the head base
+  Object.assign (document.getElementById ("mw-panel").style,           {"height": "100%"  } );   // needed due to a bug somewhere we do not know
+};
+
 
 // implement the resizing of the sidebar
 $( function() {
@@ -495,40 +504,39 @@ $( function() {
   resize: function (ev, ui)  {
     let ele =  document.getElementById ("content");
     let dist =   ( ui.size.width) + "px";
-    Object.assign (document.getElementById ("content").style,          {"margin-left":  dist  } );
-    Object.assign (document.getElementById ("left-navigation").style,  {"margin-left":  dist  } );
-    Object.assign (document.getElementById ("footer").style,           {"margin-left":  dist  } );
-    Object.assign (document.getElementById ("mw-head-base").style,     {"margin-left":  dist  } ); // helps for the placement of the audio player in the head base
 
-    Object.assign (document.getElementById ("mw-panel").style,           {"height": "100%"  } );   // needed due to a bug somewhere we do not know
+    implementSidebarWidth(dist);
     window.localStorage.setItem ("sidebar-width", dist);
   }
   });
+  
 
    // console.error ("fancytree.js: mw-panel made resizable");
   } );
 
 
 
-// implement opening some toolbox links which depend on the specific page on which we are to do so
-$(  function() {
-
-  $("a[href$='/Dummy:WhatLinksHere']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "/Special:WhatLinksHere/"  + mw.config.get('wgPageName') );
-  $("a[href$='/Dummy:PageInfo']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title="  + mw.config.get('wgPageName') +"&action=info" );
-  $("a[href$='/Dummy:RelatedChanges']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "/Special:RecentChangesLinked/"  + mw.config.get('wgPageName') );
-  $("a[href$='/Dummy:PermaLink']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title=" + mw.config.get('wgPageName') +"&oldid=" + mw.config.get ("wgRevisionId"));
-  $("a[href$='/Dummy:CiteThisPage']").attr ("href", mw.config.get("wgServer") + mw.config.get( 'wgScript') + "?title=Special:CiteThisPage&page=" + mw.config.get('wgPageName') +"&id=" + mw.config.get ("wgRevisionId") + "&wpFormIdentifier=titleform");
-
-
-// https://localhost:4443/wiki-dir/index.php?title=Special:CiteThisPage&page=Main_Page&id=108&wpFormIdentifier=titleform
-// https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&oldid=126
-//https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/Navigation&action=info
-
-}
-);
 
 
 
+
+// set the href attribute for links which might be part of the sidebar (depending on how the user has configured it)
+// but which still miss the specific link targets since these are page dependent
+const setLinksForPageTools = () => {
+  let localPath = mw.config.get("wgServer") + mw.config.get( 'wgScript');
+  let pageName  = mw.config.get('wgPageName');
+  let revId    = mw.config.get ("wgRevisionId");
+  $("a[href$='/Dummy:WhatLinksHere']")  .attr ("hrref", localPath + "/Special:WhatLinksHere/"        + pageName );
+  $("a[href$='/Dummy:PageInfo']")       .attr ("href",  localPath + "?title="                        + pageName +"&action=info" );
+  $("a[href$='/Dummy:RelatedChanges']") .attr ("href",  localPath + "/Special:RecentChangesLinked/"  + pageName );
+  $("a[href$='/Dummy:PermaLink']")      .attr ("href",  localPath + "?title=" + mw.config.get('wgPageName') +"&oldid=" + revId);
+  $("a[href$='/Dummy:CiteThisPage']")   .attr ("href",  localPath + "?title=Special:CiteThisPage&page=" + pageName +"&id=" + revId + "&wpFormIdentifier=titleform");
+};
+
+
+
+
+$(setLinksForPageTools);
 
 
 

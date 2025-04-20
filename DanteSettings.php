@@ -29,6 +29,8 @@ $wgLogo="/dante-assets/logo-180x180.png";
 $wgRightsText=  "Copyright";   // This variable must be non-empty in order that the contents of MediaWiki:Copyright is shown 
 
 $wgFooterIcons = [
+/* we do not want a separate copyright notice as that icon interferes too much with the side chicks */
+/*
   "copyright" => [
     "copyright" => [
       "src" => "/dante-assets/copyright-32.png",
@@ -38,7 +40,7 @@ $wgFooterIcons = [
       "style" => "object-fit:contain; transform: scale(0.5);  transform-origin: center; position:relative; left:20px;",  // NOTE: we want this here since in a css stylesheet via load.php we would see a FOUC
       "title" => "Links to the page explaining copyright"
 ], // placeholder for the built in copyright icon
-  ],
+  ], */
   "poweredby" => [
     "mediawiki" => [
 			// Defaults to point at
@@ -47,7 +49,8 @@ $wgFooterIcons = [
 			"src" => "/dante-assets/poweredby_dantewiki_88x31.png",
 			"url" => "https://github.com/clecap/dante-wiki",
 			"alt" => "Powered by DanteWiki",
-      "title" => "Links to this software"
+      "title" => "Links to this software",
+       "style" => "margin-right:50px;"   /* need distance from side chicks  */
   ]
   ],
 ];

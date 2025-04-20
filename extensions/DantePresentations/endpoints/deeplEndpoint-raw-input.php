@@ -13,7 +13,7 @@
  */
 
 
-namespace DeepL;
+namespace DeepL; 
 
 opcache_reset(); // ONLY TODO: during development
 

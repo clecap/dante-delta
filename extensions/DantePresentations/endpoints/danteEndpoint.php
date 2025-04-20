@@ -16,7 +16,7 @@ require_once ("../renderers/hideRenderer.php");
 
 use MediaWiki\MediaWikiServices;
 
-class DanteEndpoint {
+class DanteEndpoint { 
 
   // instance variables which define the interface to the endpoint
   protected $stringContent;

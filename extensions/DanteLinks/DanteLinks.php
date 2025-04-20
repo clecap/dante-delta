@@ -236,8 +236,20 @@ private static function extractAttributes ( &$text, &$attribs ) {
 public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) { 
   global $wgServer, $wgScriptPath;
   $out->addModules('ext.dantelinks');
- 
+
 // $out->addHeadItem ("dantelink", $text);
+
+// this would get added before the category links, still as part of the article
+/*
+  $out->addHTML ("<details>
+  <summary>Details</summary>
+  Something small enough to escape casual notice.
+</details>");
+*/
+
 }
+
+
+
 
 }

@@ -4,6 +4,17 @@ use MediaWiki\MediaWikiServices;
 require_once ("renderers/hideRenderer.php");
 
 
+
+
+
+
+
+
+
+
+
+
+
 // TODO: is this used???
 const STYLE = '
  .mw-parser-output h1 {counter-reset: h2-counter; counter-increment: h1-counter; }
@@ -60,6 +71,7 @@ public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktempl
       $links['views']['my_view'] = ['class' => '', 'href' => 'javascript:window.present("' .$wgScriptPath. '")', 'text' => 'Present'];   // siehe ext.DantePresentations.js
   }
 
+  }
 
 // TODO: THE BELOW STUFF MUST BE IMPROVED AND REFACTORED
 
@@ -84,15 +96,42 @@ public static function onSkinTemplateNavigationUniversal ( SkinTemplate $sktempl
    $slideExternalUrl = $wgServer . $wgScriptPath . '/extensions/DantePresentations/endpoints/swipeEndpoint.php?' . $query;  // works
    $links['views']['slides'] = ['class' => '', 'href' => $slideExternalUrl, 'text' => 'Swipe', 'title' => "Show page as slideshow with slider", 'target' => '_blank'];
 
-  }  // siehe ext.DantePresentations.js
+
+  $activeCollection = "";
+  if ($namespaceIndex == NS_COLLECTION) {
+    if (isset($_COOKIE['active_collection'])) {
+      $activeCollection = $_COOKIE['active_collection'];
+      $activeCollection = urldecode($activeCollection);
+      $links['views']['collection'] = ['class' => '', 'href' => 'javascript:window.CLEAR_ACTIVE_COLLECTION()', 'title' => 'Deactivate the active collection '.$activeCollection, 'text' => "Deactivate"];
+    } else {
+       $links['views']['collection'] = ['class' => '', 'href' => 'javascript:window.SET_ACTIVE_COLLECTION()', 'title' => 'Activate collection '.$activeCollection, 'text' => "Activate"];
+    }
+  }
+
+ //   $links['views'][''] = ['class' => '', 'href' => $slideExternalUrl, 'text' => 'Swipe', 'title' => "Show page as slideshow with slider", 'target' => '_blank'];
+
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
   public static function onParserFirstCallInit( Parser $parser ) {
+
     $parser->setHook ( 'aside', [ self::class,      'renderTag' ]        );        
     $parser->setHook ( 'hide',  [ "HideRenderer",   'renderProminent' ]  );
     $parser->setHook ( 'audio', [ "AudioRenderer",  'renderTag']         );      
     $parser->setHook ( 'video', [ "VideoRenderer",  'renderTag']         );      
 
+  // $parser->setHook ( 'todo',    [ self::class,  'todo']               );      
 
     // we want to prevent h1 ... h6 to be modified by the parser
     $parser->setHook ( 'h1',    [ self::class,  'renderh1']               );      
@@ -115,6 +154,27 @@ public static function renderh5 ( $input, array $args, Parser $parser, PPFrame $
 public static function renderh6 ( $input, array $args, Parser $parser, PPFrame $frame ) {  return "<h6>".$input."</h6>" ;}
 
 
+/*
+public static function todo ( $input, array $args, Parser $parser, PPFrame $frame ) {
+
+
+  $parsed = $parser->recursiveTagParse( $input, $frame );
+  // Since this can span different parses, we need to take account of the fact recursiveTagParse only half parses the text. or strip tags
+  // (UNIQ's) will be exposed. (Alternative would be to just call $parser->replaceLinkHolders() and $parser->mStripState->unstripBoth() right here right now.
+  $serialized = serialize( $parser->serializeHalfParsedText( $parsed ) );
+  $parser->getOutput()->setPageProperty( 'tdoProperty', $serialized );
+
+  $currentValue ="";
+  $prop = unserialize( $parser->getOutput()->getPageProperty( 'tdoProperty' ) );
+  if ( !$parser->isValidHalfParsedText( $prop ) ) { $currentValue = '<span class="error">Error retrieving prop</span>';} 
+  else { $currentValue = $parser->unserializeHalfParsedText( $prop );}
+
+  return "";
+
+;}
+
+
+*/
 
 
 
@@ -179,12 +239,20 @@ public static function onEditPageshowEditForminitial ( EditPage &$editPage, Outp
 public static function onOutputPageAfterGetHeadLinksArray ( $tags, OutputPage $out ) { 
   global $wgServer, $wgScriptPath;
   $out->addHeadItem("tocstyle", "<style data-src='DantePresentations-style.php'>
-#toc {display:none;}
+#toc {display:none;} 
 aside {
     color: red;
     position:relative; right:-50px; top:0px;
     float:right;
 }
+.info, .warning, .error, .INFO, .WARNING, .ERROR {border-style:solid; border-width:1px; border-radius:5px; padding:3px 10px 3px 10px; user-select: none;}
+.info    {background-color:Lightgreen;   border-color: green; }
+.warning {background-color: yellow; border-color: Darkorange;}
+.error   {background-color:red;     border-color: black;}
+.INFO    {background-color:white;   border-color: green;   color:green;}
+.WARNING {background-color:white;   border-color:orange;    color:orange;}
+.ERROR   {background-color:white;   boder-color:red;        color: red;}
+
 </style>");
 
 }
@@ -193,10 +261,105 @@ aside {
 // at this moment in the build process we have easy access to the current page name and we add the current page name into the crumbs for the next occasion
 public static function onBeforePageDisplay( OutputPage $output, Skin $skin ) {
   $output->addModules( [ "ext.DantePresentations" ] );  // injects css and js
-  
-//  $output->setIndicators (["a" => "<span class='audioPresent'>Audio</span>"]);
 
+  // for testing the look and feel
+  // $output->setIndicators ( [ "<span class='info'>Info</span>", "<span class='warning'>Warning</span>",  "<span class='error'>Error</span>"] );
+
+  $title              = $output->getTitle();
+  $text               = $title->getFullText();
+  $namespaceIndex     = $title->getNamespace();                 // get number of namespace
+
+  // collect all indicators for this page and set them
+  $indicators = [];
+  if ($namespaceIndex == NS_COLLECTION) {
+    if (isset($_COOKIE['active_collection'])) {
+      $activeCollection = $_COOKIE['active_collection'];
+      $activeCollection = urldecode($activeCollection);
+      $activeCollection = str_replace('_', ' ', $activeCollection);
+     if ($text == $activeCollection) { array_push ($indicators,  "<span class='info'>This <b>$activeCollection</b> active</span>" ); }
+     else                            { array_push ($indicators,  "<span class='warning'>Different <b>$activeCollection</b> active</span>" );}
+    }
+  }
+
+// for testing // TODO: and as marker for stuff till to do
+/*
+  array_push ($indicators,  "<span class='info'>Info</span>");
+  array_push ($indicators,  "<span class='warning'>Warning</span>");
+  array_push ($indicators,  "<span class='error'>Error</span>");
+
+  array_push ($indicators, "<span class='INFO'>Audio</span>");  // TODO: might also want to add click handler for this
+  array_push ($indicators, "<span class='info'>Video</span>");  // TODO: might also want to add click handler for this
+  array_push ($indicators, "<span class='WARNING'>Todos</span>");  // TODO: might also want to add click handler for this
+  array_push ($indicators, "<span class='ERROR'>Feedback</span>");  // TODO: might also want to add click handler for this
+*/
+
+  $output->setIndicators ($indicators);
+
+/*
+ $context = RequestContext::getMain()->getRequest();
+    $action = $context->getVal('action');
+    
+    // Check if the action is 'view'
+    if ($action === 'view' || empty($action)) {
+        // Action is 'view' (or it's the default action when no action is specified)
+        $out->addHTML('<p>You are viewing the page!</p>');
+    } else {
+        // Not a 'view' action
+        $out->addHTML('<p>This is not a view page.</p>');
+    }
+*/
+// TODO: do we want this in an edit action as well? maybe yes, since we might be interested in a preview on the status of the existing page !!!
+// TODo whatabout in move ?? in history ??
+   
+
+  if ( $namespaceIndex >= 0 ) {  // excludes Media und Special
+
+    $currentText = $output->getHTML ();
+    if (strpos($text, '<div id="toc"') == false) {  // we currently would not get a TOC by the system itself but we do not want the order of the side Chicks to change so we add an empty one ourselves
+      $output->addHTML ('
+        <div id="toc" class="toc sideChick" role="navigation" aria-labelledby="mw-toc-heading" title="Table of contents of this page" style="width: 0px; height: 0px; display: none;">
+          <div id="toc-title" class="sideTitle" lang="en" dir="ltr"><h2>Contents</h2></div><ul><li><b>No table of contents provided</b></li></ul></div>');
+    }
+    else {   // we have a native, wiki-generated toc: add  a marker class to document element to get the proper markup as in toc.css
+      $out->addHeadItem('toc-adjust', '<script data-src="DantePresentations.php">document.documentElement.classList.add ("has_tocs");</script>');
+    }
+
+  // below we have class toc in element 'bck' in order to benefit from the vector skin styling
+
+      $output->addHTML ( self::generateSideChick ("cat", "Categories") );
+      $output->addHTML ( self::generateSideChick ("sub", "Subpages") );
+      $output->addHTML ( self::generateSideChick ("col", "Collections") );
+      $output->addHTML ( self::generateSideChick ("act", "Active Collection") );
+      $output->addHTML ( self::generateSideChick ("bck", "Backlinks") );
+      $output->addHTML ( self::generateSideChick ("fwd", "Forward Links") );
+
+      $output->addHTML ( self::generateSideChick ("sib", "Siblings") );
+      $output->addHTML ( self::generateSideChick ("tdo", "Todo") );
+
+
+  }  // if namespace
+
+} // end onBeforePageDisplay
+
+
+// TODO: move away from class toc
+private static function generateSideChick (string $name, string $longName) {
+  $label=strtoupper ($name);
+  return "
+<div id='$name' class='sideChick' style='display: none;' title='$longName'>
+  <div id='$name-title' class='sideTitle' lang='en' dir='ltr' title='$longName (toggle)'>
+    <input type='checkbox' title='$longName (pin)' id='$name-pin' class='pinUi'></inpu>
+    <h2>$longName</h2>
+  </div>
+  <ul id='$name-inject'></ul>
+  <span title='$longName (toggle)' id='$name-handle' class='sideHandle'>$label</span>
+</div>";
 }
+
+
+
+
+
 
 
 // Get displaytitle page property text.
@@ -222,6 +385,7 @@ public static function onBeforePageDisplay( OutputPage $output, Skin $skin ) {
   }
   
 
+// TODO: USED ??? HOW ???
 // defines __SLIDES__ as an additional Mediawiki magic word
 // NOTE: reference is https://www.mediawiki.org/wiki/Manual:Magic_words
 public static function onGetDoubleUnderscoreIDs( &$ids ) { 
