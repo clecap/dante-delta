@@ -30,7 +30,7 @@ class RevealEndpoint {
 
 
 
-public sendResponseHeaders () {
+public static function sendResponseHeaders () {
  // add some headers to the response to support debugging and further handling
     // header ("X-Latex-Hash:".$hash);  
     // header ("X-Parsifal-Width-Latex-Cm-Was:".$widthLatexCm);
@@ -39,15 +39,15 @@ public sendResponseHeaders () {
     // header ("X-Parsifal-Scale-Used:".$gamma);  
     
     if ($retval == 0) { header ("X-Parsifal-Error:None"); }
-    else              { header ("X-Parsifal-Error:Soft"); 
+    else              { header ("X-Parsifal-Error:Soft"); }
   return;
 }
 
-public sendToClient () {}
+public static function sendToClient () {}
 
 
 
-public static function texPreviewEndpoint () {
+public function texPreviewEndpoint () {
   $VERBOSE    = false; 
   $CACHE_PATH = CACHE_PATH;
   
@@ -72,7 +72,7 @@ public static function texPreviewEndpoint () {
     
       
                         header ("X-Parsifal-ErrorDetails:".$errorDetails);  // only: if we want to send more detailed errors to client alread in case of soft errors   
-                      }  
+                      
 
     // header("Content-type:image/png");  header("Content-Length: " . filesize($name));  // set MANDATORY http reply headers
     fpassthru($fp); 
@@ -82,6 +82,8 @@ public static function texPreviewEndpoint () {
   }
 
   if ($VERBOSE) {self::debugLog ("texPreviewEndpoint: returns from call for " . $tag . " widthLatexCm: ". $widthLatexCm . "  availablePixelWidth: ". $availablePixelWidth . " \n");}
+
+}
 
 }
 

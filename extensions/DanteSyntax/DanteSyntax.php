@@ -49,7 +49,7 @@ private static function backtickParse ( &$parser, &$text, &$stripState ) {
   $text = str_replace($fixsuffix, Parser::MARKER_SUFFIX, $text);
 
   return true;
-};
+}
 
 
 }
