@@ -8,6 +8,12 @@ require_once ("DanteSettings-used.php");
 
 require ("mediawiki-PRIVATE.php");
 
+// Check the password "remember me" box by default (sitewide)
+$wgHooks['AuthChangeFormFields'][] = function ($requests, $fieldInfo, &$formDescriptor, $action) {
+    $formDescriptor['rememberMe']['type'] = 'check';
+    $formDescriptor['rememberMe']['default'] = true;
+    return true;
+};
 
 
 date_default_timezone_set( $wgLocaltimezone );
