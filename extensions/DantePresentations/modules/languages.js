@@ -15,7 +15,7 @@ let head = document.getElementById ("mw-head-base");
 
   let removeNS = (input) => {let i = input.indexOf(':'); if (i === -1) {return input;} return input.substring( i + 1); }
 
-  if (!window.BABEL_LANGUAGES) { console.error ("could not find babel languages"); }
+  if (!window.BABEL_LANGUAGES) { console.error ("DantePresentations: language.js: could not find babel languages"); return;}
 
   // console.info (window.BABEL_LANGUAGES);
 

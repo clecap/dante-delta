@@ -505,8 +505,6 @@ function editPreviewPatch () {  // the clutch to PHP; we may adapat it to use Co
 
 window.DPRES = DPRES;
 
-console.error ("PREVIEW LOADED");
-
 window.editPreviewPatch = DPRES.editPreviewPatch;
 
 
