@@ -422,10 +422,6 @@ public static function onParserAfterParse( Parser $parser, &$text, StripState $s
       , "hidehead");
   }
 
-
-
- 
-
 }
 
 
@@ -433,15 +429,13 @@ public static function onParserAfterParse( Parser $parser, &$text, StripState $s
 
 
 
+public static function onRegistration () { 
+  global $wgFileExtensions;
 
+  // allow uploads of relevant file txpes
+  if ( !in_array( 'txt', $wgFileExtensions ) ) {$wgFileExtensions[] = 'txt';}
 
-
-
-
-
-
-
-
+ }
 
 }
 

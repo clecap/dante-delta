@@ -26,6 +26,7 @@
     "ArticleViewHeader":                  "Translate::onArticleViewHeader",
     "GetPreferences":                     "DantePresentationsPreferences::onGetPreferences"
   },
+  "callback":                            "DantePresentations::onRegistration",
   "ExtensionFunctions": ["Translate::onExtensionLoadSetup"],
   "ResourceModules": {
     "ext.DantePresentations": {

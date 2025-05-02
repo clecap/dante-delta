@@ -60,7 +60,7 @@ const PROCESS = (() => {  // OPEN local scope for local variables
   let setFct = (f) => { fct = f; };  // setter for fct
 
   let process = ( eventObject ) => { // the raw service function as it is called from the outside
-    console.log ("process called");
+    console.log ("process called at eventObject=", eventObject);
     if (VERBOSE) {
       if      ( eventObject == "INIT"   )           { console.info  ("preview.js: process called at initialization ");}
       else if ( eventObject == "RESIZE" )           { console.info  ("preview.js: process called after resize" );}
