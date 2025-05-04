@@ -1,0 +1,50 @@
+/* needs to be included early */
+
+
+
+aside {
+    color: red;
+    position:relative; right:0px; top:0px;
+    float:right;
+}
+
+/* for indicators which we in DantePresentations, such as in "<span class='info'>This <b>$activeCollection</b> active</span>" ); } */
+
+.info, .warning, .error, .INFO, .WARNING, .ERROR {border-style:solid; border-width:1px; border-radius:5px; padding:3px 10px 3px 10px; user-select: none;}
+.info    {background-color:Lightgreen;   border-color: green; }
+.warning {background-color: yellow; border-color: Darkorange;}
+.error   {background-color:red;     border-color: black;}
+.INFO    {background-color:white;   border-color: green;   color:green;}
+.WARNING {background-color:white;   border-color:orange;    color:orange;}
+.ERROR   {background-color:white;   boder-color:red;        color: red;}
+
+
+
+
+
+
+  html.mag-hide-head .mw-parser-output h1::before, 
+  html.mag-hide-head .mw-parser-output h2::before, 
+  html.mag-hide-head .mw-parser-output h3::before, 
+  html.mag-hide-head .mw-parser-output h4::before, 
+  html.mag-hide-head .mw-parser-output h5::before {content: "" !important; } 
+
+ html.mag-hide-head h2, html.mag-hide-head h3, html.mag-hide-head h4, html.mag-hide-head h5, html.mag-hide-head h6 {display:none;}
+  html.mag-hide-head .mw-parser-output h1 .mw-headline::before {content: "" !important; }
+  html.mag-hide-head .mw-parser-output h2 .mw-headline::before {content: "" !important; }
+  html.mag-hide-head .mw-parser-output h3 .mw-headline::before {content: "" !important; }
+  html.mag-hide-head .mw-parser-output h4 .mw-headline::before {content: "" !important; }
+  html.mag-hide-head .mw-parser-output h5 .mw-headline::before {content: "" !important; } </style>
+
+
+.mw-parser-output h1 {counter-reset: h2-counter; counter-increment: h1-counter; }
+  .mw-parser-output h1::before {content: counter(h1-counter) ". "; }
+  .mw-parser-output h2 {counter-reset: h3-counter; counter-increment: h2-counter; }
+  .mw-parser-output h2::before {content: counter(h1-counter) "." counter(h2-counter) ". "; }
+  .mw-parser-output h3 { counter-reset: h4-counter; counter-increment: h3-counter; }
+  .mw-parser-output h3::before { content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) ". ";  }
+  .mw-parser-output h4 {  counter-reset: h5-counter;   counter-increment: h4-counter; }
+  .mw-parser-output h4::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) ". "; }
+  .mw-parser-output h5 {counter-increment: h5-counter;}
+  .mw-parser-output h5::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) "." counter(h5-counter) ". "; }
+  #mw-toc-heading::before {content: "";}

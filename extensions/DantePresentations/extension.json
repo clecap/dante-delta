@@ -10,8 +10,9 @@
     "DantePresentations":              "DantePresentations.php", 
     "Translate":                       "Translate.php", 
     "DantePresentationsPreferences":   "DantePresentationsPreferences.php",
-    "AudioRenderer":                   "php/AudioRenderer.php",
-    "VideoRenderer":                   "php/VideoRenderer.php"
+    "AudioRenderer":                   "renderers/AudioRenderer.php",
+    "VideoRenderer":                   "renderers/VideoRenderer.php",
+    "HideRenderer":                    "renderers/HideRenderer.php"
   },
   "Hooks": {
     "BeforePageDisplay":                  "DantePresentations::onBeforePageDisplay",
@@ -19,12 +20,11 @@
     "GetDoubleUnderscoreIDs":             "DantePresentations::onGetDoubleUnderscoreIDs",
     "ParserFirstCallInit":                "DantePresentations::onParserFirstCallInit",
     "EditPage::showEditForm:initial":     "DantePresentations::onEditPageshowEditForminitial",
-    "OutputPageAfterGetHeadLinksArray":   "DantePresentations::onOutputPageAfterGetHeadLinksArray",
-    "SkinEditSectionLinks":               "DantePresentations::onSkinEditSectionLinks",
     "ParserAfterParse":                   "DantePresentations::onParserAfterParse",
     "SkinAddFooterLinks":                 "DantePresentations::onSkinAddFooterLinks",
     "ArticleViewHeader":                  "Translate::onArticleViewHeader",
-    "GetPreferences":                     "DantePresentationsPreferences::onGetPreferences"
+    "GetPreferences":                     "DantePresentationsPreferences::onGetPreferences",
+    "OutputPageBeforeHTML":               "DantePresentations::onOutputPageBeforeHTML"
   },
   "callback":                            "DantePresentations::onRegistration",
   "ExtensionFunctions": ["Translate::onExtensionLoadSetup"],
@@ -33,7 +33,11 @@
       "localBasePath":       "modules",
       "remoteExtPath":       "DantePresentations/modules",
       "packageFiles":        ["ext.DantePresentations.js", "audio.js", "languages.js"],
-      "styles":              ["dantePresentations.css", "toc.css"]
+      "styles":              ["dantePresentations.css"]
+    },
+    "ext.DantePresentations.styles": {
+      "styles": ["special.css", "tags.css", "toc.css"],
+      "position": "top"
     }
   },
   "ResourceFileModulePaths": {"localBasePath": "modules", "remoteExtPath": "DantePresentations/modules"},

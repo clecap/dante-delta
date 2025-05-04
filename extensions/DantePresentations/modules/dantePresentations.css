@@ -23,3 +23,9 @@ body.inputChanged #inline-edit-preview-container {border: 5px solid gold;}
 
 
 
+
+aside {
+    color: red;
+    position:relative; right:0px; top:0px;
+    float:right;
+}

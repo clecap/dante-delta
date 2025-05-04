@@ -342,6 +342,7 @@ public function decorate ( $text ) {
   $ret .= "<html lang='en' dir='ltr' classes='" .implode (' ', $this->getHtmlClasses()) . "'>";
   $ret .= "<head classes='"  .implode (' ', $this->getHeadClasses()) . "'>";
   $ret .= "<meta charset='UTF-8'/>";
+  $ret .= '<meta name="generator" content="DanteWiki">';
   $ret .= $this->getHeadText();
   foreach ( $this->getCssPaths()      as &$value)  { $ret .= ("<link rel='stylesheet' href='" . $value . "'>");  }
   foreach ( $this->getAsyncJsPaths()  as &$value)  { $ret .= ("<script async src='" . $value . "'></script>") ;        }

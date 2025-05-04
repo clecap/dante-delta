@@ -10,7 +10,15 @@
   "Hooks": {
     "BeforePageDisplay":                 "BreadCrumbsHooks::onBeforePageDisplay",
     "SiteNoticeAfter":                   "BreadCrumbsHooks::onSiteNoticeAfter",
-    "OutputPageAfterGetHeadLinksArray":  "BreadCrumbsHooks::onOutputPageAfterGetHeadLinksArray"
+    "OutputPageAfterGetHeadLinksArray":  "BreadCrumbsHooks::onOutputPageAfterGetHeadLinksArray",
+    "OutputPageBeforeHTML":              "BreadCrumbsHooks::onOutputPageBeforeHTML"
   },
+  "ResourceModules": {
+    "ext.DanteBread.styles": {
+      "styles": ["breadCrumbs.css"],
+      "position": "top"
+    }
+  },
+  "ResourceFileModulePaths": {"localBasePath": "", "remoteExtPath": "DanteBread/"},
   "manifest_version": 2
 }

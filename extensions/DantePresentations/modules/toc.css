@@ -2,6 +2,11 @@
 /** TABLE OF CONTENTS **/
 /***********************/
 
+/* needs to be position:top for early inclusion */
+
+#toc {display:none;} 
+
+
 /* the main elements of the side chicks */
 #toc, .sideChick {float:right; position:fixed; right:-1px;
    overflow:hidden; 

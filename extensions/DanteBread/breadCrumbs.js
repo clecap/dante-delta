@@ -1,3 +1,5 @@
+ console.error ("--------------------DanteBread will be  loaded ");
+
 (() => {  // scope protection
 
 // Declaration
@@ -66,19 +68,4 @@ class BreadCrumbs {
     
 })(); // close scope protection
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+console.error ("--------------------DanteBread has loaded ");
