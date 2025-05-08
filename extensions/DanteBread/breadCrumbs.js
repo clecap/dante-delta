@@ -2,7 +2,7 @@
 
 (() => {  // scope protection
  
-// Declaration
+// Declaration 
 class BreadCrumbs {
   static globalMaxCrumbs =  8;
   static maxLength       = 20;  
