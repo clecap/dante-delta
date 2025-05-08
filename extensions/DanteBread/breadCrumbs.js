@@ -1,7 +1,7 @@
  console.error ("--------------------DanteBread will be  loaded ");
 
 (() => {  // scope protection
-
+ 
 // Declaration
 class BreadCrumbs {
   static globalMaxCrumbs =  8;
