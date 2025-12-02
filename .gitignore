@@ -42,8 +42,13 @@ ERRORLOG
 
 .git/
 
+# we ignore everything, which is essentially all the mediawiki stuff
+# and we readd what we need later
 *
 
+
+!.github/
+!.github/**
 
 !extensions/
 
