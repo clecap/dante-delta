@@ -4,8 +4,11 @@
 
 // NOTE: Debugging this: Apache log has error messages if we get no result by direct call to endpoint
 
+error_reporting(E_ALL & ~E_DEPRECATED ); 
+ini_set('display_errors', 'On'); // uncomment to obtain reasonable errors from the endpoint instead of only 500 er status from webserver
 
-error_reporting(E_ALL); ini_set('display_errors', 'On'); // uncomment to obtain reasonable errors from the endpoint instead of only 500 er status from webserver
+
+
 
 require_once ("danteEndpoint.php");
 
