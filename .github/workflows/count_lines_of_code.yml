@@ -1,0 +1,55 @@
+name: Count Lines of Code
+
+on:
+  push:
+  schedule:
+    - cron: '0 0 * * *'  # Runs every day at midnight
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    permissions:
+      contents: write  # for Git to git push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '20'
+
+      - name: Install cloc
+        run: sudo apt-get install cloc
+
+      - name: Run cloc
+        run: cloc .
+
+      - name: Save results
+        id: save-results
+        run: |
+          mkdir -p .github/results
+          cloc .       > .github/results/cloc_results.txt
+          cloc -json . > .github/results/cloc_results.json
+          cloc -md .   > .github/results/cloc_results.md
+
+      - name: Commit cloc results
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/results/cloc_results.txt
+          git add .github/results/cloc_results.json
+          git add .github/results/cloc_results.md
+          git commit -m 'Update cloc results'
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
