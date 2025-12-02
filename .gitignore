@@ -60,7 +60,13 @@ ERRORLOG
 !DanteSettings.php
 !DanteSettings-production.php
 !DanteSettings-development.php
-!DanteSettings-used.php
+
+# We do not incude DanteSettings-used.php, since this is generated and modified by the application
+# and the changes should not be pushed to remote
+#!DanteSettings-used.php
+#
+
+
 !README-dante-delta.md
 !.gitignore
 !.gitconfig
