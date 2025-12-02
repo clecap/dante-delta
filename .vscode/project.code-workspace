@@ -2,14 +2,12 @@
   "name": "Dante",
 	"folders": [
 		{"path": "../"},
-		{"path": "../extensions/Parsifal"},
-		{"path": "./"}
+		{"path": "../extensions/Parsifal"}
 	],
 	"settings": {
 		"git.repositoryScanMaxDepth": 1,
 		"git.scanRepositories": [
-			"../extensions/Parsifal", 
-      "../extensions/DanteTree"
+			"../extensions/Parsifal"
 		],
 		"search.useIgnoreFiles": true,
 	}
