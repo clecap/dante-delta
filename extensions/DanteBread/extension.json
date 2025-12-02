@@ -10,8 +10,7 @@
   "Hooks": {
     "BeforePageDisplay":                 "BreadCrumbsHooks::onBeforePageDisplay",
     "SiteNoticeAfter":                   "BreadCrumbsHooks::onSiteNoticeAfter",
-    "OutputPageAfterGetHeadLinksArray":  "BreadCrumbsHooks::onOutputPageAfterGetHeadLinksArray",
-    "OutputPageBeforeHTML":              "BreadCrumbsHooks::onOutputPageBeforeHTML"
+    "OutputPageAfterGetHeadLinksArray":  "BreadCrumbsHooks::onOutputPageAfterGetHeadLinksArray"
   },
   "ResourceModules": {
     "ext.DanteBread.styles": {
