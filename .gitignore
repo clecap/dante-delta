@@ -65,7 +65,7 @@ ERRORLOG
 !.gitignore
 !.gitconfig
 
-### Directories which we want to include
+### Directories which we want to include 
 !extensions/DanteSynch
 !extensions/DanteSynch/*
 
