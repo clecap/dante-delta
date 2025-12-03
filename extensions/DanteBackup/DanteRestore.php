@@ -54,6 +54,7 @@ public function execute( $par ) {
 }
 
 
+
 private function showForm() {
   $action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );
   $user   = $this->getUser();
@@ -190,6 +191,7 @@ public function doImport ($fileName, $info) {
 }
 
 
+// funciton importing from AWS
 private function doImportAWS ($fileName) {
   global $IP;
   $enc = DanteCommon::checkSuffix ( $fileName, ".aes");

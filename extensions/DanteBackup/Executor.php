@@ -11,6 +11,7 @@ class Executor {
     $prep->clear();
   }
 
+
   // execute a return command of the AWS CLI in the foreground; 
   // capture the output, the return code and possibly the error code
   // returns the return code; 
@@ -23,6 +24,8 @@ class Executor {
     $closeParam = proc_close($proc);
     return $closeParam;
   }
+
+
 
 // $cmd:       command to be executed
 // $output:    captures stdout
@@ -100,28 +103,69 @@ public static function liveExecuteX ( $arr, $env = array() ) {
 
   $didHaveError = false;  // flag to detect if we ever had an error
   $errorCount   = 0;      // counts the number of command which were in error
-  $count = 1;             // counts the commands
+  $count = 0;             // counts the commands
+
+  $num = count ( $arr );
 
   foreach ( $arr as $ele ) {
-    echo "---- COMMAND: ". sprintf ("%3d", $count++) . " $ele"; echo "\n"; flush(); ob_flush();
+    $count++;
+    echo "---- COMMAND: ". sprintf ("%3d", $count) . " of $num is: $ele"; echo "\n"; flush(); ob_flush();
     $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes, null, $env); 
 
-    while (!feof ($pipes[1])) {  // first drain stdout
-      $info = fgets ($pipes[1]);
-      $info = trim ($info);
-      if (strlen ($info) > 0) {echo "[".date("H:i:s")."] ".$info."\n";flush();ob_flush();}
-    } // end while
-    $first = true;
-    while (!feof ($pipes[2])) {  // then drain stderr
-      $info = fgets ($pipes[2]);
-      $info = trim ($info);
-      if (strlen ($info) > 0) {      
-        if ($first) { echo "\n** Information sent to stderr: \n"; flush();ob_flush(); $first = false;}
-        echo "** [".date("H:i:s")."] ".$info."\n"; flush();ob_flush(); 
+    // Set STDOUT and STDERR to non-blocking
+    stream_set_blocking($pipes[1], false);
+    stream_set_blocking($pipes[2], false);
+
+    while (true) {
+      // construct $read as array of sockets which we potentially still can read
+      $read = [];
+      if (!feof($pipes[1])) {$read[] = $pipes[1];}
+      if (!feof($pipes[2])) {$read[] = $pipes[2];}
+
+      if ($read) {
+        $write = null;
+        $except = null;
+        $numChanged = stream_select($read, $write, $except, 0, 200000);         // Wait up to 0.2s for data
+
+        if ($numChanged === false) {
+          echo "\n\n++++++++++++++++ STREAM SELECTION ERROR ++++++++++++\n\n";
+          break;
+        }
+
+        if ($numChanged > 0) {
+          echo "Stream selected selected $numChanged sockets \n";
+          foreach ($read as $r) {
+            $chunk = fread($r, 8192);
+            if ($chunk === false || $chunk === '') {continue;}
+            if ($r === $pipes[1])     {echo "CHUNK FROM STDOUT: ".$chunk;} 
+            elseif ($r === $pipes[2]) {echo "CHUNK FROM STDERR: ".$chunk;}
+          }
+        }
       }
-      else { /* no error information found */ }
-    }  // end while draining stderr
+
+      // Check timeout
+//      if ($timeout !== null && (time() - $startTime) > $timeout) {
+//        $timedOut = true;
+//        // Try to terminate the process
+//        proc_terminate($process);
+//      }
+
+      // If process has exited and pipes are at EOF, we are done
+      echo "** Command $count ";
+      $status = proc_get_status($proc);
+      // echo print_r ($status, true);
+      if (!$status['running']) {
+        if (feof($pipes[1]) && feof($pipes[2])) { echo "has stopped and both stdout and stderr have been emptied\n"; break;}
+        else {echo "has stopped but still draining stdout or stderr\n";}
+      }
+        else {echo "is still running\n";}
+
+    // Small sleep to avoid busy-wait
+    usleep(50000); // 50ms
+  }
+
     $closeParam = proc_close($proc);
+
     if ($closeParam != 0) {
       $didHaveError = true; $errorCount++;
       echo "\n\n";
@@ -134,13 +178,13 @@ public static function liveExecuteX ( $arr, $env = array() ) {
       echo "*** \n\n";
     }
     else {
-      echo "--- EXIT CODE of COMMAND at [".date("H:i:s")."] is: ".$closeParam . "                 " . ($closeParam == 0 ? 'OKAY': '****** ERROR ******' ); echo "\n\n\n"; flush(); ob_flush();
+      echo "--- EXIT CODE of COMMAND $count of $num at [".date("H:i:s")."] is: ".$closeParam . "                 " . ($closeParam == 0 ? 'OKAY': '****** ERROR ******' ); echo "\n\n\n"; flush(); ob_flush();
     }
   } // end for loop over all commands
 
   echo "\n\n";
-  if ($didHaveError) { echo "************ $errorCount COMMANDs were in ERROR ***"; flush(); ob_flush(); } 
-  else {}
+  if ($didHaveError) { echo "************ $errorCount COMMANDs were in ERROR ***";  } 
+  else               { echo "***** All commands have completed successfully";      }
 
   flush(); ob_flush();
   exit();

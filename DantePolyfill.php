@@ -173,4 +173,46 @@ static public function singleList ( $name ) {
 
 
 
+
+
+/**
+ *
+ *  $cmd:       command to be executed
+ *  $output:    variable which captures stdout
+ *  $error:     variable which captures stderr
+ *  $duration:  variable which captures execution time in microseconds
+ *  $verbose:   if true, write an invocation and completion log to debug
+ *  $duration:  optional variable which will be set to the duration of the call, if provided by the caller
+ *  return:     return value of the command
+ *  CAVE 1: We MUST store the value of proc_open somewhere and we must release ressource using proc_close, otherwise things may go wrong
+ *  CAVE 2: Similar with the pipes, which MUST be prepared, read and properly closed.
+ */
+
+public static function executor ( string $cmd, &$output, &$error, ?callable $logger, &$duration = null, $timeout = 0, $env = [] ) {
+  if ($logger) {$cfn = debug_backtrace()[1]['function']; $logger ( "$cfn calling shell executor\n"); }  // get name of the calling function
+
+  $startTime  = microtime(true); 
+
+  if ($timeout > 0) {$cmd = '/bin/bash -c "ulimit -t ' . $timeout . ';' . $cmd . '"';}  // add a timeout
+  $proc       = proc_open ( $cmd, [ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes, null, $env );
+
+  $output     = stream_get_contents($pipes[1]); fclose($pipes[1]);
+  $error      = stream_get_contents($pipes[2]); fclose($pipes[2]);                  // MUST close pipes before doing a proc_close
+  $closeParam = proc_close($proc);                                                  // wait for the process to finish and obtain exit value
+
+  $duration   = microtime (true) - $startTime;
+  
+  // if ($closeParam != 0) { $logger ("Executor of $cmd closed with a non-zero return from proc_close: $closeParam\n" );}  ////// TODO: rather w warning ?!?
+  if ($logger)         { $logger ( "$cfn executor call completed.\n    Command: $cmd\n    DURATION: $duration\n    OUTPUT:--------\n$output\n--------\n    ERROR: $error\n" ); }
+  return $closeParam;
+}
+
+
+
+
+
+
+
+
+
 }

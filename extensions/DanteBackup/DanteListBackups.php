@@ -16,79 +16,93 @@ public function execute( $par ) {
   $this->setHeaders();
 
   // get access data from preferences
-  $accessKey = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-accesskey' );
+  $accessKey       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-accesskey' );
   $secretAccessKey = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-secretaccesskey' );
-  $defaultSpec = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
-
-  putenv ("AWS_ACCESS_KEY_ID=$accessKey"); putenv ("AWS_SECRET_ACCESS_KEY=$secretAccessKey"); 
+  $defaultSpec     = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
 
   // s3 ls returns the time in UTC timezone - since the operating system has no concept of a local time zone
-  $cmd = "/opt/myenv/bin/aws s3 ls $defaultSpec --human-readable ";  $stdout = "";  $stderr = "";
-  $retval = DanteCommon::fullExec($cmd, $stdout, $stderr);  
+  $cmd = "/opt/myenv/bin/aws s3 ls $defaultSpec --human-readable ";      // $cmd="printenv";
+  $stdout = "";  $stderr = "";
+  $duration=null;
+  $retval = DanteUtil::executor ( $cmd, $stdout, $stderr, null, $duration, null, [ "AWS_ACCESS_KEY_ID" => $accessKey, "AWS_SECRET_ACCESS_KEY" => $secretAccessKey, "AWS_DEFAULT_REGION" => 'eu-central-1'] ); 
 
-  $prep = new AWSEnvironmentPreparatorUser ( $this->getUser() );
-  Executor::executeAWS_FG_RET ( $prep, $cmd, $output, $error );
+   // die (print_r ($stdout, true));
 
-  if ($retval != 0) { $this->getOutput()->addHTML ( "ERROR " . print_r ($stderr, true) );} 
-  else              { $this->getOutput()->addHTML ( DanteListBackups::formatLSOutput ( $stdout, $opsDB, $opsPage ) ); }
-
+  $options = self::parseOutput ( $stdout );
 
   $formDescriptor2 = [
-    'field-type' => ['section' => 'section1', 'type' => 'hidden', 'name' => 'hidden', 'default' => 'AWS', ],
-    'radio'      => ['section' => 'listform-db',  'type' => 'radio', 'label' => '',  'options' => $opsDB ] ,
-   'radio'      => ['section' => 'listform-page',  'type' => 'radio', 'label' => '', 'options' => $opsPage ] ];
+    'field-type' =>  ['section' => 'section1',       'type' => 'hidden',  'name' => 'hidden', 'default' => 'AWS', ],
+        'radio'      =>  ['section' => 'listform-db',    'type' => 'radio',   'label' => 'Database',  'options' => $options  ] ,
+    ];
+
+
   $htmlForm2 = new HTMLForm( $formDescriptor2, $this->getContext(), 'listform' );
   $htmlForm2->setFormIdentifier( 'AWS' );
   $htmlForm2->setSubmitText( 'Restore' );
   $htmlForm2->setSubmitCallback( [ $this, 'processInput' ] );  
   $htmlForm2->show();
 
- // if this function execution was a call (ie we have a hidden value), then go to execution and return
+  // if this function execution was a call (ie we have a hidden value), then go to execution and return
   // if ( strcmp ($type, "AWS") == 0) {
   //  $this->getOutput()->addHTML ( $this->dumpToAWS ( $accessKey, $secretAccessKey, $name, $zip, $enc ) );       return;}
 
 }
 
 
-/** Format the output of an "aws s3 ls" command
- *  
- *   $resu:   string, result of that command
- *   $opsDB:  associative array, gets filled with $key => filename structures for use in a form descriptor, for database dump files
- *   
- */
+private static function parseOutput ($resu) {
 
-private static function formatLSOutput ($resu, &$opsDB, &$opsPage) {
 
- $opsPage = [];
-    $opsDB = [];
-    $expo = explode ("\n", $resu); // array of result lines
-    $num = 0;
-    foreach ($expo as $line) {
-       $line = preg_replace ('/\s\s+/', " ", $line );
-       if ( strlen ($line) == 0 ) {break;}
-       $items = explode (" ", $line);  // date, time, size, unit, name
-       MWDebug::log ( print_r ($items, true));
-     //  if (count ($item) ) {break;}
-       [$date, $time, $size, $unit, $name] = $items; 
-       if (strlen ($name) == 0) {break;}
-       $key = "<span style='display:inline-block;width:600px;'>$name</span> <span style=''>$date $time [UTC]</span> <span style='text-align:right;display:inline-block;width:100px;'>$size [$unit]</span>";
-       MWDebug::log (  $key . "-------------" . $name);
-       if ( str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ) { $opsDB[$key]   = $name; }
-       if ( str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ) { $opsPage[$key] = $name; }
-       $num++;
-    }
+function sortByDate(array $items): array {
+  usort($items, function ($a, $b) {
+    return strtotime($b['date']) <=> strtotime($a['date']);
+  });
+  return $items;
+}
 
-///// construct a form for selecting from here !
+  $arr = [];
+  $opt = [];
+  $expo = explode ("\n", $resu);             // generate an array of result lines
+  $num = 0;
+  foreach ($expo as $line) {                        // iterate these lines
+    $line = preg_replace ('/\s\s+/', " ", $line );  
+    if ( strlen ($line) == 0 ) {break;}
+    $data = explode (" ", $line);           // expands the line into date, time, size, unit, name
+    // MWDebug::log ( print_r ($data, true));
+    //  if (count ($item) ) {break;}
+    // [$date, $time, $size, $unit, $name] = $items; 
 
-    $impo = implode ( "<br>", $expo);
-  return $impo;
+    $item = ["date" => $data[0], "time" => $data[1], "size" => $data[2], "unit" => $data[3], "name" => $data[4]];
+
+    $name=$data[4];
+    if ( str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ) 
+      { $item["type"] = "Data Base";}
+    elseif ( str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ) 
+      { $item["type"] = "File";}
+    else { break;}
+    $item["key"] = "<span style='display:inline-block;width:600px;'>".$item["name"]."</span> <span style=''>".$item["date"]."  ".$item["time"]." [UTC]</span> <span style='text-align:right;display:inline-block;width:100px;'>".$item["size"]."[".$item["unit"]."]</span>";
+    $item["val"] =  $item["name"]; // $num++;
+    MWDebug::log ( print_r ($item, true));
+    if (strlen ($item["name"]) == 0) {break;}
+    array_push( $arr, $item);
+  }
+  MWDebug::log ( print_r ($arr, true)) ;
+  $arrSorted = sortByDate ($arr);
+  MWDebug::log ( print_r ($arrSorted, true)) ;
+  foreach ($arrSorted as $item) {
+    $opt [ $item["key"] ] = $item["val"];
+  }
+  MWDebug::log ( print_r ($opt, true)) ;
+  return $opt;
 }
 
 
+// called upon submission of the form displayed at the listing
+public static function processInput( $formData ) { 
+  die (print_r ($formData["radio"], true));
 
+  return true; 
+}
 
-
-public static function processInput( $formData ) { return true; }
 
 
 }

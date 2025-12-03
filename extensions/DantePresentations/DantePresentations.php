@@ -114,16 +114,18 @@ Thus we basically must think of
     }
 */
 
+/*
     $ESCAPE_TAGS = [ "h1", "h2", "h3", "h4", "h5", "h6" ];
     foreach ( $ESCAPE_TAGS as $tag ) {
       $parser->setHook( $tag, function ( $input, $args, $parser, $frame ) use ( $tag ) {
         $attrs = '';
 //        foreach ( $args as $key => $value ) {$attrs .= ' ' . htmlspecialchars( $key ) . '="' . htmlspecialchars( $value ) . '"';} // disallow all attributes
-        // $content = $parser->recursiveTagParse( $input, $frame );  // recursively parse the contents of the tag
+         $content = $parser->recursiveTagParse( $input, $frame );  // recursively parse the contents of the tag
         $content = htmlspecialchars ($content);                   // escape the contents
         return "<$tag$attrs>" . $content . "</$tag>";
       });
     }
+*/
 
 /*
     $TAGS = [ ];                     // TAGS which are reproduced as they appear
@@ -144,8 +146,6 @@ Thus we basically must think of
     $parser->setHook ( 'video', [ "VideoRenderer",  'renderTag']         );      
 
     $parser->setHook ( 'pasted-html', [ self::class,  'pastedHtml']         );      
-
-
 
   // $parser->setHook ( 'todo',    [ self::class,  'todo']               );      
 
