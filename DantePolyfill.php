@@ -1,6 +1,6 @@
 <?php
 
-/** This file contains some common functions used in all of the Dante extensions.
+/** This file contains some common functions used in all of the Dante extensions. 
  *
  *  The reason we are doing this is to make stuff available on a more systematic basis
  *  without having to bother wit composer and similar stuff.
