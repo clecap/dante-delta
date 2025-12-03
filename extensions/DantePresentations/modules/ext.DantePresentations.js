@@ -258,7 +258,12 @@ implement   function implementing the state
 
 */
 
+
+
+
 class SideStatus {
+
+
 
   static PREFIX    = mw.config.get("wgServer") + mw.config.get ("wgScriptPath"); 
   static API_URL   = mw.config.get("wgServer") + mw.config.get ("wgScriptPath") + "/api.php"; 
@@ -267,14 +272,21 @@ class SideStatus {
   static NEXT_TOP  = 60;    // pixel position where we place the next side chick; initialized to the top where we start
   static GAP       = 60;    // what we add as horizonatl separation from side chick to side chick
 
-  constructor (name, query) {   console.log ("constructing SideStatus object for " + name);
+  constructor (name, query) {  
+   
+  
+   console.log ("constructing SideStatus object for " + name);
+
     this.name = name;
     this.query = {action: "query", format: "json"};    // this is the default for all API calls, but it may be overwritten by the query object
     Object.assign (this.query, query);
     this.minWidth  = 80;    this.minHeight  = 100;      // minimal size a user resize action is accepted with
     this.initWidth = 400;   this.initHeight = 400;      // width we initialize this in 
     this.#load ();
-    if ( !(this.ele = document.getElementById ( name ) ) )  {console.error ("HTML structure error, missing element: " + this.name);}   // TODO: use this everywhere
+    if ( !(this.ele = document.getElementById ( name ) ) )  {
+      console.error ("HTML structure error, missing element: " + this.name);
+      return;  // do not attempt to display anything  
+    }   // TODO: use this everywhere
 
     this.ele.style.top = SideStatus.NEXT_TOP+ "pt";  SideStatus.NEXT_TOP += SideStatus.GAP;
 
@@ -405,36 +417,47 @@ class SideStatus {
     } catch (error) {this.injectHTML (error);}
   }
 
+
+
+} // end of class SideStatus
+
+
+
+function initializeAll() {
+
+  let STATUS_TOC = new SideStatus ("toc", "table of contents");
+
+  // the sequence of initializing determines the sequence on the screen 
+  new SideStatus ("cat", {titles: mw.config.get('wgPageName'),  prop: 'categories',  cllimit: 'max' });
+  new SideStatus ("sub", {list: 'allpages',   apnamespace: mw.config.get('wgNamespaceNumber'), apprefix:  mw.config.get('wgPageName').split(':').pop() + "/", aplimit: 'max'   });
+  new SideStatus ("col", {list: 'backlinks', bltitle: mw.config.get('wgPageName'), bllimit: 'max', blnamespace: getNamespaceId ("collection") });
+  new SideStatus ("act");
+  new SideStatus ("bck", {list: 'backlinks', bltitle: mw.config.get('wgPageName'), bllimit: 'max' });
+  new SideStatus ("fwd", {prop: 'links', titles: mw.config.get('wgPageName'), lllimit: 'max'});
+
+  new SideStatus ("sib", {prop: 'links', titles: mw.config.get('wgPageName'), lllimit: 'max'});  // TODO: sibling query not yet completed !!!!!
+  new SideStatus ("tdo");  // todos are filled by server
+
+  SideStatus.ALL.bck.extract = query => query.backlinks;
+  SideStatus.ALL.fwd.extract = query => {const pageId  = Object.keys(query.pages)[0]; return query.pages?.[pageId]?.links};
+  SideStatus.ALL.cat.extract = query => {const pageId  = Object.keys(query.pages)[0]; return query.pages?.[pageId]?.categories;};
+  SideStatus.ALL.sub.extract = query => query.allpages;
+  SideStatus.ALL.col.extract = query => query.backlinks;
+
+  // SideStatus.ALL.sib.extract = ;
+  // SideStatus.ALL.tdo.extract = 
+
+
+  //  TODO: act query still missing
+  // many other new objects as well. 
+
+
 }
 
 
+if (mw.config.get('wgAction') === 'view') { initializeAll();}
+else  { console.warn ("Page is in edit mode, no SideStatus added"); return; }
 
-let STATUS_TOC = new SideStatus ("toc", "table of contents");
-
-
-// the sequence of initializing determines the sequence on the screen 
-new SideStatus ("cat", {titles: mw.config.get('wgPageName'),  prop: 'categories',  cllimit: 'max' });
-new SideStatus ("sub", {list: 'allpages',   apnamespace: mw.config.get('wgNamespaceNumber'), apprefix:  mw.config.get('wgPageName').split(':').pop() + "/", aplimit: 'max'   });
-new SideStatus ("col", {list: 'backlinks', bltitle: mw.config.get('wgPageName'), bllimit: 'max', blnamespace: getNamespaceId ("collection") });
-new SideStatus ("act");
-new SideStatus ("bck", {list: 'backlinks', bltitle: mw.config.get('wgPageName'), bllimit: 'max' });
-new SideStatus ("fwd", {prop: 'links', titles: mw.config.get('wgPageName'), lllimit: 'max'});
-
-new SideStatus ("sib", {prop: 'links', titles: mw.config.get('wgPageName'), lllimit: 'max'});  // TODO: sibling query not yet completed !!!!!
-new SideStatus ("tdo");  // todos are filled by server
-
-SideStatus.ALL.bck.extract = query => query.backlinks;
-SideStatus.ALL.fwd.extract = query => {const pageId  = Object.keys(query.pages)[0]; return query.pages?.[pageId]?.links};
-SideStatus.ALL.cat.extract = query => {const pageId  = Object.keys(query.pages)[0]; return query.pages?.[pageId]?.categories;};
-SideStatus.ALL.sub.extract = query => query.allpages;
-SideStatus.ALL.col.extract = query => query.backlinks;
-
-// SideStatus.ALL.sib.extract = ;
-// SideStatus.ALL.tdo.extract = 
-
-
-//  TODO: act query still missing
-// many other new objects as well. 
 
 
 ///// TODO: we want to have less of this stuff done at javascript runtime and more of this done at PHP time since there it can be cached by php!!
