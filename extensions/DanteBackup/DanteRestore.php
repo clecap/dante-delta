@@ -3,6 +3,10 @@
 require_once ("Executor.php");
 require_once ("DanteCommon.php");
 
+
+require_once ("extensions/DantePresentations/helpers/ServiceEndpointHelper.php");
+
+
 class DanteRestore extends SpecialPage {
 
 public function __construct() {parent::__construct( 'DanteRestore', 'dante-restore' ); }
@@ -161,7 +165,7 @@ private static function addPostImport ( $cmd ) {
   global $IP;
  // see https://www.mediawiki.org/wiki/Manual:ImportDump.php about how we must run this after an import // TODO: really all of this ????
   array_push ($cmd,  "php $IP/maintenance/rebuildrecentchanges.php"); 
-  array_push ($cmd,  "php maintenance/initSiteStats.php --update ");
+  array_push ($cmd,  "php $IP/maintenance/initSiteStats.php --update ");
   array_push ($cmd,  "php $IP/maintenance/rebuildImages.php"); 
   array_push ($cmd,  "php $IP/maintenance/rebuildall.php"); 
   array_push ($cmd,  "php $IP/maintenance/checkImages.php"); 
@@ -191,13 +195,20 @@ public function doImport ($fileName, $info) {
 }
 
 
-// funciton importing from AWS
+
+
+
+
+
+// function importing from AWS
 private function doImportAWS ($fileName) {
   global $IP;
+
   $enc = DanteCommon::checkSuffix ( $fileName, ".aes");
   $zip = DanteCommon::checkSuffix ( $fileName, ".gz" );
 
   danteLog ("DanteBackup", "doImportAWS: $fileName\n");
+
   $env = DanteCommon::getEnvironmentUser ($this->getUser());
 
   $bucketName = $env["AWS_BUCKET_NAME"];
@@ -223,10 +234,20 @@ private function doImportAWS ($fileName) {
   $arr = self::addPostImport ( $arr );
 
   danteLog ("DanteBackup", "\n doImportAWS will now enter executor \n");
-  Executor::liveExecuteX ($arr, $env);
+
+  $cmd = json_encode ( $arr );
+  ServiceEndpointHelper::sendTemplate ( $cmd, json_encode ($env) ) ;
+
+//  Executor::liveExecuteX ($arr, $env);
+  
+  
   danteLog ("DanteBackup", "\n doImportAWS left executor \n");
   return true;
 }
+
+
+
+
 
 // TODO:  --report in alle importDump Befehle ! rein
 

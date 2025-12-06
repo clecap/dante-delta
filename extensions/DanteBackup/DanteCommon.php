@@ -143,6 +143,7 @@ public static function getEnvironmentUser (User $user) {
                );
 }
 
+
 } // end CLASS
 
 

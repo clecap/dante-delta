@@ -82,7 +82,7 @@ public function Log ($text) {
 
   $fileSize = filesize ($fileName);
   if ($fileSize == false) { return; }
-  if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
+  if ($fileSize > 100000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files   ///// TODO:  WHY WOULD WE WANT TO DO THIS???
 }
 
 

@@ -186,6 +186,7 @@ static public function singleList ( $name ) {
  *  return:     return value of the command
  *  CAVE 1: We MUST store the value of proc_open somewhere and we must release ressource using proc_close, otherwise things may go wrong
  *  CAVE 2: Similar with the pipes, which MUST be prepared, read and properly closed.
+ * CAVE: Only works for short output and may block   TODO: fix
  */
 
 public static function executor ( string $cmd, &$output, &$error, ?callable $logger, &$duration = null, $timeout = 0, $env = [] ) {
