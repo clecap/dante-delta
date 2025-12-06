@@ -4,7 +4,7 @@
 // ServiceendpointHelper attaches script to the session and displays an HTML frame in which events can be displayed
 
 
-// need to use MediaWiki session manager
+// need to use MediaWiki session manager 
 require __DIR__ . '/../../../includes/WebStart.php';
 use MediaWiki\Session\SessionManager;             
 $session = SessionManager::getGlobalSession();

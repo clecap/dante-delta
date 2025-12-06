@@ -16,7 +16,7 @@ function handler (e) {
   const log = document.getElementById('log');
  
   let obj;
-  try {obj = JSON.parse (e.data);}
+  try {obj = JSON.parse (e.data);} 
   catch (exc) {
     obj = "json conversion error";
   }
