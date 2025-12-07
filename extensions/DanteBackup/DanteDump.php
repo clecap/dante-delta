@@ -1,36 +1,88 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 require_once ("DanteCommon.php");
 
 class DanteDump extends SpecialPage {
 
+// data to be moved around in this scope
 
-public bool $all;       //     if true: take all revisions, otherwise only take current revision
+
+// REVISIONS:
+public bool $all;       // if true: take all revisions, otherwise only take current revision
+
 public bool $meta;      //     if true: include upload actions
 public bool $files;     //     if true: include file contents
 public      $srcFiles;  //     true (all files) or name of a file (including namespace) listing every file to be dumped
+
+// FEATURES:
+public bool $filter;    //     if true: a filter should be applied
+public bool $zip;       //     if true: we should use compression
+public bool $enc;       //     if true: we should use encryption
+
+private     $aesPW;       // password to be used by aes, in case $enc is true
+private     $bucketName;  // name of aws bucket to be used
 
 public function __construct () { parent::__construct( 'DanteDump', 'dante-dump' ); }
 
 public function getGroupName() {return 'dante';}
 
 
-public function execute( $par ) {
-  if (! $this->getUser()->isAllowed ("dante-dump") ) { $this->getOutput()->addHTML ("You do not have the permission to dump."); return;}  
-
+public function execute( $par ) {  // danteLog ("DanteBackup", "DanteDump:execute called\n");
   $this->setHeaders();
-  $this->getOutput()->addStyle ("../extensions/DanteBackup/danteBackup.css");  // htmlform-tip  // TODO: really needed ?? // TODO: IMPROVE PATH
+  $this->checkPermissions();
+  $this->outputHeader();
+  $request = $this->getRequest();
+
+  if ( $request->wasPosted() ) {
+    danteLog ("DanteBackup", "DanteDump:execute: request was posted \n" . print_r ($request, true));
+    $this->handleForm( ); 
+  } 
+  else {$this->showForm( );}
+}
+
+
+private function showForm () {
+  danteLog ("DanteBackup", "DanteDump:showForm called\n");
+  $this->getOutput()->addHTML (wfMessage ("dante-page-dump-intro"));  // show some intro text
+
+  // describe the form to be displayed
+  $formDescriptor2 = array_merge ( DanteCommon::SOURCE_FEATURES, DanteCommon::getTARGET_FORM(), DanteCommon::FEATURES );  // generate the form
+
+  $htmlForm2 = new HTMLForm( $formDescriptor2, $this->getContext(), 'dumpform' );
+  $htmlForm2->setMethod( 'post' );               // POST is required for token check
+  $htmlForm2->setTokenSalt( 'dantedump' );       // enables CSRF token handling with the given salt dantedump, must match salt in the check below !
+  $htmlForm2->setSubmitText( 'Dump Pages' );
+  $htmlForm2->setSubmitCallback( [ $this, 'handleForm' ] );  
+  $htmlForm2->show();
+}
+
+
+private function handleForm ( ) {
+  $request = $this->getRequest();
+  $user = $this->getUser();
+  $postedToken = $request->getVal( 'wpEditToken' );
+
+  if ( !$user->matchEditToken( $postedToken, 'dantedump' ) ) {   // check with MATCHING salt above // TODO: matchEditToken will be deprecated in versions higher than MW 1.39
+    $this->getOutput()->addWikiTextAsContent("'''Invalid or expired token. Please try again.'''");
+    $this->showForm();    // re-show form with a fresh token
+    return false;
+  }
+
+  danteLog ("DanteBackup", "DanteDump:handleForm called\n");
 
   // pick up the request data in general
   $request            = $this->getRequest();
-  $names              = $request->getValueNames();                                                         danteLog ("DanteBackup", "names:  " . print_r ( $names,  true )."\n"  );
-  $values             = $request->getValues (...$names);                                                   danteLog ("DanteBackup", "values: " . print_r ( $values, true )."\n"  );
+  $names              = $request->getValueNames();                                               danteLog ("DanteBackup", "names:  " . print_r ( $names,  true )."\n"  );
+  $values             = $request->getValues (...$names);                                         danteLog ("DanteBackup", "values: " . print_r ( $values, true )."\n"  );
 
-  // pick up
-  $filter    = (isset ($values["filter"])            ? $values["filter"]        : null );  danteLog ("DanteBackup", "filter:  " . $filter. "\n");
-  $zip       = (isset ($values["compressed"])        ? $values["compressed"]    : null );  danteLog ("DanteBackup", "zip:  " . $zip. "\n");
-  $enc       = (isset ($values["encrypted"])         ? $values["encrypted"]     : null );  danteLog ("DanteBackup", "enc:  " . $enc). "\n";
+  // FEATURES: pick up features of the dump
+  $this->filter    = $values["filter"]     ?? false;  // danteLog ("DanteBackup", "filter:  " . $this->filter. "\n");
+  $this->zip       = $values["compressed"] ?? false;  // danteLog ("DanteBackup", "zip:     " . $this->zip. "\n");
+  $this->enc       = $values["encrypted"]  ?? false;  // danteLog ("DanteBackup", "enc:     " . $this->enc). "\n";
 
+  // REVISIONS: pick up which pages should be included
   if      ( isset ($values["srcFeatures"]) && strcmp ($values["srcFeatures"], "current") == 0) { $this->all = false; }
   else if ( isset ($values["srcFeatures"]) && strcmp ($values["srcFeatures"], "all")     == 0) { $this->all = true;  }
   else                                                                                         { $this->all = false; }
@@ -40,50 +92,38 @@ public function execute( $par ) {
 
   danteLog ("DanteBackup", "srcFiles=" . $this->srcFiles. "\n"); 
 
-  $this->meta    = true;   // always include file upload action metadata with File: pages  //   = (isset ($values["meta"])    ? $values["meta"]    : false  ); danteLog ("DanteBackup",  "meta:  " . $this->meta . "\n"); 
-  $this->files   = true;  // always include file contents with File: pages   // = (isset ($values["files"])    ? $values["files"]  : false );  danteLog ("DanteBackup", "files:  " . $this->files. "\n");
+  $this->meta    = true;  // always include file upload action metadata with File: pages  
+  $this->files   = true;  // always include file contents with File: pages  
       
  // get the values stored in the preferences
-  $bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
-  $aesPW            = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-encpw' );
+  $this->bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
+  $this->aesPW            = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-encpw' );
 
   // dispatch function
   if ( isset ($values["target"] ) ) {  // if we have this set, we are called from the form. We execute the tasks and return.
     $txt = null;
     switch ($values["target"]) {
-      case "window":        $this->getOutput()->disable();   self::dumpToWindow  ( $this, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW );  break;
-      case "browser":       $this->getOutput()->disable();   self::dumpToBrowser ( $this, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW );  break;
-      case "list":          $this->getOutput()->disable();   self::dumpToList (); break;
-
-      case "awsFore":       $txt = self::dumpToAWS_FG ( $this,  $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);   break;
-      case "awsBack":       $txt = self::dumpToAWS_BG ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);  break;
-
-/*
-      case "githubFore":       $txt = DanteCommon::dumpToAWS_FG ( $this,  $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);   break;
-      case "githubBack":       $txt = DanteCommon::dumpToAWS_BG ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);  break;
-      case "sshFore":       $txt = DanteCommon::dumpToAWS_FG ( $this,  $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);   break;
-      case "sshBack":       $txt = DanteCommon::dumpToAWS_BG ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW);  break;
-*/
-
-      case "serverFore":    $txt = self::dumpToServer ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW, false);   break;
-      case "serverBack":    $txt = self::dumpToServer ( $this, $bucketName, isset ($values["compressed"]), isset ($values["encrypted"]), $aesPW, true);      break;
+      case "awsFore":       $txt = self::dumpToAWS_FG         ( $this );   break;
+      case "awsBack":       $txt = self::dumpToAWS_BG         ( $this );  break;
+      case "githubFore":   /*  $txt = self::dumpToAWS_FG  ( $this);  */ break;
+      case "githubBack":   /* $txt = DanteCommon::dumpToAWS_BG  ( $this); */ break;
+      case "sshFore":     /*  $txt = DanteCommon::dumpToAWS_FG  ( $this); */  break;
+      case "sshBack":     /*  $txt = DanteCommon::dumpToAWS_BG  ( $this); */ break;
+  //    case "client":        $this->getOutput()->disable();   self::dumpToBrowser ( $this );  break;
+      case "window":        $this->getOutput()->disable();   self::dumpToWindow  ( );  break;
+      case "list":          $this->getOutput()->disable();   self::dumpToList    ( $this ); break;
+ //     case "serverFore":     $txt = self::dumpToServer ( $this, $bucketName, false);   break;
+ //     case "serverBack":    $txt = self::dumpToServer ( $this, $bucketName, true);      break;
       default:              throw new Exception ("Illegal value found for target:" . $values["target"] . " This should not happen");
     }
   if ( $txt !== null ) { $this->getOutput()->addHTML ($txt); }
   return;
   }
 
-  $this->getOutput()->addHTML (wfMessage ("dante-page-dump-intro"));  // show some intro text
-
-  // describe the form to be displayed
-  $formDescriptor2 = array_merge ( DanteCommon::SOURCE_FEATURES, DanteCommon::getTARGET_FORM(), DanteCommon::FEATURES );  // generate the form
-
-  $htmlForm2 = new HTMLForm( $formDescriptor2, $this->getContext(), 'dumpform' );
-  $htmlForm2->setSubmitText( 'Dump Pages' );
-  $htmlForm2->setSubmitCallback( [ $this, 'processInput' ] );
-  $htmlForm2->show();
 
 }
+
+
 
 
 
@@ -93,31 +133,28 @@ private static function cmdZipEncDump ( $cmd, $zip, $enc ) {
 }
 
 
-
 private static function dumpToList ( $src ) {
 
-
-
 }
 
 
-private static function dumpToWindow () {
+private function dumpToWindow ( ) {
   header( "Content-type: text/plain; charset=utf-8" );
-  $cmd = $obj->getCommand ();
-    $cmd = self::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
-    $cmd = $cmd . " 2>&1 ";  // redirecting stderror gives us the chance of seeing error messages in the window 
-    $result = 0; 
-    $ptResult = passthru ($cmd, $result);
-    echo "ERROR: $ptResult, $result, $cmd";
+  $cmd = $this->getCommand ();
+  $cmd = self::cmdZipEncDump ($cmd, $this->zip, $this->enc, $this->aesPW);
+  $cmd = $cmd . " 2>&1 ";  // redirecting stderror gives us the chance of seeing error messages in the window 
+  $result = 0; 
+  passthru ($cmd, $result);
+  echo "ERROR: $result, $cmd";
 }
 
 
-  private static function dumpToBrowser ($obj, $zip, $enc, $aesPW) {
-    $filename = DanteCommon::generateFilename( $obj->getNativeExtension(), $zip, $enc);
-    DanteCommon::contentTypeHeader ($zip, $enc);
+  private static function dumpToBrowser ($obj, ) {
+    $filename = DanteCommon::generateFilename( $obj->getNativeExtension(), $obj->zip, $obj->enc);
+    DanteCommon::contentTypeHeader ($obj->zip, $obj->enc);
     header( "Content-disposition: attachment;filename={$filename}" );
     $cmd = $obj->getCommand ();
-    $cmd = self::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
+    $cmd = self::cmdZipEncDump ($cmd, $obj->zip, $obj->enc, $obj->aesPW);
     $result = 0; 
     passthru ($cmd, $result);
   }
@@ -125,12 +162,12 @@ private static function dumpToWindow () {
 
 // obj go away 
 // background // TODO redo completelly
-public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
+public static function dumpToAWS_BG ($obj ) {
 
   $cmd = $obj->getCommand ();  // TODO: pipefail ß?????
-  $cmd = self::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
+  $cmd = self::cmdZipEncDump ($cmd, $obj->zip, $obj->enc, $obj->aesPW);
 
-  $name    = "s3://$bucketName/" . DanteCommon::generateFilename(  $obj->getNativeExtension(), $zip, $enc);
+  $name    = "s3://{$obj->bucketName}/" . DanteCommon::generateFilename(  $obj->getNativeExtension(), $obj->zip, $obj->enc);
   $cmd = $cmd . " | /opt/myenv/bin/aws s3 cp - $name ";
   $cmd = "( $cmd ) &>DANTEDBDump_LOCAL_ERROR_FILE & ";  // TODO: correct redirect ?  test
   $retCode = Executor::executeAWS_FG_RET ( new AWSEnvironmentPreparatorUser ($obj->getUser()), $cmd, $output, $error );
@@ -141,11 +178,11 @@ public static function dumpToAWS_BG ($obj, $bucketName, $zip, $enc, $aesPW) {
 
 
 // foreground
-public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
+public static function dumpToAWS_FG ( $obj ) {
   danteLog ("DanteBackup", "DanteDump::dumpToAWS_FG called \n"); 
   $cmd     = "set -o pipefail; " . $obj->getCommand ( );  // pipefail prevents masking of error conditions along the pipe
-  $cmd     = self::cmdZipEncDump ($cmd, $zip, $enc, $aesPW);
-  $name    = "s3://$bucketName/" . DanteCommon::generateFilename ($obj->getNativeExtension(), $zip, $enc);
+  $cmd     = self::cmdZipEncDump ($cmd, $obj->zip, $obj->enc, $obj->aesPW);
+  $name    = "s3://{$obj->bucketName}/" . DanteCommon::generateFilename ($obj->getNativeExtension(), $obj->zip, $obj->enc);
   $cmd    .= " | /opt/myenv/bin/aws s3 cp - $name ";
 
   $retText = "";  // accumulates this and the subsequent listing command
@@ -162,7 +199,7 @@ public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
   if ($retCode == 0) { $retText .= "<h3>Execution successful</h3>";}
   else               { $retText .= "<h3 style='color:red;'>Execution failed, return code $retCode </h3>";}
 
-  $retText .= "<h3>Directory listening of $bucketName</h3>";
+  $retText .= "<h3>Directory listening of $obj->bucketName</h3>";
 
 /*
   $retCode = Executor::executeAWS_FG_RET ( " /opt/myenv/bin/aws s3 ls $bucketName --human-readable ", $env ,  $output, $error );
@@ -170,7 +207,7 @@ public static function dumpToAWS_FG ( $obj, $bucketName, $zip, $enc, $aesPW) {
   else               { $retText .= "<hr>".   preg_replace ("/\n/", "<br>", $output) . "<hr>";}
 */
 
-  $cmd = "/opt/myenv/bin/aws s3api list-objects-v2 --bucket {$bucketName} --query 'Contents[].[Key,LastModified,Size]' --output json";
+  $cmd = "/opt/myenv/bin/aws s3api list-objects-v2 --bucket {$obj->bucketName} --query 'Contents[].[Key,LastModified,Size]' --output json";
   danteLog ("DanteBackup", "Will now call executor \n"); 
   $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
   $objects = json_decode($output, true);  // Decode the JSON output into a PHP array
@@ -224,25 +261,39 @@ public function getCommand (  ) {
   $includeFilesOpt   = ( $this->meta     ?  "--uploads"      : " ");
   $filesOpt          = ( $this->files    ? "--include-files" : " ");
 
-  danteLog ("DanteBackup",  "NOW!\n");
-
   danteLog ("DanteBackup", "Source specification is: " . $this->srcFiles . "\n");
-
-  // generate a file which contains a list of files to dump
-  @unlink ( "$IP/extensions/DanteBackup/list_of_files_to_backup");  // delete list of files to dump
-  switch ( $this->srcFiles ) {
-    case "corefiles":          $srcOpt = "--pagelist=$IP/extensions/DanteBackup/list_of_files_to_backup";    $this->getConfigFile ("Corefiles");  break;
-    case "backupfiles":       $srcOpt = "--pagelist=$IP/extensions/DanteBackup/list_of_files_to_backup";    $this->getConfigFile ("Backupfiles");  break;
-    case "backupcategory":    $srcOpt = "--pagelist=$IP/extensions/DanteBackup/list_of_files_to_backup";    $this->makeCatFileList  ("backup");  break;
-    case "backupcategories":  $srcOpt = "--pagelist=$IP/extensions/DanteBackup/list_of_files_to_backup";    $this->makeLongList ();  break;
-    case "all":               $srcOpt = " ";  break;
-  }
+  if ( $this->srcFiles != "all" ) {self::listOfFiles ( $this->srcFiles ); 
+    $srcOpt = "--pagelist=$IP/extensions/DanteBackup/list_of_files_to_backup";
+   }  // generate a file which contains a list of files to dump
+  else {$srcOpt = "";}
 
   $command = " php $IP/maintenance/dumpBackup.php $fullOpt $includeFilesOpt $filesOpt $srcOpt";
   danteLog ("DanteBackup", "\nDanteDump: getCommand: Command for dumping is: " . $command);
 
   return $command;
 }
+
+
+
+// generates a list of files to backup in file $IP/extensions/DanteBackup/list_of_files_to_backup
+private function listOfFiles ( $spec ) {
+  global $IP;
+  @unlink ( "$IP/extensions/DanteBackup/list_of_files_to_backup");  // delete list of files to dump
+  switch ( $spec ) {
+    case "corefiles":          $this->getConfigFile ("Corefiles");  break;
+    case "backupfiles":        $this->getConfigFile ("Backupfiles");  break;
+    case "backupcategory":     $this->makeCatFileList  ("backup");  break;
+    case "backupcategories":   $this->makeLongList ();  break;
+    case "all":               $srcOpt = " ";  break;  // TODO: WHAT ABOUT THE DRYRUN in this case !!!!!  where do we get the list of all files ???
+    // TODO: also want option: all with the exception of the system files (what are they ???)
+  }
+}
+
+
+
+
+
+
 
 
 // given the name of a file inside of MediaWiki namespace, generate a file named list_of_files_to_backup
@@ -262,7 +313,7 @@ private function getConfigFile ($filename) {
     danteLog ("DanteBackup", "Wrote list of files to backup\n");
   }   
   else { 
-    self::debugLog ("\n\n MediaWiki:"  .$filename. " could not be found \n\n");
+    danteLog ("DanteBackup", "\n\n MediaWiki:"  .$filename. " could not be found \n\n");
     return "Could not find MediaWiki:" .$filename;}
 }
 
@@ -316,7 +367,7 @@ private function makeLongList () {
 
     foreach ( $arr as $categ ) { self::makeCatFileList ($categ); }
   }   
-  else { self::debugLog ("\n\n MediaWiki:Backupcategories could not be found \n\n"); }
+  else { danteLog ("DanteBackup", "\n\n MediaWiki:Backupcategories could not be found \n\n"); }  // TODO: maybe rather exception
 }
 
 
@@ -324,7 +375,7 @@ private function makeLongList () {
 private static function getSubcategories(array $categories) {
   $allSubcategories = [];
   foreach ($categories as $category) {
-    $subcategories = fetchSubcategories($category);                          // Fetch subcategories for the current category
+    $subcategories = self::fetchSubcategories($category);                          // Fetch subcategories for the current category
     $allSubcategories = array_merge($allSubcategories, $subcategories);      // Merge subcategories with the result array
   }
   $allSubcategories = array_unique($allSubcategories);                       // Remove duplicates
@@ -395,17 +446,10 @@ function getAllPageNames() {
   return $allPageNames;
 }
 
-
+// TODO: deprecate
 // return the native file extension this dumper would return
-public function getNativeExtension () { return "xml";}
+// public function getNativeExtension () { return "xml";}
 
 
-// return:   true: form will not display again
-//           false: from WILL be displayed again
-//           string: show the string as error message together with the form
-public static function processInput( $formData ) {
-  return true;
-  // return print_r ( $formData,  true ) ;
-}
 
-}
+}  // end of class
