@@ -31,7 +31,8 @@ public static function sendTemplate ( $cmd, $env ) {   // sends a template, atta
     <title>Server side Script</title>
   </head>
   <body>
-
+<h1>Script Execution</h1>
+The system is executing a script. This process may take some time. Do not close this window before we inform you about completion of all activities.<br><br>
 <h3>General Log</h3>
 <ul id="log"></ul>
 
@@ -107,6 +108,7 @@ public static function liveExecuteJsonStream ( $arr, $env = array() ) {
     stream_set_blocking($pipes[1], false);
     stream_set_blocking($pipes[2], false);
 
+    $tick=0.0;
     while (true) {
       // construct $read as array of sockets which we potentially still can read
       $read = [];
@@ -146,7 +148,7 @@ public static function liveExecuteJsonStream ( $arr, $env = array() ) {
 
       // check process status
       $status = proc_get_status($proc);
-      if ($status["running"]) { ServiceEndpointHelper::sendX ( "running" , $count, "running" ); }  
+      if ($status["running"]) { ServiceEndpointHelper::sendX ( "running" , $count, "running ".$tick ); }  
       else {   // process is no longer running 
        if (feof($pipes[1]) && feof($pipes[2])) {
           ServiceEndpointHelper::sendX (  ($status["exitcode"] === 0 ? "exitOk" : "exitErr" ) , $count,  "exit ".$status["exitcode"] ); 
@@ -158,22 +160,18 @@ public static function liveExecuteJsonStream ( $arr, $env = array() ) {
       }
 
       // Small sleep to avoid busy-wait 
-      usleep(50000); // 50ms
+      usleep(100000); // 100ms
+      $tick += 0.1;
     }
 
     // this command has finished, can close the resource, check the final status and signal this in the UI
     $closeParam = proc_close($proc);
 
     if ($closeParam != 0) {$didHaveError = true; $errorCount++;  ServiceEndpointHelper::sendX ( "in-error", $count, "" );}
-    else                  {                                      ServiceEndpointHelper::sendX ( "was-ok", $count, "" ); }
+    else                  {                                      ServiceEndpointHelper::sendX ( "was-ok",   $count, "" ); }
 
-  } // end for loop over all commands
-
-//  if ($didHaveError) { echo "************ $errorCount COMMANDs were in ERROR ***";  } 
-//  else               { echo "***** All commands have completed successfully";      }
-
-  ServiceEndpointHelper::sendX ( "close", $count, $chunk);
-
+  } // end for loop over all commands  
+  ServiceEndpointHelper::sendX ( "close", $count, ( $didHaveError ?  "Please check: There were $errorCount errors." : "Completed. You may now leave this window."  ));
 }
 
 

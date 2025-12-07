@@ -189,7 +189,7 @@ static public function singleList ( $name ) {
  * CAVE: Only works for short output and may block   TODO: fix
  */
 
-public static function executor ( string $cmd, &$output, &$error, ?callable $logger, &$duration = null, $timeout = 0, $env = [] ) {
+public static function executor ( string $cmd, &$output, &$error, ?callable $logger, &$duration = null, $timeout = 0, $env = null ) {
   if ($logger) {$cfn = debug_backtrace()[1]['function']; $logger ( "$cfn calling shell executor\n"); }  // get name of the calling function
 
   $startTime  = microtime(true); 

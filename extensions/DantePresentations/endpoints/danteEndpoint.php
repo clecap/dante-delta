@@ -242,9 +242,9 @@ public function parseText ( $text, $hiding, $section = NULL, $removeTags = array
   ) ); 
 
   }
-     catch (\Exception $e) { self::Log ("***** DanteEndpoint: Parser: Caught exception:\n" );     $parsedText = "EXCEPTION: " . $e->__toString(); }
+     catch (\Exception $e) { self::Log ("***** DanteEndpoint: Parser: Caught exception:\n" );     $parsedText = "<pre>EXCEPTION: " . $e->__toString()."</pre>"; }
      catch(Throwable $t)   { self::Log ("***** DanteEndpoint: Parser: Caught Throwable:\n" );
-                             self::Log ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  $parsedText = "THROWABLE: " . $t->__toString()."\n";}
+                             self::Log ("DanteEndpoint Throwable is: " . $t->__toString()."\n");  $parsedText = "<pre>THROWABLE: " . $t->__toString()."</pre>\n";}
      finally               { //self::Log ("DanteEndpoint: in finally block\n");                 
       }
 

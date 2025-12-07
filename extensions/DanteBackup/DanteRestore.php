@@ -129,22 +129,42 @@ public static function processInputLOCAL ( $formData ) {
 protected function getGroupName() {return 'dante';}
 
 
+
+private static function getPrefix ($name) {
+  if (str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ) return "<b style='color:red;'>Database: </b> ";
+  if (str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ) return "<b style='color:blue;'>Files:    </b>";
+
+
+}
+
+
 // does an ls of the  AWS S3 bucket and returns the result apropriately formatted for a radio button selection form for the file
 private function getFileArray () {
   $bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
 
   $env = DanteCommon::getEnvironmentUser ($this->getUser());
   $cmd = "/opt/myenv/bin/aws s3api list-objects-v2 --bucket {$bucketName} --query 'Contents[].[Key,LastModified,Size]' --output json";
-  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
+  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );  // TODO: still written in blocking mode - might want to fix eventually
   $retArray = array ();
 
   if ($retCode == 0) {
     $objects = json_decode($output, true);  // Decode the JSON output into a PHP array // TODO: could be in error
 
     if (is_array($objects)) {
+      $filtered = array_filter($objects, function ($object) { 
+        $name = $object[0];
+        return 
+        str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ||
+        str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml");
+      });
+      $filtered = array_values ( $filtered );
+
       usort($objects, function ($a, $b) {return strtotime($b[1]) - strtotime($a[1]);});    // Sort the objects by LastModified in descending order
+
+
+
       foreach ($objects as $object) {
-        $retArray[  "<span style='display:inline-block;width:400px;'>".$object[0]."</span><span style='display:inline-block;width:300px;'>". $object[1] . "</span>".
+        $retArray[  "<span style='display:inline-block;width:400px;'>".self::getPrefix($object[0]).$object[0]."</span><span style='display:inline-block;width:300px;'>". $object[1] . "</span>".
        "<span style='display:inline-block;width:400px;'>". number_format ($object[2]/ (1024*1024), 2)  . "[MB] </span>"] = $object[0];
        }  // foreach
     }

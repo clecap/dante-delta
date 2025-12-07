@@ -4,6 +4,7 @@ require_once ("DanteCommon.php");
 
 class DanteDump extends SpecialPage {
 
+
 public bool $all;       //     if true: take all revisions, otherwise only take current revision
 public bool $meta;      //     if true: include upload actions
 public bool $files;     //     if true: include file contents
@@ -362,13 +363,13 @@ private function fetchSubcategories($category) {
   return $subcategories;
 }
 
+
 // Fetches all page names from a MediaWiki site across all namespaces.
 function getAllPageNames() {
   $allPageNames = [];
   $continue = '';
 
   $apiEndpoint = wfScript( 'api' );  // 'https://your-mediawiki-site/api.php';      // MediaWiki API endpoint
-
 
   do {
     // Build the query parameters  // TODO: check: does this REALLY ALWAYS provide all files ??? not sure. apilimit !!  must know as relevant for DUMP !!!!
@@ -393,13 +394,6 @@ function getAllPageNames() {
 
   return $allPageNames;
 }
-
-
-
-
-
-
-
 
 
 // return the native file extension this dumper would return
