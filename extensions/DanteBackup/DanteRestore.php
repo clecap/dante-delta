@@ -26,6 +26,7 @@ public function execute( $par ) {
   else {$this->showForm();}
 }
 
+
 private function showForm() {
   // send post data to THIS url and add action=submit to the URL so we can distinguish showing this page from submitting data to it
   $action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );  
@@ -89,8 +90,11 @@ private function handleSubmission () {
   danteLog ("DanteBackup", "On submission: Form identifier: " . print_r ($formId, true) ."\n");
     
   $arr = $this->getSpecificCommands ( $formId );    // now that we know which form was used, dispatch the execution of the forms submission
-  $this->doImportFunctionality ( $arr );            // finally dispatch the execution of these commands
+  $env = DanteCommon::getEnvironmentUser ($this->getUser());                // get the environment for the user (needed for execution)
+
+  $this->doImportFunctionality ( $arr, $env );            // finally dispatch the execution of these commands
 }
+
 
 
 private function getSpecificCommands ( $formId ) {
@@ -254,11 +258,8 @@ public static function getCommandsSSH ($url) {
 
 }
 
-/**
- *
- */
-private function doImportFunctionality ( $arr ) {
-  $env = DanteCommon::getEnvironmentUser ($this->getUser());                // get the environment for the user (needed for execution)
+
+private function doImportFunctionality ( $arr, $env ) {
   $envJson = json_encode ($env);                                            // convert PHP environment array into json text format                        
   $cmdJson = json_encode ( $cmd );                                          // convert PHP command Array into json text format
   ServiceEndpointHelper::attachToSession ( $cmdJson, $envJson );            // attach command Array and environment in string form to the current session
@@ -266,9 +267,6 @@ private function doImportFunctionality ( $arr ) {
   return true;
 }
 // TODO: the serviceEndpoint we use here - should probably not be part of DantePresentations but of DanteBackup - also might require adjustment of Apache configuration for the PHP execution !!
-
-
-
 
 
 
