@@ -254,8 +254,9 @@ public static function getCommandsSSH ($url) {
 
 }
 
-
-/** */
+/**
+ *
+ */
 private function doImportFunctionality ( $arr ) {
   $env = DanteCommon::getEnvironmentUser ($this->getUser());                // get the environment for the user (needed for execution)
   $envJson = json_encode ($env);                                            // convert PHP environment array into json text format                        
