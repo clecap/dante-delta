@@ -35,19 +35,66 @@ const DUMP_PATH = "DUMP";
 const INFO = [
   'ainform' => ['type' => 'info', 'section' => '',
       'label' => 'info',
-      'default' => '<a href="https://wikipedia.org/">Wikipediaqqqq</a>',
+      'default' => '<a href="https://wikipedia.org/">Wikipedia</a>',
       'raw' => true,   // If true, the above string won't be HTML escaped
   ] 
 ];
 
-const FEATURES = [
-  'fil'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Filter',     'name' => 'filter',     'type' => 'check',  'help-message' => 'help-filter'  ],
-  'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'help-message' => 'help-zip' ],
-  'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc' ],
+
+
+const HEADER = [
+   'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'debug', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
+   'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Page Dump',  'name' => 'archiveName', 'type' => 'text',     'readonly' => true  ],
+   'dbname'  => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Database', 'name' => 'dbName',      'type' => 'text',       'readonly' => true  ],
+   'tarname' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',     'type' => 'text',  'readonly' => true  ],
 ];
 
 
+
+
+const FEATURES = [
+  'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],
+  'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc', 'default' => true ],
+];
+
 const SOURCE_FEATURES = [
+  'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
+    'options' => [ '<i>No pages</i> included in the pages archive'                                                                                                   => "nopages",
+                   '<b>Listed</b>: Only pages listed in page <a href="./index.php?title=MediaWiki:Backupfiles">MediaWiki:Backupfiles</a>'                            => "listed",
+                   '<b>Category</b>: Only pages in <a href="./indx.php?title=Category:Backup">Category:Backup</a>'                                                   => "category",
+                   '<b>Categories</b>: Only pages in a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories</a>'     => "categories",
+                   '<b>All</b> pages'                                                                                                                                => "all", 
+                     ],   
+     'name' => 'srces',  'default' => 'all', 
+  ],
+  'radio33'  => [ 'section' => 'srcfeatures/ra' , 'type' => 'radio',  'label' => '', 
+        'options' => [ '<b>Current</b> versions only'                                   => "current",
+                       '<b>All revisions</b> included'                                  => "allrevisions", 
+                     ],   
+        'name' => 'srcFeatures',  'default' => 'allrevisions', 
+ ],
+  'radio32'  => [ 'section' => 'srcfeatures/rf' , 'type' => 'radio',  'label' => '', 
+        'options' => [ '<i>Nofiles</i>: Do not dump uploaded file contents and do not dump metadata'                      => "nofiles",
+                       '<i>Metadata</i>: Dump metadata only, no file contents'                                            => "metadata",
+                       '<b>Separate</b>: Dump metadata and file contents, but into a separate file archive'               => "separate", 
+                       '<b>Include</b>: Dump metadata and file contens into one very large page archive'                  => "include", 
+                     ],   
+        'name' => 'files',  'default' => 'include', 
+ ],
+  'radio31'  => [ 'section' => 'srcfeatures/rc' , 'type' => 'radio',  'label' => '', 
+        'options' => [ 'No database dump only do a page dump'                                => "nodb",
+                       '<b>Full</b> database dump          '                                 => "db", 
+                     ],   
+        'name' => 'db',  'default' => 'db', 
+ ],
+];
+
+
+
+
+
+
+const SOURCE_FEATURES_OLD = [
   'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
     'options' => [ 'Only pages listed in page <a href="./index.php?title=MediaWiki:Backupfiles">MediaWiki:Backupfiles</a>'                              => "backupfiles",
                    'Only pages in <a href="./indx.php?title=Category:Backup">Category:Backup</a>'                                                       => "backupcategory",
@@ -99,11 +146,20 @@ const DEBUG_FORM = [
   }
 
 
-
+// TODO we should deprecate this as it soon will no longer be used as currently there is a bug in the usage assumptions
 public static function checkSuffix ( $string, $suffix) {
   if (substr($string, -strlen($suffix)) === $suffix) { return true; } 
   else { return false; }
 }
+
+
+
+
+
+
+
+
+
 
 
   public static function generateFilename ($typ, $zip, $enc) {

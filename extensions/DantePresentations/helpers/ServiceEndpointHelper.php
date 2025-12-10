@@ -9,20 +9,19 @@ use MediaWiki\Session\SessionManager;
 
 class ServiceEndpointHelper {
 
-///// TODO: session timeout where ??????
-public static function sendTemplate ( $cmd, $env ) {   // sends a template, attach a command string to the session
-  header('Content-Type: text/html');  
-  header('Cache-Control: no-cache');
-  header('Connection: keep-alive');
 
-  $raw    = file_get_contents ( 'php://input' );
-  $method = $_SERVER['REQUEST_METHOD'];
-
+  // attach a command(list) and an environment to the current session
+public static function attachToSession ($cmd, $env) {
   $session = SessionManager::getGlobalSession();
   $session->set( 'Dante_Cmd', $cmd );             
   $session->set( 'Dante_Env', $env );
+}
 
-  $template = <<<END
+
+
+
+public static function getHeadHTML () {
+return <<<END
 <!doctype html>
 <html>
   <head>
@@ -31,25 +30,35 @@ public static function sendTemplate ( $cmd, $env ) {   // sends a template, atta
     <title>Server side Script</title>
   </head>
   <body>
+END;
+}
+
+
+
+
+public static function getGeneral ( $topInfo = "" ) {
+return <<<END
 <h1>Script Execution</h1>
 The system is executing a script. This process may take some time. Do not close this window before we inform you about completion of all activities.<br><br>
 <h3>General Log</h3>
 <ul id="log"></ul>
-
 <h3>Commands</h3>
 <div id="commands">
-  <!-- Here, Javascript will inject dynamically some information -->
 </div>
-
-  <script src="./extensions/DantePresentations/endpoints/serviceEndpoint.js"></script>
-  </body>
-</html>
+<script src="./extensions/DantePresentations/endpoints/serviceEndpoint.js"></script>
 END;
+}
 
-  echo $template;
 
-  flush(); ob_flush();
-  exit;
+
+public static function sendTemplate (  ) {
+  header('Content-Type: text/html');  
+  header('Cache-Control: no-cache');
+  header('Connection: keep-alive');
+
+  echo self::getHeadHTML ();  flush(); ob_flush();
+ 
+ 
 }
 
 

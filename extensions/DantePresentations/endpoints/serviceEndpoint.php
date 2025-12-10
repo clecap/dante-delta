@@ -5,9 +5,6 @@
 
 
 
-
-
-
 // need to use MediaWiki session manager 
 require __DIR__ . '/../../../includes/WebStart.php';
 use MediaWiki\Session\SessionManager;             

@@ -34,5 +34,13 @@
   },
   "AvailableRights": ["dante-dump", "dante-restore", "dante-dbdump", "dante-dbrestore"],
   "MessagesDirs":           { "DanteDiv": ["i18n"] },
+  "ResourceModules": {
+    "ext.DanteBackup.specialpage": {
+      "localBasePath":       "modules",
+      "remoteExtPath":       "DanteBackup/modules",
+      "packageFiles":        ["ext.DanteBackup.specialpage.js"],
+      "position": "top",
+      "targets": [ "desktop", "mobile" ]
+    } }, 
 	"manifest_version": 2
 }

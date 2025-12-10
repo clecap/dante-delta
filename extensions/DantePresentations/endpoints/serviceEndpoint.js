@@ -1,5 +1,5 @@
 
-console.info ("hi");
+
 
 const script = document.currentScript;
 const url = script.src;

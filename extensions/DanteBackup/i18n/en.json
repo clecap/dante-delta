@@ -18,19 +18,23 @@
 
   "dante-database-dump-intro": "This page allows you to produce a dump of the '''entire database''' of this dantewiki. For more information consult [[Help:DanteBackup]].",
 
-  "dante-page-dump-intro": "This page allows you to produce a dump of the '''content''' of this dantewiki (read: articles, files, revisions but no user accounts, system messages, system configurations and further so-called meta data). For files, content and upload actions are included. Make sure, File: pages are selected when not dumping all pages. For more information consult [[Help:DanteBackup]].",
+  "dante-page-dump-intro": "This page allows you to produce a dump of this dantewiki. For more information consult [[Help:DanteBackup]].",
 
-  "dante-page-restore-intro": "This page allows you to restore a dump of the '''content''' of this dantewiki (read: articles, files, revisions but no user accounts, system messages, system configurations and further so-called meta data). Please select a file to be used for restoring. For more information consult [[Help:DanteRestore]].",
+  "dante-page-restore-intro": "This page allows you to restore a dump of this dantewiki. Please select a file to be used for restoring. For more information consult [[Help:DanteRestore]].",
 
   "select-local-file": "Select a file from your local machine",
 
   "restore-from-aws": "Select one of the following AWS S3 files",
 
-  "dumpform-srcfeatures": "Source: What shall the dump include?", 
-  "dumpform-rb":  "Pages: Which pages shall be included?",
-  "dumpform-ra":  "Revisions: Which revisions shall be included?",
+  "dumpform-header": "Identification: What is the name of the dump?",
+
+  "dumpform-srcfeatures": "Source: What shall the dump include?",   
+  "dumpform-rc":  "Database:Shall we produce a database dump?",
+   "dumpform-rf":  "Files: Shall uploaded files be included?",
+  "dumpform-rb":  "Pages: Which pages shall be included in the page dump?",
+  "dumpform-ra":  "Revisions: Which revisions shall be included in the page dump?",
   "dumpform-up":  "Files: For the uploaded files, include:",
-  "dumpform-features":  "Choose features of the dump:",
+  "dumpform-features":  "Features: Which further things do you require?",
   "dumpform-target":  "Target: Where shall the dump be stored?",
   "dumpform-debug":  "Show debug output (only advanced users and only for AWS S3)",
 
@@ -76,8 +80,7 @@
   "specialpages-group-dante":  "DanteWiki",
 
   "help-filter": "Removes all hidden contents. See [[Help:Hidden Contents]]",
-  "help-zip":    "Compression reduces file size.",
-  "help-enc":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password, as without it you cannot restore the contents of the dump file."
+  "help-enc":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password, as without it you cannot restore the contents of the dump file. If a password is set for the user and you do a database dump without encryption then the password is visible as part of the database dump."
 
 
 }

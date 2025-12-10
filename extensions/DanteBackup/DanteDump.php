@@ -6,103 +6,123 @@ require_once ("DanteCommon.php");
 
 class DanteDump extends SpecialPage {
 
-// data to be moved around in this scope
-
-
-// REVISIONS:
-public bool $all;       // if true: take all revisions, otherwise only take current revision
-
-public bool $meta;      //     if true: include upload actions
-public bool $files;     //     if true: include file contents
-public      $srcFiles;  //     true (all files) or name of a file (including namespace) listing every file to be dumped
-
-// FEATURES:
-public bool $filter;    //     if true: a filter should be applied
+#region  DATA which may be moved around in the scope of this class
+public string $archiveName;
+public string $dbName; 
+public string $tarName;
+public string $srces;
+public string $srcFeatures;
+public bool $files;
+public bool $db;
+public string $target;
 public bool $zip;       //     if true: we should use compression
 public bool $enc;       //     if true: we should use encryption
 
+
+
+
+// TODO: below probably not all good here !!
+public bool $all;       // if true: take all revisions, otherwise only take current revision
+
+public bool $meta;      //     if true: include upload actions
+public      $srcFiles;  //     true (all files) or name of a file (including namespace) listing every file to be dumped
+
+// FEATURES:
+
 private     $aesPW;       // password to be used by aes, in case $enc is true
 private     $bucketName;  // name of aws bucket to be used
+#endregion
+
 
 public function __construct () { parent::__construct( 'DanteDump', 'dante-dump' ); }
 
 public function getGroupName() {return 'dante';}
 
+// page provides hint to read-only mode engine that it will not write
+public function doesWrites() {return false;}
 
-public function execute( $par ) {  // danteLog ("DanteBackup", "DanteDump:execute called\n");
+public function execute( $par ) {
   $this->setHeaders();
   $this->checkPermissions();
   $this->outputHeader();
+  $out = $this->getOutput();
+  $out->addModules( [ 'ext.DanteBackup.specialpage' ] );
   $request = $this->getRequest();
+  $action = $request->getVal( 'action', 'view' );  // Read `action` query parameter; if not present use 'view' as fallback value
 
-  if ( $request->wasPosted() ) {
-    danteLog ("DanteBackup", "DanteDump:execute: request was posted \n" . print_r ($request, true));
-    $this->handleForm( ); 
-  } 
-  else {$this->showForm( );}
+  if ( $action === 'submit' && $request->wasPosted() ) { $this->handleSubmission ( $request ); } 
+  else {$this->showForm();}
 }
 
 
 private function showForm () {
-  danteLog ("DanteBackup", "DanteDump:showForm called\n");
-  $this->getOutput()->addHTML (wfMessage ("dante-page-dump-intro"));  // show some intro text
+ // send post data to THIS url and add action=submit to the URL so we can distinguish showing this page from submitting data to it
+  $action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );  
+
+  $out    = $this->getOutput();
+  $out->addStyle ("../extensions/DanteBackup/danteBackup.css"); 
+  $out->addHTML (wfMessage ("dante-page-dump-intro"));             // show some intro text
+
+ // provide a help link
+  $out->addHelpLink( 'index.php?title=Help:DanteDump', true );  // provide a help link   // TODO: must fill with contents
 
   // describe the form to be displayed
-  $formDescriptor2 = array_merge ( DanteCommon::SOURCE_FEATURES, DanteCommon::getTARGET_FORM(), DanteCommon::FEATURES );  // generate the form
+  $formDescriptor = array_merge ( DanteCommon::HEADER, DanteCommon::SOURCE_FEATURES, DanteCommon::getTARGET_FORM(), DanteCommon::FEATURES );  // generate the form
 
-  $htmlForm2 = new HTMLForm( $formDescriptor2, $this->getContext(), 'dumpform' );
-  $htmlForm2->setMethod( 'post' );               // POST is required for token check
-  $htmlForm2->setTokenSalt( 'dantedump' );       // enables CSRF token handling with the given salt dantedump, must match salt in the check below !
-  $htmlForm2->setSubmitText( 'Dump Pages' );
-  $htmlForm2->setSubmitCallback( [ $this, 'handleForm' ] );  
-  $htmlForm2->show();
+  $htmlForm = new HTMLForm( $formDescriptor, $this->getContext(), 'dumpform' );
+  $htmlForm->setMethod( 'post' );               // POST is required for token check
+  $htmlForm->setTokenSalt( 'dantedump' );       // enables CSRF token handling with the given salt dantedump, must match salt in the check below !
+  $htmlForm->setAction( $action );              // form is submitted to this URL
+  $htmlForm->setSubmitText( 'Do the dump' );
+  $htmlForm->show();
 }
 
 
-private function handleForm ( ) {
-  $request = $this->getRequest();
-  $user = $this->getUser();
+// given a request fill in form data into the instance variables of this class
+private function pickUpData ( $request ) {
+
+  // pick up FILE NAMES 
+  $this->archiveName = $request->getVal ( 'archiveName' );     danteLog ("DanteBackup", "archiveName $this->archiveName \n");
+  $this->dbName      = $request->getVal ( 'dbName' );          danteLog ("DanteBackup", "dbName $this->dbName \n");
+  $this->tarName     = $request->getVal ( 'tarName' );         danteLog ("DanteBackup", "tarName $this->tarName \n");
+  $this->srces       = $request->getVal ( 'srces' );           danteLog ("DanteBackup", "srces $this->srces \n");
+  $this->srcFeatures = $request->getVal ( 'srcFeatures' );     danteLog ("DanteBackup", "srcFeatures $this->srcFeatures \n");
+  $this->files       = $request->getVal ( 'files' );           danteLog ("DanteBackup", "files $this->files \n");
+  $this->db          = $request->getVal ( 'db' );              danteLog ("DanteBackup", "db $this->db \n");
+  $this->target      = $request->getVal ( 'target' );          danteLog ("DanteBackup", "target $this->target \n");
+  $this->zip         = $request->getVal ( 'compressed' ) ?? false;   danteLog ("DanteBackup", "zip $this->zip \n");
+  $this->enc         = $request->getVal ( 'encrypted' )  ?? false;   danteLog ("DanteBackup", "enc $this->enc \n");
+      
+ // get the values stored in the preferences
+  $this->bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
+  $this->aesPW            = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-encpw' );
+
+  danteLog ("DanteBackup", "bucketName $this->bucketName\n");
+  danteLog ("DanteBackup", "aesPW $this->aesPW\n");
+
+
+}
+
+private function handleSubmission ( ) {
+  $request     = $this->getRequest();
+  $user        = $this->getUser();
   $postedToken = $request->getVal( 'wpEditToken' );
 
+  // check CSRF token
   if ( !$user->matchEditToken( $postedToken, 'dantedump' ) ) {   // check with MATCHING salt above // TODO: matchEditToken will be deprecated in versions higher than MW 1.39
     $this->getOutput()->addWikiTextAsContent("'''Invalid or expired token. Please try again.'''");
     $this->showForm();    // re-show form with a fresh token
     return false;
   }
 
-  danteLog ("DanteBackup", "DanteDump:handleForm called\n");
+  self::pickUpData ( $request );
 
-  // pick up the request data in general
-  $request            = $this->getRequest();
-  $names              = $request->getValueNames();                                               danteLog ("DanteBackup", "names:  " . print_r ( $names,  true )."\n"  );
-  $values             = $request->getValues (...$names);                                         danteLog ("DanteBackup", "values: " . print_r ( $values, true )."\n"  );
-
-  // FEATURES: pick up features of the dump
-  $this->filter    = $values["filter"]     ?? false;  // danteLog ("DanteBackup", "filter:  " . $this->filter. "\n");
-  $this->zip       = $values["compressed"] ?? false;  // danteLog ("DanteBackup", "zip:     " . $this->zip. "\n");
-  $this->enc       = $values["encrypted"]  ?? false;  // danteLog ("DanteBackup", "enc:     " . $this->enc). "\n";
-
-  // REVISIONS: pick up which pages should be included
-  if      ( isset ($values["srcFeatures"]) && strcmp ($values["srcFeatures"], "current") == 0) { $this->all = false; }
-  else if ( isset ($values["srcFeatures"]) && strcmp ($values["srcFeatures"], "all")     == 0) { $this->all = true;  }
-  else                                                                                         { $this->all = false; }
-  danteLog ("DanteBackup", "all=" . $this->all . "\n"); 
-
-  if ( isset ($values["srces"]) ) { $this->srcFiles = $values["srces"];} else {  $this->srcFiles = "all";}
-
-  danteLog ("DanteBackup", "srcFiles=" . $this->srcFiles. "\n"); 
-
-  $this->meta    = true;  // always include file upload action metadata with File: pages  
-  $this->files   = true;  // always include file contents with File: pages  
-      
- // get the values stored in the preferences
-  $this->bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
-  $this->aesPW            = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-encpw' );
+  danteLog ("DanteBackup", "dispatching on $this->target\n");
 
   // dispatch function
-  if ( isset ($values["target"] ) ) {  // if we have this set, we are called from the form. We execute the tasks and return.
+  if ( $this->target  ) {  
     $txt = null;
-    switch ($values["target"]) {
+    switch ( $this->target ) {
       case "awsFore":       $txt = self::dumpToAWS_FG         ( $this );   break;
       case "awsBack":       $txt = self::dumpToAWS_BG         ( $this );  break;
       case "githubFore":   /*  $txt = self::dumpToAWS_FG  ( $this);  */ break;
@@ -116,14 +136,10 @@ private function handleForm ( ) {
  //     case "serverBack":    $txt = self::dumpToServer ( $this, $bucketName, true);      break;
       default:              throw new Exception ("Illegal value found for target:" . $values["target"] . " This should not happen");
     }
-  if ( $txt !== null ) { $this->getOutput()->addHTML ($txt); }
+  // if ( $txt !== null ) { $this->getOutput()->addHTML ($txt); }
   return;
   }
-
-
 }
-
-
 
 
 
@@ -131,6 +147,8 @@ private function handleForm ( ) {
 private static function cmdZipEncDump ( $cmd, $zip, $enc ) {
   return "set -o pipefail; " . $cmd . ($zip ? " | gzip " : " ") . ($enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -pass env:LOCAL_FILE_ENC " : " ") ; 
 }
+
+
 
 
 private static function dumpToList ( $src ) {
@@ -149,15 +167,15 @@ private function dumpToWindow ( ) {
 }
 
 
-  private static function dumpToBrowser ($obj, ) {
-    $filename = DanteCommon::generateFilename( $obj->getNativeExtension(), $obj->zip, $obj->enc);
-    DanteCommon::contentTypeHeader ($obj->zip, $obj->enc);
-    header( "Content-disposition: attachment;filename={$filename}" );
-    $cmd = $obj->getCommand ();
-    $cmd = self::cmdZipEncDump ($cmd, $obj->zip, $obj->enc, $obj->aesPW);
-    $result = 0; 
-    passthru ($cmd, $result);
-  }
+private static function dumpToBrowser ($obj, ) {
+  $filename = DanteCommon::generateFilename( $obj->getNativeExtension(), $obj->zip, $obj->enc);
+  DanteCommon::contentTypeHeader ($obj->zip, $obj->enc);
+  header( "Content-disposition: attachment;filename={$filename}" );
+  $cmd = $obj->getCommand ();
+  $cmd = self::cmdZipEncDump ($cmd, $obj->zip, $obj->enc, $obj->aesPW);
+  $result = 0; 
+  passthru ($cmd, $result);
+}
 
 
 // obj go away 
@@ -209,7 +227,7 @@ public static function dumpToAWS_FG ( $obj ) {
 
   $cmd = "/opt/myenv/bin/aws s3api list-objects-v2 --bucket {$obj->bucketName} --query 'Contents[].[Key,LastModified,Size]' --output json";
   danteLog ("DanteBackup", "Will now call executor \n"); 
-  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );
+  $retCode = Executor::executeAWS_FG_RET ( $cmd, $env, $output, $error );  // TODO: REFACTOR !
   $objects = json_decode($output, true);  // Decode the JSON output into a PHP array
   if (is_array($objects)) {
     usort($objects, function ($a, $b) {return strtotime($b[1]) - strtotime($a[1]);});    // Sort the objects by LastModified in descending order
@@ -255,11 +273,24 @@ public static function dumpToServer ( $obj, $name, $zip, $enc, $aesPW, $backgrou
 
 // generate and return a command for dumping pages
 // as side effect: generates a list of files to dump
-public function getCommand (  ) {
+public function getPageCommand (  ) {
   global $IP;
-  $fullOpt           = ( $this->all      ? "--full "         : "--current");
-  $includeFilesOpt   = ( $this->meta     ?  "--uploads"      : " ");
-  $filesOpt          = ( $this->files    ? "--include-files" : " ");
+
+  // fullOpt controls the options on pages present
+  switch ( $this->srcFeatures ) {
+    case "current":            $fullOpt = "--current"; break;
+    case "allrevisions":       $fullOpt = "--full";    break;
+    default: throw new Exception ("Wrong value for parameter srcFeatures: $this->srcFeatures");
+  }
+
+  // filesOpt controls th options on filesize
+  switch ( $this->files ) {
+    case "nofiles":  $filesOpt = "";          break;
+    case "metadata": $filesOpt = "--uploads"; break;
+    case "separate": $filesOpt == "";         break;
+    case "include":  $filesOpt = "--uploads --include-files"; break;
+    default: throw new Exception ("wrong vlaue for parameter files: $this->files");
+  }
 
   danteLog ("DanteBackup", "Source specification is: " . $this->srcFiles . "\n");
   if ( $this->srcFiles != "all" ) {self::listOfFiles ( $this->srcFiles ); 
@@ -267,7 +298,7 @@ public function getCommand (  ) {
    }  // generate a file which contains a list of files to dump
   else {$srcOpt = "";}
 
-  $command = " php $IP/maintenance/dumpBackup.php $fullOpt $includeFilesOpt $filesOpt $srcOpt";
+  $command = " php $IP/maintenance/dumpBackup.php $fullOpt $filesOpt $srcOpt";
   danteLog ("DanteBackup", "\nDanteDump: getCommand: Command for dumping is: " . $command);
 
   return $command;
@@ -275,25 +306,40 @@ public function getCommand (  ) {
 
 
 
-// generates a list of files to backup in file $IP/extensions/DanteBackup/list_of_files_to_backup
-private function listOfFiles ( $spec ) {
-  global $IP;
-  @unlink ( "$IP/extensions/DanteBackup/list_of_files_to_backup");  // delete list of files to dump
-  switch ( $spec ) {
-    case "corefiles":          $this->getConfigFile ("Corefiles");  break;
-    case "backupfiles":        $this->getConfigFile ("Backupfiles");  break;
-    case "backupcategory":     $this->makeCatFileList  ("backup");  break;
-    case "backupcategories":   $this->makeLongList ();  break;
-    case "all":               $srcOpt = " ";  break;  // TODO: WHAT ABOUT THE DRYRUN in this case !!!!!  where do we get the list of all files ???
-    // TODO: also want option: all with the exception of the system files (what are they ???)
-  }
+/////// TODO: MUST SWITCH MEDIAWIKI INTo READ ONLY MODE WHILE DUMPING !!!!!!! or we get race conditions and similar stuff
+//// $wgReadOnly = 'Maintenance: backing up files';
+
+
+private function getDBCommand () {
+  global $wgDBname, $wgDBserver, $wgDBpassword, $wgDBuser;
+  $cmd = "mysqldump --host=$wgDBserver --user=$wgDBuser --password=$wgDBpassword --single-transaction $wgDBname " . ($this->zip ? " | gzip " : "") . ($this->enc ? " | openssl aes-256-cbc -e -salt -pass $aesPW " : "" );
+  return $cmd;
+}
+
+private function getFilesCommand () {
+  global $wgUploadDirectory;
+  $cmd = "tar -czvf mediawiki-uploads.tar.gz --exclude='thumb' \"$wgUploadDirectory\" "; 
+
+
 }
 
 
 
 
-
-
+// generates a list of files to backup in file $IP/extensions/DanteBackup/list_of_files_to_backup
+private static function listOfFiles ( $srcFiles ) {
+  global $IP;
+  @unlink ( "$IP/extensions/DanteBackup/list_of_files_to_backup");  // delete current list of files to dump
+  switch ( $srcFiles ) {
+    case "nopages":         // $this->getConfigFile ("Corefiles");  break;  // TODO: not active ????
+    case "listed":             $this->getConfigFile ("Backupfiles");  break;  // TODO check and fix
+    case "category":           $this->makeCatFileList  ("backup");  break;// TODO check and fix
+    case "categories":         $this->makeLongList ();  break;// TODO check and fix
+    case "all":               $srcOpt = " ";  break;  // TODO: WHAT ABOUT THE DRYRUN in this case !!!!!  where do we get the list of all files ???
+    // TODO: also want option: all with the exception of the system files (what are they ???)
+    default: throw new Exception ("Wrong value for parameter pages: $srcFiles");
+  }
+}
 
 
 // given the name of a file inside of MediaWiki namespace, generate a file named list_of_files_to_backup
@@ -445,10 +491,6 @@ function getAllPageNames() {
 
   return $allPageNames;
 }
-
-// TODO: deprecate
-// return the native file extension this dumper would return
-// public function getNativeExtension () { return "xml";}
 
 
 
