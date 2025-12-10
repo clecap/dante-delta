@@ -77,6 +77,9 @@ ERRORLOG
 !.gitconfig
 
 ### Directories which we want to include 
+!extensions/DanteCommon
+!extensions/DanteCommon/*
+
 !extensions/DanteSynch
 !extensions/DanteSynch/*
 

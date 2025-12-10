@@ -1,0 +1,25 @@
+{
+  "name":     "DanteCommon",
+  "version":  "1.0", 
+  "author":   ["Clemens H. Cap"],
+  "url":      "",
+  "description": "Provides common functionality for Dantee extensions",
+  "license-name": "GPL-2.0-or-later",
+  "type": "other",
+  "AutoloadClasses": {
+
+  },
+  "ResourceModules": {
+    "ext.DantePresentations": {
+      "localBasePath":       "modules",
+      "remoteExtPath":       "DantePresentations/modules",
+      "packageFiles":        ["ext.DantePresentations.js", "audio.js", "languages.js"],
+      "styles":              ["dantePresentations.css"]
+    },
+    "ext.DantePresentations.styles": {
+      "styles": ["special.css", "tags.css", "toc.css"],
+      "position": "top"
+    }
+  },
+  "manifest_version": 2
+} 
