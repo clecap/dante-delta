@@ -161,6 +161,7 @@ $wgDrawioEditorBackendUrl=$wgServer.$wgScriptPath. "/external-services/draw-io/d
 ###
 ### Dante Extensions: Configure and Load
 ###
+wfLoadExtension ( ext: 'DanteCommon' ); // core part for all dante extensions
 wfLoadExtension( 'DanteBread' );
 wfLoadExtension( 'DanteLinks' );
 wfLoadExtension( 'DanteTree' );

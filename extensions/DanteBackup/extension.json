@@ -10,8 +10,6 @@
   "AutoloadClasses":      {
     "DanteDump":                "DanteDump.php",
     "DanteRestore":             "DanteRestore.php",
-    "DanteDBDump":              "DanteDBDump.php",
-    "DanteDBRestore":           "DanteDBRestore.php",
     "DanteListBackups":         "DanteListBackups.php",
     "DanteBackupPreferences":   "DanteBackupPreferences.php",
     "DanteInitialStore":        "DanteInitialStore.php",
@@ -21,8 +19,6 @@
   "SpecialPages": {
     "DanteDump":          { "class": "DanteDump"  },
     "DanteRestore":       { "class": "DanteRestore"  },
-    "DanteDBDump":        { "class": "DanteDBDump"  },
-    "DanteDBRestore":     { "class": "DanteDBRestore"  },
     "DanteListBackups":   { "class": "DanteListBackups"},
     "DanteInitialStore":  { "class": "DanteInitialStore"},
     "DanteInitialLoad":   { "class": "DanteInitialLoad"}

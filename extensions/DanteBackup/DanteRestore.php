@@ -6,15 +6,16 @@ require_once ("DanteCommon.php");    // TODO: really? check ?!
 require_once ("extensions/DantePresentations/helpers/ServiceEndpointHelper.php");
 
 
-class DanteRestore extends SpecialPage {
+class DanteRestore extends DanteSpecialPage {
 
 public function __construct() {parent::__construct( 'DanteRestore', 'dante-restore' ); }
 
-protected function getGroupName() {return 'dante';}
+// protected function getGroupName() {return 'dante';}
 
 // page provides hint to read-only mode engine that it might do a write
 public function doesWrites() {return true;}
 
+/*
 public function execute( $par ) {
   $this->setHeaders();
   $this->checkPermissions();
@@ -25,6 +26,7 @@ public function execute( $par ) {
   if ( $action === 'submit' && $request->wasPosted() ) { $this->handleSubmission ( $request ); } 
   else {$this->showForm();}
 }
+*/
 
 
 private function showForm() {
@@ -259,11 +261,11 @@ public static function getCommandsSSH ($url) {
 }
 
 
-private function doImportFunctionality ( $arr, $env ) {
+private function doImportFunctionality ( $cmd, $env ) {
   $envJson = json_encode ($env);                                            // convert PHP environment array into json text format                        
   $cmdJson = json_encode ( $cmd );                                          // convert PHP command Array into json text format
-  ServiceEndpointHelper::attachToSession ( $cmdJson, $envJson );            // attach command Array and environment in string form to the current session
-  $this->getOutput()->addHTML ( ServiceEndpointHelper::getGeneral () );     // send a general html template which then contains javascript which activates a serviceEndpoint sending event streams 
+  ServiceEndpointHelper::attachToSession ( $cmdJson, $envJson );         // attach command Array and environment in string form to the current session
+  $this->getOutput()->addHTML ( ServiceEndpointHelper::getGeneral () );      // send a general html template which then contains javascript which activates a serviceEndpoint sending event streams 
   return true;
 }
 // TODO: the serviceEndpoint we use here - should probably not be part of DantePresentations but of DanteBackup - also might require adjustment of Apache configuration for the PHP execution !!
