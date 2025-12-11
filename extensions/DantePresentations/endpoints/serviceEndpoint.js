@@ -35,10 +35,11 @@ function handler (e) {
     case "stdout": { let ele =document.getElementById ("stdout-" + obj.num); ele.classList.add ("stdout-active"); ele.textContent += obj.data;  down(ele); break; }
     case "cmd":    { let ele =document.getElementById ("cmd-" + obj.num); ele.textContent += obj.data; down (ele); break;    }
       
+    // setup sets up another template for a command to receive further information updates  
     case "setup":  {
       const fragment = 
         `<div id="container-${obj.num}" class="container">
-           <h3 class="title"># ${obj.num} <span id="status-${obj.num}" class="status"></span> <span id="cmd-${obj.num}" class="cmd"></span></h3>
+           <h3 class="title"># ${obj.num} <span id="status-${obj.num}" class="status"></span> <span id="tick-${obj.num}" class="tick"></span> <span id="cmd-${obj.num}" class="cmd"></span></h3>
            <h4>Output</h4>
            <pre id="stdout-${obj.num}" class="stdout"></pre>
            <h4>Errors</h4>
@@ -47,7 +48,7 @@ function handler (e) {
        `;
       const target = document.getElementById('commands');
       target.insertAdjacentHTML('beforeend', fragment);
-      down (ele);
+      down (target);
       break;
     }
 
@@ -63,9 +64,11 @@ function handler (e) {
 
     case "was-ok": { let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("was-ok"); break;}
 
-
+    // we want to update the total running time (wall clock)
+    case "tick":   { let ele=document.getElementById ("tick-" + obj.num); ele.textContent = obj.data; break;;}
+    
     case "close": { console.warn ("will close event source"); source.close();  
-      let ele=document.createElement ("h1"); ele.textContent = obj.data; document.body.appendChild (ele);
+      let ele=document.createElement ("h2"); ele.textContent = obj.data; document.body.appendChild (ele);
       down (ele);
       break;}
 

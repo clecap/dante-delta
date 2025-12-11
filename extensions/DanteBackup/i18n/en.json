@@ -42,6 +42,7 @@
   "dbdumpform-features":  "Choose features of the database dump:",
 
   "restform-restore-from-s3": "Select a page dump file for restoring",
+  "restore-from-url": "Enter a URL for restoring from the file it designates",
 
   "prefs-aws":         "Credentials for AWS Backup",
 

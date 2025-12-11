@@ -4,7 +4,7 @@ use MediaWiki\MediaWikiServices;
 
 require_once ("DanteCommon.php");
 
-class DanteDump extends SpecialPage {
+class DanteDump extends DanteSpecialPage {
 
 #region  DATA which may be moved around in the scope of this class
 public string $archiveName;
@@ -41,21 +41,10 @@ public function getGroupName() {return 'dante';}
 // page provides hint to read-only mode engine that it will not write
 public function doesWrites() {return false;}
 
-public function execute( $par ) {
-  $this->setHeaders();
-  $this->checkPermissions();
-  $this->outputHeader();
-  $out = $this->getOutput();
-  $out->addModules( [ 'ext.DanteBackup.specialpage' ] );
-  $request = $this->getRequest();
-  $action = $request->getVal( 'action', 'view' );  // Read `action` query parameter; if not present use 'view' as fallback value
-
-  if ( $action === 'submit' && $request->wasPosted() ) { $this->handleSubmission ( $request ); } 
-  else {$this->showForm();}
-}
 
 
-private function showForm () {
+
+protected function showForm (): void {
  // send post data to THIS url and add action=submit to the URL so we can distinguish showing this page from submitting data to it
   $action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );  
 
@@ -100,27 +89,18 @@ private function pickUpData ( $request ) {
   danteLog ("DanteBackup", "bucketName $this->bucketName\n");
   danteLog ("DanteBackup", "aesPW $this->aesPW\n");
 
-
 }
 
-private function handleSubmission ( ) {
-  $request     = $this->getRequest();
-  $user        = $this->getUser();
-  $postedToken = $request->getVal( 'wpEditToken' );
 
-  // check CSRF token
-  if ( !$user->matchEditToken( $postedToken, 'dantedump' ) ) {   // check with MATCHING salt above // TODO: matchEditToken will be deprecated in versions higher than MW 1.39
-    $this->getOutput()->addWikiTextAsContent("'''Invalid or expired token. Please try again.'''");
-    $this->showForm();    // re-show form with a fresh token
-    return false;
-  }
 
-  self::pickUpData ( $request );
 
-  danteLog ("DanteBackup", "dispatching on $this->target\n");
+protected function getSpecificCommands ( $formId ): mixed {
 
-  // dispatch function
-  if ( $this->target  ) {  
+// dispatch function
+ 
+ // TODO: still fully broken
+$cmd = [];
+
     $txt = null;
     switch ( $this->target ) {
       case "awsFore":       $txt = self::dumpToAWS_FG         ( $this );   break;
@@ -137,9 +117,9 @@ private function handleSubmission ( ) {
       default:              throw new Exception ("Illegal value found for target:" . $values["target"] . " This should not happen");
     }
   // if ( $txt !== null ) { $this->getOutput()->addHTML ($txt); }
-  return;
-  }
+  return $cmd;
 }
+
 
 
 
@@ -178,6 +158,10 @@ private static function dumpToBrowser ($obj, ) {
 }
 
 
+
+
+
+
 // obj go away 
 // background // TODO redo completelly
 public static function dumpToAWS_BG ($obj ) {
@@ -195,8 +179,21 @@ public static function dumpToAWS_BG ($obj ) {
 
 
 
+
+private function getAWSCommands () {
+
+
+
+}
+
+
+
+
+
+
 // foreground
 public static function dumpToAWS_FG ( $obj ) {
+
   danteLog ("DanteBackup", "DanteDump::dumpToAWS_FG called \n"); 
   $cmd     = "set -o pipefail; " . $obj->getCommand ( );  // pipefail prevents masking of error conditions along the pipe
   $cmd     = self::cmdZipEncDump ($cmd, $obj->zip, $obj->enc, $obj->aesPW);
@@ -205,7 +202,6 @@ public static function dumpToAWS_FG ( $obj ) {
 
   $retText = "";  // accumulates this and the subsequent listing command
 
-  danteLog ("DanteBackup", "DanteDump::dumpToAWS_FG will now get environment \n"); 
   $env = DanteCommon::getEnvironmentUser ($obj->getUser());
 
   danteLog ("DanteBackup", "DanteDump::dumpToAWS_FG will now call executor for dump commands \n"); 
@@ -462,7 +458,7 @@ private function fetchSubcategories($category) {
 
 
 // Fetches all page names from a MediaWiki site across all namespaces.
-function getAllPageNames() {
+function getAllPageNames(): array {
   $allPageNames = [];
   $continue = '';
 
