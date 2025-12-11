@@ -102,7 +102,7 @@ public function execute( $par ) {
 
 // TODO: test if we get the error messages from aws s3 (eg when using inextistan eys etc)
 
-  $cmd = " aws s3 cp s3://dantebackup.iuk.one/back1 -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php /var/www/html/wiki-dir/maintenance/importDump.php --uploads "; 
+  $cmd = " aws s3 cp s3://dantebackup.iuk.one/back1 -  | " .  ($enc ? " openssl aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass pass:password | " : "" )  .  ($zip ? " gunzip -c | " : "") . " php /var/www/html/wiki-dir/maintenance/importDump.php --uploads "; 
   $output=null;
   $retval=null;
   MWDebug::log ( "will execute: " .   print_r ( $cmd,   true )  );

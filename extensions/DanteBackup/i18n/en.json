@@ -4,8 +4,6 @@
   },
   "dantedump":            "Dante Dump",
   "danterestore":         "Dante Restore",
-  "dantedbdump":          "Dante Database Dump",
-  "dantedbrestore":       "Dante Database Restore",
   "dantelistbackups":     "Dante List Backups",
   "danteinitialstore":    "Dante Initial Store",
   "danteinitialload":    "Dante Initial Load",
@@ -26,16 +24,16 @@
 
   "restore-from-aws": "Select one of the following AWS S3 files",
 
-  "dumpform-header": "Identification: What is the name of the dump?",
+  "header": "Identification: What is the name of the dump?",
 
-  "dumpform-srcfeatures": "Source: What shall the dump include?",   
-  "dumpform-rc":  "Database:Shall we produce a database dump?",
-   "dumpform-rf":  "Files: Shall uploaded files be included?",
-  "dumpform-rb":  "Pages: Which pages shall be included in the page dump?",
-  "dumpform-ra":  "Revisions: Which revisions shall be included in the page dump?",
+  "srcfeatures": "Source: What shall the dump include?",   
+  "rc":  "Database:Shall we produce a database dump?",
+  "rf":  "Files: Shall uploaded files be included?",
+  "rb":  "Pages: Which pages shall be included in the page dump?",
+  "ra":  "Revisions: Which revisions shall be included in the page dump?",
   "dumpform-up":  "Files: For the uploaded files, include:",
-  "dumpform-features":  "Features: Which further things do you require?",
-  "dumpform-target":  "Target: Where shall the dump be stored?",
+  "features":  "Features: Which further things do you require?",
+  "target":  "Target: Where shall the dump be stored?",
   "dumpform-debug":  "Show debug output (only advanced users and only for AWS S3)",
 
   "dbdumpform-target": "Where shall the database dump be stored?", 

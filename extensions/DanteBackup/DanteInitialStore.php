@@ -137,12 +137,18 @@ public function execute ( $subPage ) {
 // TODO; MUST clear /tmp files afterwrds - we still do not do so !!
 
 
+
+
 class DanteInitialLoad extends SpecialPage {
 
 public function __construct () { parent::__construct( 'DanteInitialLoad' ); }
 
 public function getGroupName() {return 'dante';}
   
+
+// TODO: CAVE: THIS LACKS CSRF check !!!!!!!!!
+
+
 public function execute ( $subPage ) {
   //  if (! $this->getUser()->isAllowed ("dante-restore") ) { $this->getOutput()->addHTML ("You do not have the permission to restore."); return;}  
 

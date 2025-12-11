@@ -29,28 +29,15 @@ function getSubPagesFor( $titleText, $namespace ) {
 
 class DanteCommon {
 
-const DUMP_PATH = "DUMP";
-
-// describe the form to be displayed (and insert the default values picked up from preferences)
-const INFO = [
-  'ainform' => ['type' => 'info', 'section' => '',
-      'label' => 'info',
-      'default' => '<a href="https://wikipedia.org/">Wikipedia</a>',
-      'raw' => true,   // If true, the above string won't be HTML escaped
-  ] 
-];
-
-
+const DUMP_PATH = "/var/www/html/wiki-dir/dump";    // TODO: allow this as setting in the configuration file !! 
 
 const HEADER = [
-   'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'debug', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
+   'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump', 
+      'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
    'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Page Dump',  'name' => 'archiveName', 'type' => 'text',     'readonly' => true  ],
    'dbname'  => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Database', 'name' => 'dbName',      'type' => 'text',       'readonly' => true  ],
    'tarname' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',     'type' => 'text',  'readonly' => true  ],
 ];
-
-
-
 
 const FEATURES = [
   'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],
@@ -121,19 +108,13 @@ const DEBUG_FORM = [
    return  [
     'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
         'options' => [ // "bibi".wfMessage ('somestuff')->plain() =>  "checkme",  // TODO: that's how to localize this stuff; that's why we have this as return of a function and not as a const array
-           '<b>AWS S3 foreground</b> (shows error messages; may take minutes to hours)'                                                                                 => "awsFore",
-           '<b>AWS S3 background</b> (no error messages; need to check for completion by <a href=\'./index.php?title=Special:DanteListBackups\'>listing backups</a>)'   => "awsBack", 
-           '<b>Github foreground</b> (shows error messages; may take minutes to hours)'                                                                                 => "githubFore",
-           '<b>Github background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'                   => "githubBack", 
-           '<b>SSH foreground</b> (shows error messages; may take minutes to hours)'                                                                                    => "sshFore",
-           '<b>SSH background</b> (no error messages; need to check for completion by <a href=\'./Special:DanteListBackups\'>listing backups</a>)'                      => "sshBack", 
-           "<b>Client</b> (save as file on the client using the browser)"                                                                                               => "client",
-           '<b>Window</b> (show it in the browser window; may include error messages; useful for debugging)'                                                                   => "window",
-           '<b>List</b> (only show list of files as dry-run; does <em>not</em> dump; useful for debugging)'                                                                    => "list",
-           '<b>Server foreground</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                                         => "serverFore",
-           '<b>Server background</b> (no error messages; need to check for completion on server; only testing or when server accessible)'                               => "serverBack",
+           '<b>AWS S3</b> (shows error messages; may take minutes to hours)'                                                                                 => "aws",
+           '<b>Github</b> (shows error messages; may take minutes to hours)'                                                                                 => "github",
+           '<b>SSH / SCP</b> (shows error messages; may take minutes to hours)'                                                                              => "ssh",
+           "<b>Client</b> (save as file on the client using the browser)"                                                                                    => "client",
+           '<b>Server</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                                         => "server",
         ], 
-        'name' => 'target',  'default' => 'awsFore', 
+        'name' => 'target',  'default' => 'aws', 
  ]  ,
   ];
 
@@ -153,33 +134,12 @@ public static function checkSuffix ( $string, $suffix) {
 }
 
 
-
-
-
-
-
-
-
-
-
-  public static function generateFilename ($typ, $zip, $enc) {
-    global $wgSitename;
-    $filename = urlencode( $wgSitename ) . wfTimestampNow();
-   if ($enc) { if ($zip) { return  $filename . ".$typ.gz.aes" ;} else { return $filename . ".$typ.aes" ;}} 
-    else      { if ($zip) { return  $filename . ".$typ.gz"     ;} else { return $filename . ".$typ"     ;}}
-  }
-
-  // $obj: the object providing the getNativeExtension and generateCommand functions
-
-
-
-
   // command decorator. result then gets piped/redirected into different sinks
 //   TODO: MAYBE: openssl aes-256-cbc -e -salt -pbkdf2 -pass pass:$aesPW " : " ") ; 
-// openssl aes-256-cbc -d -salt -pbkdf2 -pass ENV:LOCAL_FILE_ENC |
+// openssl aes-256-cbc -d -salt -pbkdf2 -iter 100000-pbkdf2 -pass ENV:LOCAL_FILE_ENC |
 public static function cmdZipEncRestore ( $cmdGenerate, $cmdConsume, $zip, $enc ) {
   danteLog ("DanteBackup", "\n DanteCommon::cmdZipEncRestore generate: $cmdGenerate \n $cmdConsume \n  " . ($zip ? "  compressed": "  UNcompressed")."\n   $enc \n\n");
-  $ret = "set -o pipefail; " .  $cmdGenerate . ($enc ? " openssl aes-256-cbc -d -salt -pass env:LOCAL_FILE_ENC | " : "" ) . ($zip ? " gunzip -c | " : "") .  $cmdConsume;
+  $ret = "set -o pipefail; " .  $cmdGenerate . ($enc ? "   aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC | " : "" ) . ($zip ? " gunzip -c | " : "") .  $cmdConsume;
   danteLog ("DanteBackup", "\n DanteCommon::cmdZipEncRestore returns $ret \n\n");
   return $ret;
 }

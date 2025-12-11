@@ -24,6 +24,7 @@ function extractPreContents ($code) {
   return $result;
 }
 
+
 function danteLog ($extension, $text) {
   $fileName = dirname(__FILE__) . "/extensions/".$extension."/LOGFILE";
   
@@ -35,9 +36,6 @@ function danteLog ($extension, $text) {
   if ($fileSize > 1000000) {  $handle = fopen($fileName, 'w'); }  // truncate too long files
 
 }
-
-
-
 
 
 

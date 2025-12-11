@@ -7,7 +7,9 @@
   "license-name": "GPL-2.0-or-later",
   "type": "other",
   "AutoloadClasses": {
-    "DanteSpecialPage":     "DanteSpecialPages.php"
+    "DanteSpecialPage":     "DanteSpecialPages.php",
+    "ServiceExecutor":      "ServiceExecutor.php",
+    "InfoExtractor":        "InfoExtractor.php"
   },
   "ResourceModules": {
     "ext.DantePresentations": {

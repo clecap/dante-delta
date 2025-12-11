@@ -3,7 +3,7 @@
 require_once ("Executor.php");       // TODO: should move away from this
 require_once ("DanteCommon.php");    // TODO: really? check ?!
 
-require_once ("extensions/DantePresentations/helpers/ServiceEndpointHelper.php");
+require_once ("extensions/DanteCommon/ServiceEndpointHelper.php");
 
 
 class DanteRestore extends DanteSpecialPage {
@@ -19,7 +19,8 @@ protected function showForm  (): void  {
   $action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );  
 
   $out    = $this->getOutput();
-  $out->addStyle ("../extensions/DanteBackup/danteBackup.css"); 
+  $out->addModuleStyles ( ['ext.DanteBackup.specialpage.styles'] );  // this is a styles-only module which mediawiki loads early enough to prevent FOUC
+
   $out->addHTML (wfMessage ("dante-page-restore-intro"));
 
   // provide a help link
@@ -50,9 +51,6 @@ protected function showForm  (): void  {
 
 
 
-
-
-
 protected function getSpecificCommands ( $formId ): mixed {
   $request = $this->getRequest();
   switch ($formId) {
@@ -77,6 +75,7 @@ protected function getSpecificCommands ( $formId ): mixed {
      case 'formId_URL':
       $url = $request->getVal ("url");
       $this->doImportURL ( $url, $this->getUser() );
+
       break;
      case 'formId_SCP':
      // TODO

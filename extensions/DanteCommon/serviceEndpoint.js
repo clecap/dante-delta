@@ -1,14 +1,4 @@
-
-
-
-const script = document.currentScript;
-const url = script.src;
-const params = new URL(url).searchParams;
-const sn     = params.get('sn');
-console.info ("seeing sn = ", sn);
-
-
-const source = new EventSource("./extensions/DantePresentations/endpoints/serviceEndpoint.php?sn="+sn);
+const source = new EventSource("./extensions/DanteCommon/serviceEndpoint.php");
 
 
 function handler (e) {
@@ -31,10 +21,7 @@ function handler (e) {
       log.scrollTop = log.scrollHeight;     // Auto-scroll to bottom
       break;
 
-    case "stderr": { let ele =document.getElementById ("stderr-" + obj.num); ele.classList.add ("stderr-active"); ele.textContent += obj.data; down(ele);  break; }
-    case "stdout": { let ele =document.getElementById ("stdout-" + obj.num); ele.classList.add ("stdout-active"); ele.textContent += obj.data;  down(ele); break; }
-    case "cmd":    { let ele =document.getElementById ("cmd-" + obj.num); ele.textContent += obj.data; down (ele); break;    }
-      
+     
     // setup sets up another template for a command to receive further information updates  
     case "setup":  {
       const fragment = 
@@ -52,29 +39,19 @@ function handler (e) {
       break;
     }
 
-    case "status": { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; break; }  // write in the closing status // TODO: can we deprecate this??
-
+    case "stderr":     { let ele =document.getElementById ("stderr-" + obj.num); ele.classList.add ("stderr-active"); ele.textContent += obj.data; down(ele);  break; }
+    case "stdout":     { let ele =document.getElementById ("stdout-" + obj.num); ele.classList.add ("stdout-active"); ele.textContent += obj.data;  down(ele); break; }
+    case "cmd":        { let ele =document.getElementById ("cmd-" + obj.num); ele.textContent += obj.data; down (ele); break;    }
+    case "status":     { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; break; }  // write in the closing status // TODO: can we deprecate this??
     case "running":    { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; ele.classList.add ("running"); break; }  // write in the closing status    
     case "exitOk":     { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; ele.classList.add ("exitOk");  break; }  // write in the closing status    
     case "exitErr":    { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; ele.classList.add ("exitErr"); break; }  // write in the closing status    
     case "drainOk":    { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; ele.classList.add ("drainOk");  break; }  // write in the closing status    
     case "drainErr":   { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; ele.classList.add ("drainErr"); break; }  // write in the closing status        
-
-    case "in-error": { let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("in-error"); break; }
-
-    case "was-ok": { let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("was-ok"); break;}
-
-    // we want to update the total running time (wall clock)
-    case "tick":   { let ele=document.getElementById ("tick-" + obj.num); ele.textContent = obj.data; break;;}
-    
-    case "close": { console.warn ("will close event source"); source.close();  
-      let ele=document.createElement ("h2"); ele.textContent = obj.data; document.body.appendChild (ele);
-      down (ele);
-      break;}
-
-
-
-
+    case "in-error":   { let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("in-error"); break; }
+    case "was-ok":     { let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("was-ok"); break;}
+    case "tick":       { let ele=document.getElementById ("tick-" + obj.num); ele.textContent = obj.data; break;;}      // we want to update the total running time (wall clock)
+    case "close":      { source.close();  let ele=document.createElement ("h2"); ele.textContent = obj.data; document.body.appendChild (ele); down (ele); break;}
 
     default: {
       const li = document.createElement('li');
@@ -90,7 +67,6 @@ source.onmessage=handler;
 
 source.onerror = e => {console.error('SSE error', e);};
       
-
 // returns a handler for logging messages in side of the general log area with a prefix
 const logHandler = ( prefix ) => (e => {
   console.log (e);
@@ -101,7 +77,7 @@ const logHandler = ( prefix ) => (e => {
   log.scrollTop = log.scrollHeight;     // Auto-scroll to bottom
 });
 
-
+// special event types are logged into the general log
 source.addEventListener ("exception",     logHandler ("Exception: ")     );
 source.addEventListener ("php-exception", logHandler ("PHP Exception: ") );
 source.addEventListener ("php-error",     logHandler ("PHP Error: ")     );

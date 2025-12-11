@@ -3,10 +3,8 @@
 // serviceEndpoint implements a more general endpoint for executing long running scripts with error control possibilities for the user
 // ServiceendpointHelper attaches a script to the session and displays an HTML frame in which events can be displayed
 
-
-
 // need to use MediaWiki session manager 
-require __DIR__ . '/../../../includes/WebStart.php';
+require __DIR__ . '/../../includes/WebStart.php';
 use MediaWiki\Session\SessionManager;             
 $session = SessionManager::getGlobalSession();
 
@@ -56,8 +54,10 @@ $envString = $session->get ( 'Dante_Env' );  // a string which encodes in JSON f
 $cmdArray = json_decode ( $cmdString, true );
 $envArray = json_decode ( $envString, true);
 
-require_once ( __DIR__ . "/../helpers/ServiceEndpointHelper.php");
+require_once ( __DIR__ . "/ServiceEndpointHelper.php");  // CAVE: MUST require this here, since the autoloader mechanism does not properly detect the callable below
+// require_once ( __DIR__ . "/ServiceExecutor.php");     // NOTE: THat ius not necessary, this is autoloaded properly
 
-ServiceEndpointHelper::liveExecuteJsonStream ( $cmdArray, $envArray );
+$stdoutCollect = null; $stderrCollect = null;
+ServiceExecutor::executeCommandArray ( $cmdArray, $envArray, $stdoutCollect, $stderrCollect, [ ServiceEndpointHelper::class, 'sendEvent' ] );
 
 ?>

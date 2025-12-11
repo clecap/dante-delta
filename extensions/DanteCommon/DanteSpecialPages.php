@@ -7,8 +7,9 @@ abstract class DanteSpecialPage extends SpecialPage {
 protected function getGroupName() {return 'dante';}
 
 
-public function execute( $par ) {
+public function execute( $par ): void {
   $this->setHeaders();
+
   $this->checkPermissions();
   $this->outputHeader();
   $request = $this->getRequest();
@@ -36,9 +37,12 @@ protected function handleSubmission () {
     $formId = $request->getVal( 'wpFormIdentifier' );  // get formId to see, which form was used
     danteLog ("DanteBackup", "On submission: Form identifier: " . print_r ($formId, true) ."\n");
     
-    $arr = $this->getSpecificCommands ( $formId );    // now that we know which form was used, dispatch the execution of the forms submission
+    $arr = $this->getSpecificCommands ( $formId );                          // now that we know which form was used, dispatch the execution of the forms submission
     $env = DanteCommon::getEnvironmentUser ($this->getUser());                // get the environment for the user (needed for execution)
 
+    danteLog ("DanteBackup", "environment in handleSubmission is ".print_r ($env, true));
+
+    // The following now does the dispatching via the html code generated below in ServiceEndpointHelper
     $this->executeCommands ( $arr, $env );            // finally dispatch the execution of these commands
 
   } catch ( Exception $x) {
@@ -50,7 +54,7 @@ protected function handleSubmission () {
 
 
 /**
- * Execute the commands in array $cmd and stream stdou and stderr by an event stream mechanism to the browser.
+ * Execute the commands in array $cmd and stream stdout and stderr by an event stream mechanism to the browser.
  *
  * @param [type] $cmd
  * @param [type] $env

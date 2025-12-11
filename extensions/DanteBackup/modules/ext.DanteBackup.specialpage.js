@@ -1,5 +1,4 @@
-// console.error ("DanteBackup.js is there");
-
+//alert ("ext.DanteBackup.specialpage.js loaded");
 
 
 var siteName = mw.config.get('wgSiteName');

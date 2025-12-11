@@ -1,0 +1,35 @@
+#log {overflow: auto;  max-height:100px; height:50px;}
+
+.status, .tick, .cmd {font-weight:normal; font-size:smaller; margin-left:20px;}
+
+.stdout, .stderr               {display:none; }
+.stdout-active, .stderr-active {display:block; overflow: auto; max-height:100px; }
+
+.stdout, .stderr {border:1px solid black; padding:6px; }
+
+.stdout        {background-color: lightgreen;}
+.stderr-active {background-color: pink !important;}
+
+
+h2 {font-weight:normal; margin-top:0px;}
+
+h3 {font-weight:normal;}
+
+h3   {margin-top:0px; margin-bottom:8px;}
+h4         {margin-bottom: 0px; margin-top:0px;}
+h4 + pre   {margin-top: 0;}
+
+#log, .container {background-color: Azure; border:1px solid grey; border-radius:10px;}
+#log, .container {margin:6px 6px 10px 0px; padding:6px;}
+
+.title {}
+
+.status    { font-weight:normal;}
+.running   {}
+.drainOk   {}
+.drainErr  {}
+.exitOk    {}
+.exitErr   {color:red; font-weight:bold;}
+
+.in-error {background-color: pink;}
+.was-ok   {background-color:lightgreen;}
