@@ -222,9 +222,9 @@ public static function getCommandsSSH ($url) {
 
 // generates a prefix for the choice form
 private static function getPrefix ($name) {
-  if (str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ) return "<b style='color:red;display:inline-block;width:80px;'>Database: </b> ";
-  if (str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ) return "<b style='color:blue;display:inline-block;width:80px;'>Pages:    </b>";
-  if (str_ends_with ($name, ".tar") || str_ends_with ($name, ".tar.aes") ) return "<b style='color:green;display:inline-block;width:80px;'>Files:    </b>";
+  if (str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ) return "<b  class='prefix-database'>Database: </b>";
+  if (str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ) return "<b  class='prefix-pages'>Pages: </b>";
+  if (str_ends_with ($name, ".tar") || str_ends_with ($name, ".tar.aes") ) return "<b class='prefix-files'>Files:    </b>";
 }
 
 
@@ -245,16 +245,18 @@ private function getFileArray () {
       $filtered = array_filter($objects, function ($object) { 
         $name = $object[0];
         return 
-        str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ||
-        str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml");
+          str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ||
+          str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ||
+          str_ends_with ( $name, ".tar") || str_ends_with ($name, ".tar.aes");
       });
       $filtered = array_values ( $filtered );
 
       usort($filtered, function ($a, $b) {return strtotime($b[1]) - strtotime($a[1]);});    // Sort the objects by LastModified in descending order
 
       foreach ($filtered as $object) {
-        $retArray[  "<span style='display:inline-block;width:400px;'>".self::getPrefix($object[0]).$object[0]."</span><span style='display:inline-block;width:300px;'>". $object[1] . "</span>".
-       "<span style='display:inline-block;width:400px;'>". number_format ($object[2]/ (1024*1024), 2)  . "[MB] </span>"] = $object[0];
+        $retArray[  "<span class='table-name'  >". self::getPrefix($object[0]). trim($object[0])."</span>".
+                    "<span class='table-stamp' >". $object[1] . "</span>".
+                    "<span class='table-size'  >". number_format ($object[2]/ (1024*1024), 2)  . "[MB] </span>"]   = $object[0];
        }  // foreach
     }
     else { $retArray["<div style='color:red;'><p>ERROR: Could not parse the following JSON return from aws:</p><p><code>$output</code></p></div>"]= "ERROR";}

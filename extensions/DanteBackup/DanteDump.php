@@ -6,12 +6,13 @@ require_once ("DanteCommon.php");
 require_once ("extensions/DanteCommon/ServiceEndpointHelper.php");
 
 
-$DUMP_PATH = "/var/www/html/wiki-dir/dump";    // TODO: allow this as setting in the configuration file !! 
+$DUMP_PATH = "/var/www/html/wiki-dir/dump";    // TODO: allow this as setting in the configuration file !!  // Path to place the server-local dumps to
 
 global $IP;
-$FILE_LIST_BACKUP = "$IP/extensions/DanteBackup/list_of_files_to_backup";
 
 class DanteDump extends DanteSpecialPage {
+
+public static $SPEC_PREFIX;  // initialized at end of class
 
 #region  DATA which may be moved around in the scope of this class
 public string $archiveName;
@@ -97,7 +98,11 @@ protected function getSpecificCommands ( $formId ): mixed {
       if ( $generateTar !== "" ) {$generateTar    .= " | /opt/myenv/bin/aws s3 cp -  s3://{$this->bucketName}/".$this->tarName; }
       return [$generatePages, $generateDb, $generateTar];  // that's the commands to be executed
       break;
-    case "github":   /*  $txt = self::dumpToAWS_FG  ( $this);  */ break;
+    case "github":   /*  $txt = self::dumpToAWS_FG  ( $this);  */ 
+      //InfoExtractor::exportAllToTextFiles ("/tmp/gitDump");
+      return $this->gitPrepare();
+      break;
+
     case "ssh":     /*  $txt = DanteCommon::dumpToAWS_FG  ( $this); */  break;
     case "client":        $this->getOutput()->disable();   self::dumpToBrowser ( $this );  break;
     case "server":     
@@ -122,10 +127,15 @@ protected function getSpecificCommands ( $formId ): mixed {
 /** wraps a command with
  *    1) a leading pipefail to prevent errors along the pipe to be masked
  *    2) piping into first compression and then encryption
+ *
+ *  @parameter ?bool If present and true then we must omit the gzip stuff, independently of what $this says. Needed for the tar file
  */
-private function wrap ( $cmd ) {
+private function wrap ( $cmd, $omitZip = false ) {
   if ( $cmd === "" ) {return "";}
-  return "set -o pipefail; " . $cmd . ($this->zip ? " | gzip " : " ") . ($this->enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC " : " ") ; 
+  $retval  = "set -o pipefail; " . $cmd;          // return in a pipe sequence the exit code of the first failing command
+  if ($omitZip !== false) {$retval .= ($this->zip ? " | gzip " : " ");}
+  $retval .= ($this->enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC " : " ") ; 
+  return $retval; 
 }
 
 
@@ -136,19 +146,6 @@ private static function cmdZipEncDump ( $cmd, $zip, $enc ) {
   return "set -o pipefail; " . $cmd . ($zip ? " | gzip " : " ") . ($enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC " : " ") ; 
 }
 
-
-
-/*
-private function dumpToWindow ( ) {
-  header( "Content-type: text/plain; charset=utf-8" );
-  $cmd = $this->getCommand ();
-  $cmd = self::cmdZipEncDump ($cmd, $this->zip, $this->enc, $this->aesPW);
-  $cmd = $cmd . " 2>&1 ";  // redirecting stderror gives us the chance of seeing error messages in the window 
-  $result = 0; 
-  passthru ($cmd, $result);
-  echo "ERROR: $result, $cmd";
-}
-*/
 
 /*
 private static function dumpToBrowser ($obj, ) {
@@ -167,16 +164,15 @@ private static function dumpToBrowser ($obj, ) {
 // as side effect: generates a list of files to dump
 public function getPageCommand (  ) {
   global $IP;
-  global $FILE_LIST_BACKUP;
 
-  // fullOpt controls the options on pages present
+  // fullOpt     controls the options on pages present
   switch ( $this->srcFeatures ) {
     case "current":            $fullOpt = "--current"; break;
     case "allrevisions":       $fullOpt = "--full";    break;
     default: throw new Exception ("Wrong value for parameter srcFeatures: $this->srcFeatures");
   }
 
-  // filesOpt controls which information on wiki uploaded files is present
+  // filesOpt    controls which information on wiki uploaded files is present
   switch ( $this->files ) {
     case "nofiles":  $filesOpt = "";          break;
     case "metadata": $filesOpt = "--uploads"; break;
@@ -187,18 +183,16 @@ public function getPageCommand (  ) {
 
   danteLog ("DanteBackup", "Source specification is: " . $this->srces . "\n");
 
-  // srces controls which pages are present in the xml page archive 
-
-// TODO: CLEAN - truncate the file !!!!!!!!!
-
+  // src controls which pages are present in the xml page archive 
+  // prepare the file lists for now
+  self::generateSpecFile ( null );  // generate all specification files
   switch ($this->srces) {
-    case "nopages":            touch ($FILE_LIST_BACKUP);  break;  // should be empty; xml dump may still contain namespace names etc.
-    case "listed":             InfoExtractor::articleExtract ("Backupfiles", true, $FILE_LIST_BACKUP);  break;  // TODO check 
-    case "category":           InfoExtractor::appendCategoryArticlesToFile ("backup", $FILE_LIST_BACKUP); break;
-    
-    case "categories":         $this->makeLongList ();  break;// TODO check and fix
-    case "all":               $srcOpt = " ";  break;  // TODO: WHAT ABOUT THE DRYRUN in this case !!!!!  where do we get the list of all files ???
-    // TODO: also want option: all with the exception of the system files (what are they ???)
+    case "nopages":             //  touch ($FILE_LIST_BACKUP);  break;    // should be empty; xml dump may still contain namespace names etc.
+    case "all":                   $srcOpt = " ";  break;  
+    case "listed":                // NOBREAK
+    case "category":              // NOBREAK
+    case "categories":            // NOBREAK
+    case "categories-indirect":   $srcOpt = self::$SPEC_PREFIX . "this->srces";  break;  
     default: throw new Exception ("Wrong value for parameter pages: $this->srces");
   }
 
@@ -209,6 +203,116 @@ public function getPageCommand (  ) {
 }
 
 
+private function gitPrepare () {
+ 
+ 
+
+
+  $USER="clecap";
+
+ $user = $this->getUser();
+$TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
+
+//  $TOKEN="";  // TODO: still must find a secure way to load that GIT access token without committing it to githug !!!!!
+
+
+// TODO: NOT HE FINAL THING AS IT IS THE INCORRECT TOKEN BY NOW.
+ // TODO: need two different cases and tokens: inital contents / system contents - and user dumpToBrowser
+ // encrypt and aes might not apply or might not be optimal settings (for github, no binary content recommended to be stored there )
+
+
+  $GITMAIL="dante-himself@dante.wiki";
+  $GITUSER="Dante Wiki System";
+  $COMMIT_MESSAGE="Commit by dantewiki itself";
+
+  $REPO="https://$USER:$TOKEN@github.com/clecap/dante-wiki-contents.git";
+  $REPO_NAME="dante-wiki-contents";
+
+  $myOutputDir = "/tmp/gitDump";
+
+
+
+
+  // NOTE: below we want to have a cd into the correct directory in every line as every line gets executed in a fresh shell with its (wrong) directory and git
+  // in a development container, VS code sometimes patches all kinds of git hooks and environment variables to be connect vs code better to gitPrepare
+  // in case we are running in such a container (when developing) we do not want this 
+  // that is why we add the following junk
+  $unsetCode="unset GIT_ASKPASS && unset SSH_ASKPASS && unset GIT_SSH && unset GIT_SSH_COMMAND && unset GIT_TERMINAL_PROMPT ";
+  $adjust="-c core.askPass=  -c credential.helper= -c credential.interactive=never";
+  $noHook="-c core.hooksPath=/dev/null";
+  $cdRepo="cd $myOutputDir/$REPO_NAME";
+  $git="/usr/bin/git";  // want to use original git binary and not a (possibly) vs code patched binary or shell script
+   
+  $myCmd = ["command" => [InfoExtractor::class, 'exportAllToTextFiles'], 
+            "args"    => [ "outDir" => "$myOutputDir/$REPO_NAME", "namespaces" => null, "includeRedirects" => true, "batchSize" => 500, "clean" => true ] ];
+
+  $cmds = [
+    "sudo rm -Rf /tmp/gitDump/; mkdir -p $myOutputDir ",    ///// Still rm is hardcoded TODO: cave, danger if we have an interpolation error
+    "ls -al /tmp",
+    "ls -al $myOutputDir",
+    "cd $myOutputDir; $git $adjust $noHook clone --depth 1 $REPO",
+    "ls -al /tmp/gitDump",    //// TODO: CAVE: name of the employed repository is used - watch out if we change this for a different user
+    "$cdRepo && $git config user.name \"$GITUSER\"",
+    "$cdRepo && $git config user.email \"$GITMAIL\"",
+    $myCmd,  // now add the fresh files from the wiki to the local git   // TODO: must implement proper filters here 
+    "$cdRepo && git add .  && git status ",
+   // the following FIRST does a cd and if this succeeds THEN does a diff and if the diff exits with a 1 (which it does when there staged changes exist) only then do a commit
+   // this is necessary since a git commit without any staged things would fail with exit code 1 
+   // note that we need a command terminator ; at the end of the commit
+    "$cdRepo && { git diff --cached --quiet || git commit -m \"$COMMIT_MESSAGE\"; } ",
+    "$cdRepo && $git status",
+    "$cdRepo && $git push --verbose $REPO",
+    "sudo rm -Rf /tmp/gitDump/ ",
+  ];
+  return $cmds;
+}
+
+
+/**
+ * Given a srces specification for files to dump, build a file containing the specified file names under a standardized name
+ *
+ * @param string $spec Permissible are: "listed", "category", "categories", "categories-indirect" or null
+ *                     With null, all permissible files are generated
+ * @return void
+ */
+private static function generateSpecFile ( $spec ) {
+  $NAME = self::$SPEC_PREFIX . $spec;
+  switch ( $spec ) {
+    case "listed":             
+      InfoExtractor::articleExtract ("MediaWiki:Backupfiles", true, $NAME);  
+      break; 
+    case "category":          
+      $titles = InfoExtractor::getTitlesOfCategory ("Backup");
+      file_put_contents ( $NAME, implode ("\n", $titles) );
+      break;
+    case "categories":     
+      $listOfCategories  = InfoExtractor::articleExtract ("MediaWiki:Backupcategories", true, null);
+      $arrayOfCategories = explode ("\n", $listOfCategories);
+      $arrayOfCategories = array_filter($arrayOfCategories, function ($str) {return trim($str) !== ''; });  // remove empty entries
+      $arrayOfTitles     = InfoExtractor::getTitlesOfCategories ( $arrayOfCategories );
+      file_put_contents ( $NAME, implode ("\n", $arrayOfTitles) );
+      break;// TODO check and fix
+    case "categories-indirect":
+       $arrayOfCategories = InfoExtractor::getIndirectSubcategories ("MediaWiki:Backupcategories indirect");
+       $arrayOfTitles     = InfoExtractor::getTitlesOfCategories ( $arrayOfCategories );
+       file_put_contents ( $NAME, implode ("\n", $arrayOfTitles) );
+       break;
+    case null:
+      self::generateSpecFile ("listed");
+      self::generateSpecFile ("category");
+      self::generateSpecFile ("categories");
+      self::generateSpecFile ("categories-indirect");
+      break;
+
+    default: throw new Exception ("Wrong value for parameter pages: $spec");
+  }
+}
+
+
+
+
+
+
 private function getDBCommand () {
   global $wgDBname, $wgDBserver, $wgDBpassword, $wgDBuser;
   $cmd = "mysqldump --skip-ssl --host=$wgDBserver --user=$wgDBuser --password=$wgDBpassword --single-transaction $wgDBname " . ($this->zip ? " | gzip " : "") . ($this->enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -iter 100000  -pass env:LOCAL_FILE_ENC " : "" );
@@ -217,7 +321,8 @@ private function getDBCommand () {
 
 private function getFilesCommand () {
   global $wgUploadDirectory;
-  $cmd = "tar -czvf - --exclude='thumb' \"$wgUploadDirectory\" ";  // TODO Test this. Do we really want -v (lists all files ??)  and what about -z ... is this not doubling the compression thingie???
+  $tarOptions = ( $this->enc ? "-cvzf" : "-cvf" );    // encryption is done by tar itself, decryption is automagic when doing tar -x
+  $cmd = "tar $tarOptions - --exclude='thumb' \"$wgUploadDirectory\" ";  // TODO Test this. Do we really want -v (lists all files ??)  and what about -z ... is this not doubling the compression thingie???
   return $cmd;
 }
 
@@ -232,21 +337,7 @@ private function getFilesCommand () {
 // TODO factor some stuff from Parsifal into DanteCommon
 // TODO: remove that branch in Parsifal .... github
 
-// generates a list of files to backup in file $IP/extensions/DanteBackup/list_of_files_to_backup
-// TODO: maybe already unused - DEPRECATE
-private static function listOfFiles ( $srces ) {
-  global $IP;
-  @unlink ( "$IP/extensions/DanteBackup/list_of_files_to_backup");  // delete current list of files to dump // TODO: trun this into a fixed constant or filename somewhere
-  switch ( $srces ) {
-    case "nopages":         touch ("$IP/extensions/DanteBackup/list_of_files_to_backup");  break;  // file should be empty, xml dump might still contain namespace names and more
-    case "listed":          InfoExtractor::articleExtract ("Backupfiles", true, "$IP/extensions/DanteBackup/list_of_files_to_backup");  break;  // TODO check and fix
-    case "category":        self::makeCatFileList  ("backup");  break;// TODO check and fix
-    case "categories":      self::makeLongList ();  break;// TODO check and fix
-    case "all":             $srcOpt = " ";  break;  // TODO: WHAT ABOUT THE DRYRUN in this case !!!!!  where do we get the list of all files ???
-    // TODO: also want option: all with the exception of the system files (what are they ???)
-    default: throw new Exception ("Wrong value for parameter pages: $srces");
-  }
-}
+
 
 
 // given the $titleName of a page inside of MediaWiki name, generate a file named list_of_files_to_backup
@@ -312,27 +403,6 @@ private static function makeCatFileList ( $category, $fileName ) {
   return;
 }
 
-
-// TODO: migrate into DanteCommon extension
-// for all categories in MediaWiki:Backupcategories get the direct files and append them
-private static function makeLongList () {
-  global $IP;
-  danteLog ("DanteBackup", "Will get at MediaWiki:Backupcategories \n");                                                 
-  $title      = Title::newFromText( "Backupcategories", NS_MEDIAWIKI );                       // build title object for MediaWiki:Backupcategories
-  $wikipage   = new WikiPage ($title);                                                        // get the WikiPage for that title
-  $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
-  if ($contentObject ) {                                                                      // IF we have found a content object for this thing
-    $code    = ContentHandler::getContentText ( $contentObject );
-    $code    = extractPreContents ($code);
-    danteLog ("DanteBackup", "Found extracted contents in this file as:\n $code \n");
-    danteLog ("DanteBackup", "Type is: ". gettype($code) ." \n");
-    $arr = preg_split("/\r\n|\n|\r/", $code);
-    danteLog ("DanteBackup", "Got: " . print_r ($arr, true) . " \n");
-
-    foreach ( $arr as $categ ) { self::makeCatFileList ($categ); }
-  }   
-  else { danteLog ("DanteBackup", "\n\n MediaWiki:Backupcategories could not be found \n\n"); }  // TODO: maybe rather exception
-}
 
 
 // Helper function to get subcategories of given categories in MediaWiki.
@@ -413,3 +483,8 @@ function getAllPageNames(): array {
 
 
 }  // end of class
+
+
+
+
+DanteDump::$SPEC_PREFIX = $IP."/extensions/DanteBackup/lists/"; 

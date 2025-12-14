@@ -29,7 +29,7 @@ function getSubPagesFor( $titleText, $namespace ) {
 
 class DanteCommon {
 
-const DUMP_PATH = "/var/www/html/wiki-dir/dump";    // TODO: allow this as setting in the configuration file !! 
+const DUMP_PATH = "/var/www/html/wiki-dir/dump";   
 
 const HEADER = [
    'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump', 
@@ -48,8 +48,9 @@ const SOURCE_FEATURES = [
   'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
     'options' => [ '<i>No pages</i> included in the pages archive'                                                                                                   => "nopages",
                    '<b>Listed</b>: Only pages listed in page <a href="./index.php?title=MediaWiki:Backupfiles">MediaWiki:Backupfiles</a>'                            => "listed",
-                   '<b>Category</b>: Only pages in <a href="./indx.php?title=Category:Backup">Category:Backup</a>'                                                   => "category",
-                   '<b>Categories</b>: Only pages in a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories</a>'     => "categories",
+                   '<b>Category</b>: Only pages belonging to <a href="./indx.php?title=Category:Backup">Category:Backup</a> (<a href="./cache/">dryrun</a>)'                                => "category",
+                   '<b>Categories</b>: Only pages belonging to a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories</a>'     => "categories",
+                   '<b>Categories Indirect</b>: Only pages belonging to a category or an arbitrarily deep subcategory of a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories Indirect</a>'     => "categories-indirect",
                    '<b>All</b> pages'                                                                                                                                => "all", 
                      ],   
      'name' => 'srces',  'default' => 'all', 
@@ -63,8 +64,8 @@ const SOURCE_FEATURES = [
   'radio32'  => [ 'section' => 'srcfeatures/rf' , 'type' => 'radio',  'label' => '', 
         'options' => [ '<i>Nofiles</i>: Do not dump uploaded file contents and do not dump metadata'                      => "nofiles",
                        '<i>Metadata</i>: Dump metadata only, no file contents'                                            => "metadata",
-                       '<b>Separate</b>: Dump metadata and file contents, but into a separate file archive'               => "separate", 
-                       '<b>Include</b>: Dump metadata and file contens into one very large page archive'                  => "include", 
+                       '<b>Separate</b>: Dump metadata (into page archive) and file contents into a separate file archive'               => "separate", 
+                       '<b>Include</b>: Dump metadata and file contens (both into one large page archive)'                  => "include", 
                      ],   
         'name' => 'files',  'default' => 'include', 
  ],
@@ -107,7 +108,7 @@ const DEBUG_FORM = [
   public static function getTARGET_FORM () {
    return  [
     'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
-        'options' => [ // "bibi".wfMessage ('somestuff')->plain() =>  "checkme",  // TODO: that's how to localize this stuff; that's why we have this as return of a function and not as a const array
+        'options' => [ 
            '<b>AWS S3</b> (shows error messages; may take minutes to hours)'                                                                                 => "aws",
            '<b>Github</b> (shows error messages; may take minutes to hours)'                                                                                 => "github",
            '<b>SSH / SCP</b> (shows error messages; may take minutes to hours)'                                                                              => "ssh",
@@ -127,16 +128,9 @@ const DEBUG_FORM = [
   }
 
 
-// TODO we should deprecate this as it soon will no longer be used as currently there is a bug in the usage assumptions
-public static function checkSuffix ( $string, $suffix) {
-  if (substr($string, -strlen($suffix)) === $suffix) { return true; } 
-  else { return false; }
-}
 
 
   // command decorator. result then gets piped/redirected into different sinks
-//   TODO: MAYBE: openssl aes-256-cbc -e -salt -pbkdf2 -pass pass:$aesPW " : " ") ; 
-// openssl aes-256-cbc -d -salt -pbkdf2 -iter 100000-pbkdf2 -pass ENV:LOCAL_FILE_ENC |
 public static function cmdZipEncRestore ( $cmdGenerate, $cmdConsume, $zip, $enc ) {
   danteLog ("DanteBackup", "\n DanteCommon::cmdZipEncRestore generate: $cmdGenerate \n $cmdConsume \n  " . ($zip ? "  compressed": "  UNcompressed")."\n   $enc \n\n");
   $ret = "set -o pipefail; " .  $cmdGenerate . ($enc ? "   aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC | " : "" ) . ($zip ? " gunzip -c | " : "") .  $cmdConsume;

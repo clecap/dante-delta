@@ -42,10 +42,12 @@ function getSrcFeatures () {
    ).join('');
 }
 
-function getSuffix () {
+function getSuffix ( sup=false ) { // if sup true then suppress the gz (needed for tar)
   let compressed = document.getElementById ("mw-input-compressed").checked;
   let encrypted  = document.getElementById ("mw-input-compressed").checked;
-  return (compressed ? ".gz" : "") + (encrypted ? ".aes"  : "");
+  if (sup !== true) {}
+
+  return (sup !== true ? (compressed ? ".gz" : "") : "") + (encrypted ? ".aes"  : "");
 }
 
 function wireup () {
@@ -65,7 +67,7 @@ function wireup () {
 
 function initialize () {
   console.error ("running initialize");
-  let eleTag = document.getElementById ("mw-input-tag");   
+  let eleTag = document.getElementById ("mw-input-tag");      
   let eleFinalName = document.getElementById ("mw-input-archiveName");
   let nodb = document.getElementById ("mw-input-db-nodb").checked;
   let db   = document.getElementById ("mw-input-db-db").checked;
@@ -82,7 +84,7 @@ function initialize () {
 
   if (nodb) {eleDbName.value = " *** NO DATABASE DUMP DONE *** ";}
 
-  if (separate) {eletarName.value = siteName + "-" + timestamp () + ".tar" + getSuffix();}
+  if (separate) {eletarName.value = siteName + "-" + timestamp () + ".tar" + getSuffix (true);}
    else {eletarName.value = " *** NO FILE ARCHIVE GENERATED *** ";}
 
   
