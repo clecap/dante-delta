@@ -4,6 +4,7 @@
 abstract class DanteSpecialPage extends SpecialPage {
 
 
+// a DanteSpecialPage should be listed in group Dante
 protected function getGroupName() {return 'dante';}
 
 
@@ -37,13 +38,16 @@ protected function handleSubmission () {
     $formId = $request->getVal( 'wpFormIdentifier' );  // get formId to see, which form was used
     danteLog ("DanteBackup", "On submission: Form identifier: " . print_r ($formId, true) ."\n");
     
-    $arr = $this->getSpecificCommands ( $formId );                          // now that we know which form was used, dispatch the execution of the forms submission
-    $env = DanteCommon::getEnvironmentUser ($this->getUser());                // get the environment for the user (needed for execution)
+
+    $arr = $this->getSpecificCommands ( $formId );                     // now that we know which form was used, dispatch the execution of the forms submission
+
+
+    $env = DanteCommon::getEnvironmentUser ($this->getUser());           // get the environment for the user (needed for execution)  // TODO: might want to improve structure
 
     danteLog ("DanteBackup", "environment in handleSubmission is ".print_r ($env, true));
 
     // The following now does the dispatching via the html code generated below in ServiceEndpointHelper
-    $this->executeCommands ( $arr, $env );            // finally dispatch the execution of these commands
+    $this->executeCommands ( $arr, $env );                                // finally dispatch the execution of these commands
 
   } catch ( Exception $x) {
     $this->getOutput()->addWikiTextAsContent("Exception occured: ". $x);
@@ -82,12 +86,18 @@ protected function standardForm ( $descriptor, $action, $acro, $textOnButton ): 
 }
 
 /**
- * Should be overwritten by subclass, provides and shows the form to be displayed
+ * Must be implemented by subclass, provides and shows the form to be displayed
  * @return void 
  */
 abstract protected function showForm () : void;
 
 
+/**
+ * Must be implemented by subclass
+ *
+ * @param [type] $formId
+ * @return mixed
+ */
 abstract protected function getSpecificCommands ( $formId ) : mixed;
 
 

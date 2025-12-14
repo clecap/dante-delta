@@ -8,7 +8,8 @@
 .stdout, .stderr {border:1px solid black; padding:6px; }
 
 .stdout        {background-color: lightgreen;}
-.stderr-active {background-color: pink !important;}
+.stderr-active {background-color: pink !important;} /* used when stderr is written into */
+.stderr-ok     {background-color: lightgreen !important;} /* used when stderr was written into but finally we get an ok exit status */
 
 
 h2 {font-weight:normal; margin-top:0px;}
