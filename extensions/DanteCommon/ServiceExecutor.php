@@ -24,6 +24,14 @@ class ServiceExecutor {
  *  (4) null, for doing nothing an djust utilizing the remaining functionalities we have here
  *
  * CALLED in serviceEndpoint.php
+ *
+ * $arr is an array of one of 
+ *     string         in which case it is a simple string command which must be executed
+ *     callable       in which case it is a callable to be called 
+ *     map with keys "command", "timeout" and "args" where "args" must be a serializable array of arguments 
+ *       the command may be a string or a callable
+ *       the timeout may provide an additional timeout value
+ *       the args may provide an arry of arguments to be called
  */
 public static function executeCommandArray ( $arr, $env = array(), &$stdoutCollect = null, &$stderrCollect = null, ?callable $notify=null ) {
   $didHaveError = false;  // flag to detect if we ever had an error
@@ -37,19 +45,36 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
   foreach ( $arr as $obj ) {  // iterate over all objects in the array
     $count++;
 
-    $timeout = null;       // default is no timeout
+    $timeout = null;       // default is not to use a timeout
     $startTime = time();   // memorize time the command was started
+
     if (is_string($obj) || is_callable ($obj)) {$ele = $obj;} // if $obj is a string or a callable, this is the command
-    else  {                                                                  // otherwise we expect an array/map with keys "command", "timeout" and. NOTE: no timeouts for callables.
-                // and "args" in case of a function. "args" must be a serializable Array of arguments
+    else  {                                                                  // otherwise we expect an array/map with keys "command", "timeout" 
+                                                                             // and "args" in case of a function. "args" must be a serializable Array of arguments
+                                                                             // NOTE: no timeouts for callables.
       if ( !isset($obj["command"] )) {
         $notify ? $notify ( "close", $count, "Error: Cannot find command at slot " . $count. " but just " . print_r ($obj, true)) : null;  // must notify client or it continues requesting
-        throw new Exception ("Cannot find command in array object ". print_r ($obj, true) );}
-      if ( !isset($obj["timeout"] )) {
-        $notify ? $notify ( "close", $count, "Got a timeout on server at slot " . $count) : null;  // must notify client or it continues requesting
-        throw new Exception ("Cannot find timeout in array object ". print_r ($obj, true) );}
-      $ele     = $obj["command"];
-      $timeout = $obj["timeout"];
+        throw new Exception ("Cannot find command in array object ". print_r ($obj, true) );
+      }
+      $ele     = $obj["command"];  // now we can set the command variable
+      $args    = null;
+
+      // check if command has a correct value !
+      if ( !is_callable ($ele) && ! is_string ($ele) ) {
+        $notify ? $notify ( "close", $count, "Error: At slot " . $count. " there is no callable and no string but just " . print_r ($ele, true)) : null;  // must notify client or it continues requesting
+        throw new Exception ("Error: At slot ". $count . " there is no callable and no string but just " . print_r ($ele, true) );
+      }
+
+      if ( is_callable ($ele) ) {
+        if ( isset ($obj["args"] ) ) {$args = $obj["args"];}
+      }
+
+      if ( !isset($obj["timeout"] )  && is_string ($ele)   ) {
+        $notify ? $notify ( "close", $count, "Cannot find timeout in array object with string command " . $count . " for ". print_r ($ele, true)) : null;  // must notify client or it continues requesting
+        throw new Exception ("Cannot find timeout in array object ". print_r ($ele, true) );  
+      }
+
+      $timeout = ( isset($obj["timeout"]) ? $obj["timeout"] : null); // do not use a timeout if none is specified
     } 
     
     // ServiceEndpointHelper::sendX ( "log", $count, $ele);    // log the array element as text string for debugging purposes
@@ -57,16 +82,27 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
     $notify ? $notify( "setup", $count, $ele) : null;  // setup a logging area for this command if necessary
     $notify ? $notify( "cmd",   $count, $ele) : null;  // log the command itself
 
-    if     (is_string ($ele))     { /* continues below */}
-    elseif (is_callable ($ele))   {  /* this branch is for the case that we find a callable in the array */
-      ['result' =>$fcnResult, 'stdout' => $fcnStdout, 'stderr' => $fcnStderr ] = self::captureOutput( $ele );  // capture the output of the call to the callable
+
+    if (is_callable ($ele))   {  /* this branch is for the case that we find a callable in the array */
+
+      ['result' =>$fcnResult, 'stdout' => $fcnStdout, 'stderr' => $fcnStderr, 'exception' => $fcnException ] = self::captureOutput ( $ele, ...$args );  // capture the output of the call to the callable, including possible exceptions
+
       $notify ? $notify ( "stdout", $count, $fcnStdout) : null;
       $notify ? $notify ( "stderr", $count, $fcnStderr ): null;
-      $notify ? $notify (  "ret" , $count,  "returned=". print_r ($fcnResult, true) ) : null; 
+
+      $duration = time() - $startTime;
+      $tim = "duration=".$duration."[sec]";
+      $notify ? $notify ( "tick", $count, chunk: $tim ) : null;
+
+      if ($fcnException === null) {$notify ? $notify (  "ret" , $count,  "retu=". print_r ($fcnResult, true) ) : null; }
+      else {
+        $didHaveError = true; $errorCount++; 
+        $notify ? $notify (  "exitErr" , $count,  "EXCEPTION raised: ".  get_class($fcnException) ) : null; 
+      }
+
       continue;
     }
-    else {throw new Exception ("Element is neither string nor callable");}
-
+   
     // open the process ressource
     $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes, null, $env); 
 
@@ -76,7 +112,7 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
 
     $tick=0.0;
 
-    // if requested, initialize the reporting variables for stdou and stderr for this command
+    // if requested, initialize the reporting variables for stdout and stderr for this command
     if ($stdoutCollect) {$stdoutCollect[$count] = "";}
     if ($stderrCollect) {$stderrCollect[$count] = "";}
 
@@ -109,7 +145,7 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
         }
       }
 
-      // Check timeout
+      // Check timeout, but only if we are using timeouts, i.e. $timeout !== null
       if ($timeout !== null && (time() - $startTime) > $timeout) {
         $notify ? $notify ("timeout", $count, (time() - $startTime)) : null;
         proc_terminate($proc);  //        // Try to terminate the process
@@ -138,7 +174,6 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
       $notify ? $notify ( "tick", $count, chunk: $tim ) : null;
     }
 
-
 // TODO: NOW that we are drained we could also issue another notification for the -now-fully collected output
 // TODO: Maybe only now provide this back to the caller into the stdout and stderr collectors
 
@@ -149,13 +184,17 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
     else                  {                                      $notify ? $notify ( "was-ok",   $count, "" ) : null; }
 
   } // end for loop over all commands  
+
   $notify ? $notify ( "close", $count, ( $didHaveError ?  "Please check: There were $errorCount errors." : "Completed. You may now leave this window."  )) : null;
+  if ($didHaveError) {
+    $notify ? $notify ( "in-error", 0, "" ) : null;
+  }
 }
 
 
 
 /**
- * Call a callable function and capture stdou, stderr and result
+ * Call a callable function and capture stdout, stderr and result
  *
  * @param callable $fn
  * @param [type] ...$args
@@ -164,34 +203,37 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
  * NOTE: By design of PHP we can only catch exceptions via a handler. We cannot catch arbitrary data written to stderr 
  *       from a PHP function.
  */
-public static function captureOutput(callable $fn, ...$args): array {
+public static function captureOutput (callable $fn, ...$args): array {
   $stdout = '';
   $stderr = '';
+  $result = null;
+  $exception = null;
 
-  $prevHandler = set_error_handler (function ( int $severity, string $message, string $file, int $line ) use (&$stderr, &$prevHandler) {
-    if (!(error_reporting() & $severity)) {return false;}
-    $stderr .= sprintf( "[%s] %s in %s on line %d\n",   self::error_type_to_string($severity), $message, $file, $line );
-    if ($prevHandler) { return $prevHandler($severity, $message, $file, $line);}
-    return true; // prevent default error handling
-  }, E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+  $prevHandler = set_error_handler(
+    function (int $severity, string $message, string $file, int $line) use (&$stderr, &$prevHandler) {
+      if (!(error_reporting() & $severity)) {return false;}
+      $stderr .= sprintf ("[%s] %s in %s on line %d\n", self::error_type_to_string($severity), $message, $file, $line);
+      if ($prevHandler) { return $prevHandler($severity, $message, $file, $line); }
+      return true;
+    },
+    E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED
+  );
 
-  ob_start();                                                      // clear output buffer
-  try     { $result = $fn(...$args); $stdout = ob_get_clean(); }  // call result and pick up output stuff 
-  finally { restore_error_handler(); }                            // restore the previous error handler
+  ob_start();
 
-  return [ 'result' => $result ?? null, 'stdout' => $stdout, 'stderr' => $stderr ];
+  try {$result = $fn(...$args);} 
+  catch (\Throwable $e) {
+    $exception = $e;
+    $stderr .= sprintf( "[%s] %s in %s on line %d\n%s\n",  get_class($e),  $e->getMessage(),  $e->getFile(),  $e->getLine(),  $e->getTraceAsString() );
+  } 
+  finally {
+    $stdout = ob_get_contents();
+    ob_end_clean();
+    restore_error_handler();
+  }
+
+  return ['result' => $result, 'stdout' => $stdout, 'stderr' => $stderr, 'exception' => $exception];
 }
-
-private static function error_type_to_string(int $severity): string {
-  return match ($severity) {
-    E_ERROR             => 'ERROR',               E_WARNING        => 'WARNING',       E_PARSE => 'PARSE',                            E_CORE_ERROR => 'CORE_ERROR',
-    E_CORE_WARNING      => 'CORE_WARNING',        E_COMPILE_ERROR  => 'COMPILE_ERROR', E_COMPILE_WARNING  => 'COMPILE_WARNING',       E_NOTICE => 'NOTICE',
-    E_USER_ERROR        => 'USER_ERROR',          E_USER_WARNING   => 'USER_WARNING',  E_USER_NOTICE      => 'USER_NOTICE',           
-    E_RECOVERABLE_ERROR => 'RECOVERABLE_ERROR',   E_DEPRECATED      => 'DEPRECATED',   E_USER_DEPRECATED  => 'USER_DEPRECATED',       default => 'UNKNOWN',
-  };
-}
-
-
 
 
 

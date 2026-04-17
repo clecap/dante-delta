@@ -3,12 +3,9 @@
 // Infoextractor is a collection of functions which extract information from MediaWiki in certain convenient forms
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserIdentity;
 
-
-//use ContentHandler;
-//use Title;
-//use WikiPage;
-
+/** @package  */
 class InfoExtractor {
 
 
@@ -142,7 +139,13 @@ public static function getIndirectSubcategories( string|array $category): array 
 
 // TODO: *   - 'progressCallback' => callable|null  // function(int $exported, int $scanned): void
 
+
+
+
+// TODO: from gitDump move to unique directory
+// TODO: later, clean up those directory names
 public static function exportAllToTextFiles ( string $outDir = "/tmp/gitDump",  $namespaces=null, $includeRedirects=true, $batchSize = 500, $clean = false ): array {
+  print ("exportAlltoTextFiles is HERE *****");
 
   $services = MediaWikiServices::getInstance();
   $lb       = $services->getDBLoadBalancer();
@@ -214,6 +217,76 @@ public static function exportAllToTextFiles ( string $outDir = "/tmp/gitDump",  
 
   if ( is_callable( $progress ) ) {$progress( $exported, $scanned );}  // call progress notifier
   return ['exported' => $exported, 'scanned' => $scanned];
+}
+
+
+
+
+// iterates a directory containing slug coded files and imports all of them
+public static function importAllTextFilesSlugged ( string $inDir, string $userName ) {
+
+  $user = MediaWikiServices::getInstance()->getUserFactory()->newFromName($userName); // convert to UserIdentity
+
+  $it = new DirectoryIterator($inDir);
+  foreach ($it as $fileinfo) {
+    if ($fileinfo->isDot()) {continue;}  // skip dot directories
+    if (strtolower($fileinfo->getExtension()) !== 'txt') {continue;} // skip files which are not extension txt
+    if ($fileinfo->isFile()) {
+       $fileName = $fileinfo->getPathname();
+       $pageTitle = self::restoreTitleFromFileName ( $fileName);
+        self::importTextFileToWikiPage ( $fileName, $pageTitle, $user, false );
+    }                 
+  }
+}
+
+
+
+// imports a single text file
+public static function importTextFileToWikiPage ( string $filePath, string $pageTitleText, UserIdentity $performer, bool $createOnly = false ): void   {
+
+  $text = file_get_contents($filePath);
+  if ($text === false) {throw new RuntimeException("Could not read file: $filePath");}
+
+  $title = Title::newFromText($pageTitleText);
+  if (!$title) {throw new RuntimeException("Invalid page title: $pageTitleText");}
+
+  $services = MediaWikiServices::getInstance();
+  $wikiPage = $services->getWikiPageFactory()->newFromTitle($title);
+
+  if ($createOnly && $wikiPage->exists()) {throw new RuntimeException("Page already exists: $pageTitleText");}
+
+  $content = ContentHandler::makeContent($text, $title);
+
+  $pageUpdater = $wikiPage->newPageUpdater($performer);
+  $pageUpdater->setContent(SlotRecord::MAIN, $content);
+
+  $summary = CommentStoreComment::newUnsavedComment ( 'Imported from text file' );
+
+  $status = $pageUpdater->saveRevision($summary);
+
+// maybe version fix
+/*
+if (method_exists($status, 'isOK')) {
+  if (!$status->isOK()) {
+    throw new RuntimeException('Save failed');
+  }
+} else {
+  // Fallback: assume failure if null/false
+  if (!$status) {
+    throw new RuntimeException('Save failed (no status object)');
+  }
+}
+*/
+
+
+  if (!$status->isOK()) {
+    $errors = [];
+    foreach ($status->getErrors() as $error) { if (isset($error['message'])) { $errors[] = (string)$error['message']; } }
+
+    $message = $errors ? implode('; ', $errors) : 'Unknown save failure';
+
+    throw new RuntimeException("Failed to save page: $message");
+  }
 }
 
 
@@ -315,6 +388,32 @@ public static function rrmdir($dir) {
   }
   rmdir($dir);
 }
+
+
+
+
+
+
+// generate a unique temporary directory and returns its name 
+// racecondition safe 
+public static function makeTempDir(string $prefix = 'mw_'): string {
+  $base = rtrim(sys_get_temp_dir(), '/');
+  for ($i = 0; $i < 20; $i++) {  // do 20 attempts (preventing collisions)
+    $dir = $base . '/' . $prefix . bin2hex(random_bytes(16));
+    if (mkdir($dir, 0777)) {return $dir;}  // break out of loop
+    if (!file_exists($dir)) {
+      throw new RuntimeException('Failed to create temporary directory');
+    }
+  }
+  throw new RuntimeException('Could not create a unique temporary directory');
+}
+
+
+
+
+
+
+
 
 
 

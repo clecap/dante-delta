@@ -23,7 +23,7 @@ function handler (e) {
   }
 
   switch (obj.command) {
-    case "log":  {doLog (obj.data); break;}  // log it under li log
+    case "log":  {doLog (obj.data); break;}  // log it under li log (as general log)
 
     // sets up a limit for the number of commands. if we receive more "setup" calls than defined by the limit
     // we do a hard shutdown of the eventsource. Goal of this is to set a limit in case something went wrong
@@ -60,8 +60,8 @@ function handler (e) {
     case "exitErr":    { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; ele.classList.add ("exitErr"); break; }  // write in the closing status    
     case "drainOk":    { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; ele.classList.add ("drainOk");  break; }  // write in the closing status    
     case "drainErr":   { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; ele.classList.add ("drainErr"); break; }  // write in the closing status        
-    case "in-error":   { let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("in-error"); break; }
-    case "was-ok":     { let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("was-ok"); break;}
+    case "in-error":   { document.body.classList.add ("in-error"); let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("in-error"); break; }
+    case "was-ok":     { let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("was-ok");   break;}
     case "tick":       { let ele=document.getElementById ("tick-" + obj.num); ele.textContent = obj.data; break;;}      // we want to update the total running time (wall clock)
     case "close":      { source.close();  let ele=document.createElement ("h2"); ele.textContent = obj.data; document.body.appendChild (ele); down (ele); break;}
 

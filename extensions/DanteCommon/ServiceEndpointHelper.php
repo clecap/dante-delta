@@ -13,6 +13,10 @@ class ServiceEndpointHelper {
   // attach a command(list) and an environment to the current session
 public static function attachToSession ($cmd, $env) {
   $session = SessionManager::getGlobalSession();
+
+  danteLog ("DanteBackup", "environment in attachToSession is ".print_r ($env, true));
+  danteLog ("DanteBackup", "command in attachToSession is ".print_r ($cmd, true));
+
   $session->set( 'Dante_Cmd', $cmd );             
   $session->set( 'Dante_Env', $env );
 }
@@ -29,7 +33,7 @@ return <<<END
     <link rel="stylesheet" href="./extensions/DanteCommon/serviceEndpoint.css" />
     <title>Server side Script</title>
   </head>
-  <body>
+  <body class=''>
 END;
 }
 

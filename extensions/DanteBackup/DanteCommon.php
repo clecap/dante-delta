@@ -132,9 +132,9 @@ const DEBUG_FORM = [
 
   // command decorator. result then gets piped/redirected into different sinks
 public static function cmdZipEncRestore ( $cmdGenerate, $cmdConsume, $zip, $enc ) {
-  danteLog ("DanteBackup", "\n DanteCommon::cmdZipEncRestore generate: $cmdGenerate \n $cmdConsume \n  " . ($zip ? "  compressed": "  UNcompressed")."\n   $enc \n\n");
+  // danteLog ("DanteBackup", "\n DanteCommon::cmdZipEncRestore generate: $cmdGenerate \n $cmdConsume \n  " . ($zip ? "  compressed": "  UNcompressed")."\n   $enc \n\n");
   $ret = "set -o pipefail; " .  $cmdGenerate . ($enc ? "  openssl  aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC | " : "" ) . ($zip ? " gunzip -c | " : "") .  $cmdConsume;
-  danteLog ("DanteBackup", "\n DanteCommon::cmdZipEncRestore returns $ret \n\n");
+  // danteLog ("DanteBackup", "\n DanteCommon::cmdZipEncRestore returns $ret \n\n");
   return $ret;
 }
 

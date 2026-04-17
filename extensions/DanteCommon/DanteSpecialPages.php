@@ -37,11 +37,8 @@ protected function handleSubmission () {
   try {
     $formId = $request->getVal( 'wpFormIdentifier' );  // get formId to see, which form was used
     danteLog ("DanteBackup", "On submission: Form identifier: " . print_r ($formId, true) ."\n");
-    
 
     $arr = $this->getSpecificCommands ( $formId );                     // now that we know which form was used, dispatch the execution of the forms submission
-
-
     $env = DanteCommon::getEnvironmentUser ($this->getUser());           // get the environment for the user (needed for execution)  // TODO: might want to improve structure
 
     danteLog ("DanteBackup", "environment in handleSubmission is ".print_r ($env, true));

@@ -4,6 +4,7 @@ require_once ("DanteCommon.php");
 require_once ("Executor.php");
 
 
+
 // a memo is a single record for controlling the functionality of uploading DanteWiki system contents files
 class Memo {
 
@@ -15,14 +16,14 @@ public string $label;       // label for the collection
 public string $url;         // url for looking uo by user
 
 public static function getConfig () {
- $config = [
-    new Memo ( "Cat_DanteInitialContents",         DanteUtil::catList      ("DanteInitialContents"),              "Category:DanteInitialContents" ),
-    new Memo ( "Cat_DanteInitialCustomize",        DanteUtil::catList      ("DanteInitialCustomize"),             "Category:DanteInitialCustomize"),
-    new Memo ( "MediaWiki_DanteInitialContents",   DanteUtil::listOfListed ("MediaWiki:DanteInitialContents"),    "MediaWiki:DanteInitialContents" ),
-    new Memo ( "MediaWiki_DanteInitialCustomize",  DanteUtil::listOfListed ("MediaWiki:DanteInitialCustomize"),   "MediaWiki:DanteInitialCustomize" ),
-    new Memo ( "Test",                             DanteUtil::listOfNamespace (NS_TEST),                          "Special:AllPages&from=&to=&namespace=3000" ),
-    new Memo ( "MainPage",                         DanteUtil::singleList ("Main Page"),                            "Main_Page" ), 
-    new Memo ( "MediaWiki_Sidebar",                DanteUtil::singleList ("MediaWiki:Sidebar"),                   "MediaWiki:Sidebar" )
+  $config = [
+    new Memo ( "Cat_DanteInitialContents",         DanteUtil::catList           ("DanteInitialContents"),               "Category:DanteInitialContents" ),
+    new Memo ( "Cat_DanteInitialCustomize",        DanteUtil::catList           ("DanteInitialCustomize"),              "Category:DanteInitialCustomize"),
+    new Memo ( "MediaWiki_DanteInitialContents",   DanteUtil::listOfListed      ("MediaWiki:DanteInitialContents"),    "MediaWiki:DanteInitialContents" ),
+    new Memo ( "MediaWiki_DanteInitialCustomize",  DanteUtil::listOfListed      ("MediaWiki:DanteInitialCustomize"),   "MediaWiki:DanteInitialCustomize" ),
+    new Memo ( "Test",                             DanteUtil::listOfNamespace   (NS_TEST),                          "Special:AllPages&from=&to=&namespace=3000" ),
+    new Memo ( "MainPage",                         DanteUtil::singleList        ("Main Page"),                         "Main_Page" ), 
+    new Memo ( "MediaWiki_Sidebar",                DanteUtil::singleList        ("MediaWiki:Sidebar"),                 "MediaWiki:Sidebar" )
   ];
   return $config;
 }
@@ -53,7 +54,7 @@ public function execute ( $owner, $repository, $token, $path, $out=false ) {
 
   if ($out) $out->addHTML ( "<h3>dumpBackup wrote to stderr:</h3><p><pre>" .$error. "</pre></p>");
   $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml.gz",  $token,   gzencode ($output) );   // upload a .xml.gz variant
-  $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml",    $token,   $output );               // upload a .xml variant
+  $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml",    $token,   $output );                      // upload a .xml variant
 
   $json = json_decode ($response);
   // if ($json->status != 200) { throw new Exception ("PROBLEM");}  // TODO: fix ?!?
@@ -63,7 +64,8 @@ public function execute ( $owner, $repository, $token, $path, $out=false ) {
   @unlink ($filepath);
 }
 
-} // end class
+} // end class MEMO
+
 
 
 class DanteInitialStore extends SpecialPage {
@@ -77,7 +79,7 @@ public function execute ( $subPage ) {
   $this->outputHeader();
   $out = $this->getOutput();
     
-  // Check if form is submitted
+  // Check if form was submitted
   $request       = $this->getRequest();
   $owner         = $request->getText ('owner');
   $repository    = $request->getText ('repository');
@@ -85,12 +87,12 @@ public function execute ( $subPage ) {
   $token         = $request->getText ('token');
   $check         = $request->getText ('check');           // used to check if this invocation is from a submission or not
 
-  $config        = Memo::getConfig();   // get the configuration data from the one place where we configure it
+  $config        = Memo::getConfig();                           // get the configuration data from the one place where we configure it
 
-  $user   = $this->getUser();
-  $token        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
+  $user          = $this->getUser();
+  $token         = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
 
-  if ( $check === '12345' ) {  // Display submitted input - only in case we really submitted a token 
+  if ( $check === '12345' ) {  // Display submitted input - only in case we really submitted a token  // TODO: make it variable SECURITY ISSUE
     $out->addHTML ("<h3>Details of Script Execution </h3>");
     foreach ( $config as $val ) { $val->execute( $owner, $repository, $token, $path, $out);}
   }
@@ -127,7 +129,7 @@ public function execute ( $subPage ) {
 
 
   // NOTE: for the github upload api we need the contents in a shell variable (max 2MB)
-  // Should this prove insufficient, we must iterate over chunks or individual files (or activate compression for the storage on github
+  // Should this prove insufficient, we must iterate over chunks or individual files
  
 } // end function execute
 
@@ -187,11 +189,7 @@ public function execute ( $subPage ) {
    
   }
 
-
-
 }
-
-
 
 } // end class
 

@@ -203,15 +203,16 @@ public function getPageCommand (  ) {
 }
 
 
+
+
+
+// returns commands to prepare a local git instance and place files in there 
+// TODO: just a PoC not a full implementation
 private function gitPrepare () {
- 
- 
-
-
   $USER="clecap";
 
- $user = $this->getUser();
-$TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
+   $user = $this->getUser();
+  $TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
 
 //  $TOKEN="";  // TODO: still must find a secure way to load that GIT access token without committing it to githug !!!!!
 
@@ -231,10 +232,8 @@ $TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup
   $myOutputDir = "/tmp/gitDump";
 
 
-
-
   // NOTE: below we want to have a cd into the correct directory in every line as every line gets executed in a fresh shell with its (wrong) directory and git
-  // in a development container, VS code sometimes patches all kinds of git hooks and environment variables to be connect vs code better to gitPrepare
+  // in a development container, VS code sometimes patches all kinds of git hooks and environment variables to connect vs code better to gitPrepare
   // in case we are running in such a container (when developing) we do not want this 
   // that is why we add the following junk
   $unsetCode="unset GIT_ASKPASS && unset SSH_ASKPASS && unset GIT_SSH && unset GIT_SSH_COMMAND && unset GIT_TERMINAL_PROMPT ";
@@ -243,7 +242,7 @@ $TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup
   $cdRepo="cd $myOutputDir/$REPO_NAME";
   $git="/usr/bin/git";  // want to use original git binary and not a (possibly) vs code patched binary or shell script
    
-  $myCmd = ["command" => [InfoExtractor::class, 'exportAllToTextFiles'], 
+  $myCmd = ["command" => [InfoExtractor::class, 'exportAllToTextFiles'],
             "args"    => [ "outDir" => "$myOutputDir/$REPO_NAME", "namespaces" => null, "includeRedirects" => true, "batchSize" => 500, "clean" => true ] ];
 
   $cmds = [
@@ -252,17 +251,17 @@ $TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup
     "ls -al $myOutputDir",
     "cd $myOutputDir; $git $adjust $noHook clone --depth 1 $REPO",
     "ls -al /tmp/gitDump",    //// TODO: CAVE: name of the employed repository is used - watch out if we change this for a different user
-    "$cdRepo && $git config user.name \"$GITUSER\"",
-    "$cdRepo && $git config user.email \"$GITMAIL\"",
+    "$cdRepo && $git config user.name \"$GITUSER\"",         // configure local git properly setting user
+    "$cdRepo && $git config user.email \"$GITMAIL\"",        // configure local git properly setting email
     $myCmd,  // now add the fresh files from the wiki to the local git   // TODO: must implement proper filters here 
     "$cdRepo && git add .  && git status ",
    // the following FIRST does a cd and if this succeeds THEN does a diff and if the diff exits with a 1 (which it does when there staged changes exist) only then do a commit
    // this is necessary since a git commit without any staged things would fail with exit code 1 
    // note that we need a command terminator ; at the end of the commit
     "$cdRepo && { git diff --cached --quiet || git commit -m \"$COMMIT_MESSAGE\"; } ",
-    "$cdRepo && $git status",
+    "$cdRepo && $git status",                
     "$cdRepo && $git push --verbose $REPO",
-    "sudo rm -Rf /tmp/gitDump/ ",
+   // "sudo rm -Rf /tmp/gitDump/ ",
   ];
   return $cmds;
 }
@@ -447,6 +446,8 @@ private function fetchSubcategories($category) {
 
   return $subcategories;
 }
+
+
 
 
 // Fetches all page names from a MediaWiki site across all namespaces.
