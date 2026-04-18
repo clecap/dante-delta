@@ -243,7 +243,10 @@ public static function importAllTextFilesSlugged ( string $inDir, string $userNa
 
         // danteLog ("DanteBackup", "\n importing slugged file $fileName as $pageTitle" );
 
-        self::importTextFileToWikiPage($fileName, $pageTitle, $user, false);
+      //  self::importTextFileToWikiPage($fileName, $pageTitle, $user, false);
+      
+        self::addPageFromFile ( $pageTitle, $fileName, $user, "SECOND");
+      
       }
     }
   }
@@ -297,6 +300,57 @@ public static function importTextFileToWikiPage ( string $filePath, string $page
 
 
 }
+
+
+
+/**
+ * Create a wiki page from the contents of a local file.
+ *
+ * @param string $pageTitle   Target wiki page title, e.g. 'MyPage'
+ * @param string $filePath    Absolute path to the source file
+ * @param UserIdentity $user  Performing user
+ * @param string $summary     Edit summary
+ * @return \Status
+ */
+public static function addPageFromFile (string $pageTitle, string $filePath, UserIdentity $user, string $summary = 'Created from file') {
+  if ( !is_file( $filePath ) || !is_readable( $filePath ) ) {
+    return \Status::newFatal( 'Source file does not exist or is not readable.' );
+  }
+
+  $text = file_get_contents( $filePath );
+  if ( $text === false ) {
+    return \Status::newFatal( 'Failed to read source file.' );
+  }
+
+  $title = Title::newFromText( $pageTitle );
+  if ( !$title ) {
+    return \Status::newFatal( 'Invalid page title.' );
+  }
+
+  $services = MediaWikiServices::getInstance();
+  $wikiPage = $services->getWikiPageFactory()->newFromTitle( $title );
+
+  if ( $wikiPage->exists() ) {
+    return \Status::newFatal( 'Page already exists.' );
+  }
+
+  $content = ContentHandler::makeContent(
+    $text,
+    $title,
+    CONTENT_MODEL_WIKITEXT
+  );
+
+  $updater = $wikiPage->newPageUpdater( $user );
+  $updater->setContent( SlotRecord::MAIN, $content );
+
+  return $updater->saveRevision(
+    CommentStoreComment::newUnsavedComment( $summary )
+  );
+}
+
+
+
+
 
 
 
