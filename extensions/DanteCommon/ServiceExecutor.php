@@ -76,8 +76,6 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
 
       $timeout = ( isset($obj["timeout"]) ? $obj["timeout"] : null); // do not use a timeout if none is specified
     } 
-    
-    // ServiceEndpointHelper::sendX ( "log", $count, $ele);    // log the array element as text string for debugging purposes
 
     $notify ? $notify( "setup", $count, $ele) : null;  // setup a logging area for this command if necessary
     $notify ? $notify( "cmd",   $count, $ele) : null;  // log the command itself

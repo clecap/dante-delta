@@ -30,29 +30,23 @@ protected function showForm  (): void  {
   // provide a help link
   $out->addHelpLink( 'index.php?title=Help:DanteRestore', true );  // provide a help link   // TODO: must fill with contents
 
-  // POSSIBILITY 1
-  $out->addHTML ("<h2>Possibility 1: Restore from a file on your computer</h2>"); 
+  $out->addHTML ("<h2>From a local file on your computer</h2>"); 
   $form = [ 'xmlimport' => ['type' => 'file','name' => 'xmlimport', 'accept' => [ 'application/xml', 'text/xml', 'application/x-gzip-compressed', 'application/octet-stream' ], 'section' => 'select-local-file', 'required' => true, ] ];
   self::standardForm ($form, $action, "LOCAL", "Restore from file");
 
-  // POSSIBILITY 2
-  $out->addHTML ("<h2>Possibility 2: Restore from a file from the AWS S3 storage area</h2>"); 
+  $out->addHTML ("<h2>From a file from the AWS S3 storage area</h2>"); 
   $out->addHTML ("The type (Pages, Database, Files) determines the restored elements.");
   $form = [ 'awsRadio'  => [ 'type' => 'radio', 'section' => 'restore-from-aws', 'options' => $this->getFileArray (),   'name' => 'awsRadio', 'required' => true  ] ];
   self::standardForm ($form, $action, "AWS", "Restore from AWS");
 
-  // POSSIBILITY 3
-  $out->addHTML ("<h2>Possibility 3: Restore from a file at an Internet URL (not operative?)</h2>"); 
+  $out->addHTML ("<h2>From a file at an Internet URL (not operative?)</h2>"); 
   $form = [ 'url' => [ 'type' => 'text', 'name' => 'url', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
   self::standardForm ($form, $action, "URL", "Restore from URL");
 
-  // POSSIBILITY 4
-  $out->addHTML ("<h2>Possibility 4: Restore from a file accessible by SSH (not yet operative)</h2>"); 
+  $out->addHTML ("<h2>From a file at an SSH/SCP location (not yet operative)</h2>"); 
   $form = [ 'scp' => [ 'type' => 'text', 'name' => 'url', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ]
            + [ 'scpUser' => [ 'type' => 'text', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
   self::standardForm ($form, $action, "SCP", "Restore via SCP");
-
-  // POSSIBILITY 5
 
   $owner = "clecap";
   $repository = "dante-wiki-contents";
@@ -72,6 +66,7 @@ protected function showForm  (): void  {
 
 // returns the specific command required for executing the necessary functions
 protected function getSpecificCommands ( $formId ): mixed {
+  global $IP;
   $request = $this->getRequest();
   switch ($formId) {
     case 'formId_LOCAL':
@@ -99,19 +94,14 @@ protected function getSpecificCommands ( $formId ): mixed {
       break;
 
     case 'formId_GITHUB':
-
       $arr = $this->gitClone ();
-
       break; 
+
     default: 
     case 'formId_SCP':
      // TODO
        throw new Exception ("Not yet implemented case: ".$formId); // TODO     
   
-
-
-
-
        break;
     }
     return $arr;
@@ -325,6 +315,7 @@ private static function addPostImport ( $cmd ) {
 // TODO: just a PoC not a full implementation
 // CAVE: need this in here since we need access to the current user name and the token stuff of it....
 private function gitClone () {
+  global $IP;
   $user = $this->getUser();
   $token        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' ); // TODO: maybe later more flexible - enter or override
 
@@ -336,25 +327,15 @@ private function gitClone () {
 
   $repoUrl = sprintf( 'https://%s:%s@github.com/%s/%s.git', rawurlencode($owner), rawurlencode($token), $owner, $repo );
 
-  $gitClone = "git clone --depth=1 --single-branch --branch $branch $repoUrl $targetDir ";  //
-
   $user = $this->getUser();
   $userName = $user->getName();
 
-  $myCmd = ["command" => [InfoExtractor::class, 'importAllTextFilesSlugged' ],
-            "args"    => [ "inDir" => $targetDir, "userName" => $userName ] ];
-
   $cmds = [
-    "ls -al /tmp",
-    "ls -al $targetDir",
-    $gitClone,
-    "ls -al $targetDir",
-    "chmod 777 $targetDir",
-    $myCmd
+    "git clone --depth=1 --single-branch --branch $branch $repoUrl $targetDir",
+    "php $IP/extensions/DanteCommon/importDirectory.php --ddir $targetDir --slug"
   ];
 
   return $cmds;
-
 }
 
 

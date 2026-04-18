@@ -19,10 +19,6 @@ aside {
 .ERROR   {background-color:white;   boder-color:red;        color: red;}
 
 
-
-
-
-
   html.mag-hide-head .mw-parser-output h1::before, 
   html.mag-hide-head .mw-parser-output h2::before, 
   html.mag-hide-head .mw-parser-output h3::before, 
@@ -37,14 +33,17 @@ aside {
   html.mag-hide-head .mw-parser-output h5 .mw-headline::before {content: "" !important; } </style>
 
 
+.mw-parser-output {counter-reset: h1-counter;}
 .mw-parser-output h1 {counter-reset: h2-counter; counter-increment: h1-counter; }
-  .mw-parser-output h1::before {content: counter(h1-counter) ". "; }
-  .mw-parser-output h2 {counter-reset: h3-counter; counter-increment: h2-counter; }
-  .mw-parser-output h2::before {content: counter(h1-counter) "." counter(h2-counter) ". "; }
-  .mw-parser-output h3 { counter-reset: h4-counter; counter-increment: h3-counter; }
-  .mw-parser-output h3::before { content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) ". ";  }
-  .mw-parser-output h4 {  counter-reset: h5-counter;   counter-increment: h4-counter; }
-  .mw-parser-output h4::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) ". "; }
-  .mw-parser-output h5 {counter-increment: h5-counter;}
-  .mw-parser-output h5::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) "." counter(h5-counter) ". "; }
-  #mw-toc-heading::before {content: "";}
+.mw-parser-output h1::before {content: counter(h1-counter) ". "; }
+.mw-parser-output h2 {counter-reset: h3-counter; counter-increment: h2-counter; }
+.mw-parser-output h2::before {content: counter(h1-counter) "." counter(h2-counter) ". "; }
+.mw-parser-output h3 { counter-reset: h4-counter; counter-increment: h3-counter; }
+.mw-parser-output h3::before { content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) ". ";  }
+.mw-parser-output h4 {  counter-reset: h5-counter;   counter-increment: h4-counter; }
+.mw-parser-output h4::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) ". "; }
+.mw-parser-output h5 {counter-increment: h5-counter;}
+.mw-parser-output h5::before {content: counter(h1-counter) "." counter(h2-counter) "." counter(h3-counter) "." counter(h4-counter) "." counter(h5-counter) ". "; }
+#mw-toc-heading::before {content: "";}
+
+  

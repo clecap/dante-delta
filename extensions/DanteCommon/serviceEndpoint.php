@@ -14,9 +14,27 @@ header('Cache-Control: no-cache');
 header('Connection: keep-alive');
 header('X-Accel-Buffering: no');
 
-ini_set('display_errors', '0');
+
+
+
+ini_set('display_errors', '1');
 ini_set('log_errors', '1');
 error_reporting(E_ALL);
+
+
+ danteLog ("DanteCommon", "serviceendpoint here !\n");
+
+  $user = \RequestContext::getMain()->getUser();
+  // danteLog ("DanteCommon", "serviceendpoint here with user: " . print_r ($user, true) . "\n");
+  $userName = $user->getName();
+  danteLog ("DanteCommon", "\n user is: $userName");
+
+  if ( $user->isRegistered() ) {
+    danteLog ("DanteCommon", "\n registered user is: $userName");
+  }
+
+
+danteLog ("DanteCommon", __DIR__);
 
 // We need to change the error handlers, since the receiver of this endpoint expects an event stream format and
 // PHP sends errors and exceptions usually as HTML, to which the receiver cannot react properly
@@ -51,7 +69,7 @@ $cmdString = $session->get ( 'Dante_Cmd' );  // a string which encodes in JSON f
 $envString = $session->get ( 'Dante_Env' );  // a string which encodes in JSON format the environment in which these commands shall be executed
 
 
- danteLog ("DanteBackup", "\n environment string in service endpoint ".print_r ($envString, true));  // should TODO log into serviceEndpoint log ?!?!
+danteLog ("DanteBackup", "\n environment string in service endpoint ".print_r ($envString, true));  // should TODO log into serviceEndpoint log ?!?!
   
 
 // convert json text into php array

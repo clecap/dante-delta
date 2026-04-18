@@ -245,7 +245,13 @@ public static function importAllTextFilesSlugged ( string $inDir, string $userNa
 
       //  self::importTextFileToWikiPage($fileName, $pageTitle, $user, false);
       
-        self::addPageFromFile ( $pageTitle, $fileName, $user, "SECOND");
+// $pageTitle = "Clemen" . random_int(1, 100);
+
+//  self::createPage ( $pageTitle, "I am " . $pageTitle.random_int (1,2000), $user);
+
+//danteLog ("DanteBackup", "\n PAGE WAS CREATED" );
+
+//        self::addPageFromFile ( $pageTitle, $fileName, $user, "SECOND");
       
       }
     }
@@ -255,6 +261,62 @@ public static function importAllTextFilesSlugged ( string $inDir, string $userNa
 
 
 
+
+
+public static function createPage(string $titleText, string $pageText, \MediaWiki\User\UserIdentity $user) {
+  $title = \Title::newFromText( $titleText );
+  if ( !$title ) {throw new \Exception( 'Illegal title' );}
+
+  $services = \MediaWiki\MediaWikiServices::getInstance();
+  $wikiPage = $services->getWikiPageFactory()->newFromTitle( $title );
+  $content  = \ContentHandler::makeContent( $pageText, $title );
+
+  $pageUpdater = $wikiPage->newPageUpdater( $user );
+  $pageUpdater->setContent( SlotRecord::MAIN, $content );
+  $pageUpdater->saveRevision ( \CommentStoreComment::newUnsavedComment( 'Page created programmatically' ) );
+
+  if ( !$pageUpdater->wasSuccessful() || !$pageUpdater->wasRevisionCreated() ) {
+    $status = $pageUpdater->getStatus();
+    throw new \Exception(
+      'Save failed: ' . print_r( $status->getErrorsArray(), true )
+    );
+  }
+}
+
+
+
+
+
+private static function createPage2 (string $titleText, string $pageText, \MediaWiki\User\UserIdentity $user) {
+  
+  $title = \Title::newFromText( $titleText );
+  if ( !$title ) {throw new Exception ("illegal title");}
+
+  $services = \MediaWiki\MediaWikiServices::getInstance();
+  $wikiPage = $services->getWikiPageFactory()->newFromTitle( $title );
+  $content = \ContentHandler::makeContent( $pageText, $title );
+
+  $pageUpdater = $wikiPage->newPageUpdater( $user );
+  $pageUpdater->setContent( 'main', $content );
+
+  $pageUpdater->saveRevision(\CommentStoreComment::newUnsavedComment( 'Page created programmatically' ));
+
+    $status = $pageUpdater->getStatus();
+   
+  //    'Page creation failed: ' . implode( '; ', $status->getErrorsArray() )
+  
+  danteLog ("DanteBackup", print_r ($status, true));
+
+  
+
+}
+
+
+
+
+
+
+// BROKEN ???
 // imports a single text file
 public static function importTextFileToWikiPage ( string $filePath, string $pageTitleText, UserIdentity $performer, bool $createOnly = false ): void   {
 
@@ -302,54 +364,46 @@ public static function importTextFileToWikiPage ( string $filePath, string $page
 }
 
 
-
 /**
- * Create a wiki page from the contents of a local file.
- *
- * @param string $pageTitle   Target wiki page title, e.g. 'MyPage'
- * @param string $filePath    Absolute path to the source file
- * @param UserIdentity $user  Performing user
- * @param string $summary     Edit summary
- * @return \Status
+ * Create a wiki page from a local file.
  */
-public static function addPageFromFile (string $pageTitle, string $filePath, UserIdentity $user, string $summary = 'Created from file') {
-  if ( !is_file( $filePath ) || !is_readable( $filePath ) ) {
-    return \Status::newFatal( 'Source file does not exist or is not readable.' );
-  }
+public static function addPageFromFile( string $pageTitle, string $filePath, UserIdentity $user, string $summary = 'Created from file' ) {
+  
+  if ( !is_file( $filePath ) || !is_readable( $filePath ) ) {throw new Exception ("file does not exist or not readable");}
 
   $text = file_get_contents( $filePath );
-  if ( $text === false ) {
-    return \Status::newFatal( 'Failed to read source file.' );
-  }
+  if ( $text === false ) { throw new Exception ("text is false"); }
 
   $title = Title::newFromText( $pageTitle );
-  if ( !$title ) {
-    return \Status::newFatal( 'Invalid page title.' );
-  }
+  if ( !$title || !$title->canExist() ) { throw new Exception ("invalid page title");}
 
   $services = MediaWikiServices::getInstance();
   $wikiPage = $services->getWikiPageFactory()->newFromTitle( $title );
 
-  if ( $wikiPage->exists() ) {
-    return \Status::newFatal( 'Page already exists.' );
+  if ( $wikiPage->exists() ) { 
+    danteLog ("DanteBackup", "page already exists: " . $pageTitle);
+    return;
   }
 
-  $content = ContentHandler::makeContent(
-    $text,
-    $title,
-    CONTENT_MODEL_WIKITEXT
-  );
+  $content = ContentHandler::makeContent( $text, $title, CONTENT_MODEL_WIKITEXT);
 
   $updater = $wikiPage->newPageUpdater( $user );
   $updater->setContent( SlotRecord::MAIN, $content );
 
-  return $updater->saveRevision(
-    CommentStoreComment::newUnsavedComment( $summary )
+  $updater->saveRevision(
+    CommentStoreComment::newUnsavedComment( $summary ),
+    EDIT_NEW
   );
+
+  if ( !$updater->wasSuccessful() || !$updater->isNew() ) {
+    $status = $updater->getStatus();
+    throw new Exception ("save error " . print_r ($status, true));
+  }
+
+  $gen = $title->getPrefixedText();
+
+  danteLog ( "DanteBackup", "\n saved: " . $gen . " created:  " . ($updater->wasRevisionCreated() ? "TRUE" : "FALSE") ) ;
 }
-
-
-
 
 
 

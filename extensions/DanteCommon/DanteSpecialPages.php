@@ -10,12 +10,10 @@ protected function getGroupName() {return 'dante';}
 
 public function execute( $par ): void {
   $this->setHeaders();
-
   $this->checkPermissions();
   $this->outputHeader();
   $request = $this->getRequest();
   $action = $request->getVal( 'action', 'view' );  // Read `action` query parameter; if not present use 'view' as fallback value
-
   if ( $action === 'submit' && $request->wasPosted() ) { $this->handleSubmission ( $request ); } 
   else {$this->showForm();}
 }
@@ -44,12 +42,11 @@ protected function handleSubmission () {
     danteLog ("DanteBackup", "environment in handleSubmission is ".print_r ($env, true));
 
     // The following now does the dispatching via the html code generated below in ServiceEndpointHelper
-    $this->executeCommands ( $arr, $env );                                // finally dispatch the execution of these commands
+    $this->executeCommands ( $arr, $env );                           // finally dispatch the execution of these commands
 
   } catch ( Exception $x) {
     $this->getOutput()->addWikiTextAsContent("Exception occured: ". $x);
   }
-
 
 }
 

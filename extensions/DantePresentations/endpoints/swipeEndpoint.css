@@ -39,16 +39,17 @@ body {overflow:hidden;}
 .swipe-num  {font-weight:bold; color: blue;min-width:25px;display:inline-block; text-align:center; }
 .total-num-slides {color: blue;min-width:25px;display:inline-block; text-align:center;}
 
-
+/* UI elements */
 .swipe-zoom {position:absolute; top:0px; right:400px; z-index:10; padding:5px; border:0px solid blue; border-radius:5px; color:blue;}
-
 .swipe-navigator {position:absolute; top:0px; right:100px; z-index:10; padding:5px; border:0px solid blue; border-radius:5px; color:blue;}
+
 
 .swipe-stuff {margin-top:1px; padding:50px 140px 50px 140px;  height:100vh; width:100vw;min-height:100vh; overflow-y:scroll;}
 
 .swipe-stuff {  border:1px solid red;}
 
-.content {  border: 1px solid magenta; width:fit-content;}
+/* style the content inside of the slide */
+.content {  border: 0px solid magenta; width:fit-content;}
 .innerContent { zoom:1;}
 
 /* selector and options */
@@ -65,9 +66,6 @@ a.swipe-link {margin-left:10px; margin-right:10px; font-weight:bold; color:blue;
 button {height:30px; width:36px; position:relative;top:-5px; margin-left:5px; margin-right:5px; cursor:pointer;}
 
 button.zoomShow {width:80px;}
-
-
-
 
 
 

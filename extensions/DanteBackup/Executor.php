@@ -33,7 +33,7 @@ class Executor {
 // $error:     captures stderr
 // $duration:  captures execution time in microseconds
 // return:     return value of the command
- public static function execute ( $cmd, &$output, &$error, &$duration ) {
+public static function execute ( $cmd, &$output, &$error, &$duration ) {
   $startTime = microtime(true); 
   $proc = proc_open($cmd,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes);
   $output = stream_get_contents($pipes[1]);
@@ -43,7 +43,7 @@ class Executor {
   $closeParam = proc_close($proc);
   $duration = microtime (true) - $startTime;
   return $closeParam;
-  }
+}
 
   // $output is textual output from a OS command with lines seperated by newlines and cols seperated by one or more blanks
   // $keys is an array of key names
@@ -91,7 +91,7 @@ public static function liveExecute ( $arr ) {
 }
 
 
-// called with an array of shell functions which produce live, real time output
+// called with an array of shell commands which produce live, real time output
 // pipes the output, as it comes up, to the web page, including stderr
 // since we are using compression on the transport layer, this is not going to work as text/html
 // thus we use text/event-stream

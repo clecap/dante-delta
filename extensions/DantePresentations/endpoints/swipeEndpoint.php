@@ -5,8 +5,7 @@
  * This endpoint provides swipeable content
  */
 
-
-error_reporting(E_ALL); ini_set('display_errors', 'On');
+// error_reporting(E_ALL); ini_set('display_errors', 'On');
 
 require_once ("danteEndpoint.php");
 
@@ -46,9 +45,6 @@ window.mySwipe = new Swipe(element, {
 </script>";
 
 
-
-
-
 // js code for proper resizing drawio figures
 const DRAWIO_SIZE_PATCH = "
 <script>
@@ -72,7 +68,7 @@ drawIOPatch ();
 
 const SCALER = "
 <script>
-document.
+
 
 </script>
 ";
@@ -93,6 +89,13 @@ private $transformScale = 1;
 private $posSelect ="";        // for the selector 
 
 public function getInput () { return self::getInputTitle(); }
+
+
+
+
+
+
+
 
 
 public function processSlide () : string {
@@ -144,19 +147,16 @@ Section 0 is always considered to exist, even if it only contains the empty stri
     // build the element displaying where we are
     $posText     = "<div class='swipe-positioner'><span class='swipe-num' title='Current number'>".$linear."</span> of <span class='total-num-slides' title='Total number'></span></div>";
 
-    // build a zoom UI
+    // ZOOM UI
     $zoomUI = "<div class='swipe-zoom'><button class='zoomMinus'>-</button><button class='zoomShow'></button><button class='zoomPlus'>+</button></div>";
 
     // build a navigation element
-    $mainLink = "<a class='swipe-link' href='".$wgServer.$wgScriptPath."/index.php?title=".$this->dbkey."' title='Go back to main article'>".$this->title."</a>";
-    $nextLink = "<button onclick='window.mySwipe.next();'>&#8594;</button>";
-    $prevLink = "<button  onclick='window.mySwipe.prev();'>&#8592; </button>";
-    $navigator   = "<div class='swipe-navigator'>".$prevLink.$mainLink.$nextLink."</div>";
+    $mainLink  = "<a class='swipe-link' href='".$wgServer.$wgScriptPath."/index.php?title=".$this->dbkey."' title='Go back to main article'>".$this->title."</a>";
+    $nextLink  = "<button onclick='window.mySwipe.next();'>&#8594;</button>";
+    $prevLink  = "<button  onclick='window.mySwipe.prev();'>&#8592; </button>";
+    $navigator = "<div class='swipe-navigator'>".$prevLink.$mainLink.$nextLink."</div>";
 
-//    $myLine      = "<div class='bodyContent'>".$posText.$navigator.$parsedText."</div>";    // works
-
-
-    $myLine      = "<div class='bodyContent'><div class='swipe-line'>".$posSelect.$posText. $zoomUI.$navigator."</div><div class='swipe-stuff'><div class='content'><div class='innerContent'>".$parsedText."</div></div></div></div>";    
+    $myLine      = "<div class='bodyContent'><div class='swipe-line'>".$posText. $zoomUI.$navigator."</div><div class='swipe-stuff'><div class='content'><div class='innerContent'>".$parsedText."</div></div></div></div>";    
 
     $ret .= $myLine;
   }
@@ -169,6 +169,8 @@ Section 0 is always considered to exist, even if it only contains the empty stri
 
   return $ret;
 }
+
+
 
 
 
@@ -186,11 +188,12 @@ public function processOne ( $secNum ) : string {
 public function process () : string {
   $ret = "";
   try { $ret .= $this->processSlide ();
-    // $ret = $this->processOne (2);
+     // $ret = $this->processOne (2);
   }
   catch (Throwable $t) { $ret .= $t->__toString(); }
   return $ret;
 }
+
 
 public function getCssPaths () {
   return [
@@ -202,13 +205,15 @@ public function getCssPaths () {
 }
 
 public function getAsyncJsPaths() { return [ '../../../load.php?lang=en&amp;modules=startup&amp;only=scripts&amp;raw=1&amp;skin=vector']; }
-public function getJsPaths () { global $wgExtensionAssetsPath;  return ["$wgExtensionAssetsPath/Parsifal/js/runtime.js", "$wgExtensionAssetsPath/DantePresentations/js/swipe.min.js",
+public function getJsPaths () { global $wgExtensionAssetsPath;  
+  return ["$wgExtensionAssetsPath/Parsifal/js/runtime.js", "$wgExtensionAssetsPath/DantePresentations/js/swipe.min.js",
   "$wgExtensionAssetsPath/DantePresentations/endpoints/swipeEndpoint.js"
 ]; }
 public function getHeadText () : string { return "<style> body {transform:scale(".$this->transformScale."); transform-origin:top left;</style>"; }
 
+
 public function decorateBody ( string $text ) : string {
-  return  $text .  DRAWIO_SIZE_PATCH . SWIPER_JS . $this->posSelect . "<script>window.INIT();</script>" ;
+  return  $text  .  DRAWIO_SIZE_PATCH . SWIPER_JS . $this->posSelect . "<script>window.INIT();</script>" ;
 }
 
 } // class
@@ -217,6 +222,3 @@ public function decorateBody ( string $text ) : string {
 
 $point = new SwipeEndpoint (  );
 $point->execute();  // display text obtained from process
-
-
-
