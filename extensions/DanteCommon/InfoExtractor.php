@@ -3,6 +3,7 @@
 // Infoextractor is a collection of functions which extract information from MediaWiki in certain convenient forms
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\SlotRecord;
 use MediaWiki\User\UserIdentity;
 
 /** @package  */
@@ -222,22 +223,32 @@ public static function exportAllToTextFiles ( string $outDir = "/tmp/gitDump",  
 
 
 
+
 // iterates a directory containing slug coded files and imports all of them
 public static function importAllTextFilesSlugged ( string $inDir, string $userName ) {
 
   $user = MediaWikiServices::getInstance()->getUserFactory()->newFromName($userName); // convert to UserIdentity
 
   $it = new DirectoryIterator($inDir);
-  foreach ($it as $fileinfo) {
-    if ($fileinfo->isDot()) {continue;}  // skip dot directories
-    if (strtolower($fileinfo->getExtension()) !== 'txt') {continue;} // skip files which are not extension txt
-    if ($fileinfo->isFile()) {
-       $fileName = $fileinfo->getPathname();
-       $pageTitle = self::restoreTitleFromFileName ( $fileName);
-        self::importTextFileToWikiPage ( $fileName, $pageTitle, $user, false );
-    }                 
+  foreach ($it as $dirInfo) {
+    if ($dirInfo->isDot()) {continue;}     // skip dot files
+    if (!$dirInfo->isDir()) {continue;}    // skip non-directories
+    $subIt = new DirectoryIterator($dirInfo->getPathname());
+    foreach ($subIt as $fileinfo) {
+      if ($fileinfo->isDot()) {continue;}
+      if (strtolower($fileinfo->getExtension()) !== 'txt') {continue;}
+      if ($fileinfo->isFile()) {
+        $fileName = $fileinfo->getPathname();
+        $pageTitle = self::restoreTitleFromFileName($fileName);
+
+        // danteLog ("DanteBackup", "\n importing slugged file $fileName as $pageTitle" );
+
+        self::importTextFileToWikiPage($fileName, $pageTitle, $user, false);
+      }
+    }
   }
 }
+
 
 
 
@@ -257,39 +268,35 @@ public static function importTextFileToWikiPage ( string $filePath, string $page
 
   $content = ContentHandler::makeContent($text, $title);
 
+  danteLog("DanteBackup", "\n performer: '" . $performer->getName() . "' id=" . $performer->getId());
+  if ($performer->getId() === 0) { throw new RuntimeException("Performer is anonymous (id=0) — pass a registered user"); }
+
   $pageUpdater = $wikiPage->newPageUpdater($performer);
   $pageUpdater->setContent(SlotRecord::MAIN, $content);
 
   $summary = CommentStoreComment::newUnsavedComment ( 'Imported from text file' );
 
-  $status = $pageUpdater->saveRevision($summary);
+  $rev = $pageUpdater->saveRevision($summary);
+  $status = $pageUpdater->getStatus();
 
-// maybe version fix
-/*
-if (method_exists($status, 'isOK')) {
-  if (!$status->isOK()) {
-    throw new RuntimeException('Save failed');
-  }
-} else {
-  // Fallback: assume failure if null/false
-  if (!$status) {
-    throw new RuntimeException('Save failed (no status object)');
-  }
-}
-*/
+  danteLog ("DanteBackup", "\n importing '$pageTitleText' (resolved: '" . $title->getPrefixedText() . "' ns=" . $title->getNamespace() . ") rev=" . ($rev ? $rev->getId() : 'null') . " status=$status" );
+  // danteLog ("DanteBackup", "\n text is: " . $text);
 
 
+  if ($status === null) { throw new RuntimeException("Failed to save page: no status returned"); }
   if (!$status->isOK()) {
     $errors = [];
     foreach ($status->getErrors() as $error) { if (isset($error['message'])) { $errors[] = (string)$error['message']; } }
-
     $message = $errors ? implode('; ', $errors) : 'Unknown save failure';
-
     throw new RuntimeException("Failed to save page: $message");
   }
+  if ($rev === null) { danteLog("DanteBackup", "\n no-change (page already has this content): $pageTitleText"); }
+
+  $wikiPage->clear();
+  danteLog("DanteBackup", "\n page exists in DB after save: " . ($wikiPage->exists() ? 'YES' : 'NO'));
+
+
 }
-
-
 
 
 
