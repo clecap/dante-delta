@@ -104,7 +104,7 @@ class ImportDirectory extends Maintenance {
 		$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
 
 		foreach ( $files as $file => $text ) {
-			$pageName = $prefix . pathinfo( $file, PATHINFO_FILENAME );
+			$pageName = $prefix . $file;
 			$timestamp = $useTimestamp ? wfTimestamp( TS_UNIX, filemtime( $file ) ) : wfTimestampNow();
 
 			$title = Title::newFromText( $pageName );
