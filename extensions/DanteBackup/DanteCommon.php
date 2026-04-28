@@ -31,13 +31,6 @@ class DanteCommon {
 
 const DUMP_PATH = "/var/www/html/wiki-dir/dump";   
 
-const HEADER = [
-   'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump', 
-      'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
-   'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Page Dump',  'name' => 'archiveName', 'type' => 'text',     'readonly' => true  ],
-   'dbname'  => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Database', 'name' => 'dbName',      'type' => 'text',       'readonly' => true  ],
-   'tarname' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',     'type' => 'text',  'readonly' => true  ],
-];
 
 const FEATURES = [
   'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],

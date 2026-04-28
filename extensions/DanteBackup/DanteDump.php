@@ -45,8 +45,30 @@ protected function showForm (): void {
   $out->addHTML (wfMessage ("dante-page-dump-intro"));             // show some intro text
   $out->addHelpLink( 'index.php?title=Help:DanteDump', true );  // provide a help link   // TODO: must fill with contents
 
+  $out->addHTML ("<h3>Dump Initial Files</h3>");
+
+   $header = [
+     'GIT_OWNER'     => [ 'section' => 'inital', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80, 'label' => 'Git Owner',      'name' => 'GIT_OWNER',   'type' => 'text',  'default' => 'clecap' ],
+     'GIT_REPO'      => [ 'section' => 'inital', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80, 'label' => 'Repository',     'name' => 'GIT_REPO',    'type' => 'text',  'default' => 'dante-wiki-contents' ],
+     'GIT_BRANCH'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',  'size' => 80, 'label' => 'Branch',         'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'test-branch' ],
+     'GIT_COMMIT'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',  'size' => 80, 'label' => 'Commit Message', 'name' => 'GIT_COMMIT',  'type' => 'text',  'default' => 'Commit by DanteDump for initial contents'],
+     'GIT_TOKEN'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',  'size' => 80, 'label' => 'Access Token',   'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => '']
+   ];
+
+   self::standardForm ($header, $action, "dump", "Do the dump");
+
+
+  $header = [
+    'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump',
+       'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
+    'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Page Dump',     'name' => 'archiveName', 'type' => 'text', 'readonly' => true ],
+    'dbname'  => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Database',      'name' => 'dbName',      'type' => 'text', 'readonly' => true ],
+    'tarname' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',     'type' => 'text', 'readonly' => true ],
+  ];
+
+
   // describe the form to be displayed
-  $form = array_merge ( DanteCommon::HEADER, DanteCommon::SOURCE_FEATURES, DanteCommon::getTARGET_FORM(), DanteCommon::FEATURES );  // generate the form
+  $form = array_merge ( $header, DanteCommon::SOURCE_FEATURES, DanteCommon::getTARGET_FORM(), DanteCommon::FEATURES );  // generate the form
   self::standardForm ($form, $action, "dump", "Do the dump");
 }
 
