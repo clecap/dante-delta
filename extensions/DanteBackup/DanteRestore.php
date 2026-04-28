@@ -332,7 +332,7 @@ private function gitClone () {
 
   $cmds = [
     "git clone --depth=1 --single-branch --branch $branch $repoUrl $targetDir",
-    "php $IP/extensions/DanteCommon/importDirectory.php --ddir $targetDir --slug"
+    "php $IP/extensions/DanteCommon/importDirectory.php --ddir $targetDir --slug --overwrite"
   ];
 
   return $cmds;

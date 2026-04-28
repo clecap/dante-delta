@@ -2,69 +2,7 @@
 
 require_once ("DanteCommon.php");
 require_once ("Executor.php");
-
-
-
-// a memo is a single record for controlling the functionality of uploading DanteWiki system contents files
-class Memo {
-
-public string $name;        // name of the collection of contents
-public string $filename;    // temporary file name used as pagelist for this collection
-public string $contents;    // contents
-public string $num;         // number of elements of the collection
-public string $label;       // label for the collection
-public string $url;         // url for looking uo by user
-
-public static function getConfig () {
-  $config = [
-    new Memo ( "Cat_DanteInitialContents",         DanteUtil::catList           ("DanteInitialContents"),               "Category:DanteInitialContents" ),
-    new Memo ( "Cat_DanteInitialCustomize",        DanteUtil::catList           ("DanteInitialCustomize"),              "Category:DanteInitialCustomize"),
-    new Memo ( "MediaWiki_DanteInitialContents",   DanteUtil::listOfListed      ("MediaWiki:DanteInitialContents"),    "MediaWiki:DanteInitialContents" ),
-    new Memo ( "MediaWiki_DanteInitialCustomize",  DanteUtil::listOfListed      ("MediaWiki:DanteInitialCustomize"),   "MediaWiki:DanteInitialCustomize" ),
-    new Memo ( "Test",                             DanteUtil::listOfNamespace   (NS_TEST),                          "Special:AllPages&from=&to=&namespace=3000" ),
-    new Memo ( "MainPage",                         DanteUtil::singleList        ("Main Page"),                         "Main_Page" ), 
-    new Memo ( "MediaWiki_Sidebar",                DanteUtil::singleList        ("MediaWiki:Sidebar"),                 "MediaWiki:Sidebar" )
-  ];
-  return $config;
-}
-
-public function __construct ( string $name, string $filename, string $url ) {
-  global $wgServer, $wgScriptPath;
-  $this->name      = $name;
-  $this->filename  = $filename;
-  $this->url       = $url;
-  $this->contents  = file_get_contents ($this->filename);
-  $this->num       = substr_count($this->contents, "\n");
-
-  $this->label = "<li>All $this->num pages belonging to <a href='$wgServer/$wgScriptPath/index.php?title=$this->url'>$this->url</a>
-    <div style='max-height:200px; overflow-y:scroll; overflow-x:hidden; margin:20px;'><pre style='margin:0px; padding:0px;'>$this->contents</pre></div></li>";
-
-}
-
-public function execute ( $owner, $repository, $token, $path, $out=false ) {
-  global $IP;
-
-  // generate a manifest file and upload that manifest file
-  $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->filename-manifest.txt", $token, $this->contents);
-  if ($out) $out->addHTML( '<h3>got filepath:</h3><p><pre>' . $this->filename . '</pre></p>' );
-
-  // dump the contents as requested into into variable $output
-  $cmd = "php  $IP/maintenance/dumpBackup.php --current --uploads  --include-files  --pagelist=$this->filename";
-  $ret = Executor::execute ( $cmd, $output, $error, $duration );
-
-  if ($out) $out->addHTML ( "<h3>dumpBackup wrote to stderr:</h3><p><pre>" .$error. "</pre></p>");
-  $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml.gz",  $token,   gzencode ($output) );   // upload a .xml.gz variant
-  $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml",    $token,   $output );                      // upload a .xml variant
-
-  $json = json_decode ($response);
-  // if ($json->status != 200) { throw new Exception ("PROBLEM");}  // TODO: fix ?!?
-  $json_indented_by_4 = json_encode($json, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
-  $json_indented_by_2 = preg_replace('/^(  +?)\\1(?=[^ ])/m', '$1', $json_indented_by_4);
-  if ($out) $out->addHTML( '<h3>Github server replied to API call:</h3><p><pre>' . $json_indented_by_2 . '</pre></p>' );
-  @unlink ($filepath);
-}
-
-} // end class MEMO
+require_once (__DIR__ . "/../DanteCommon/PageCollection.php");
 
 
 
@@ -87,7 +25,7 @@ public function execute ( $subPage ) {
   $token         = $request->getText ('token');
   $check         = $request->getText ('check');           // used to check if this invocation is from a submission or not
 
-  $config        = Memo::getConfig();                           // get the configuration data from the one place where we configure it
+  $config        = PageCollection::getConfig();                           // get the configuration data from the one place where we configure it
 
   $user          = $this->getUser();
   $token         = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
@@ -179,7 +117,7 @@ public function execute ( $subPage ) {
   if ( $wasSent == "4" ) {
     danteLog ("DanteBackup", "Dante InitialLoad:execute Was submitted\n");
     $this->useTransactionalTimeLimit();  // raise time limit for this operation
-    $config = Memo::getConfig();   // get the configuration data from the one place where we configure it
+    $config = PageCollection::getConfig();   // get the configuration data from the one place where we configure it
     danteLog ("DanteBackup", "Dante InitialLoad:execute will now loop\n");
     foreach ($config as $val) { 
       // danteLog ("DanteBackup", "Dante InitialLoad: will now do ".$val->url."\n");

@@ -26,10 +26,6 @@ public string $target;
 public bool $zip;       //     if true: we should use compression
 public bool $enc;       //     if true: we should use encryption
 
-//public      $srcFiles;  //     true (all files) or name of a file (including namespace) listing every file to be dumped
-
-// FEATURES:
-
 private     $aesPW;       // password to be used by aes, in case $enc is true
 private     $bucketName;  // name of aws bucket to be used
 #endregion
