@@ -4,6 +4,8 @@ use MediaWiki\MediaWikiServices;
 
 require_once ("DanteCommon.php");
 require_once ("extensions/DanteCommon/ServiceEndpointHelper.php");
+require_once ("extensions/DanteCommon/PageCollection.php");
+
 
 
 $DUMP_PATH = "/var/www/html/wiki-dir/dump";    // TODO: allow this as setting in the configuration file !!  // Path to place the server-local dumps to
@@ -45,17 +47,30 @@ protected function showForm (): void {
   $out->addHTML (wfMessage ("dante-page-dump-intro"));             // show some intro text
   $out->addHelpLink( 'index.php?title=Help:DanteDump', true );  // provide a help link   // TODO: must fill with contents
 
-  $out->addHTML ("<h3>Dump Initial Files</h3>");
+ 
+  // TODO: must clean up by deleting files later !!
+
+  $config = PageCollection::getConfig();                                 // get an array of PageCollections
+  $manifest = PageCollection::makeManifest ( $config );
+
+  $sumNum = 0;
+  $text = ""; foreach ( $config as $value) {$text .= $value->label; $sumNum += $value->num; unlink ($value->filename); }  // format proper output text AND unlink intermediary individual collection files
+  $out->addHTML ("<h2>Dump System Files</h2>");
+  $text = "<details><summary>Total number: <b>" . $sumNum . " Files </b></summary> " .$text . "<p><b>Manifest:</b> $manifest</details>";
+
 
    $header = [
-     'GIT_OWNER'     => [ 'section' => 'inital', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80, 'label' => 'Git Owner',      'name' => 'GIT_OWNER',   'type' => 'text',  'default' => 'clecap' ],
-     'GIT_REPO'      => [ 'section' => 'inital', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80, 'label' => 'Repository',     'name' => 'GIT_REPO',    'type' => 'text',  'default' => 'dante-wiki-contents' ],
-     'GIT_BRANCH'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',  'size' => 80, 'label' => 'Branch',         'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'test-branch' ],
-     'GIT_COMMIT'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',  'size' => 80, 'label' => 'Commit Message', 'name' => 'GIT_COMMIT',  'type' => 'text',  'default' => 'Commit by DanteDump for initial contents'],
-     'GIT_TOKEN'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',  'size' => 80, 'label' => 'Access Token',   'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => '']
-   ];
+     'araw_info'     => [ 'section' => 'selected-files', 'class' => 'HTMLInfoField', 'raw' => true, 'default' => $text ],  // only displays the affected files
+     'GIT_OWNER'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Git Owner',      'name' => 'GIT_OWNER',   'type' => 'text',  'default' => 'clecap' ],
+     'GIT_REPO'      => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Repository',     'name' => 'GIT_REPO',    'type' => 'text',  'default' => 'dante-wiki-contents' ],
+     'GIT_BRANCH'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Branch',          'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'test-branch' ],
+     'GIT_COMMIT'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Commit Message',  'name' => 'GIT_COMMIT',  'type' => 'text',  'default' => 'Commit by DanteDump for initial contents'],
+     'GIT_TOKEN'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Access Token',    'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => ''],
+     'MANIFEST_FILE'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Manifest File',    'name' => 'MANIFEST_FILE',   'type' => 'text',  'default' => $manifest, "readonly" => true],
+   ];  // need to send manifest file name in the request, maybe no need to display it here as well
+  
 
-   self::standardForm ($header, $action, "dump", "Do the dump");
+   self::standardForm ($header, $action, "git", "Do the dump");
 
 
   $header = [
@@ -77,6 +92,26 @@ protected function getSpecificCommands ( $formId ): mixed {
   global $DUMP_PATH;
 
   $request = $this->getRequest();
+
+  switch ($formId) {
+  
+    case "formId_git":
+
+      $gitDir = InfoExtractor::makeTempDir ();
+
+             // export articles in manifest file to the temporary git directiry
+      $generate = ["command" => [InfoExtractor::class, 'exportManifestToTextFiles'], "args"    => [ "manifestFile" => $request->getVal ( 'MANIFEST_FILE' ), "outDir" => "$gitDir", "clean" => false] ];
+
+      $cmd = self::gitPrepare ( $request->getVal ('GIT_OWNER'),  $request->getVal ('GIT_REPO'),  $request->getVal ('GIT_BRANCH'),  $request->getVal ('GIT_COMMIT'),  $request->getVal ('GIT_TOKEN') , $generate);
+      return $cmd;
+
+
+  }
+
+
+
+
+
 
   // pick up all the data required for dispatching
   $this->archiveName = $request->getVal ( 'archiveName' );     danteLog ("DanteBackup", "archiveName $this->archiveName \n");
@@ -116,10 +151,7 @@ protected function getSpecificCommands ( $formId ): mixed {
       if ( $generateTar !== "" ) {$generateTar    .= " | /opt/myenv/bin/aws s3 cp -  s3://{$this->bucketName}/".$this->tarName; }
       return [$generatePages, $generateDb, $generateTar];  // that's the commands to be executed
       break;
-    case "github":   /*  $txt = self::dumpToAWS_FG  ( $this);  */ 
-      //InfoExtractor::exportAllToTextFiles ("/tmp/gitDump");
-      return $this->gitPrepare();
-      break;
+   
 
     case "ssh":     /*  $txt = DanteCommon::dumpToAWS_FG  ( $this); */  break;
     case "client":        $this->getOutput()->disable();   self::dumpToBrowser ( $this );  break;
@@ -224,63 +256,45 @@ public function getPageCommand (  ) {
 
 
 
-// returns commands to prepare a local git instance and place files in there 
-// TODO: just a PoC not a full implementation
-private function gitPrepare () {
-  $USER="clecap";
+// returns commands to prepare a local git instance and place files in there
+private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string $GIT_BRANCH, string $GIT_COMMIT, string $GIT_TOKEN, $generate ) {
 
-   $user = $this->getUser();
-  $TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
+  $GITMAIL = "dante-himself@dante.wiki"; 
+  $GITUSER = "Dante Wiki System";
 
-//  $TOKEN="";  // TODO: still must find a secure way to load that GIT access token without committing it to githug !!!!!
+  $REPO       = "https://$GIT_OWNER:$GIT_TOKEN@github.com/$GIT_OWNER/$GIT_REPO.git";
 
+  $myOutputDir = $generate["args"]["outDir"];    // pick up from generation function
 
-// TODO: NOT HE FINAL THING AS IT IS THE INCORRECT TOKEN BY NOW.
- // TODO: need two different cases and tokens: inital contents / system contents - and user dumpToBrowser
- // encrypt and aes might not apply or might not be optimal settings (for github, no binary content recommended to be stored there )
+  // Each command runs in a fresh shell, so cd explicitly every time.
+  $cdRepo = "cd $myOutputDir/$GIT_REPO";
 
+  // Suppress VS Code git hooks/credential helpers that may interfere in a dev container.
+  $adjust = "-c core.askPass=  -c credential.helper= -c credential.interactive=never";
+  $noHook = "-c core.hooksPath=/dev/null";
 
-  $GITMAIL="dante-himself@dante.wiki";
-  $GITUSER="Dante Wiki System";
-  $COMMIT_MESSAGE="Commit by dantewiki itself";
+  $git    = "/usr/bin/git";  // use original binary, not a possibly VS-code-patched wrapper
 
-  $REPO="https://$USER:$TOKEN@github.com/clecap/dante-wiki-contents.git";
-  $REPO_NAME="dante-wiki-contents";
-
-  $myOutputDir = "/tmp/gitDump";
-
-
-  // NOTE: below we want to have a cd into the correct directory in every line as every line gets executed in a fresh shell with its (wrong) directory and git
-  // in a development container, VS code sometimes patches all kinds of git hooks and environment variables to connect vs code better to gitPrepare
-  // in case we are running in such a container (when developing) we do not want this 
-  // that is why we add the following junk
-  $unsetCode="unset GIT_ASKPASS && unset SSH_ASKPASS && unset GIT_SSH && unset GIT_SSH_COMMAND && unset GIT_TERMINAL_PROMPT ";
-  $adjust="-c core.askPass=  -c credential.helper= -c credential.interactive=never";
-  $noHook="-c core.hooksPath=/dev/null";
-  $cdRepo="cd $myOutputDir/$REPO_NAME";
-  $git="/usr/bin/git";  // want to use original git binary and not a (possibly) vs code patched binary or shell script
-   
   $myCmd = ["command" => [InfoExtractor::class, 'exportAllToTextFiles'],
-            "args"    => [ "outDir" => "$myOutputDir/$REPO_NAME", "namespaces" => null, "includeRedirects" => true, "batchSize" => 500, "clean" => true ] ];
+            "args"    => [ "outDir" => "$myOutputDir/$GIT_REPO", "namespaces" => null, "includeRedirects" => true, "batchSize" => 500, "clean" => true ] ];
 
   $cmds = [
-    "sudo rm -Rf /tmp/gitDump/; mkdir -p $myOutputDir ",    ///// Still rm is hardcoded TODO: cave, danger if we have an interpolation error
-    "ls -al /tmp",
-    "ls -al $myOutputDir",
-    "cd $myOutputDir; $git $adjust $noHook clone --depth 1 $REPO",
-    "ls -al /tmp/gitDump",    //// TODO: CAVE: name of the employed repository is used - watch out if we change this for a different user
-    "$cdRepo && $git config user.name \"$GITUSER\"",         // configure local git properly setting user
-    "$cdRepo && $git config user.email \"$GITMAIL\"",        // configure local git properly setting email
-    $myCmd,  // now add the fresh files from the wiki to the local git   // TODO: must implement proper filters here 
-    "$cdRepo && git add .  && git status ",
-   // the following FIRST does a cd and if this succeeds THEN does a diff and if the diff exits with a 1 (which it does when there staged changes exist) only then do a commit
-   // this is necessary since a git commit without any staged things would fail with exit code 1 
-   // note that we need a command terminator ; at the end of the commit
-    "$cdRepo && { git diff --cached --quiet || git commit -m \"$COMMIT_MESSAGE\"; } ",
-    "$cdRepo && $git status",                
-    "$cdRepo && $git push --verbose $REPO",
-   // "sudo rm -Rf /tmp/gitDump/ ",
+    "mkdir -p $myOutputDir",  // TODO: needed ??
+    "cd $myOutputDir; $git $adjust $noHook clone --depth 1 --branch $GIT_BRANCH $REPO",
+    "$cdRepo && $git config user.name \"$GITUSER\"",
+    "$cdRepo && $git config user.email \"$GITMAIL\"",
+    $generate,  // export wiki pages into the local clone
+    "$cdRepo && $git add . && $git status",
+    // commit only when staged changes exist (git diff --cached exits 1 when changes are present)
+    "$cdRepo && { $git diff --cached --quiet || $git commit -m \"$GIT_COMMIT\"; }",
+    "$cdRepo && $git status",
+    "$cdRepo && $git push --verbose $REPO $GIT_BRANCH",
+    "rm -Rf $cleanup"
   ];
+
+
+  
+
   return $cmds;
 }
 

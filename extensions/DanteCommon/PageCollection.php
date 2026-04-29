@@ -5,11 +5,13 @@ class PageCollection {
 
   public string $name;        // name of the collection of contents
   public string $filename;    // temporary file name used as pagelist for this collection
-  public string $contents;    // contents
+  public string $contents;    // list of files as stored in the files
   public string $num;         // number of elements of the collection
   public string $label;       // label for the collection
-  public string $url;         // url for looking uo by user
+  public string $url;         // url for looking up by user
 
+
+// returns an array of PageCollections, as reflecting the initial system contents
   public static function getConfig () {
     $config = [
       new PageCollection ( "Cat_DanteInitialContents",         DanteUtil::catList           ("DanteInitialContents"),               "Category:DanteInitialContents" ),
@@ -23,6 +25,17 @@ class PageCollection {
     return $config;
   }
 
+
+// writes all $contents of the given PageCollection array into a temp manifest file; returns the file name
+  public static function makeManifest ( array $collections ): string {
+    $tmpFile = tempnam ( sys_get_temp_dir(), 'pc_' );
+    $combined = implode ( "\n", array_map ( fn($c) => $c->contents, $collections ) );
+    file_put_contents ( $tmpFile, $combined );
+    return $tmpFile;
+  }
+
+
+// constructs one instance of a PageCollection
   public function __construct ( string $name, string $filename, string $url ) {
     global $wgServer, $wgScriptPath;
     $this->name      = $name;
@@ -31,10 +44,20 @@ class PageCollection {
     $this->contents  = file_get_contents ($this->filename);
     $this->num       = substr_count($this->contents, "\n");
 
-    $this->label = "<li>All $this->num pages belonging to <a href='$wgServer/$wgScriptPath/index.php?title=$this->url'>$this->url</a>
-    <div style='max-height:200px; overflow-y:scroll; overflow-x:hidden; margin:20px;'><pre style='margin:0px; padding:0px;'>$this->contents</pre></div></li>";
+    $this->label = "<details><summary><b>$this->num pages </b> belonging to <a href='$wgServer/$wgScriptPath/index.php?title=$this->url'>$this->url</a></summary>
+    <div style='max-height:200px; overflow-y:scroll; overflow-x:hidden; margin:20px;'><pre style='margin:0px; padding:0px;'>$this->contents</pre></div></details>";
   }
 
+  public function cleanUp (): void {
+    @unlink ( $this->filename );
+  }
+
+
+
+
+
+
+  // TODO: DEPRECATE THIS together with DanteInitialStore.php
   public function execute ( $owner, $repository, $token, $path, $out=false ) {
     global $IP;
 

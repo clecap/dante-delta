@@ -138,13 +138,6 @@ public static function getIndirectSubcategories( string|array $category): array 
    * @throws \RuntimeException on fatal IO errors.
    */
 
-// TODO: *   - 'progressCallback' => callable|null  // function(int $exported, int $scanned): void
-
-
-
-
-// TODO: from gitDump move to unique directory
-// TODO: later, clean up those directory names
 public static function exportAllToTextFiles ( string $outDir = "/tmp/gitDump",  $namespaces=null, $includeRedirects=true, $batchSize = 500, $clean = false ): array {
   print ("exportAlltoTextFiles is HERE *****");
 
@@ -187,14 +180,15 @@ public static function exportAllToTextFiles ( string $outDir = "/tmp/gitDump",  
       $scanned++;
       $lastId = (int)$row->page_id;
       $title = Title::makeTitle( (int)$row->page_namespace, $row->page_title );
-      if ( !$title || !$title->exists() ) {continue;}
+      if ( !$title ) { throw new Exception ("Failed to make title for " . $row->page_title ); }
+      if ( !$title->exists() ) {throw new Exception ("Title does not exist for " . $row->page_title); }
 
       $page = WikiPage::factory( $title );
       $rev = $page->getRevisionRecord();
-      if ( !$rev ) {continue;}
+      if ( !$rev ) { throw new Exception ("Could not get revision record for " . $row->page_title);}
 
       $content = $rev->getContent( 'main' );
-      if ( !$content ) {continue;}
+      if ( !$content ) { throw new Exception ("Could not get content for " . $row->page_title);}
 
       $text = ContentHandler::getContentText( $content ); // TODO: modernize this to content models !!
 
@@ -222,6 +216,50 @@ public static function exportAllToTextFiles ( string $outDir = "/tmp/gitDump",  
 
 
 
+
+
+
+// exports pages listed in a manifest file (one title per line) to text files in $outDir
+public static function exportManifestToTextFiles ( string $manifestFile, string $outDir, bool $clean = false ): array {
+  if ( !is_readable( $manifestFile ) ) { throw new \RuntimeException( "Cannot read manifest file: $manifestFile" ); }
+
+  if ( $clean ) { self::rrmdir( $outDir ); }
+  if ( !is_dir( $outDir ) ) {
+    if ( !mkdir( $outDir, 0775, true ) ) { throw new \RuntimeException( "Cannot create output directory: $outDir" ); }
+  }
+  if ( !is_writable( $outDir ) ) { throw new \RuntimeException( "Output directory is not writable: $outDir" ); }
+
+  $lines    = file( $manifestFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+  $exported = 0;
+  $skipped  = 0;
+
+  foreach ( $lines as $titleText ) {
+    $titleText = trim( $titleText );
+    $title = Title::newFromText( $titleText );
+    if ( !$title || !$title->exists() ) { $skipped++;  continue; }
+
+    $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
+    $rev  = $page->getRevisionRecord();
+    if ( !$rev ) { $skipped++;  continue; }
+
+    $content = $rev->getContent( 'main' );
+    if ( !$content ) { $skipped++;  continue; }
+
+    $text     = ( $content instanceof \TextContent ) ? $content->getText() : $content->serialize();
+    $relPath  = self::makeRelPath( $title, 'txt' );
+    $fullPath = rtrim( $outDir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR . $relPath;
+
+    $dir = dirname( $fullPath );
+    if ( !is_dir( $dir ) ) {
+      if ( !mkdir( $dir, 0775, true ) ) { throw new \RuntimeException( "Cannot create directory: $dir" ); }
+    }
+
+    if ( @file_put_contents( $fullPath, $text ) === false ) { throw new \RuntimeException( "Failed writing file: $fullPath" ); }
+    $exported++;
+  }
+
+  return [ 'exported' => $exported, 'skipped' => $skipped ];
+}
 
 
 // iterates a directory containing slug coded files and imports all of them

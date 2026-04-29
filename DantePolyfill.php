@@ -87,7 +87,7 @@ static public function storeToGithub ($owner, $repo, $path, $token, $content) {
 
 
 /**
- * Given the name $cat of a category, return the list of files belonging to this category (this includes category files)
+ * Given the name $cat of a category, return the name of a temporary file listing all files belonging to this category (this includes category files)
  */
 static public function catList ( $cat ) {
   // Get the list of pages which are in the given category $cat
