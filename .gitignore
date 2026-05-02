@@ -79,15 +79,19 @@ ERRORLOG
 ### Directories which we want to include 
 !extensions/DanteCommon
 !extensions/DanteCommon/*
+extensions/DanteCommon/LOGFILE
 
 !extensions/DanteSynch
 !extensions/DanteSynch/*
+extensions/DanteSynch/LOGFILE
 
 !extensions/DanteHideSection
 !extensions/DanteHideSection/*
+extensions/DanteHideSection/LOGFILE
 
 !extensions/DanteBread
 !extensions/DanteBread/*
+extensions/DanteBread/LOGFILE
 
 !extensions/DanteLinks
 !extensions/DanteLinks/*
@@ -95,6 +99,7 @@ extensions/DanteLinks/DANTELINKS-LOGFILE
 
 !extensions/DanteSnippets
 !extensions/DanteSnippets/*
+extensions/DanteSnippets/LOGFILE
 
 !extensions/DanteTree
 !extensions/DanteTree/*
@@ -111,6 +116,7 @@ extensions/DanteBackup/LOGFILE
 
 !extensions/DanteSyntax
 !extensions/DanteSyntax/*
+extensions/DanteSyntax/LOGFILE
 
 !skins/skinny
 !skins/skinny/*
