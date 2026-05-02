@@ -58,6 +58,8 @@ protected function showForm (): void {
   $out->addHTML ("<h2>Dump System Files</h2>");
   $text = "<details><summary>Total number: <b>" . $sumNum . " Files </b></summary> " .$text . "<p><b>Manifest:</b> $manifest</details>";
 
+  $user = $this->getUser();
+  $GIT_TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' ); 
 
    $header = [
      'araw_info'     => [ 'section' => 'selected-files', 'class' => 'HTMLInfoField', 'raw' => true, 'default' => $text ],  // only displays the affected files
@@ -65,7 +67,7 @@ protected function showForm (): void {
      'GIT_REPO'      => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Repository',     'name' => 'GIT_REPO',    'type' => 'text',  'default' => 'dante-wiki-contents' ],
      'GIT_BRANCH'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Branch',          'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'test-branch' ],
      'GIT_COMMIT'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Commit Message',  'name' => 'GIT_COMMIT',  'type' => 'text',  'default' => 'Commit by DanteDump for initial contents'],
-     'GIT_TOKEN'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Access Token',    'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => ''],
+     'GIT_TOKEN'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Access Token',    'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => $GIT_TOKEN],
      'MANIFEST_FILE'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Manifest File',    'name' => 'MANIFEST_FILE',   'type' => 'text',  'default' => $manifest, "readonly" => true],
    ];  // need to send manifest file name in the request, maybe no need to display it here as well
   
@@ -265,6 +267,7 @@ private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string
   $REPO       = "https://$GIT_OWNER:$GIT_TOKEN@github.com/$GIT_OWNER/$GIT_REPO.git";
 
   $myOutputDir = $generate["args"]["outDir"];    // pick up from generation function
+  $manifestFile = $generate["args"]["manifestFile"];
 
   // Each command runs in a fresh shell, so cd explicitly every time.
   $cdRepo = "cd $myOutputDir/$GIT_REPO";
@@ -275,8 +278,9 @@ private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string
 
   $git    = "/usr/bin/git";  // use original binary, not a possibly VS-code-patched wrapper
 
-  $myCmd = ["command" => [InfoExtractor::class, 'exportAllToTextFiles'],
-            "args"    => [ "outDir" => "$myOutputDir/$GIT_REPO", "namespaces" => null, "includeRedirects" => true, "batchSize" => 500, "clean" => true ] ];
+  $prune = ["command" => [InfoExtractor::class, 'pruneToManifest'], "args"    => [ "manifestFile" => $manifestFile, "outDir" => $myOutputDir ] ];
+
+ 
 
   $cmds = [
     "mkdir -p $myOutputDir",  // TODO: needed ??
@@ -288,8 +292,9 @@ private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string
     // commit only when staged changes exist (git diff --cached exits 1 when changes are present)
     "$cdRepo && { $git diff --cached --quiet || $git commit -m \"$GIT_COMMIT\"; }",
     "$cdRepo && $git status",
+    $prune,
     "$cdRepo && $git push --verbose $REPO $GIT_BRANCH",
-    "rm -Rf $cleanup"
+    //"rm -Rf $myOutputDir"
   ];
 
 

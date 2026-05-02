@@ -15,6 +15,7 @@ class ServiceExecutor {
  * @param [type] $stdoutCollect If not null, collects the stdout of every command
  * @param [type] $stderrCollect If not null, collects the stderr of every command
  * @param [callable] $notify If not null, called occasionally during reading out the pipes and iterating the command array
+ * @param [boolean]  $stopOnError   In case of error, abort further processing of commands
  * @return void
  *
  * Function $notify can be 
@@ -33,7 +34,7 @@ class ServiceExecutor {
  *       the timeout may provide an additional timeout value
  *       the args may provide an arry of arguments to be called
  */
-public static function executeCommandArray ( $arr, $env = array(), &$stdoutCollect = null, &$stderrCollect = null, ?callable $notify=null ) {
+public static function executeCommandArray ( $arr, $env = array(), &$stdoutCollect = null, &$stderrCollect = null, ?callable $notify=null, $stopOnError = true ) {
   $didHaveError = false;  // flag to detect if we ever had an error
   $errorCount   = 0;      // counts the number of command which were in error
   $count = 0;             // counts the commands, counting starts at 1 (since this is for the user)
@@ -44,6 +45,8 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
 
   foreach ( $arr as $obj ) {  // iterate over all objects in the array
     $count++;
+
+    danteLog ("DanteCommon", "*** entered loop for number $count \n");
 
     $timeout = null;       // default is not to use a timeout
     $startTime = time();   // memorize time the command was started
@@ -81,27 +84,39 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
     $notify ? $notify( "cmd",   $count, $ele) : null;  // log the command itself
 
 
-    if (is_callable ($ele))   {  /* this branch is for the case that we find a callable in the array */
+    danteLog ("DanteCommon", "Now checking ele \n " );
+    danteLog ("DanteCommon", "ele reports as  " . print_r ($ele, true). "\n");
+    danteLog ("DanteCommon", (is_callable ($ele) ? " IS_CALL ": " IS_NOT_CALL " ) . ( is_string ($ele) ? "IS_STRING" : "IS_NOT_STRING" ) . "\n");
 
+    if (!is_callable ($ele) && !is_string($ele)) {throw new Exception ( "Is neither callable nor string: " . print_r ($ele, true) );}
+
+    
+
+
+    if (is_callable ($ele))   {  /* this branch is for the case that we find a callable in the array */
       ['result' =>$fcnResult, 'stdout' => $fcnStdout, 'stderr' => $fcnStderr, 'exception' => $fcnException ] = self::captureOutput ( $ele, ...$args );  // capture the output of the call to the callable, including possible exceptions
 
       $notify ? $notify ( "stdout", $count, $fcnStdout) : null;
       $notify ? $notify ( "stderr", $count, $fcnStderr ): null;
 
       $duration = time() - $startTime;
-      $tim = "duration=".$duration."[sec]";
+      $tim = "duration=".number_format($duration, 2)."[sec]";
       $notify ? $notify ( "tick", $count, chunk: $tim ) : null;
 
-      if ($fcnException === null) {$notify ? $notify (  "ret" , $count,  "retu=". print_r ($fcnResult, true) ) : null; }
+      if ($fcnException === null) { 
+        $notify ? $notify (  "ret" , $count,  "retu=". print_r ($fcnResult, true) ) : null; 
+        continue;
+      }
       else {
         $didHaveError = true; $errorCount++; 
         $notify ? $notify (  "exitErr" , $count,  "EXCEPTION raised: ".  get_class($fcnException) ) : null; 
+        if ($stopOnError) {break;} else {continue;}
       }
-
-      continue;
     }
    
     // open the process ressource
+    danteLog ("DanteCommon", "Invoking in proc_open:  " . print_r ($ele, true). "\n");
+
     $proc = proc_open($ele,[ 1 => ['pipe','w'], 2 => ['pipe','w'],], $pipes, null, $env); 
 
     // Set STDOUT and STDERR to non-blocking
@@ -178,12 +193,17 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
     // this command has finished, can close the resource, check the final status and signal this in the UI
     $closeParam = proc_close($proc);
 
-    if ($closeParam != 0) {$didHaveError = true; $errorCount++;  $notify ? $notify ( "in-error", $count, "" ) : null;}
+    if ($closeParam != 0) {
+      $didHaveError = true; $errorCount++;  $notify ? $notify ( "in-error", $count, "" ) : null;
+      if ($stopOnError) {  break;} else {continue;}
+    }
     else                  {                                      $notify ? $notify ( "was-ok",   $count, "" ) : null; }
 
   } // end for loop over all commands  
 
-  $notify ? $notify ( "close", $count, ( $didHaveError ?  "Please check: There were $errorCount errors." : "Completed. You may now leave this window."  )) : null;
+
+
+  $notify ? $notify ( "close", $count, ( $didHaveError ?  "Please check: There were $errorCount errors "  . ($stopOnError ? " and we stopped on the error " : " and we continued after the error" )   : "Completed. You may now leave this window."  )) : null;
   if ($didHaveError) {
     $notify ? $notify ( "in-error", 0, "" ) : null;
   }
