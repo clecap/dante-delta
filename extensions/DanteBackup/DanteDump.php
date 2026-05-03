@@ -266,11 +266,11 @@ private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string
 
   $REPO       = "https://$GIT_OWNER:$GIT_TOKEN@github.com/$GIT_OWNER/$GIT_REPO.git";
 
-  $myOutputDir = $generate["args"]["outDir"];    // pick up from generation function
+  $myOutputDir  = $generate["args"]["outDir"];          // pick up from generation function
   $manifestFile = $generate["args"]["manifestFile"];
 
-  // Each command runs in a fresh shell, so cd explicitly every time.
-  $cdRepo = "cd $myOutputDir/$GIT_REPO";
+ 
+  $cdRepo = "cd $myOutputDir";  // Each command runs in a fresh shell, so cd explicitly every time.
 
   // Suppress VS Code git hooks/credential helpers that may interfere in a dev container.
   $adjust = "-c core.askPass=  -c credential.helper= -c credential.interactive=never";
@@ -280,11 +280,9 @@ private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string
 
   $prune = ["command" => [InfoExtractor::class, 'pruneToManifest'], "args"    => [ "manifestFile" => $manifestFile, "outDir" => $myOutputDir ] ];
 
- 
-
   $cmds = [
     "mkdir -p $myOutputDir",  // TODO: needed ??
-    "cd $myOutputDir; $git $adjust $noHook clone --depth 1 --branch $GIT_BRANCH $REPO",
+    "cd $myOutputDir; $git $adjust $noHook clone --depth 1 --branch $GIT_BRANCH $REPO $myOutputDir",  // clone into the output directory itself
     "$cdRepo && $git config user.name \"$GITUSER\"",
     "$cdRepo && $git config user.email \"$GITMAIL\"",
     $generate,  // export wiki pages into the local clone
@@ -292,7 +290,7 @@ private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string
     // commit only when staged changes exist (git diff --cached exits 1 when changes are present)
     "$cdRepo && { $git diff --cached --quiet || $git commit -m \"$GIT_COMMIT\"; }",
     "$cdRepo && $git status",
-    $prune,
+    $prune,  // deletes .git/HEAD  
     "$cdRepo && $git push --verbose $REPO $GIT_BRANCH",
     //"rm -Rf $myOutputDir"
   ];

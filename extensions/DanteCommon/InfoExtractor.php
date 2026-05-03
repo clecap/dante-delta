@@ -263,7 +263,7 @@ public static function exportManifestToTextFiles ( string $manifestFile, string 
 
 
 // deletes every file in $outDir whose relative path is not the expected path of a title listed in $manifestFile
-public static function pruneToManifest ( string $manifestFile, string $outDir ): array {
+public static function pruneToManifestOLD ( string $manifestFile, string $outDir ): array {
   if ( !is_readable( $manifestFile ) ) { throw new \RuntimeException( "Cannot read manifest file: $manifestFile" ); }
   if ( !is_dir( $outDir ) )            { return [ 'deleted' => 0 ]; }
 
@@ -293,6 +293,69 @@ public static function pruneToManifest ( string $manifestFile, string $outDir ):
 
   return [ 'deleted' => $deleted ];
 }
+
+
+
+
+// deletes every file in $outDir whose relative path is not the expected path of a title listed in $manifestFile;
+// never touches .git or anything below .git/
+public static function pruneToManifest ( string $manifestFile, string $outDir ): array {
+  if ( !is_readable( $manifestFile ) ) { throw new \RuntimeException( "Cannot read manifest file: $manifestFile" ); }
+  if ( !is_dir( $outDir ) )            { return [ 'deleted' => 0 ]; }
+
+  $base = rtrim( $outDir, DIRECTORY_SEPARATOR );
+
+  $lines    = file( $manifestFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+  $expected = [];
+  foreach ( $lines as $titleText ) {
+    $title = Title::newFromText( trim( $titleText ) );
+    if ( !$title ) { continue; }
+    $expected[ str_replace( '\\', '/', self::makeRelPath( $title, 'txt' ) ) ] = true;
+  }
+
+  $deleted = 0;
+
+  $dirIt = new \RecursiveDirectoryIterator(
+    $base,
+    \RecursiveDirectoryIterator::SKIP_DOTS
+  );
+
+  $filterIt = new \RecursiveCallbackFilterIterator(
+    $dirIt,
+    static function ( \SplFileInfo $current, string $key, \RecursiveDirectoryIterator $iterator ): bool {
+      if ( $current->isDir() && $current->getFilename() === '.git' ) {
+        return false;
+      }
+
+      return true;
+    }
+  );
+
+  $it = new \RecursiveIteratorIterator(
+    $filterIt,
+    \RecursiveIteratorIterator::LEAVES_ONLY
+  );
+
+  foreach ( $it as $fileInfo ) {
+    if ( !$fileInfo->isFile() ) { continue; }
+
+    $rel = str_replace( '\\', '/', substr( $fileInfo->getPathname(), strlen( $base ) + 1 ) );
+
+    if ( $rel === '.git' || str_starts_with( $rel, '.git/' ) ) {
+      continue;
+    }
+
+    if ( !isset( $expected[$rel] ) ) {
+      unlink( $fileInfo->getPathname() );
+      $deleted++;
+    }
+  }
+
+  return [ 'deleted' => $deleted ];
+}
+
+
+
 
 
 // iterates a directory containing slug coded files and imports all of them
