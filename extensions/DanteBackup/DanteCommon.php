@@ -32,10 +32,12 @@ class DanteCommon {
 const DUMP_PATH = "/var/www/html/wiki-dir/dump";   
 
 
+// TODO: DEPRECATE SOON
 const FEATURES = [
   'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],
   'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc', 'default' => true ],
 ];
+
 
 const SOURCE_FEATURES = [
   'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
@@ -61,12 +63,6 @@ const SOURCE_FEATURES = [
                        '<b>Include</b>: Dump metadata and file contens (both into one large page archive)'                  => "include", 
                      ],   
         'name' => 'files',  'default' => 'include', 
- ],
-  'radio31'  => [ 'section' => 'srcfeatures/rc' , 'type' => 'radio',  'label' => '', 
-        'options' => [ 'No database dump only do a page dump'                                => "nodb",
-                       '<b>Full</b> database dump          '                                 => "db", 
-                     ],   
-        'name' => 'db',  'default' => 'db', 
  ],
 ];
 
@@ -98,12 +94,12 @@ const DEBUG_FORM = [
 ];
 
 
+// TODO: DEPRECATE THIS
   public static function getTARGET_FORM () {
    return  [
     'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
         'options' => [ 
            '<b>AWS S3</b> (shows error messages; may take minutes to hours)'                                                                                 => "aws",
-           '<b>Github</b> (shows error messages; may take minutes to hours)'                                                                                 => "github",
            '<b>SSH / SCP</b> (shows error messages; may take minutes to hours)'                                                                              => "ssh",
            "<b>Client</b> (save as file on the client using the browser)"                                                                                    => "client",
            '<b>Server</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                                         => "server",

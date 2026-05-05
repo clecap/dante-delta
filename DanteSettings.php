@@ -181,7 +181,6 @@ wfLoadExtension( 'DanteSnippets' );
 
 $wgTopDante = new stdClass();  // a generic top level object helper for parsifal and dante, must be defined here, before loading Parsifal
 
-$wgGroupPermissions['sysop']['resetParsifal']=true;
 
 // the sequence of loading should be:  1) Parsifal  2) DantePresentations  3) DanteHideSection  -  this influences the sequence of interaction possibilities in the edit links part of the page
 wfLoadExtension( 'Parsifal' );

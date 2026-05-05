@@ -236,14 +236,15 @@ public static function exportManifestToTextFiles ( string $manifestFile, string 
   foreach ( $lines as $titleText ) {
     $titleText = trim( $titleText );
     $title = Title::newFromText( $titleText );
-    if ( !$title || !$title->exists() ) { $skipped++;  continue; }
+    if ( !$title )           { $skipped++;  throw new Exception ("No title object obtained for: ".$titleText); }
+    if ( !$title->exists() ) { $skipped++;  throw new Exception ("Title does not exist for: ". $titleText); }
 
     $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
     $rev  = $page->getRevisionRecord();
-    if ( !$rev ) { $skipped++;  continue; }
+    if ( !$rev ) { $skipped++;  throw new Exception ("No revision record obtained for: " . $titleText); }
 
     $content = $rev->getContent( 'main' );
-    if ( !$content ) { $skipped++;  continue; }
+    if ( !$content ) { $skipped++;  throw new Exception ("No content obtained for: ". $titleText); }
 
     $text     = ( $content instanceof \TextContent ) ? $content->getText() : $content->serialize();
     $relPath  = self::makeRelPath( $title, 'txt' );
@@ -257,6 +258,9 @@ public static function exportManifestToTextFiles ( string $manifestFile, string 
     if ( @file_put_contents( $fullPath, $text ) === false ) { throw new \RuntimeException( "Failed writing file: $fullPath" ); }
     $exported++;
   }
+
+  echo "Exported: $exported \n";
+  echo "Skipped: $skipped\n";
 
   return [ 'exported' => $exported, 'skipped' => $skipped ];
 }

@@ -59,8 +59,15 @@ ERRORLOG
 ### Files which we must include
 
 !README-dantepatch.md
+
+##
+## Files we patched in the mediawiki core
+##
 !includes/import/WikiImporter.php
 !includes/media/SVGReader.php
+
+
+
 !DantePolyfill.php
 !DanteSettings.php
 !DanteSettings-production.php

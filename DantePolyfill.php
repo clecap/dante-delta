@@ -149,8 +149,8 @@ static public function getPagesInNamespace( $namespaceIndex ) {
     __METHOD__  // The name of the calling function, for logging purposes
   );
 
-  $pages = [];  // Initialize an array to hold the page titles
-  foreach ( $res as $row ) {$pages[] = $row->page_title;}   // Iterate over the results and add each page title to the array
+  $pages = [];
+  foreach ( $res as $row ) { $pages[] = Title::makeTitle( $namespaceIndex, $row->page_title )->getPrefixedText(); }
   return $pages;
 }
 

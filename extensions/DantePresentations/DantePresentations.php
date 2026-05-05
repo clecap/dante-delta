@@ -200,7 +200,7 @@ public static function onSkinAddFooterLinks( Skin $skin, string $key, array &$fo
   global $wgDanteOperatingMode, $wgServer, $wgScriptPath;
   if ( strcmp ($key, 'places') == 0 ) {
     $footerlinks['imprint']       = Html::element( 'a', ['href' => $wgServer.$wgScriptPath."/index.php/"."Project:Imprint", 'rel' => 'noreferrer noopener' ], "Imprint");
-    $footerlinks['parsifaldebug'] = Html::element( 'a',  ['href' => $wgServer.$wgScriptPath."/index.php/"."Special:ParsifalDebug", 'rel' => 'noreferrer noopener' ], "Mode: " . $wgDanteOperatingMode);
+    $footerlinks['dantedevelopment'] = Html::element( 'a',  ['href' => $wgServer.$wgScriptPath."/index.php/"."Special:DanteDevelopment", 'rel' => 'noreferrer noopener' ], "Mode: " . $wgDanteOperatingMode);
 
     $freeSpace = "Free Space: " . floor ( disk_free_space ("/var/www/html") / 1000000000 ) . " GB";
     $footerlinks['space'] = Html::element( 'a',  ['href' =>   $wgServer. $wgScriptPath . "/index.php/" .  "Special:ParsifalReset", 'rel' => 'noreferrer noopener'], $freeSpace);

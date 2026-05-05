@@ -1,11 +1,8 @@
 <?php
 
-use MediaWiki\MediaWikiServices;
-
 require_once ("DanteCommon.php");
 require_once ("extensions/DanteCommon/ServiceEndpointHelper.php");
 require_once ("extensions/DanteCommon/PageCollection.php");
-
 
 
 $DUMP_PATH = "/var/www/html/wiki-dir/dump";    // TODO: allow this as setting in the configuration file !!  // Path to place the server-local dumps to
@@ -48,33 +45,48 @@ protected function showForm (): void {
   $out->addHelpLink( 'index.php?title=Help:DanteDump', true );  // provide a help link   // TODO: must fill with contents
 
  
-  // TODO: must clean up by deleting files later !!
+  // TODO: must clean up by deleting files later !! (manifest, intermediary git directories and MUCH more !!!)
 
+
+  //// MASK FOR DUMPING SYSTEM PAGES
   $config = PageCollection::getConfig();                                 // get an array of PageCollections
-  $manifest = PageCollection::makeManifest ( $config );
+  $manifest = PageCollection::makeManifest ( $config );     // get a manifest file
 
   $sumNum = 0;
   $text = ""; foreach ( $config as $value) {$text .= $value->label; $sumNum += $value->num; unlink ($value->filename); }  // format proper output text AND unlink intermediary individual collection files
-  $out->addHTML ("<h2>Dump System Files</h2>");
-  $text = "<details><summary>Total number: <b>" . $sumNum . " Files </b></summary> " .$text . "<p><b>Manifest:</b> $manifest</details>";
+
+  $uniqueNum = self::countUniqueNonEmptyLines ($manifest);
+
+  
+  $out->addHTML ("<h2>Dump System Pages</h2>");
+  $out->addHTML ("<details><summary>Dumps Pages of the DanteWiki System but no User Pages to a Git Repository for System Development</summary>");
+
+  $text = "<details><summary>Total number of Files mentioned: <b>" . $sumNum . "  unique ones:" .$uniqueNum . " unique ones</b></summary> " .$text . "<p><b>Manifest:</b> $manifest</details>";
 
   $user = $this->getUser();
   $GIT_TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' ); 
 
    $header = [
-     'araw_info'     => [ 'section' => 'selected-files', 'class' => 'HTMLInfoField', 'raw' => true, 'default' => $text ],  // only displays the affected files
-     'GIT_OWNER'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Git Owner',      'name' => 'GIT_OWNER',   'type' => 'text',  'default' => 'clecap' ],
-     'GIT_REPO'      => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Repository',     'name' => 'GIT_REPO',    'type' => 'text',  'default' => 'dante-wiki-contents' ],
-     'GIT_BRANCH'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Branch',          'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'test-branch' ],
-     'GIT_COMMIT'    => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Commit Message',  'name' => 'GIT_COMMIT',  'type' => 'text',  'default' => 'Commit by DanteDump for initial contents'],
-     'GIT_TOKEN'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Access Token',    'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => $GIT_TOKEN],
-     'MANIFEST_FILE'     => [ 'section' => 'initial', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Manifest File',    'name' => 'MANIFEST_FILE',   'type' => 'text',  'default' => $manifest, "readonly" => true],
+     'araw_info'       => [ 'section' => 'selected-files', 'class' => 'HTMLInfoField', 'raw' => true, 'default' => $text ],  // only displays the affected files
+     'GIT_OWNER'       => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Git Owner',      'name' => 'GIT_OWNER',   'type' => 'text',  'default' => 'clecap' ],
+     'GIT_REPO'        => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Repository',     'name' => 'GIT_REPO',    'type' => 'text',  'default' => 'dante-wiki-contents' ],
+     'GIT_BRANCH'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Branch',          'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'test-branch' ],
+     'GIT_COMMIT'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Commit Message',  'name' => 'GIT_COMMIT',  'type' => 'text',  'default' => 'Commit by DanteDump for initial contents'],
+     'GIT_TOKEN'       => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Access Token',    'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => $GIT_TOKEN],
+     'MANIFEST_FILE'   => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Manifest File',    'name' => 'MANIFEST_FILE',   'type' => 'text',  'default' => $manifest, "readonly" => true],
    ];  // need to send manifest file name in the request, maybe no need to display it here as well
   
 
-   self::standardForm ($header, $action, "git", "Do the dump");
+   self::standardForm ($header, $action, "git", "Dump System Files");
+   $out->addHTML ("</details>");
 
 
+
+
+
+
+  $out->addHTML ("<h2>Dump Pages / Files as Archive</h2>");
+  $out->addHTML ("<details><summary>Dumps Pages and Possibly Files as Single Archive</summary>");
   $header = [
     'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump',
        'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
@@ -83,11 +95,78 @@ protected function showForm (): void {
     'tarname' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',     'type' => 'text', 'readonly' => true ],
   ];
 
-
-  // describe the form to be displayed
   $form = array_merge ( $header, DanteCommon::SOURCE_FEATURES, DanteCommon::getTARGET_FORM(), DanteCommon::FEATURES );  // generate the form
   self::standardForm ($form, $action, "dump", "Do the dump");
+  $out->addHTML ("</details>");
+
+
+
+  self::maskFiles ( $out, $action );
+  self::maskDatabaseTables ( $out , $action );
+  
 }
+
+
+
+
+private function maskFiles ( $out, $action ) {
+  $out->addHTML ("<h2>Dump Files</h2>");
+  $out->addHTML ("<details><summary>Dumps files which were uploaded to this DanteWiki</summary>");
+  $form = [
+    'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump',
+       'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
+    'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Page Dump',     'name' => 'archiveName', 'type' => 'text', 'readonly' => true ],
+     'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],
+     'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc', 'default' => true ],
+    'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
+        'options' => [ 
+           '<b>AWS S3</b> (shows error messages; may take minutes to hours)'                                                                                 => "aws",
+           '<b>SSH / SCP</b> (shows error messages; may take minutes to hours)'                                                                              => "ssh",
+           "<b>Client</b> (save as file on the client using the browser)"                                                                                    => "client",
+           '<b>Server</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                                         => "server",
+        ], 
+        'name' => 'target',  'default' => 'aws', 
+ ]  ,
+  ];
+  
+  
+  self::standardForm ($form, $action, "dump", "Dump Files");
+  $out->addHTML ("</details>");
+}
+
+
+
+private function maskDatabaseTables ( $out, $action ) {
+  $out->addHTML ("<h2>Dump Database Tables</h2>");
+  $out->addHTML ("<details><summary>Dumps Database Tables in SQL Text Form.</summary>");
+
+  $header = [
+    'tag'      => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump',
+                    'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
+    'tarname'  => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',     'type' => 'text', 'readonly' => true ],
+    'radio'    => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
+        'options' => [ 
+           '<b>AWS S3</b> (shows error messages; may take minutes to hours)'                                                                                 => "aws",
+           '<b>SSH / SCP</b> (shows error messages; may take minutes to hours)'                                                                              => "ssh",
+           "<b>Client</b> (save as file on the client using the browser)"                                                                                    => "client",
+           '<b>Server</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                                         => "server",
+        ], 
+        'name' => 'target',  'default' => 'aws', 
+    ]  ,
+
+
+
+
+    'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],
+    'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc-db', 'default' => true ],
+  ];
+
+  $form = array_merge ( $header, DanteCommon::getTARGET_FORM() );  // generate the form
+  self::standardForm ($form, $action, "dumpDB", "Dump Database Tables");
+  $out->addHTML ("</details>");
+}
+
+
 
 
 protected function getSpecificCommands ( $formId ): mixed {
@@ -269,7 +348,7 @@ private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string
   $myOutputDir  = $generate["args"]["outDir"];          // pick up from generation function
   $manifestFile = $generate["args"]["manifestFile"];
 
- 
+
   $cdRepo = "cd $myOutputDir";  // Each command runs in a fresh shell, so cd explicitly every time.
 
   // Suppress VS Code git hooks/credential helpers that may interfere in a dev container.
@@ -280,18 +359,40 @@ private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string
 
   $prune = ["command" => [InfoExtractor::class, 'pruneToManifest'], "args"    => [ "manifestFile" => $manifestFile, "outDir" => $myOutputDir ] ];
 
+
+
+// check if the specified REPO has a specified BRANCH and if it has not, generate one at the remote; finally clone the branch, existing or freshly generated
+// some git providers only allow generation of a BRANCH upon a non-empty commit, so to cater for this situation we provide for a minimal upload as well
+
+$initCmd = <<<BASH
+  git ls-remote --exit-code --heads {$REPO} {$GIT_BRANCH} || (
+    tmp=\$(mktemp -d) &&
+    git -C "\$tmp" init --initial-branch={$GIT_BRANCH} &&
+    git -C "\$tmp" config user.name "{$GITUSER}" &&
+    git -C "\$tmp" config user.email "{$GITMAIL}" &&
+    git -C "\$tmp" commit --allow-empty -m init &&
+    git -C "\$tmp" remote add origin {$REPO} &&
+    git -C "\$tmp" push -q origin {$GIT_BRANCH} &&
+    rm -rf "\$tmp"
+  ) && git clone --depth 1 --branch {$GIT_BRANCH} {$REPO} {$myOutputDir}
+BASH;
+
+
+// NOTE: git -C allows to specify a directory and spares us the cd to the directory
+
   $cmds = [
     "mkdir -p $myOutputDir",  // TODO: needed ??
-    "cd $myOutputDir; $git $adjust $noHook clone --depth 1 --branch $GIT_BRANCH $REPO $myOutputDir",  // clone into the output directory itself
-    "$cdRepo && $git config user.name \"$GITUSER\"",
-    "$cdRepo && $git config user.email \"$GITMAIL\"",
+    $initCmd,
+    "$git -C $myOutputDir config user.name \"$GITUSER\"",
+    "$git -C $myOutputDir config user.email \"$GITMAIL\"",
     $generate,  // export wiki pages into the local clone
-    "$cdRepo && $git add . && $git status",
+    "$git -C $myOutputDir add . ",
+    "$git -C $myOutputDir status",
     // commit only when staged changes exist (git diff --cached exits 1 when changes are present)
-    "$cdRepo && { $git diff --cached --quiet || $git commit -m \"$GIT_COMMIT\"; }",
-    "$cdRepo && $git status",
+    "{ $git -C $myOutputDir diff --cached --quiet || $git -C $myOutputDir commit -m \"$GIT_COMMIT\"; }",
+    "$git -C $myOutputDir status",
     $prune,  // deletes .git/HEAD  
-    "$cdRepo && $git push --verbose $REPO $GIT_BRANCH",
+    "$git -C $myOutputDir push --verbose $REPO $GIT_BRANCH",
     //"rm -Rf $myOutputDir"
   ];
 
@@ -517,6 +618,13 @@ function getAllPageNames(): array {
 }
 
 
+
+private static function countUniqueNonEmptyLines( string $filePath ): int {
+  $lines = file( $filePath, FILE_IGNORE_NEW_LINES );
+  if ( $lines === false ) { return 0; }
+  $unique = array_unique( array_filter( $lines, fn( $l ) => trim( $l ) !== '' ) );
+  return count( $unique );
+}
 
 }  // end of class
 

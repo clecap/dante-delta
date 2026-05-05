@@ -1,0 +1,72 @@
+<?php
+
+// require_once (  dirname(__FILE__) . "/../config/config.php");    // include path configuration
+
+class OperatingMode extends FormSpecialPage {
+
+  private $submitResult;       // used to communicate the result of the submission to onSuccess
+
+  public function __construct () {
+    parent::__construct( 'DanteDevelopment', 'developDante' ); 
+    $this->submitResult=-1;    // not yet set  
+  }
+  
+  public function getGroupName() {return 'dante';}
+  
+  
+  public function onSubmit( array $data )  {
+    global $IP;
+    $VERBOSE = false;  // CAVE: if we debug this and set this to true we MUST comment away the deletion of LOGFILE below or we will not see what we log !!
+
+    if (! $this->getUser()->isAllowed ("developDante") ) {return false;}                                 
+
+    // NOTE: need to reset apcu cache and opcache to have this effective as soon as possible in all transitions
+    if ($data["radio"] == 0) { copy ("$IP/DanteSettings-production.php",          "$IP/DanteSettings-used.php");   apcu_clear_cache(); opcache_reset(); }
+    if ($data["radio"] == 1) { copy ("$IP/DanteSettings-development.php",         "$IP/DanteSettings-used.php");   apcu_clear_cache(); opcache_reset(); }
+  //  if ($data["radio"] == 2) { copy ("$IP/DanteSettings-development-deprec.php",  "$IP/DanteSettings-used.php");   apcu_clear_cache(); opcache_reset(); }
+
+    $this->submitResult = $data["radio"];
+    return Status::newGood();
+  }
+
+  public function onSuccess() {  // triggered on success
+    $out = $this->getOutput();
+    $out->redirect( wfExpandUrl( Title::newFromText( 'Main Page' )->getFullURL() ) );
+  }
+
+  public function getFormFields()  {
+    global $wgDanteOperatingMode;
+    global $wgServer, $wgScriptPath;
+    $output = $this->getOutput();
+
+   	$output->addHTML( "<h2>Operating mode</h2>");
+    $output->addHTML ("<p>Current operating mode is: $wgDanteOperatingMode.</p>  <p>This form allows to switch to a new operating mode</p>" );
+   	$output->addHTML( '<p><b>Running in development or development & deprecation mode contains security risks and is discouraged!</b></p>' );
+    $output->addHTML( '<b>Unless you know exactly what you are doing, please close this browser window immediately.</b>' );
+
+
+
+
+    $output->addHTML( ' <a href="'.$wgServer.$wgScriptPath.'?title=Special:SpecialPages">Special Pages</a>' );
+
+     $formDescriptor = [
+      'radio' => [
+          'type' => 'radio',
+          'label' => 'Operative mode',
+          'options' => [
+              'Production' => 0,
+              'Development' => 1,
+   //           'Development & Deprecation' => 2  // do not use, currently broken inside of Mediawiki core code itself TODO
+          ],
+      // The options selected by default (identified by value)
+      //    'default' => 1,
+      ]
+  ];
+  
+    return $formDescriptor;
+
+
+  }
+
+  
+}

@@ -79,7 +79,13 @@
   "specialpages-group-dante":  "DanteWiki",
 
   "help-filter": "Removes all hidden contents. See [[Help:Hidden Contents]]",
-  "help-enc":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password, as without it you cannot restore the contents of the dump file. If a password is set for the user and you do a database dump without encryption then the password is visible as part of the database dump."
 
+  "help-enc":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password used in the dump, as without it you cannot restore the contents of the dump file.",
+
+
+  "help-enc-db":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password used in the dump, as without it you cannot restore the contents of the dump file. If a password is set for the user and you do a database dump without encryption then the password is visible as part of the database dump.",
+
+  "selected-files": "Files selected for this dump",
+  "git-data":  "Git Repository Data"
 
 }
