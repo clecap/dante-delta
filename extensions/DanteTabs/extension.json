@@ -1,0 +1,71 @@
+{
+	"name": "DanteTabs",
+	"version": "1.0.0",
+	"author": ["Clemens H. Cap"],
+	"descriptionmsg": "dantetabs-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.39.0"
+	},
+	"namespaces": [
+		{
+			"id": 3000,
+			"constant": "NS_TEST",
+			"name": "Test",
+			"subpages": true,
+			"content": true,
+			"defaultcontentmodel": "wikitext"
+		},
+    {
+			"id": 3002,
+			"constant": "NS_LIT",
+			"name": "Lit",
+			"subpages": true,
+			"content": true,
+			"defaultcontentmodel": "wikitext"
+		},
+		{
+			"id": 3004,
+			"constant": "NS_TODO",
+			"name": "Todo",
+			"subpages": true,
+			"content": true,
+			"defaultcontentmodel": "wikitext"
+		},
+		{
+			"id": 3006,
+			"constant": "NS_FAQ",
+			"name": "Faq",
+			"subpages": true,
+			"content": true,
+			"defaultcontentmodel": "wikitext"
+		},
+		{
+			"id": 3008,
+			"constant": "NS_EX",
+			"name": "Ex",
+			"subpages": true,
+			"content": true,
+			"defaultcontentmodel": "wikitext"
+		},
+		{
+			"id": 3010,
+			"constant": "NS_DRAFT",
+			"name": "Draft",
+			"subpages": true,
+			"content": true,
+			"defaultcontentmodel": "wikitext"
+		}
+	],
+	"Hooks": {
+		"SkinTemplateNavigation::Universal": "DanteTabsHooks::onSkinTemplateNavigationUniversal"
+	},
+	"AutoloadClasses": {
+		"DanteTabsHooks": "includes/DanteTabsHooks.php"
+	},
+	"MessagesDirs": {
+		"DanteTabs": ["i18n"]
+	},
+	"manifest_version": 2
+}

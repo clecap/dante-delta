@@ -109,17 +109,6 @@ $wgGroupPermissions['docent']['edit'] = true;         # only used to generate th
 $wgGroupPermissions['*']['createaccount'] = false;    # currently prevent account creation
 
 
-/* configure new namespace for hosting Test cases */
-define("NS_TEST", 3000); 
-define("NS_TEST_TALK", 3001);
-$wgExtraNamespaces[NS_TEST]      = "Test";
-$wgExtraNamespaces[NS_TEST_TALK] = "Test_talk";
-$wgContentNamespaces[] = NS_TEST;                 // Allow content to be created in the custom namespace
-$wgNamespaceProtection[NS_TEST] = ['edit'];       // Require edit permission for this namespace
-$wgNamespaceProtection[NS_TEST_TALK] = ['edit'];
-
-
-
 $wgEditPageFrameOptions ="SAMEORIGIN";                // required to allow the preview iframe in the edit view to navigate to pages of the same 
 
 $wgLogos = false;
@@ -165,6 +154,7 @@ wfLoadExtension ( ext: 'DanteCommon' ); // core part for all dante extensions
 wfLoadExtension( 'DanteBread' );
 wfLoadExtension( 'DanteLinks' );
 wfLoadExtension( 'DanteTree' );
+wfLoadExtension( 'DanteTabs' );
 
 
 $wgGroupPermissions['sysop']['dante-restore'] = true;  // TODO: this should go into the registration function of the extension as a default somehow and not be required here. // NOTE: here: it must be before loading the extension 
