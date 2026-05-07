@@ -128,6 +128,10 @@ extensions/DanteSyntax/LOGFILE
 
 !extensions/DanteTabs
 !extensions/DanteTabs/*
+!extensions/DanteTabs/i18n/
+!extensions/DanteTabs/i18n/*
+!extensions/DanteTabs/includes/
+!extensions/DanteTabs/includes/*
 extensions/DanteTabs/LOGFILE
 
 

@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": ["Clemens H. Cap"]
+	},
+	"dantetabs-desc": "Provides the Lit, Todo, Faq, Ex, and Draft namespaces with per-article tab navigation",
+	"nstab-dante-test":  "Test",
+	"nstab-dante-lit":   "Lit",
+	"nstab-dante-todo":  "Todo",
+	"nstab-dante-faq":   "Faq",
+	"nstab-dante-ex":    "Ex",
+	"nstab-dante-draft": "Draft"
+}
