@@ -21,6 +21,7 @@ class OperatingMode extends SpecialPage {
 
     $this->showOperatingModeForm();
     $this->showSecondForm();
+    $this->showThirdForm();
 
     $out = $this->getOutput();
     $out->addHTML ( '<p><a href="' . $wgServer . $wgScriptPath . '?title=Special:SpecialPages">Special Pages</a></p>' );
@@ -79,6 +80,24 @@ class OperatingMode extends SpecialPage {
     $form->setSubmitCallback( [ $this, 'processSecondForm' ] );
     $form->show();
   }
+
+
+
+private function showThirdForm() {
+    global $wgServer, $wgScriptPath;
+    $out = $this->getOutput();
+    $out->addHTML( "<h2>Provide Links to Analytic Test Pages</h2>" );
+    $out->addHTML( "<ul>" );
+    $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/extensions/DanteCommon/html/Clipboard.html'>Analyze Clipboard Contents</a></li>" );
+    $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/extensions/DanteCommon/html/Dragdrop.html'>Analyze Dragdrop Contents</a></li>" );
+    $out->addHTML( "<ul>" );
+  
+  }
+
+
+
+
+
 
   public function processSecondForm() {
     global $IP;
