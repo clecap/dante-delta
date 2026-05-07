@@ -84,6 +84,10 @@ ERRORLOG
 !.gitconfig
 
 ### Directories which we want to include 
+
+!.claude
+!.claude/**
+
 !extensions/DanteCommon
 !extensions/DanteCommon/**
 extensions/DanteCommon/LOGFILE
