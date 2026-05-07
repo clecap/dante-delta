@@ -126,6 +126,11 @@ extensions/DanteBackup/LOGFILE
 !extensions/DanteSyntax/*
 extensions/DanteSyntax/LOGFILE
 
+!extensions/DanteTabs
+!extensions/DanteTabs/*
+extensions/DanteTabs/LOGFILE
+
+
 !skins/skinny
 !skins/skinny/*
 
