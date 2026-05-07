@@ -121,6 +121,7 @@ extensions/DanteTree/LOGFILE
 !extensions/DantePresentations
 !extensions/DantePresentations/**
 extensions/DantePresentations/LOGFILE
+extensions/DantePresentations/endpoints/ENDPOINT_LOG
 
 !extensions/DanteBackup
 !extensions/DanteBackup/**
