@@ -7,11 +7,21 @@
     body {
       font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 2rem;
-      max-width: 1100px;
+      max-width: 1200px;
     }
 
     button, label, #pasteTarget, #dropArea {
       font: inherit;
+    }
+
+    button {
+      padding: 0.35rem 0.65rem;
+    }
+
+    label {
+      display: inline-block;
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
     }
 
     #pasteTarget, #dropArea {
@@ -32,20 +42,65 @@
       background: #f0f0f0;
     }
 
+    #summary {
+      display: grid;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .section {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      background: #fff;
+    }
+
+    .section h3 {
+      margin-top: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 0.35rem 1rem;
+    }
+
+    .key {
+      font-weight: 600;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0.5rem 0;
+    }
+
+    .chip {
+      display: inline-block;
+      border: 1px solid #aaa;
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      background: #f8f8f8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .payload {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin: 0.75rem 0;
+      background: #fafafa;
+    }
+
     pre {
       background: #f5f5f5;
       border-radius: 8px;
       padding: 1rem;
       overflow: auto;
       white-space: pre-wrap;
-    }
-
-    img {
-      max-width: 480px;
-      max-height: 320px;
-      display: block;
-      margin: 1rem 0;
-      border: 1px solid #ccc;
+      overflow-wrap: anywhere;
     }
   </style>
 </head>
@@ -54,6 +109,7 @@
 
   <p>
     <button id="readButton">Inspect via Clipboard API</button>
+
     <label>
       <input id="unsanitizedHtml" type="checkbox">
       try unsanitized HTML
@@ -62,7 +118,7 @@
 
   <h2>Paste area</h2>
   <div id="pasteTarget" contenteditable="true">
-    Click here and paste with ⌘V. This inspects what a paste event exposes.
+    Click here and paste with ⌘V.
   </div>
 
   <h2>Drop area</h2>
@@ -70,15 +126,17 @@
     Drop files, images, links, selected text, or rich content here.
   </div>
 
-  <h2>Result</h2>
-  <pre id="output"></pre>
+  <h2>Human-readable result</h2>
+  <div id="summary">
+    No inspection result yet.
+  </div>
 
-  <h2>Previews</h2>
-  <div id="previews"></div>
+  <h2>Technical JSON</h2>
+  <pre id="output"></pre>
 
   <script>
     const output = document.querySelector("#output");
-    const previews = document.querySelector("#previews");
+    const summary = document.querySelector("#summary");
     const pasteTarget = document.querySelector("#pasteTarget");
     const dropArea = document.querySelector("#dropArea");
     const readButton = document.querySelector("#readButton");
@@ -86,23 +144,12 @@
 
     function resetOutput() {
       output.textContent = "";
-      previews.replaceChildren();
+      summary.replaceChildren("No inspection result yet.");
     }
 
     function show(value) {
+      renderSummary(value);
       output.textContent = JSON.stringify(value, null, 2);
-    }
-
-    function truncate(value, maxLength = 5000) {
-      if (typeof value !== "string") {
-        return value;
-      }
-
-      if (value.length <= maxLength) {
-        return value;
-      }
-
-      return value.slice(0, maxLength) + `\n… truncated after ${maxLength} characters`;
     }
 
     function isTextLike(type) {
@@ -114,123 +161,43 @@
         type.endsWith("+xml");
     }
 
-    function likelyPasteOrDropMeaning(type) {
-      if (type === "Files") {
-        return "File transfer marker: inspect dataTransfer.files for concrete File objects.";
-      }
-
-      if (type === "text/plain") {
-        return "Plain text: text fields, code editors, terminals, search boxes.";
-      }
-
-      if (type === "text/html") {
-        return "Rich HTML: email composers, web editors, Google Docs, CMS editors.";
-      }
-
-      if (type === "text/uri-list") {
-        return "URL list: browsers, link fields, apps that accept links.";
-      }
-
-      if (type === "text/rtf" || type === "application/rtf") {
-        return "Rich text: word processors and rich-text editors.";
-      }
-
-      if (type.startsWith("image/")) {
-        return "Image data: image editors, document editors, chat apps, design tools.";
-      }
-
-      if (type === "application/json" || type.endsWith("+json")) {
-        return "Structured JSON: developer tools or apps that explicitly accept JSON.";
-      }
-
-      if (type === "") {
-        return "No MIME type reported. Common for some files, directories, or app-specific drag data.";
-      }
-
-      return "Target-specific: only apps or sites that understand this format can use it.";
-    }
-
-    function imageDimensions(url) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-
-        img.onload = () => {
-          resolve({
-            width: img.naturalWidth,
-            height: img.naturalHeight
-          });
-        };
-
-        img.onerror = reject;
-        img.src = url;
-      });
-    }
-
-    async function summarizeBlob(blob, type) {
-      const summary = {
-        type,
-        blobType: blob.type || "(not reported)",
-        sizeBytes: blob.size,
-        likelyMeaning: likelyPasteOrDropMeaning(type)
+    async function summarizeBlob(blob, requestedType) {
+      const result = {
+        requestedType,
+        blobType: blob.type,
+        size: blob.size
       };
 
-      if (isTextLike(type)) {
-        summary.textPreview = truncate(await blob.text());
+      if (isTextLike(requestedType) || isTextLike(blob.type)) {
+        result.payload = {
+          kind: "text",
+          text: await blob.text()
+        };
       }
 
-      if (type.startsWith("image/")) {
-        const url = URL.createObjectURL(blob);
-        summary.objectUrl = url;
-
-        try {
-          summary.image = await imageDimensions(url);
-        } catch {
-          summary.image = "(could not decode image dimensions)";
-        }
-
-        const img = document.createElement("img");
-        img.src = url;
-        img.alt = `${type}, ${blob.size} bytes`;
-        previews.appendChild(img);
-      }
-
-      return summary;
+      return result;
     }
 
     async function summarizeFile(file, index) {
-      const summary = {
+      const result = {
         index,
         name: file.name,
-        type: file.type || "(not reported)",
-        sizeBytes: file.size,
+        type: file.type,
+        size: file.size,
         lastModified: file.lastModified,
         lastModifiedISO: Number.isFinite(file.lastModified)
           ? new Date(file.lastModified).toISOString()
-          : null,
-        likelyMeaning: likelyPasteOrDropMeaning(file.type)
+          : null
       };
 
-      if (file.type.startsWith("image/")) {
-        const url = URL.createObjectURL(file);
-        summary.objectUrl = url;
-
-        try {
-          summary.image = await imageDimensions(url);
-        } catch {
-          summary.image = "(could not decode image dimensions)";
-        }
-
-        const img = document.createElement("img");
-        img.src = url;
-        img.alt = `${file.name}, ${file.type}, ${file.size} bytes`;
-        previews.appendChild(img);
+      if (isTextLike(file.type)) {
+        result.payload = {
+          kind: "text",
+          text: await file.text()
+        };
       }
 
-      if (isTextLike(file.type) && file.size <= 1_000_000) {
-        summary.textPreview = truncate(await file.text());
-      }
-
-      return summary;
+      return result;
     }
 
     function getStringFromDataTransferItem(item) {
@@ -242,50 +209,43 @@
     }
 
     async function summarizeDataTransferItem(item, index) {
-      const summary = {
+      const result = {
         index,
         kind: item.kind,
-        type: item.type || "(not reported)",
-        likelyMeaning: likelyPasteOrDropMeaning(item.type)
+        type: item.type
       };
 
       if (item.kind === "string") {
-        const text = await getStringFromDataTransferItem(item);
-        summary.textPreview = truncate(text);
+        result.payload = {
+          kind: "text",
+          text: await getStringFromDataTransferItem(item)
+        };
       }
 
       if (item.kind === "file") {
         const file = item.getAsFile();
-
-        if (file) {
-          summary.file = await summarizeFile(file, index);
-        } else {
-          summary.file = "(no File object returned; this may be a directory or browser-restricted item)";
-        }
+        result.file = file ? await summarizeFile(file, index) : null;
       }
 
-      return summary;
+      return result;
     }
 
     async function inspectDataTransfer(dataTransfer, method) {
-      const types = Array.from(dataTransfer.types);
-
       const result = {
         method,
         dropEffect: dataTransfer.dropEffect,
         effectAllowed: dataTransfer.effectAllowed,
-        types: types.map((type) => ({
-          type,
-          likelyMeaning: likelyPasteOrDropMeaning(type)
-        })),
+        types: Array.from(dataTransfer.types),
         stringDataByType: {},
+        itemCount: dataTransfer.items.length,
         items: [],
+        fileCount: dataTransfer.files.length,
         files: []
       };
 
-      for (const type of types) {
+      for (const type of dataTransfer.types) {
         if (type !== "Files") {
-          result.stringDataByType[type] = truncate(dataTransfer.getData(type));
+          result.stringDataByType[type] = dataTransfer.getData(type);
         }
       }
 
@@ -298,6 +258,196 @@
       }
 
       return result;
+    }
+
+    function makeElement(tagName, text, className) {
+      const element = document.createElement(tagName);
+
+      if (className) {
+        element.className = className;
+      }
+
+      if (text !== undefined && text !== null) {
+        element.textContent = String(text);
+      }
+
+      return element;
+    }
+
+    function addSection(title) {
+      const section = makeElement("section", null, "section");
+      section.appendChild(makeElement("h3", title));
+      summary.appendChild(section);
+      return section;
+    }
+
+    function addGridRow(grid, key, value) {
+      grid.appendChild(makeElement("div", key, "key"));
+      grid.appendChild(makeElement("div", value));
+    }
+
+    function addGrid(section, rows) {
+      const grid = makeElement("div", null, "grid");
+
+      for (const [key, value] of rows) {
+        addGridRow(grid, key, value);
+      }
+
+      section.appendChild(grid);
+      return grid;
+    }
+
+    function addTypeChips(section, types) {
+      const chips = makeElement("div", null, "chips");
+
+      for (const type of types) {
+        chips.appendChild(makeElement("span", type || "(empty string)", "chip"));
+      }
+
+      section.appendChild(chips);
+    }
+
+    function addPayload(section, title, payload) {
+      const wrapper = makeElement("div", null, "payload");
+      wrapper.appendChild(makeElement("h4", title));
+
+      if (!payload) {
+        wrapper.appendChild(makeElement("p", "No payload field."));
+        section.appendChild(wrapper);
+        return;
+      }
+
+      addGrid(wrapper, [
+        ["Kind", payload.kind ?? ""]
+      ]);
+
+      wrapper.appendChild(makeElement("pre", payload.text ?? ""));
+      section.appendChild(wrapper);
+    }
+
+    function renderBlobRepresentation(section, representation) {
+      const subSection = makeElement("div", null, "payload");
+      subSection.appendChild(makeElement("h4", "Blob representation"));
+
+      addGrid(subSection, [
+        ["Requested type", representation.requestedType],
+        ["Blob type", representation.blobType],
+        ["Size", representation.size]
+      ]);
+
+      if (representation.payload) {
+        addPayload(subSection, "Text payload", representation.payload);
+      }
+
+      section.appendChild(subSection);
+    }
+
+    function renderFile(section, file) {
+      const fileSection = makeElement("div", null, "payload");
+      fileSection.appendChild(makeElement("h4", "File"));
+
+      addGrid(fileSection, [
+        ["Index", file.index],
+        ["Name", file.name],
+        ["Type", file.type],
+        ["Size", file.size],
+        ["Last modified", file.lastModified],
+        ["Last modified ISO", file.lastModifiedISO]
+      ]);
+
+      if (file.payload) {
+        addPayload(fileSection, "Text payload", file.payload);
+      }
+
+      section.appendChild(fileSection);
+    }
+
+    function renderSummary(result) {
+      summary.replaceChildren();
+
+      if (result.errorName || result.error) {
+        const section = addSection("Error");
+
+        addGrid(section, [
+          ["Error", result.error || ""],
+          ["Error name", result.errorName || ""],
+          ["Error message", result.errorMessage || ""],
+          ["Note", result.note || ""]
+        ]);
+
+        return;
+      }
+
+      const overview = addSection("Overview");
+
+      addGrid(overview, [
+        ["Method", result.method || ""],
+        ["Item count", result.itemCount ?? ""],
+        ["File count", result.fileCount ?? result.files?.length ?? ""],
+        ["dropEffect", result.dropEffect ?? ""],
+        ["effectAllowed", result.effectAllowed ?? ""]
+      ]);
+
+      if (Array.isArray(result.types)) {
+        overview.appendChild(makeElement("h4", "DataTransfer types"));
+        addTypeChips(overview, result.types);
+      }
+
+      if (result.stringDataByType && Object.keys(result.stringDataByType).length > 0) {
+        const stringData = addSection("DataTransfer.getData(type)");
+
+        for (const [type, value] of Object.entries(result.stringDataByType)) {
+          addPayload(stringData, type, {
+            kind: "text",
+            text: value
+          });
+        }
+      }
+
+      if (Array.isArray(result.items) && result.items.length > 0) {
+        const items = addSection("Items");
+
+        for (const item of result.items) {
+          const itemSection = makeElement("div", null, "payload");
+          itemSection.appendChild(makeElement("h4", `Item ${item.index ?? item.itemIndex}`));
+
+          addGrid(itemSection, [
+            ["Index", item.index ?? item.itemIndex ?? ""],
+            ["Kind", item.kind ?? ""],
+            ["Type", item.type ?? ""],
+            ["Presentation style", item.presentationStyle ?? ""]
+          ]);
+
+          if (Array.isArray(item.types)) {
+            itemSection.appendChild(makeElement("h4", "Types"));
+            addTypeChips(itemSection, item.types);
+          }
+
+          if (item.payload) {
+            addPayload(itemSection, "Item string payload", item.payload);
+          }
+
+          if (Array.isArray(item.representations)) {
+            for (const representation of item.representations) {
+              renderBlobRepresentation(itemSection, representation);
+            }
+          }
+
+          if (item.file) {
+            renderFile(itemSection, item.file);
+          }
+
+          items.appendChild(itemSection);
+        }
+      }
+
+      if (Array.isArray(result.files) && result.files.length > 0) {
+        const files = addSection("Files");
+
+        for (const file of result.files) {
+          renderFile(files, file);
+        }
+      }
     }
 
     async function inspectViaClipboardApi() {
@@ -315,10 +465,10 @@
           ? { unsanitized: ["text/html"] }
           : undefined;
 
-        let items;
+        let clipboardItems;
 
         try {
-          items = options
+          clipboardItems = options
             ? await navigator.clipboard.read(options)
             : await navigator.clipboard.read();
         } catch (error) {
@@ -326,25 +476,25 @@
             throw error;
           }
 
-          items = await navigator.clipboard.read();
+          clipboardItems = await navigator.clipboard.read();
         }
 
         const result = {
           method: "navigator.clipboard.read()",
-          itemCount: items.length,
+          itemCount: clipboardItems.length,
           items: []
         };
 
-        for (const [itemIndex, item] of items.entries()) {
+        for (const [itemIndex, clipboardItem] of clipboardItems.entries()) {
           const itemResult = {
             itemIndex,
-            presentationStyle: item.presentationStyle || "(not reported)",
-            types: item.types,
+            presentationStyle: clipboardItem.presentationStyle,
+            types: clipboardItem.types,
             representations: []
           };
 
-          for (const type of item.types) {
-            const blob = await item.getType(type);
+          for (const type of clipboardItem.types) {
+            const blob = await clipboardItem.getType(type);
             itemResult.representations.push(await summarizeBlob(blob, type));
           }
 
@@ -356,7 +506,7 @@
         show({
           errorName: error.name,
           errorMessage: error.message,
-          note: "Click the button directly, allow the browser paste prompt, and run this from localhost or HTTPS."
+          note: "Click the button directly, allow the browser paste prompt, and use a secure context such as HTTPS or localhost."
         });
       }
     }
