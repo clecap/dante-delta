@@ -15,7 +15,7 @@
 			"name": "Test",
 			"subpages": true,
 			"content": true,
-			"defaultcontentmodel": "wikitext"
+			"defaultcontentmodel": "wikitext" 
 		},
     {
 			"id": 3002,
