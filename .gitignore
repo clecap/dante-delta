@@ -107,6 +107,7 @@ extensions/DanteLinks/DANTELINKS-LOGFILE
 !extensions/DanteSnippets
 !extensions/DanteSnippets/*
 extensions/DanteSnippets/LOGFILE
+extensions/DanteSnippets/LOG
 
 !extensions/DanteTree
 !extensions/DanteTree/*
