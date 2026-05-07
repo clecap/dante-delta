@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Clipboard and Drop Inspector</title>
+  <style>
+    body {
+      font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 2rem;
+      max-width: 1100px;
+    }
+
+    button, label, #pasteTarget, #dropArea {
+      font: inherit;
+    }
+
+    #pasteTarget, #dropArea {
+      border: 1px solid #999;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      min-height: 5rem;
+    }
+
+    #dropArea {
+      border-style: dashed;
+      background: #fafafa;
+    }
+
+    #dropArea.dragOver {
+      outline: 3px solid #777;
+      background: #f0f0f0;
+    }
+
+    pre {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    img {
+      max-width: 480px;
+      max-height: 320px;
+      display: block;
+      margin: 1rem 0;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Clipboard and Drop Inspector</h1>
+
+  <p>
+    <button id="readButton">Inspect via Clipboard API</button>
+    <label>
+      <input id="unsanitizedHtml" type="checkbox">
+      try unsanitized HTML
+    </label>
+  </p>
+
+  <h2>Paste area</h2>
+  <div id="pasteTarget" contenteditable="true">
+    Click here and paste with ⌘V. This inspects what a paste event exposes.
+  </div>
+
+  <h2>Drop area</h2>
+  <div id="dropArea">
+    Drop files, images, links, selected text, or rich content here.
+  </div>
+
+  <h2>Result</h2>
+  <pre id="output"></pre>
+
+  <h2>Previews</h2>
+  <div id="previews"></div>
+
+  <script>
+    const output = document.querySelector("#output");
+    const previews = document.querySelector("#previews");
+    const pasteTarget = document.querySelector("#pasteTarget");
+    const dropArea = document.querySelector("#dropArea");
+    const readButton = document.querySelector("#readButton");
+    const unsanitizedHtml = document.querySelector("#unsanitizedHtml");
+
+    function resetOutput() {
+      output.textContent = "";
+      previews.replaceChildren();
+    }
+
+    function show(value) {
+      output.textContent = JSON.stringify(value, null, 2);
+    }
+
+    function truncate(value, maxLength = 5000) {
+      if (typeof value !== "string") {
+        return value;
+      }
+
+      if (value.length <= maxLength) {
+        return value;
+      }
+
+      return value.slice(0, maxLength) + `\n… truncated after ${maxLength} characters`;
+    }
+
+    function isTextLike(type) {
+      return type.startsWith("text/") ||
+        type === "application/json" ||
+        type === "application/xml" ||
+        type === "image/svg+xml" ||
+        type.endsWith("+json") ||
+        type.endsWith("+xml");
+    }
+
+    function likelyPasteOrDropMeaning(type) {
+      if (type === "Files") {
+        return "File transfer marker: inspect dataTransfer.files for concrete File objects.";
+      }
+
+      if (type === "text/plain") {
+        return "Plain text: text fields, code editors, terminals, search boxes.";
+      }
+
+      if (type === "text/html") {
+        return "Rich HTML: email composers, web editors, Google Docs, CMS editors.";
+      }
+
+      if (type === "text/uri-list") {
+        return "URL list: browsers, link fields, apps that accept links.";
+      }
+
+      if (type === "text/rtf" || type === "application/rtf") {
+        return "Rich text: word processors and rich-text editors.";
+      }
+
+      if (type.startsWith("image/")) {
+        return "Image data: image editors, document editors, chat apps, design tools.";
+      }
+
+      if (type === "application/json" || type.endsWith("+json")) {
+        return "Structured JSON: developer tools or apps that explicitly accept JSON.";
+      }
+
+      if (type === "") {
+        return "No MIME type reported. Common for some files, directories, or app-specific drag data.";
+      }
+
+      return "Target-specific: only apps or sites that understand this format can use it.";
+    }
+
+    function imageDimensions(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+
+        img.onload = () => {
+          resolve({
+            width: img.naturalWidth,
+            height: img.naturalHeight
+          });
+        };
+
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    async function summarizeBlob(blob, type) {
+      const summary = {
+        type,
+        blobType: blob.type || "(not reported)",
+        sizeBytes: blob.size,
+        likelyMeaning: likelyPasteOrDropMeaning(type)
+      };
+
+      if (isTextLike(type)) {
+        summary.textPreview = truncate(await blob.text());
+      }
+
+      if (type.startsWith("image/")) {
+        const url = URL.createObjectURL(blob);
+        summary.objectUrl = url;
+
+        try {
+          summary.image = await imageDimensions(url);
+        } catch {
+          summary.image = "(could not decode image dimensions)";
+        }
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = `${type}, ${blob.size} bytes`;
+        previews.appendChild(img);
+      }
+
+      return summary;
+    }
+
+    async function summarizeFile(file, index) {
+      const summary = {
+        index,
+        name: file.name,
+        type: file.type || "(not reported)",
+        sizeBytes: file.size,
+        lastModified: file.lastModified,
+        lastModifiedISO: Number.isFinite(file.lastModified)
+          ? new Date(file.lastModified).toISOString()
+          : null,
+        likelyMeaning: likelyPasteOrDropMeaning(file.type)
+      };
+
+      if (file.type.startsWith("image/")) {
+        const url = URL.createObjectURL(file);
+        summary.objectUrl = url;
+
+        try {
+          summary.image = await imageDimensions(url);
+        } catch {
+          summary.image = "(could not decode image dimensions)";
+        }
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = `${file.name}, ${file.type}, ${file.size} bytes`;
+        previews.appendChild(img);
+      }
+
+      if (isTextLike(file.type) && file.size <= 1_000_000) {
+        summary.textPreview = truncate(await file.text());
+      }
+
+      return summary;
+    }
+
+    function getStringFromDataTransferItem(item) {
+      return new Promise((resolve) => {
+        item.getAsString((value) => {
+          resolve(value);
+        });
+      });
+    }
+
+    async function summarizeDataTransferItem(item, index) {
+      const summary = {
+        index,
+        kind: item.kind,
+        type: item.type || "(not reported)",
+        likelyMeaning: likelyPasteOrDropMeaning(item.type)
+      };
+
+      if (item.kind === "string") {
+        const text = await getStringFromDataTransferItem(item);
+        summary.textPreview = truncate(text);
+      }
+
+      if (item.kind === "file") {
+        const file = item.getAsFile();
+
+        if (file) {
+          summary.file = await summarizeFile(file, index);
+        } else {
+          summary.file = "(no File object returned; this may be a directory or browser-restricted item)";
+        }
+      }
+
+      return summary;
+    }
+
+    async function inspectDataTransfer(dataTransfer, method) {
+      const types = Array.from(dataTransfer.types);
+
+      const result = {
+        method,
+        dropEffect: dataTransfer.dropEffect,
+        effectAllowed: dataTransfer.effectAllowed,
+        types: types.map((type) => ({
+          type,
+          likelyMeaning: likelyPasteOrDropMeaning(type)
+        })),
+        stringDataByType: {},
+        items: [],
+        files: []
+      };
+
+      for (const type of types) {
+        if (type !== "Files") {
+          result.stringDataByType[type] = truncate(dataTransfer.getData(type));
+        }
+      }
+
+      for (const [index, item] of Array.from(dataTransfer.items).entries()) {
+        result.items.push(await summarizeDataTransferItem(item, index));
+      }
+
+      for (const [index, file] of Array.from(dataTransfer.files).entries()) {
+        result.files.push(await summarizeFile(file, index));
+      }
+
+      return result;
+    }
+
+    async function inspectViaClipboardApi() {
+      resetOutput();
+
+      if (!navigator.clipboard || !navigator.clipboard.read) {
+        show({
+          error: "navigator.clipboard.read() is not available in this browser/context."
+        });
+        return;
+      }
+
+      try {
+        const options = unsanitizedHtml.checked
+          ? { unsanitized: ["text/html"] }
+          : undefined;
+
+        let items;
+
+        try {
+          items = options
+            ? await navigator.clipboard.read(options)
+            : await navigator.clipboard.read();
+        } catch (error) {
+          if (!options) {
+            throw error;
+          }
+
+          items = await navigator.clipboard.read();
+        }
+
+        const result = {
+          method: "navigator.clipboard.read()",
+          itemCount: items.length,
+          items: []
+        };
+
+        for (const [itemIndex, item] of items.entries()) {
+          const itemResult = {
+            itemIndex,
+            presentationStyle: item.presentationStyle || "(not reported)",
+            types: item.types,
+            representations: []
+          };
+
+          for (const type of item.types) {
+            const blob = await item.getType(type);
+            itemResult.representations.push(await summarizeBlob(blob, type));
+          }
+
+          result.items.push(itemResult);
+        }
+
+        show(result);
+      } catch (error) {
+        show({
+          errorName: error.name,
+          errorMessage: error.message,
+          note: "Click the button directly, allow the browser paste prompt, and run this from localhost or HTTPS."
+        });
+      }
+    }
+
+    async function inspectPasteEvent(event) {
+      event.preventDefault();
+      resetOutput();
+
+      const result = await inspectDataTransfer(event.clipboardData, "paste event");
+      show(result);
+    }
+
+    function handleDragEnter(event) {
+      event.preventDefault();
+      dropArea.classList.add("dragOver");
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "copy";
+      }
+    }
+
+    function handleDragLeave(event) {
+      if (!dropArea.contains(event.relatedTarget)) {
+        dropArea.classList.remove("dragOver");
+      }
+    }
+
+    async function inspectDropEvent(event) {
+      event.preventDefault();
+      dropArea.classList.remove("dragOver");
+      resetOutput();
+
+      const result = await inspectDataTransfer(event.dataTransfer, "drop event");
+      show(result);
+    }
+
+    readButton.addEventListener("click", inspectViaClipboardApi);
+    pasteTarget.addEventListener("paste", inspectPasteEvent);
+
+    dropArea.addEventListener("dragenter", handleDragEnter);
+    dropArea.addEventListener("dragover", handleDragOver);
+    dropArea.addEventListener("dragleave", handleDragLeave);
+    dropArea.addEventListener("drop", inspectDropEvent);
+  </script>
+</body>
+</html>

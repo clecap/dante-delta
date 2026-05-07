@@ -89,7 +89,7 @@ private function showThirdForm() {
     $out->addHTML( "<h2>Provide Links to Analytic Test Pages</h2>" );
     $out->addHTML( "<ul>" );
     $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/extensions/DanteCommon/html/Clipboard.html'>Analyze Clipboard Contents</a></li>" );
-    $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/extensions/DanteCommon/html/Dragdrop.html'>Analyze Dragdrop Contents</a></li>" );
+    $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/extensions/DanteCommon/html/DragDrop.html'>Analyze Dragdrop Contents</a></li>" );
     $out->addHTML( "<ul>" );
   
   }
