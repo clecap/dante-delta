@@ -69,7 +69,7 @@ $cmdString = $session->get ( 'Dante_Cmd' );  // a string which encodes in JSON f
 $envString = $session->get ( 'Dante_Env' );  // a string which encodes in JSON format the environment in which these commands shall be executed
 
 
-danteLog ("DanteBackup", "\n environment string in service endpoint ".print_r ($envString, true));  // should TODO log into serviceEndpoint log ?!?!
+// danteLog ("DanteBackup", "\n environment string in service endpoint ".print_r ($envString, true));  // should TODO log into serviceEndpoint log ?!?!
   
 
 // convert json text into php array
@@ -82,7 +82,7 @@ require_once ( __DIR__ . "/ServiceEndpointHelper.php");  // CAVE: MUST require t
 $stdoutCollect = null; $stderrCollect = null;
 
 
- danteLog ("DanteBackup", "\n environment array in service endpoint ".print_r ($envArray, true));
+// danteLog ("DanteBackup", "\n environment array in service endpoint ".print_r ($envArray, true));
 
 
 ServiceExecutor::executeCommandArray ( $cmdArray, $envArray, $stdoutCollect, $stderrCollect, [ ServiceEndpointHelper::class, 'sendEvent' ] );

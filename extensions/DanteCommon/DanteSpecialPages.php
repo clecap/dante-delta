@@ -39,7 +39,7 @@ protected function handleSubmission () {
     $arr = $this->getSpecificCommands ( $formId );                     // now that we know which form was used, dispatch the execution of the forms submission
     $env = DanteCommon::getEnvironmentUser ($this->getUser());           // get the environment for the user (needed for execution)  // TODO: might want to improve structure
 
-    danteLog ("DanteBackup", "environment in handleSubmission is ".print_r ($env, true));
+//    danteLog ("DanteBackup", "environment in handleSubmission is ".print_r ($env, true));
 
     // The following now does the dispatching via the html code generated below in ServiceEndpointHelper
     $this->executeCommands ( $arr, $env );                           // finally dispatch the execution of these commands

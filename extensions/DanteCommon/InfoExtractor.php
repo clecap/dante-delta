@@ -30,7 +30,7 @@ public static function articleExtract ( string $titleName, ?bool $filter = null,
   if ($filter) {
     if (preg_match('/^<pre>\R?(.*?)^<\/pre>/ms', $text, $m)) {$text = $m[1];} else {$text = '';}
   }
-  if ($fileName !== null) {file_put_contents($fileName, $text); return null;} else {return $text;}
+  if ($fileName !== null) {if (@file_put_contents($fileName, $text) === false) {throw new Exception("file_put_contents failed for $fileName");} return null;} else {return $text;}
 }
 
 

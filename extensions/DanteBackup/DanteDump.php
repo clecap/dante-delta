@@ -14,6 +14,8 @@ class DanteDump extends DanteSpecialPage {
 public static $SPEC_PREFIX;  // initialized at end of class
 
 #region  DATA which may be moved around in the scope of this class
+
+// TODO: clean this up since we now use this as local variables in the calls
 public string $archiveName;
 public string $dbName; 
 public string $tarName;
@@ -81,32 +83,119 @@ protected function showForm (): void {
    $out->addHTML ("</details>");
 
 
+  self::maskPages          ( $out, $action );
+  self::maskFiles          ( $out, $action );
+  self::maskDatabaseTables ( $out, $action );  
+}
 
-
-
-
+// the mask for the pages dump option
+private function maskPages ($out, $action) {
   $out->addHTML ("<h2>Dump Pages / Files as Archive</h2>");
   $out->addHTML ("<details><summary>Dumps Pages and Possibly Files as Single Archive</summary>");
-  $header = [
+  $form = [
     'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump',
        'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
     'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Page Dump',     'name' => 'archiveName', 'type' => 'text', 'readonly' => true ],
-    'dbname'  => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Database',      'name' => 'dbName',      'type' => 'text', 'readonly' => true ],
     'tarname' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',     'type' => 'text', 'readonly' => true ],
+  
+    'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
+      'options' => [ '<i>No pages</i> included in the pages archive'                                                                                                   => "nopages",
+                     '<b>Listed</b>: Only pages listed in page <a href="./index.php?title=MediaWiki:Backupfiles">MediaWiki:Backupfiles</a>'                            => "listed",
+                     '<b>Category</b>: Only pages belonging to <a href="./indx.php?title=Category:Backup">Category:Backup</a> (<a href="./cache/">dryrun</a>)'                                => "category",
+                     '<b>Categories</b>: Only pages belonging to a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories</a>'     => "categories",
+                     '<b>Categories Indirect</b>: Only pages belonging to a category or an arbitrarily deep subcategory of a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories Indirect</a>'     => "categories-indirect",
+                     '<b>All</b> pages'                                                                                                                                => "all", 
+                       ],   
+       'name' => 'srces',  'default' => 'all', 
+    ],
+
+    'radio33'  => [ 'section' => 'srcfeatures/ra' , 'type' => 'radio',  'label' => '', 
+        'options' => [ '<b>Current</b> versions only'                                   => "current",
+                       '<b>All revisions</b> included'                                  => "allrevisions", 
+                     ],   
+        'name' => 'srcFeatures',  'default' => 'allrevisions', 
+     ],
+    'radio32'  => [ 'section' => 'srcfeatures/rf' , 'type' => 'radio',  'label' => '', 
+          'options' => [ '<i>Nofiles</i>: Do not dump uploaded file contents and do not dump metadata'                      => "nofiles",
+                       '<i>Metadata</i>: Dump metadata only, no file contents'                                              => "metadata",
+                       '<b>Separate</b>: Dump metadata (into page archive) and file contents into a separate file archive'  => "separate", 
+                       '<b>Include</b>: Dump metadata and file contens (both into one large page archive)'                  => "include", 
+                     ],   
+        'name' => 'files',  'default' => 'include', 
+   ],
+    'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
+        'options' => [ 
+           '<b>AWS S3</b> (shows error messages; may take minutes to hours)'                                                                                 => "aws",
+           '<b>SSH / SCP</b> (shows error messages; may take minutes to hours)'                                                                              => "ssh",
+           "<b>Client</b> (save as file on the client using the browser)"                                                                                    => "client",
+           '<b>Server</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                                         => "server",
+        ], 
+        'name' => 'target',  'default' => 'aws', 
+     ]  ,  
+  'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],
+  'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc', 'default' => true ],
   ];
 
-  $form = array_merge ( $header, DanteCommon::SOURCE_FEATURES, DanteCommon::getTARGET_FORM(), DanteCommon::FEATURES );  // generate the form
-  self::standardForm ($form, $action, "dump", "Do the dump");
+  self::standardForm ($form, $action, "pages", "Do the dump");
   $out->addHTML ("</details>");
-
-
-
-  self::maskFiles ( $out, $action );
-  self::maskDatabaseTables ( $out , $action );
-  
 }
 
 
+// command for the pages dump option
+private function commandPages () {
+  $request = $this->getRequest();
+
+  $archiveName = $request->getVal ( 'archiveName' );     danteLog ("DanteBackup", "archiveName $archiveName \n");
+
+//  if ( strpos( $this->tarName, '*') !== false) { $this->tarName = ""; }  // squash it to empty if not proper
+
+  $srces       = $request->getVal ( 'srces' );           danteLog ("DanteBackup", "srces $srces \n");
+  $srcFeatures = $request->getVal ( 'srcFeatures' );     danteLog ("DanteBackup", "srcFeatures $srcFeatures \n");
+  $files       = $request->getVal ( 'files' );           danteLog ("DanteBackup", "files $files \n");
+  $target      = $request->getVal ( 'target' );          danteLog ("DanteBackup", "target $target \n");
+  $zip         = $request->getVal ( 'compressed' ) ?? false;   danteLog ("DanteBackup", "zip $zip \n");
+  $enc         = $request->getVal ( 'encrypted' )  ?? false;   danteLog ("DanteBackup", "enc $enc \n");
+     
+  // get the values stored in the preferences
+  $bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
+  $aesPW            = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-encpw' );
+
+  danteLog ("DanteBackup", "bucketName $bucketName\n");
+  // danteLog ("DanteBackup", "aesPW $aesPW\n");  // TODO: remove from logging, make more secure
+
+  // build production commands, prepend with a pipefail so we do not mask error condistions along the pipe and append compression and encryption
+
+  $pageCommand = $this->getPageCommand ( $srcFeatures, $files, $srces);
+  danteLog ("DanteBackup", "pageCommand $pageCommand\n");
+  $generatePages =  self::wrap ($pageCommand , $zip, $enc );
+  danteLog ("DanteBackup", "wrapped pageCommand $generatePages\n");
+
+//  if ($this->tarName !== "") {$generateTar   =  self::wrap ( $this->getFilesCommand (), $zip, $enc );} else {$generateTar = "";}  // check if we really want file tar archive
+
+  $txt = null;
+  switch ( $target ) {
+    case "aws":      
+      $generatePages  .= " | /opt/myenv/bin/aws s3 cp -  s3://{$bucketName}/".$archiveName;
+      danteLog ("DanteBackup", "aws generatePages: $generatePages\n");
+      // if ( $generateTar !== "" ) {$generateTar    .= " | /opt/myenv/bin/aws s3 cp -  s3://{$this->bucketName}/".$this->tarName; }
+      //return [$generatePages, $generateTar];  // that's the commands to be executed
+      return [$generatePages];  // that's the commands to be executed
+      break;
+
+    case "ssh":     /*  $txt = DanteCommon::dumpToAWS_FG  ( $this); */  break;
+    case "client":        $this->getOutput()->disable();   self::dumpToBrowser ( $this );  break;
+    case "server":     
+      if ( !is_dir ( $DUMP_PATH ) )    { if ( !mkdir($DUMP_PATH, 0777, true) ) {throw new Exception("Failed to create directory: $DUMP_PATH"); } }
+      if ( !is_writable ($DUMP_PATH) ) { if ( !chmod($DUMP_PATH, 0777) ) { throw new Exception("Directory is not writable and chmod failed: $DUMP_PATH"); } }
+      $generatePages  .= " > ".$DUMP_PATH."/".$this->archiveName;
+     // if ( $generateTar !== "" ) {$generateTar    .= " >" .$DUMP_PATH. "/".$this->tarName; }
+      return [$generatePages, $generateTar];  // that's the commands to be executed
+      break;
+    default:              throw new Exception ("Illegal value found for target:" . $values["target"] . " This should not happen");
+  }
+ 
+
+}
 
 
 private function maskFiles ( $out, $action ) {
@@ -173,78 +262,20 @@ protected function getSpecificCommands ( $formId ): mixed {
   global $DUMP_PATH;
 
   $request = $this->getRequest();
-
   switch ($formId) {
-  
     case "formId_git":
-
       $gitDir = InfoExtractor::makeTempDir ();
-
-             // export articles in manifest file to the temporary git directiry
+      // export articles in manifest file to the temporary git directiry
       $generate = ["command" => [InfoExtractor::class, 'exportManifestToTextFiles'], "args"    => [ "manifestFile" => $request->getVal ( 'MANIFEST_FILE' ), "outDir" => "$gitDir", "clean" => false] ];
-
       $cmd = self::gitPrepare ( $request->getVal ('GIT_OWNER'),  $request->getVal ('GIT_REPO'),  $request->getVal ('GIT_BRANCH'),  $request->getVal ('GIT_COMMIT'),  $request->getVal ('GIT_TOKEN') , $generate);
       return $cmd;
 
+    case "formId_pages":
+      $cmd = self::commandPages ();
+      return $cmd;
 
-  }
-
-
-
-
-
-
-  // pick up all the data required for dispatching
-  $this->archiveName = $request->getVal ( 'archiveName' );     danteLog ("DanteBackup", "archiveName $this->archiveName \n");
-  $this->dbName      = $request->getVal ( 'dbName' );          danteLog ("DanteBackup", "dbName $this->dbName \n");
-  $this->tarName     = $request->getVal ( 'tarName' );         danteLog ("DanteBackup", "tarName $this->tarName \n");
-
-// TODO: must modify the javascript in the form that the dump identification tag does not accept illegal characters
-
-  if ( strpos( $this->tarName, '*') !== false) { $this->tarName = ""; }  // squash it to empty if not proper
-
-
-  $this->srces       = $request->getVal ( 'srces' );           danteLog ("DanteBackup", "srces $this->srces \n");
-  $this->srcFeatures = $request->getVal ( 'srcFeatures' );     danteLog ("DanteBackup", "srcFeatures $this->srcFeatures \n");
-  $this->files       = $request->getVal ( 'files' );           danteLog ("DanteBackup", "files $this->files \n");
-  $this->db          = $request->getVal ( 'db' );              danteLog ("DanteBackup", "db $this->db \n");
-  $this->target      = $request->getVal ( 'target' );          danteLog ("DanteBackup", "target $this->target \n");
-  $this->zip         = $request->getVal ( 'compressed' ) ?? false;   danteLog ("DanteBackup", "zip $this->zip \n");
-  $this->enc         = $request->getVal ( 'encrypted' )  ?? false;   danteLog ("DanteBackup", "enc $this->enc \n");
-      
- // get the values stored in the preferences
-  $this->bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
-  $this->aesPW            = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-encpw' );
-
-  danteLog ("DanteBackup", "bucketName $this->bucketName\n");
-  danteLog ("DanteBackup", "aesPW $this->aesPW\n");  // TODO: remove from logging, make more secure
-
-  // build production commands, prepend with a pipefail so we do not mask error condistions along the pipe and append compression and encryption
-  $generatePages =  self::wrap ( $this->getPageCommand () );
-  $generateDb    =  self::wrap ( $this->getDBCommand () );
-  if ($this->tarName !== "") {$generateTar   =  self::wrap ( $this->getFilesCommand () );} else {$generateTar = "";}  // check if we really want file tar archive
-
-  $txt = null;
-  switch ( $this->target ) {
-    case "aws":      
-      $generatePages  .= " | /opt/myenv/bin/aws s3 cp -  s3://{$this->bucketName}/".$this->archiveName;
-      $generateDb     .= " | /opt/myenv/bin/aws s3 cp -  s3://{$this->bucketName}/".$this->dbName;
-      if ( $generateTar !== "" ) {$generateTar    .= " | /opt/myenv/bin/aws s3 cp -  s3://{$this->bucketName}/".$this->tarName; }
-      return [$generatePages, $generateDb, $generateTar];  // that's the commands to be executed
-      break;
-   
-
-    case "ssh":     /*  $txt = DanteCommon::dumpToAWS_FG  ( $this); */  break;
-    case "client":        $this->getOutput()->disable();   self::dumpToBrowser ( $this );  break;
-    case "server":     
-      if ( !is_dir ( $DUMP_PATH ) )    { if ( !mkdir($DUMP_PATH, 0777, true) ) {throw new Exception("Failed to create directory: $DUMP_PATH"); } }
-      if ( !is_writable ($DUMP_PATH) ) { if ( !chmod($DUMP_PATH, 0777) ) { throw new Exception("Directory is not writable and chmod failed: $DUMP_PATH"); } }
-      $generatePages  .= " > ".$DUMP_PATH."/".$this->archiveName;
-      $generateDb     .= " > ".$DUMP_PATH."/".$this->dbName;
-      if ( $generateTar !== "" ) {$generateTar    .= " >" .$DUMP_PATH. "/".$this->tarName; }
-      return [$generatePages, $generateDb, $generateTar];  // that's the commands to be executed
-      break;
-    default:              throw new Exception ("Illegal value found for target:" . $values["target"] . " This should not happen");
+    default:
+      throw new Exception ("Not yet implemented or illegal form id: $formId");  
   }
 
   return [];  // should not happen
@@ -261,11 +292,11 @@ protected function getSpecificCommands ( $formId ): mixed {
  *
  *  @parameter ?bool If present and true then we must omit the gzip stuff, independently of what $this says. Needed for the tar file
  */
-private function wrap ( $cmd, $omitZip = false ) {
+private function wrap ( $cmd, $zip, $enc, $omitZip = false ) {
   if ( $cmd === "" ) {return "";}
   $retval  = "set -o pipefail; " . $cmd;          // return in a pipe sequence the exit code of the first failing command
-  if ($omitZip !== false) {$retval .= ($this->zip ? " | gzip " : " ");}
-  $retval .= ($this->enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC " : " ") ; 
+  if ($omitZip !== false) {$retval .= ($zip ? " | gzip " : " ");}
+  $retval .= ($enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC " : " ") ; 
   return $retval; 
 }
 
@@ -291,20 +322,21 @@ private static function dumpToBrowser ($obj, ) {
 */
 
 
-// generate and return a command for dumping pages
+
+// generate and return a shell command for dumping pages
 // as side effect: generates a list of files to dump
-public function getPageCommand (  ) {
+public function getPageCommand ( $srcFeatures, $files, $srces ) {
   global $IP;
 
   // fullOpt     controls the options on pages present
-  switch ( $this->srcFeatures ) {
+  switch ( $srcFeatures ) {
     case "current":            $fullOpt = "--current"; break;
     case "allrevisions":       $fullOpt = "--full";    break;
     default: throw new Exception ("Wrong value for parameter srcFeatures: $this->srcFeatures");
   }
 
   // filesOpt    controls which information on wiki uploaded files is present
-  switch ( $this->files ) {
+  switch ( $files ) {
     case "nofiles":  $filesOpt = "";          break;
     case "metadata": $filesOpt = "--uploads"; break;
     case "separate": $filesOpt = "";         break;
@@ -312,12 +344,18 @@ public function getPageCommand (  ) {
     default: throw new Exception ("wrong vlaue for parameter files: $this->files");
   }
 
-  danteLog ("DanteBackup", "Source specification is: " . $this->srces . "\n");
+  danteLog ("DanteBackup", "Source specification is: " . $srces . "\n");
 
   // src controls which pages are present in the xml page archive 
   // prepare the file lists for now
-  self::generateSpecFile ( null );  // generate all specification files
-  switch ($this->srces) {
+ 
+
+///////  self::generateSpecFile ( null );  // generate all specification files
+
+
+
+
+  switch ($srces) {
     case "nopages":             //  touch ($FILE_LIST_BACKUP);  break;    // should be empty; xml dump may still contain namespace names etc.
     case "all":                   $srcOpt = " ";  break;  
     case "listed":                // NOBREAK
@@ -442,10 +480,6 @@ private static function generateSpecFile ( $spec ) {
     default: throw new Exception ("Wrong value for parameter pages: $spec");
   }
 }
-
-
-
-
 
 
 private function getDBCommand () {

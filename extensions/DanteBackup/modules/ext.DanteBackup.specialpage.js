@@ -1,6 +1,5 @@
 //alert ("ext.DanteBackup.specialpage.js loaded");
 
-
 var siteName = mw.config.get('wgSiteName');
 
 // alert (siteName);
@@ -69,16 +68,12 @@ function initialize () {
   console.error ("running initialize");
   let eleTag = document.getElementById ("mw-input-tag");      
   let eleFinalName = document.getElementById ("mw-input-archiveName");
-  let nodb = document.getElementById ("mw-input-db-nodb").checked;
-  let db   = document.getElementById ("mw-input-db-db").checked;
 
   let separate   = document.getElementById ("mw-input-files-separate").checked;
   let nofiles    = document.getElementById ("mw-input-files-nofiles").checked;
   let metadata   = document.getElementById ("mw-input-files-metadata").checked;
 
   eleFinalName.value = siteName + "-" + eleTag.value + "-" +timestamp () + "-" + getSrces() + "-" + getSrcFeatures() + "-" + getFiles() + ".xml" + getSuffix();
-  let eleDbName = document.getElementById ("mw-input-dbName");
-  eleDbName.value = siteName + "-" + eleTag.value  + "-" + timestamp () + ".sql" + getSuffix();
   let eletarName = document.getElementById ("mw-input-tarName");
   eletarName.value = siteName + "-" + eleTag.value  + "-" + timestamp ();
 
@@ -86,9 +81,6 @@ function initialize () {
 
   if (separate) {eletarName.value = siteName + "-" + timestamp () + ".tar" + getSuffix (true);}
    else {eletarName.value = " *** NO FILE ARCHIVE GENERATED *** ";}
-
-  
-
 
 }
 

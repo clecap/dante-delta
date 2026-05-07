@@ -71,6 +71,7 @@ class DanteTabsHooks {
 			$links['namespaces'][$key] = [
 				'class'   => $classes ? implode( ' ', $classes ) : false,
 				'text'    => $sktemplate->msg( 'nstab-dante-' . strtolower( $nsName ) )->text(),
+				'title'   => $sktemplate->msg( 'nstab-dante-' . strtolower( $nsName ) . '-hint' )->text(),
 				'href'    => $href,
 				'context' => 'dante',
 				'primary' => true,

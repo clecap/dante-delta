@@ -14,8 +14,8 @@ class ServiceEndpointHelper {
 public static function attachToSession ($cmd, $env) {
   $session = SessionManager::getGlobalSession();
 
-  danteLog ("DanteBackup", "environment in attachToSession is ".print_r ($env, true));
-  danteLog ("DanteBackup", "command in attachToSession is ".print_r ($cmd, true));
+//  danteLog ("DanteBackup", "environment in attachToSession is ".print_r ($env, true));
+//  danteLog ("DanteBackup", "command in attachToSession is ".print_r ($cmd, true));
 
   $session->set( 'Dante_Cmd', $cmd );             
   $session->set( 'Dante_Env', $env );

@@ -8,5 +8,12 @@
 	"nstab-dante-todo":  "Todo",
 	"nstab-dante-faq":   "Faq",
 	"nstab-dante-ex":    "Ex",
-	"nstab-dante-draft": "Draft"
+	"nstab-dante-draft": "Draft",
+
+	"nstab-dante-test-hint":  "Test namespace",
+	"nstab-dante-lit-hint":   "Literature and references",
+	"nstab-dante-todo-hint":  "Tasks and action items",
+	"nstab-dante-faq-hint":   "Frequently asked questions",
+	"nstab-dante-ex-hint":    "Examples and exercises",
+	"nstab-dante-draft-hint": "Work in progress"
 }

@@ -39,6 +39,7 @@ const FEATURES = [
 ];
 
 
+// TODO: deeprecate soon
 const SOURCE_FEATURES = [
   'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
     'options' => [ '<i>No pages</i> included in the pages archive'                                                                                                   => "nopages",
