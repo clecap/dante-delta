@@ -12,6 +12,7 @@
     "BeforePageDisplay":          "TreeAndMenu::onBeforePageDisplay",
     "CategoryAfterPageAdded":     "TreeAndMenu::onCategoryAfterPageAdded",
     "CategoryAfterPageRemoved":   "TreeAndMenu::onCategoryAfterPageRemoved",
+    "PageDeleteComplete":         "TreeAndMenu::onPageDeleteComplete",
     "EditPage::attemptSave:after": "TreeAndMenu::onEditPageattemptSaveafter"
   },
   "AutoloadClasses":        {"TreeAndMenu": "TreeAndMenu_body.php"},

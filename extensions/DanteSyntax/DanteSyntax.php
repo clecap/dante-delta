@@ -3,9 +3,24 @@
 
 class DanteSyntax {
   
-public static function onParserBeforeInternalParse( Parser &$parser, &$text, &$strip_state ) { 
   
+/** Register <details> and <summary> as extension tags, keeping them out of the sanitizer. */
+public static function onParserFirstCallInit( Parser $parser ): void {
+  $parser->setHook( 'details', [ self::class, 'renderDetails' ] );
+  $parser->setHook( 'summary', [ self::class, 'renderSummary' ] );
+}
 
+/** @param array $args @param Parser $parser @param PPFrame $frame */
+public static function renderDetails( string $input, array $args, Parser $parser, PPFrame $frame ): string {
+  $open = isset( $args['open'] ) ? ' open' : '';
+  return "<details$open>" . $parser->recursiveTagParse( $input, $frame ) . '</details>';
+}
+
+public static function renderSummary( string $input, array $_args, Parser $parser, PPFrame $frame ): string {
+  return '<summary>' . $parser->recursiveTagParse( $input, $frame ) . '</summary>';
+}
+
+public static function onParserBeforeInternalParse( Parser $_parser, string &$_text, StripState $_strip_state ): void {
 }
 
 // Parse function

@@ -156,6 +156,8 @@ wfLoadExtension( 'DanteLinks' );
 wfLoadExtension( 'DanteTree' );
 wfLoadExtension( 'DanteTabs' );
 
+wfLoadExtension( 'DanteSyntax' );
+
 
 $wgGroupPermissions['sysop']['dante-restore'] = true;  // TODO: this should go into the registration function of the extension as a default somehow and not be required here. // NOTE: here: it must be before loading the extension 
 $wgGroupPermissions['sysop']['dante-dump'] = true;

@@ -504,19 +504,41 @@ $( function() {
   resize: function (ev, ui)  {
     let ele =  document.getElementById ("content");
     let dist =   ( ui.size.width) + "px";
-
     implementSidebarWidth(dist);
-    window.localStorage.setItem ("sidebar-width", dist);
+    window.localStorage.setItem ("sidebar-width", dist); console.log ("sidebar-width set to " + dist);
   }
   });
-  
-
    // console.error ("fancytree.js: mw-panel made resizable");
   } );
 
 
 
 
+
+
+/** Inject a sidebar toggle icon into #mw-head-base and wire its click to the resize mechanism. */
+function addSidebarToggleButton () {
+  const btn = $('<span title="Toggle sidebar" style="cursor:pointer; margin-right:8px; font-size:1.2em; position:relative; z-index:9999;">&#9776;</span>');
+  btn.on('click', function (e) {
+    e.stopPropagation();
+    var status = window.localStorage.getItem ("sidebar-status") || "shown";
+    var dist   = window.localStorage.getItem('sidebar-width') || "400px";
+    console.log ("sidebar is " + dist + " and " + status);
+    if (status == "hidden") {  // sidebar is hidden - show it again
+
+       window.localStorage.setItem ("sidebar-status", "shown");
+    }
+    else {  // sidebar is shown - hide it again
+      dist = "0px";
+      window.localStorage.setItem ("sidebar-status", "hidden");
+    }
+    $('#mw-panel').css('width', dist);
+    implementSidebarWidth(dist);
+  });
+  $('#mw-head-base').prepend(btn);
+}
+
+$(document).ready( addSidebarToggleButton );
 
 
 

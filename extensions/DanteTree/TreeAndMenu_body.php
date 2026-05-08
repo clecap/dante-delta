@@ -1,17 +1,18 @@
 <?php
 
 
-/** NOTE: we use a cache for the Sidebar. Files is fine, since it also provides a cached Sidebar in a cold start
-    which ACPu would not */
+/** NOTE: we use a cache for the Sidebar. Files is fine, since it also provides a cached Sidebar in a cold start, which ACPu would not */
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\ProperPageIdentity;
+use MediaWiki\Permissions\Authority;
+use MediaWiki\Revision\RevisionRecord;
 
 class TreeAndMenu {
   const TREE = 1; 
   const MENU = 2;
 
 public static function onParserFirstCallInit (Parser $parser) {                 // set the parser functions for  #tree   and  #menu
-  // self::debugLog ("Hello !");
   $parser->setFunctionHook('tree', array('TreeAndMenu', 'expandTreeX') );
   $parser->setFunctionHook('menu', array('TreeAndMenu', 'expandMenuX') );
   return true;
@@ -26,7 +27,6 @@ static function debugLog ($text) {
 
 
 public static function onSkinBuildSidebar ($skin, &$bar ) {
-  global $wgOut;
   global $IP;
   global $wgServer, $wgScriptPath;
   global $wgAllowVerbose; $VERBOSE = false && $wgAllowVerbose;
@@ -136,11 +136,27 @@ public static function onEditPageattemptSaveafter( EditPage $editPage, Status $s
 }  // end function afterAttemptSave
 
 
-// changing category membership requires redoing the sidebar
-public static function onCategoryAfterPageRemoved( $category, $wikiPage, $id ) { global $IP; $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); } }
 
-// changing category membership requires redoing the sidebar
-public static function onCategoryAfterPageAdded( $category, $wikiPage ) {  global $IP; $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); } }
+// changing category membership invalidates sidebar cache
+public static function onCategoryAfterPageRemoved( $category, $wikiPage, $id ) { self::invalidateSidebarCache (); }
+
+// changing category membership invalidates sidebar cache
+public static function onCategoryAfterPageAdded( $category, $wikiPage ) {  self::invalidateSidebarCache (); }
+
+// deletion of a category page invalidates sidebar cache
+public static function onPageDeleteComplete( ProperPageIdentity $page,  Authority $deleter, string $reason, int $pageID, RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount): void {
+  if ( $page->getNamespace() !== NS_CATEGORY ) { return; }
+  self::invalidateSidebarCache ();
+}
+
+
+
+
+
+
+private static function invalidateSidebarCache () {
+  global $IP; $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); }
+}
 
 
 
@@ -197,6 +213,9 @@ public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
   $out->addHeadItem ("sidebarstyle", <<<EOT
 <script data-src="TreeAndMenu_body.php">
   let pers = window.localStorage.getItem ("sidebar-width");
+  let sidebarStatus = window.localStorage.getItem ("sidebar-status");
+  if (sidebarStatus == "hidden") {pers = "0px";}
+   console.error ("Initial sidebar is: " + pers + " and " + sidebarStatus);
   if (pers) {
     let style = `<style data-src="TreeAndMenu_body.php">`+
       `#mw-panel {width: \${pers} ; height: 100%;}
@@ -212,12 +231,14 @@ EOT);
 
 
   $out->addModules('ext.fancytree');                                                         // scripts may load via ressource loader
-  $out->addStyle("../extensions/DanteTree/danteTree.css");                                   // style is added directly since the loader would result in a FOUC
-  $out->addStyle("../extensions/DanteTree/fancytree/fancytree.css"); 
+  $out->addStyle("../extensions/DanteTree/danteTree.css");                                     // style is added directly since the loader would result in a FOUC
+  $out->addStyle("../extensions/DanteTree/fancytree/fancytree.css");                           // style is added directly since the loader would result in a FOUC
+
   $out->addJsConfigVars('fancytree_path', $wgExtensionAssetsPath . "/DanteTree/fancytree");  // define the preload path for preloading some icons; not sure if really needed and an advantage // TODO: currently still need this wgExtensionsassetsPath here
     // Suckerfish menu script and styles
     $out->addModules('ext.suckerfish');
     $out->addStyle("../extensions/DanteTree/suckerfish/suckerfish.css");
+
  }
 
 
@@ -370,36 +391,6 @@ WHERE tmpSelectCat2.cl_from IS NULL GROUP BY tmpSelectCat1.cl_to";
   }
 
 
-
-
-    // TODO: WORKING ON THIS - CODE NOT CORRECT    CHC
-    // get all the categories which are children of $root together with information which of those categories is marked for the page with pagenumber $pageNum
-    /*
-  public static function getChildrenMarked ($root, $pageNum, $depth = 1) {
-    $allCats    = array();                                 // Initialize return value
-    $dbObj      = wfGetDB(DB_MASTER);                      // Get a database object  CHC changed to master for freshness// TODO: PERHAPS NOT NECESSARY !!!!!!!!!!!!!!!!!!!!!!!!!!!! ALSO ON OTHER PLACES !!!!!!!!!!!!!!!!
-    $CATEGORYLINKS = $dbObj->tableName('categorylinks');   // Get table names to access them in SQL query
-    $PAGE    = $dbObj->tableName('page');
-
-    // The normal query to get all children of a given root category
-    $sql =
-  'SELECT tmpSelectCatPage.page_title AS title FROM ' . $CATEGORYLINKS . ' AS tmpSelectCat
-   LEFT JOIN ' . $PAGE . ' AS tmpSelectCatPage ON tmpSelectCat.cl_from = tmpSelectCatPage.page_id
-   WHERE tmpSelectCat.cl_to LIKE ' . $dbObj->addQuotes($root) . ' AND tmpSelectCatPage.page_namespace = 14 ORDER BY tmpSelectCatPage.page_title ASC;';
-
-
-    $res = $dbObj->query($sql, __METHOD__);     // Run the query
-    while ($row = $dbObj->fetchRow($res)) {   // Process the resulting rows
-      if ($root == $row['title']) {continue;}    // Survive category link loops
-      $allCats += array($row['title'] => $depth);   // Add current entry to array
-   //   $allCats += self::getChildren($row['title'], $depth + 1);  // NOTE: THIS IS ABOUT DOING IT TRANSITIVELY OR NOT !!!!
-    }
-    $dbObj->freeResult($res); // Free result object
-    // Afterwards return the array to the upper recursion level
-
-    return $allCats;
-  }
-*/
 
 
    // #tree parser-functions
