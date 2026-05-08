@@ -42,40 +42,41 @@ class DanteTabsHooks {
 
 		$danteNamespaces = self::getDanteNamespaces();
 
-		// Only inject tabs when browsing a main-namespace article
-		// or a page already in one of our Dante namespaces.
-		$relevantNamespaces = array_merge( [ NS_MAIN ], array_keys( $danteNamespaces ) );
-		if ( !in_array( $currentNs, $relevantNamespaces, true ) ) {
-			return;
-		}
+		// Activate for NS_MAIN, all Dante content namespaces, and their talk counterparts.
+		$talkNamespaces     = array_merge( [ NS_TALK ], array_map( fn( $id ) => $id + 1, array_keys( $danteNamespaces ) ) );
+		$relevantNamespaces = array_merge( [ NS_MAIN ], array_keys( $danteNamespaces ), $talkNamespaces );
+		if ( !in_array( $currentNs, $relevantNamespaces, true ) ) { return; }
 
+		// Keep only talk tabs from MediaWiki's output — subject tabs are rebuilt by us.
+		// Filtering by context is key-independent and works regardless of MW version.
+		// Rebuild with fixed order: Page | Discussion | Dante tabs
+		$newTabs = [];
+
+		// 1. Page (NS_MAIN) — always first
+		$mainTitle  = Title::makeTitle( NS_MAIN, $baseName );
+		$mainExists = $mainTitle->isKnown();
+		$mainHref   = $mainExists ? $mainTitle->getLinkURL() : $mainTitle->getLinkURL( [ 'action' => 'edit', 'redlink' => '1' ] );
+		$mainClass  = ( $currentNs === NS_MAIN ) ? 'selected' : ( $mainExists ? false : 'new' );
+		$newTabs['nstab-main'] = [ 'class' => $mainClass, 'text' => $sktemplate->msg( 'nstab-main' )->text(), 'href' => $mainHref, 'context' => 'subject', 'primary' => true ];
+
+		// 2. Discussion — always Talk:$baseName regardless of current namespace
+		$talkTitle  = Title::makeTitle( NS_TALK, $baseName );
+		$talkExists = $talkTitle->isKnown();
+		$talkHref   = $talkExists ? $talkTitle->getLinkURL() : $talkTitle->getLinkURL( [ 'action' => 'edit', 'redlink' => '1' ] );
+		$talkClass  = ( $currentNs === NS_TALK ) ? 'selected' : ( $talkExists ? false : 'new' );
+		$newTabs['talk'] = [ 'class' => $talkClass, 'text' => $sktemplate->msg( 'talk' )->text(), 'href' => $talkHref, 'context' => 'talk' ];
+
+		// 3. Dante namespace tabs
 		foreach ( $danteNamespaces as $nsId => $nsName ) {
 			$targetTitle = Title::makeTitle( $nsId, $baseName );
 			$key         = 'dante-' . strtolower( $nsName );
-
-			$isSelected = ( $currentNs === $nsId );
-			$exists     = $targetTitle->isKnown();
-
-			$classes = [];
-			if ( $isSelected ) {
-				$classes[] = 'selected';
-			}
-			if ( !$exists ) {
-				$classes[] = 'new';
-			}
-
-			$href = $exists
-				? $targetTitle->getLinkURL()
-				: $targetTitle->getLinkURL( [ 'action' => 'edit', 'redlink' => '1' ] );
-
-			$links['namespaces'][$key] = [
-				'class'   => $classes ? implode( ' ', $classes ) : false,
-				'text'    => $sktemplate->msg( 'nstab-dante-' . strtolower( $nsName ) )->text(),
-				'title'   => $sktemplate->msg( 'nstab-dante-' . strtolower( $nsName ) . '-hint' )->text(),
-				'href'    => $href,
-				'context' => 'dante',
-				'primary' => true,
-			];
+			$isSelected  = ( $currentNs === $nsId );
+			$exists      = $targetTitle->isKnown();
+			$classes     = array_filter( [ $isSelected ? 'selected' : '', $exists ? '' : 'new' ] );
+			$href        = $exists ? $targetTitle->getLinkURL() : $targetTitle->getLinkURL( [ 'action' => 'edit', 'redlink' => '1' ] );
+			$newTabs[$key] = [ 'class' => $classes ? implode( ' ', $classes ) : false, 'text' => $sktemplate->msg( 'nstab-dante-' . strtolower( $nsName ) )->text(), 'title' => $sktemplate->msg( 'nstab-dante-' . strtolower( $nsName ) . '-hint' )->text(), 'href' => $href, 'context' => 'dante', 'primary' => true ];
 		}
+
+		$links['namespaces'] = $newTabs;
 	}
 }
