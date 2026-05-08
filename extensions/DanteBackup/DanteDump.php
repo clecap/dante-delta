@@ -50,9 +50,9 @@ protected function showForm (): void {
   // TODO: must clean up by deleting files later !! (manifest, intermediary git directories and MUCH more !!!)
 
 
-  //// MASK FOR DUMPING SYSTEM PAGES
-  $config = PageCollection::getConfig();                                 // get an array of PageCollections
-  $manifest = PageCollection::makeManifest ( $config );     // get a manifest file
+  // Detremines which files have to be dumped
+  $config = PageCollection::getConfig();                                 // get an array of PageCollections (and there, in PageCollection, it is defined which files we dump)
+  $manifest = PageCollection::makeManifest ( $config );     // build a manifest file from this Pagecollection. It contains all the files we should dump
 
   $sumNum = 0;
   $text = ""; foreach ( $config as $value) {$text .= $value->label; $sumNum += $value->num; unlink ($value->filename); }  // format proper output text AND unlink intermediary individual collection files
@@ -63,7 +63,7 @@ protected function showForm (): void {
   $out->addHTML ("<h2>Dump System Pages</h2>");
   $out->addHTML ("<details><summary>Dumps Pages of the DanteWiki System but no User Pages to a Git Repository for System Development</summary>");
 
-  $text = "<details><summary>Total number of Files mentioned: <b>" . $sumNum . "  unique ones:" .$uniqueNum . " unique ones</b></summary> " .$text . "<p><b>Manifest:</b> $manifest</details>";
+  $text = "<details><summary>Total number of Files mentioned: <b>" . $sumNum . "  of which " .$uniqueNum . " unique ones</b></summary> " .$text . "<p><b>Manifest:</b> $manifest</details>";
 
   $user = $this->getUser();
   $GIT_TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' ); 
@@ -72,10 +72,10 @@ protected function showForm (): void {
      'araw_info'       => [ 'section' => 'selected-files', 'class' => 'HTMLInfoField', 'raw' => true, 'default' => $text ],  // only displays the affected files
      'GIT_OWNER'       => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Git Owner',      'name' => 'GIT_OWNER',   'type' => 'text',  'default' => 'clecap' ],
      'GIT_REPO'        => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Repository',     'name' => 'GIT_REPO',    'type' => 'text',  'default' => 'dante-wiki-contents' ],
-     'GIT_BRANCH'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Branch',          'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'test-branch' ],
+     'GIT_BRANCH'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Branch',          'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'master' ],
      'GIT_COMMIT'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Commit Message',  'name' => 'GIT_COMMIT',  'type' => 'text',  'default' => 'Commit by DanteDump for initial contents'],
      'GIT_TOKEN'       => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Access Token',    'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => $GIT_TOKEN],
-     'MANIFEST_FILE'   => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Manifest File',    'name' => 'MANIFEST_FILE',   'type' => 'text',  'default' => $manifest, "readonly" => true],
+     'MANIFEST_FILE'   => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright dante-readonly',   'size' => 80,  'label' => 'Manifest File',    'name' => 'MANIFEST_FILE',   'type' => 'text',  'default' => $manifest, "readonly" => true],
    ];  // need to send manifest file name in the request, maybe no need to display it here as well
   
 
@@ -95,13 +95,13 @@ private function maskPages ($out, $action) {
   $form = [
     'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump',
        'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
-    'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Page Dump',     'name' => 'archiveName', 'type' => 'text', 'readonly' => true ],
-    'tarname' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',     'type' => 'text', 'readonly' => true ],
+    'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright dante-readonly', 'size' => 80, 'label' => 'Page Archive Name',     'name' => 'archiveName', 'type' => 'text', 'readonly' => true ],
+    'tarname' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright dante-readonly', 'size' => 80, 'label' => 'File Archive Name',  'name' => 'tarName',     'type' => 'text', 'readonly' => true ],
   
     'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
       'options' => [ '<i>No pages</i> included in the pages archive'                                                                                                   => "nopages",
                      '<b>Listed</b>: Only pages listed in page <a href="./index.php?title=MediaWiki:Backupfiles">MediaWiki:Backupfiles</a>'                            => "listed",
-                     '<b>Category</b>: Only pages belonging to <a href="./indx.php?title=Category:Backup">Category:Backup</a> (<a href="./cache/">dryrun</a>)'                                => "category",
+                     '<b>Category</b>: Only pages belonging to <a href="./index.php?title=Category:Backup">Category:Backup</a>'                                => "category",
                      '<b>Categories</b>: Only pages belonging to a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories</a>'     => "categories",
                      '<b>Categories Indirect</b>: Only pages belonging to a category or an arbitrarily deep subcategory of a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories Indirect</a>'     => "categories-indirect",
                      '<b>All</b> pages'                                                                                                                                => "all", 
@@ -110,7 +110,7 @@ private function maskPages ($out, $action) {
     ],
 
     'radio33'  => [ 'section' => 'srcfeatures/ra' , 'type' => 'radio',  'label' => '', 
-        'options' => [ '<b>Current</b> versions only'                                   => "current",
+        'options' => [ '<b>Current versions</b> only'                                   => "currentversion",
                        '<b>All revisions</b> included'                                  => "allrevisions", 
                      ],   
         'name' => 'srcFeatures',  'default' => 'allrevisions', 
@@ -204,9 +204,9 @@ private function maskFiles ( $out, $action ) {
   $form = [
     'tag'     => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump',
        'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
-    'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'Page Dump',     'name' => 'archiveName', 'type' => 'text', 'readonly' => true ],
-     'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],
-     'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc', 'default' => true ],
+    'archive' => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright dante-readonly', 'size' => 80, 'label' => 'Page Dump',     'name' => 'archiveName_files', 'type' => 'text', 'readonly' => true ],
+     'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed_files', 'type' => 'check' , 'default' => true ],
+     'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted_files',  'type' => 'check' , 'help-message' => 'help-enc', 'default' => true ],
     'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
         'options' => [ 
            '<b>AWS S3</b> (shows error messages; may take minutes to hours)'                                                                                 => "aws",
@@ -232,7 +232,7 @@ private function maskDatabaseTables ( $out, $action ) {
   $header = [
     'tag'      => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump',
                     'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
-    'tarname'  => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',     'type' => 'text', 'readonly' => true ],
+    'tarname'  => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright dante-readonly', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',   'type' => 'text', 'readonly' => true ],
     'radio'    => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
         'options' => [ 
            '<b>AWS S3</b> (shows error messages; may take minutes to hours)'                                                                                 => "aws",
@@ -246,8 +246,8 @@ private function maskDatabaseTables ( $out, $action ) {
 
 
 
-    'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],
-    'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc-db', 'default' => true ],
+    'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed_db', 'type' => 'check' , 'default' => true ],
+    'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted_db',  'type' => 'check' , 'help-message' => 'help-enc-db', 'default' => true ],
   ];
 
   $form = array_merge ( $header, DanteCommon::getTARGET_FORM() );  // generate the form
@@ -264,9 +264,12 @@ protected function getSpecificCommands ( $formId ): mixed {
   $request = $this->getRequest();
   switch ($formId) {
     case "formId_git":
-      $gitDir = InfoExtractor::makeTempDir ();
+      $gitDir = InfoExtractor::makeTempDir ();  // make a temporary directory in which all this will take place
       // export articles in manifest file to the temporary git directiry
-      $generate = ["command" => [InfoExtractor::class, 'exportManifestToTextFiles'], "args"    => [ "manifestFile" => $request->getVal ( 'MANIFEST_FILE' ), "outDir" => "$gitDir", "clean" => false] ];
+      $generate = ["command" => [InfoExtractor::class, 'exportManifestToTextFiles'], 
+                   "args"    => [ "manifestFile" => $request->getVal ( 'MANIFEST_FILE' ), "outDir" => "$gitDir", "clean" => false],
+                   "comment" => "<b>Exporting</b> files in manifest"
+                  ];
       $cmd = self::gitPrepare ( $request->getVal ('GIT_OWNER'),  $request->getVal ('GIT_REPO'),  $request->getVal ('GIT_BRANCH'),  $request->getVal ('GIT_COMMIT'),  $request->getVal ('GIT_TOKEN') , $generate);
       return $cmd;
 
@@ -325,23 +328,23 @@ private static function dumpToBrowser ($obj, ) {
 
 // generate and return a shell command for dumping pages
 // as side effect: generates a list of files to dump
-public function getPageCommand ( $srcFeatures, $files, $srces ) {
+public static function getPageCommand ( $srcFeatures, $files, $srces ) {
   global $IP;
 
   // fullOpt     controls the options on pages present
   switch ( $srcFeatures ) {
-    case "current":            $fullOpt = "--current"; break;
-    case "allrevisions":       $fullOpt = "--full";    break;
-    default: throw new Exception ("Wrong value for parameter srcFeatures: $this->srcFeatures");
+    case "currentversion":             $fullOpt = "--current"; break;
+    case "allrevisions":               $fullOpt = "--full";    break;
+    default: throw new Exception ("Illegal value for parameter srcFeatures: $srcFeatures");
   }
 
   // filesOpt    controls which information on wiki uploaded files is present
   switch ( $files ) {
-    case "nofiles":  $filesOpt = "";          break;
-    case "metadata": $filesOpt = "--uploads"; break;
-    case "separate": $filesOpt = "";         break;
-    case "include":  $filesOpt = "--uploads --include-files"; break;
-    default: throw new Exception ("wrong vlaue for parameter files: $this->files");
+    case "nofiles":   $filesOpt = "";                          break;
+    case "metadata":  $filesOpt = "--uploads";                 break;
+    case "separate":  $filesOpt = "";                          break;
+    case "include":   $filesOpt = "--uploads --include-files"; break;
+    default:          throw new Exception ("Illegal value for parameter files: $files");
   }
 
   danteLog ("DanteBackup", "Source specification is: " . $srces . "\n");
@@ -350,10 +353,7 @@ public function getPageCommand ( $srcFeatures, $files, $srces ) {
   // prepare the file lists for now
  
 
-///////  self::generateSpecFile ( null );  // generate all specification files
-
-
-
+///////  self::generateSpecFile ( null );  // generate all specification files // TODO: not yet implemented
 
   switch ($srces) {
     case "nopages":             //  touch ($FILE_LIST_BACKUP);  break;    // should be empty; xml dump may still contain namespace names etc.
@@ -361,8 +361,8 @@ public function getPageCommand ( $srcFeatures, $files, $srces ) {
     case "listed":                // NOBREAK
     case "category":              // NOBREAK
     case "categories":            // NOBREAK
-    case "categories-indirect":   $srcOpt = self::$SPEC_PREFIX . "this->srces";  break;  
-    default: throw new Exception ("Wrong value for parameter pages: $this->srces");
+    case "categories-indirect":   // $srcOpt = self::$SPEC_PREFIX . "$srces";  break;  
+    default: throw new Exception ("Wrong value for parameter pages or not yet implemented: $srces");
   }
 
   $command = " php $IP/maintenance/dumpBackup.php $fullOpt $filesOpt $srcOpt";
@@ -373,36 +373,23 @@ public function getPageCommand ( $srcFeatures, $files, $srces ) {
 
 
 
-
-
 // returns commands to prepare a local git instance and place files in there
 private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string $GIT_BRANCH, string $GIT_COMMIT, string $GIT_TOKEN, $generate ) {
 
   $GITMAIL = "dante-himself@dante.wiki"; 
   $GITUSER = "Dante Wiki System";
+  $REPO    = "https://$GIT_OWNER:$GIT_TOKEN@github.com/$GIT_OWNER/$GIT_REPO.git";
 
-  $REPO       = "https://$GIT_OWNER:$GIT_TOKEN@github.com/$GIT_OWNER/$GIT_REPO.git";
-
-  $myOutputDir  = $generate["args"]["outDir"];          // pick up from generation function
+  $myOutputDir  = $generate["args"]["outDir"];          // pick up from generation command
   $manifestFile = $generate["args"]["manifestFile"];
-
-
-  $cdRepo = "cd $myOutputDir";  // Each command runs in a fresh shell, so cd explicitly every time.
-
-  // Suppress VS Code git hooks/credential helpers that may interfere in a dev container.
-  $adjust = "-c core.askPass=  -c credential.helper= -c credential.interactive=never";
-  $noHook = "-c core.hooksPath=/dev/null";
 
   $git    = "/usr/bin/git";  // use original binary, not a possibly VS-code-patched wrapper
 
-  $prune = ["command" => [InfoExtractor::class, 'pruneToManifest'], "args"    => [ "manifestFile" => $manifestFile, "outDir" => $myOutputDir ] ];
-
-
+  $prune = ["command" => [InfoExtractor::class, 'pruneToManifest'], "args"    => [ "manifestFile" => $manifestFile, "outDir" => $myOutputDir ], "comment" => "Pruning files which were deleted in Wiki"];
 
 // check if the specified REPO has a specified BRANCH and if it has not, generate one at the remote; finally clone the branch, existing or freshly generated
 // some git providers only allow generation of a BRANCH upon a non-empty commit, so to cater for this situation we provide for a minimal upload as well
-
-$initCmd = <<<BASH
+$initBranch = <<<BASH
   git ls-remote --exit-code --heads {$REPO} {$GIT_BRANCH} || (
     tmp=\$(mktemp -d) &&
     git -C "\$tmp" init --initial-branch={$GIT_BRANCH} &&
@@ -412,26 +399,36 @@ $initCmd = <<<BASH
     git -C "\$tmp" remote add origin {$REPO} &&
     git -C "\$tmp" push -q origin {$GIT_BRANCH} &&
     rm -rf "\$tmp"
-  ) && git clone --depth 1 --branch {$GIT_BRANCH} {$REPO} {$myOutputDir}
+  ) 
 BASH;
+
+  $showGitStatus = ["command" => "$git -C $myOutputDir status",  "comment" => "<b>Git Status</b>"];
 
 
 // NOTE: git -C allows to specify a directory and spares us the cd to the directory
 
   $cmds = [
-    "mkdir -p $myOutputDir",  // TODO: needed ??
-    $initCmd,
-    "$git -C $myOutputDir config user.name \"$GITUSER\"",
-    "$git -C $myOutputDir config user.email \"$GITMAIL\"",
-    $generate,  // export wiki pages into the local clone
-    "$git -C $myOutputDir add . ",
-    "$git -C $myOutputDir status",
-    // commit only when staged changes exist (git diff --cached exits 1 when changes are present)
-    "{ $git -C $myOutputDir diff --cached --quiet || $git -C $myOutputDir commit -m \"$GIT_COMMIT\"; }",
-    "$git -C $myOutputDir status",
-    $prune,  // deletes .git/HEAD  
-    "$git -C $myOutputDir push --verbose $REPO $GIT_BRANCH",
-    //"rm -Rf $myOutputDir"
+  //  [ "command" => "git ls-remote --exit-code --heads {$REPO} {$GIT_BRANCH}" ,               "comment" => "<b>Testing existence of branch</b> $GIT_BRANCH at $GIT_OWNER/$GIT_REPO" ],
+    [ "command" => $initBranch,                                                              "comment" => "<b>Conditionally generating branch</b> $GIT_BRANCH in case it is misssing"],
+    [ "command" =>  "git clone --depth 1 --branch {$GIT_BRANCH} {$REPO} {$myOutputDir}",     "comment" => "<b>Git Cloning</b> from $GIT_BRANCH at $GIT_OWNER/$GIT_REPO"],
+    [ "command" =>  "$git -C $myOutputDir config user.name \"$GITUSER\"",                    "comment" => "Set git commit user.name to $GITUSER"],
+    [ "command" => "$git -C $myOutputDir config user.email \"$GITMAIL\"",                    "comment" => "Set git commit user.email to $GITMAIL" ],
+    $showGitStatus,
+    $generate,                                                  // export wiki pages into the local clone 
+    $showGitStatus,
+    $prune,                                  // TODO: does it ????? deletes .git/HEAD  
+    $showGitStatus,
+    [ "command" => "$git -C $myOutputDir add . " ,           "comment" => "Staging git files"],                    
+    $showGitStatus,
+
+    [ "command" => "$git -C $myOutputDir diff --cached --name-status ",  "comment" => "List staged files"],
+
+    // commit only when staged changes exist (git diff --cached exits 1 when changes are present) - otherwise we get an error status when there is nothing to commit
+    [ "command" => "{ if $git -C $myOutputDir diff --cached --quiet; then echo 'Nothing to commit'; else $git -C $myOutputDir commit -m \"$GIT_COMMIT\"; fi; }", "comment" => "<b>Git Commit</b>"],   
+    $showGitStatus,  
+    [ "command" => "$git -C $myOutputDir push --verbose $REPO $GIT_BRANCH",                  "comment" => "Pushing to $GIT_BRANCH at $GIT_OWNER/$GIT_REPO" ],
+    $showGitStatus,
+  //  [ "command" => "rm -Rf $myOutputDir",                                                    "comment" => "Remove temp directory"]
   ];
 
 

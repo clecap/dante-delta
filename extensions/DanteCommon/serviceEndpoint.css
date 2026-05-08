@@ -34,3 +34,5 @@ h4 + pre   {margin-top: 0;}
 
 .in-error {background-color: pink;}
 .was-ok   {background-color:lightgreen;}
+
+summary {cursor:pointer;}

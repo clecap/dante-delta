@@ -43,7 +43,7 @@ function getSrcFeatures () {
 
 function getSuffix ( sup=false ) { // if sup true then suppress the gz (needed for tar)
   let compressed = document.getElementById ("mw-input-compressed").checked;
-  let encrypted  = document.getElementById ("mw-input-compressed").checked;
+  let encrypted  = document.getElementById ("mw-input-encrypted").checked;
   if (sup !== true) {}
 
   return (sup !== true ? (compressed ? ".gz" : "") : "") + (encrypted ? ".aes"  : "");
@@ -51,7 +51,7 @@ function getSuffix ( sup=false ) { // if sup true then suppress the gz (needed f
 
 function wireup () {
   ["nopages", "listed", "category", "categories", "all"].forEach ( txt => document.getElementById ("mw-input-srces-" + txt).addEventListener ('change', initialize));
-  ["current", "allrevisions"].forEach ( txt => document.getElementById ("mw-input-srcFeatures-" + txt).addEventListener ('change', initialize));
+  ["currentversion", "allrevisions"].forEach ( txt => document.getElementById ("mw-input-srcFeatures-" + txt).addEventListener ('change', initialize));
   ["mw-input-compressed",  "mw-input-encrypted"].forEach ( txt => document.getElementById (txt).addEventListener ('change', initialize) );
   ["nofiles", "metadata", "separate", "include"].forEach ( txt => document.getElementById ("mw-input-files-" + txt).addEventListener ('change', initialize));
   document.getElementById ("mw-input-tag").addEventListener ("input", initialize );

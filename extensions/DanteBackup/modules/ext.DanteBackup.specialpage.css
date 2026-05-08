@@ -1,0 +1,6 @@
+.dante-readonly input {
+  background-color: #f0f0f0 !important;
+  color: #555 !important;
+  cursor: not-allowed;
+}
+

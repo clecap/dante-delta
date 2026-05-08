@@ -221,6 +221,10 @@ public static function exportAllToTextFiles ( string $outDir = "/tmp/gitDump",  
 
 // exports pages listed in a manifest file (one title per line) to text files in $outDir
 public static function exportManifestToTextFiles ( string $manifestFile, string $outDir, bool $clean = false ): array {
+
+  echo "Inside InfoExtractor::exportManifestToTextFiles\n";
+ 
+
   if ( !is_readable( $manifestFile ) ) { throw new \RuntimeException( "Cannot read manifest file: $manifestFile" ); }
 
   if ( $clean ) { self::rrmdir( $outDir ); }
@@ -266,46 +270,18 @@ public static function exportManifestToTextFiles ( string $manifestFile, string 
 }
 
 
-// deletes every file in $outDir whose relative path is not the expected path of a title listed in $manifestFile
-public static function pruneToManifestOLD ( string $manifestFile, string $outDir ): array {
-  if ( !is_readable( $manifestFile ) ) { throw new \RuntimeException( "Cannot read manifest file: $manifestFile" ); }
-  if ( !is_dir( $outDir ) )            { return [ 'deleted' => 0 ]; }
-
-  $base = rtrim( $outDir, DIRECTORY_SEPARATOR );
-
-  $lines    = file( $manifestFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
-  $expected = [];
-  foreach ( $lines as $titleText ) {
-    $title = Title::newFromText( trim( $titleText ) );
-    if ( !$title ) { continue; }
-    $expected[ str_replace( '\\', '/', self::makeRelPath( $title, 'txt' ) ) ] = true;
-  }
-
-  $deleted = 0;
-  $it = new \RecursiveIteratorIterator(
-    new \RecursiveDirectoryIterator( $base, \RecursiveDirectoryIterator::SKIP_DOTS ),
-    \RecursiveIteratorIterator::LEAVES_ONLY
-  );
-  foreach ( $it as $fileInfo ) {
-    if ( !$fileInfo->isFile() ) { continue; }
-    $rel = str_replace( '\\', '/', substr( $fileInfo->getPathname(), strlen( $base ) + 1 ) );
-    if ( !isset( $expected[$rel] ) ) {
-      unlink( $fileInfo->getPathname() );
-      $deleted++;
-    }
-  }
-
-  return [ 'deleted' => $deleted ];
-}
-
-
-
 
 // deletes every file in $outDir whose relative path is not the expected path of a title listed in $manifestFile;
 // never touches .git or anything below .git/
 public static function pruneToManifest ( string $manifestFile, string $outDir ): array {
+
+  echo "*** Pruning\n";
+
+   error_log ("******** PRUNING ERROR LOG TEST");
+ //fwrite(STDERR, "Pruning ***** Test of error message to STDERR\n");
+
   if ( !is_readable( $manifestFile ) ) { throw new \RuntimeException( "Cannot read manifest file: $manifestFile" ); }
-  if ( !is_dir( $outDir ) )            { return [ 'deleted' => 0 ]; }
+  if ( !is_dir( $outDir ) )            { throw new Exception ("Outdir is not a directory: $outDir "); }
 
   $base = rtrim( $outDir, DIRECTORY_SEPARATOR );
 
@@ -313,21 +289,24 @@ public static function pruneToManifest ( string $manifestFile, string $outDir ):
   $expected = [];
   foreach ( $lines as $titleText ) {
     $title = Title::newFromText( trim( $titleText ) );
-    if ( !$title ) { continue; }
+    if ( !$title ) { 
+      echo "*** Could not obtain title object for title $titleText\n";
+      continue;
+    
+     }
     $expected[ str_replace( '\\', '/', self::makeRelPath( $title, 'txt' ) ) ] = true;
   }
 
+
   $deleted = 0;
 
-  $dirIt = new \RecursiveDirectoryIterator(
-    $base,
-    \RecursiveDirectoryIterator::SKIP_DOTS
-  );
+  $dirIt = new \RecursiveDirectoryIterator ($base, \RecursiveDirectoryIterator::SKIP_DOTS );
 
   $filterIt = new \RecursiveCallbackFilterIterator(
     $dirIt,
     static function ( \SplFileInfo $current, string $key, \RecursiveDirectoryIterator $iterator ): bool {
       if ( $current->isDir() && $current->getFilename() === '.git' ) {
+        echo "Skipping .git directory \n";
         return false;
       }
 
@@ -335,13 +314,14 @@ public static function pruneToManifest ( string $manifestFile, string $outDir ):
     }
   );
 
-  $it = new \RecursiveIteratorIterator(
-    $filterIt,
-    \RecursiveIteratorIterator::LEAVES_ONLY
-  );
+  $it = new \RecursiveIteratorIterator($filterIt, \RecursiveIteratorIterator::LEAVES_ONLY);
+
 
   foreach ( $it as $fileInfo ) {
-    if ( !$fileInfo->isFile() ) { continue; }
+    if ( !$fileInfo->isFile() ) { 
+      $path = $fileInfo->getPathname();
+      echo "Not looking at: ". $path . "\n";
+      continue; }
 
     $rel = str_replace( '\\', '/', substr( $fileInfo->getPathname(), strlen( $base ) + 1 ) );
 
@@ -349,8 +329,10 @@ public static function pruneToManifest ( string $manifestFile, string $outDir ):
       continue;
     }
 
-    if ( !isset( $expected[$rel] ) ) {
-      unlink( $fileInfo->getPathname() );
+    if ( !isset( $expected[$rel] ) ) { 
+      $path = $fileInfo->getPathname();
+      echo "Deleting: ". $path . "\n";
+      unlink( $path );
       $deleted++;
     }
   }

@@ -51,10 +51,16 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
     $timeout = null;       // default is not to use a timeout
     $startTime = time();   // memorize time the command was started
 
+    $comment = "NC";      // default is NC for no comment
+
     if (is_string($obj) || is_callable ($obj)) {$ele = $obj;} // if $obj is a string or a callable, this is the command
-    else  {                                                                  // otherwise we expect an array/map with keys "command", "timeout" 
+    else  {                                                                  // otherwise we expect an array/map with keys "command", optional "timeout" 
                                                                              // and "args" in case of a function. "args" must be a serializable Array of arguments
                                                                              // NOTE: no timeouts for callables.
+                                                                             // optional is key comment
+
+
+
       if ( !isset($obj["command"] )) {
         $notify ? $notify ( "close", $count, "Error: Cannot find command at slot " . $count. " but just " . print_r ($obj, true)) : null;  // must notify client or it continues requesting
         throw new Exception ("Cannot find command in array object ". print_r ($obj, true) );
@@ -68,19 +74,21 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
         throw new Exception ("Error: At slot ". $count . " there is no callable and no string but just " . print_r ($ele, true) );
       }
 
-      if ( is_callable ($ele) ) {
-        if ( isset ($obj["args"] ) ) {$args = $obj["args"];}
-      }
+      if ( is_callable ($ele) ) { if ( isset ($obj["args"] ) ) {$args = $obj["args"];} }
+      if ( isset($obj["timeout"]) )                                  {$timeout = $obj["timeout"];}
 
-      if ( !isset($obj["timeout"] )  && is_string ($ele)   ) {
-        $notify ? $notify ( "close", $count, "Cannot find timeout in array object with string command " . $count . " for ". print_r ($ele, true)) : null;  // must notify client or it continues requesting
-        throw new Exception ("Cannot find timeout in array object ". print_r ($ele, true) );  
-      }
+//      if ( !isset($obj["timeout"] )  && is_string ($ele)   ) {
+//        $notify ? $notify ( "close", $count, "Cannot find timeout in array object with string command " . $count . " for ". print_r ($ele, true)) : null;  // must notify client or it continues requesting
+//        throw new Exception ("Cannot find timeout in array object ". print_r ($ele, true) );  
+//      }
 
       $timeout = ( isset($obj["timeout"]) ? $obj["timeout"] : null); // do not use a timeout if none is specified
-    } 
 
-    $notify ? $notify( "setup", $count, $ele) : null;  // setup a logging area for this command if necessary
+      if ( isset ($obj["comment"])) { $comment = $obj["comment"];}
+    }  // end ELSE 
+
+
+    $notify ? $notify( "setup", $count, $comment) : null;  // setup a logging area for this command if necessary
     $notify ? $notify( "cmd",   $count, $ele) : null;  // log the command itself
 
 
@@ -92,24 +100,26 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
 
     
 
-
     if (is_callable ($ele))   {  /* this branch is for the case that we find a callable in the array */
       ['result' =>$fcnResult, 'stdout' => $fcnStdout, 'stderr' => $fcnStderr, 'exception' => $fcnException ] = self::captureOutput ( $ele, ...$args );  // capture the output of the call to the callable, including possible exceptions
 
-      $notify ? $notify ( "stdout", $count, $fcnStdout) : null;
-      $notify ? $notify ( "stderr", $count, $fcnStderr ): null;
+      $fcnStdout = trim ($fcnStdout);  $fcnStderr = trim ($fcnStderr);
+
+      if (!empty($fcnStdout)) {$notify ? $notify ( "stdout", $count, $fcnStdout) : null;  }                      // sets the stdout field
+      if (!empty ($fcnStderr)) {$notify ? $notify ( "stderr", $count, $fcnStderr ): null; }                    // sets the stderr field
 
       $duration = time() - $startTime;
       $tim = "duration=".number_format($duration, 2)."[sec]";
       $notify ? $notify ( "tick", $count, chunk: $tim ) : null;
 
-      if ($fcnException === null) { 
-        $notify ? $notify (  "ret" , $count,  "retu=". print_r ($fcnResult, true) ) : null; 
+      if ($fcnException === null) {  // there was no exception
+        $notify ? $notify (  "retOk" , $count,  "return=". print_r ($fcnResult, true) ) : null; 
         continue;
       }
       else {
         $didHaveError = true; $errorCount++; 
-        $notify ? $notify (  "exitErr" , $count,  "EXCEPTION raised: ".  get_class($fcnException) ) : null; 
+        $notify ? $notify (  "retErr" , $count,  "EXCEPTION raised: ".  get_class($fcnException) ) : null; 
+
         if ($stopOnError) {break;} else {continue;}
       }
     }
@@ -218,14 +228,20 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
  * @param [type] ...$args
  * @return array
  *
- * NOTE: By design of PHP we can only catch exceptions via a handler. We cannot catch arbitrary data written to stderr 
- *       from a PHP function.
+ * NOTE: By design of PHP we can only catch exceptions via a handler. 
+ *       We cannot catch arbitrary data written to stderr from a PHP function.
+ *       We can, however, patch the error_log function and use this inside of the called functions.
  */
 public static function captureOutput (callable $fn, ...$args): array {
   $stdout = '';
   $stderr = '';
   $result = null;
   $exception = null;
+
+  // Redirect error_log() output to a temp file — error_log() bypasses set_error_handler
+  $tmpErrFile  = tempnam(sys_get_temp_dir(), 'dante_stderr_');
+  $prevErrorLog = ini_get('error_log');
+  ini_set('error_log', $tmpErrFile);
 
   $prevHandler = set_error_handler(
     function (int $severity, string $message, string $file, int $line) use (&$stderr, &$prevHandler) {
@@ -239,15 +255,23 @@ public static function captureOutput (callable $fn, ...$args): array {
 
   ob_start();
 
-  try {$result = $fn(...$args);} 
+  try {$result = $fn(...$args);}
   catch (\Throwable $e) {
     $exception = $e;
     $stderr .= sprintf( "[%s] %s in %s on line %d\n%s\n",  get_class($e),  $e->getMessage(),  $e->getFile(),  $e->getLine(),  $e->getTraceAsString() );
-  } 
+  }
   finally {
     $stdout = ob_get_contents();
     ob_end_clean();
     restore_error_handler();
+
+    // Restore error_log and collect whatever was written to it
+    ini_set('error_log', $prevErrorLog ?: '');
+    if (file_exists($tmpErrFile)) {
+      $logged = file_get_contents($tmpErrFile);
+      if ($logged !== false && $logged !== '') {$stderr .= $logged;}
+      unlink($tmpErrFile);
+    }
   }
 
   return ['result' => $result, 'stdout' => $stdout, 'stderr' => $stderr, 'exception' => $exception];
