@@ -1,6 +1,8 @@
 
 console.info ("ext.dantehidesction.js will be loading");
 
+
+
 ( function ( $, mw ) {
 	'use strict';
 
@@ -67,8 +69,7 @@ function doShowAll () {  // switch all top-level elements to visible
 }
 
 
-function doToggleAll () {
-  //console.log ();
+function doToggleAll () {  //console.log ();
   if (ALL_HIDDEN === true) { doShowAll();} 
   else if (ALL_HIDDEN === false) { doHideAll ();}
   else {} 
@@ -79,14 +80,15 @@ function doShowAllLevels () { // switch all levels to visible
  $('[data-section]').each( (idx,ele) => { if (ele.dataset.hidden == "true") {doShowSection ( ele.dataset.section );} } )
 }
 
+
 // hide the section contents below the section heading identified by the given sectionNumber
 function doHideSection ( sectionNumber ) {
   sectionNumber = parseInt (sectionNumber);
-  let $header = $('[data-section="'+sectionNumber+'"]');                     // find the header according to the numbering
-  $header.prepend("<span class='DHSpan'>&gt;</span>");                                         // prepend a plus elment to this header element
+  let $header = $('[data-section="'+sectionNumber+'"]');                             // find the header according to the numbering
+  $header.prepend("<span class='DHSpan'>&gt;</span>");                               // prepend a plus element to this header element
   $header.attr("data-hidden", "true");
-  let headtype = $header.prop('tagName');                                    // get tagname of that header
-  $header.nextUntil( non_nesting[headtype] )["addClass"]('hs-hide-' + headtype);    // iterate down the hierarchy for hiding everything below
+  let headtype = $header.prop('tagName');                                            // get tagname of that header
+  $header.nextUntil( non_nesting[headtype] )["addClass"]('hs-hide-' + headtype);     // iterate down the hierarchy for hiding everything below
 }
 
 function doShowSection ( sectionNumber ) {
@@ -103,6 +105,8 @@ function doToggleSection ( sectionNumber) {
   let $header = $('[data-section="'+sectionNumber+'"]');                     // find the header according to the numbering
   if ( $header.attr("data-hidden") == "true" ) { doShowSection (sectionNumber); }  else { doHideSection (sectionNumber); }
 }
+
+
 
 $.fn.longpress = function(longCallback, shortCallback, duration) {   // install longpress plugin for jquery
   if (typeof duration === "undefined") {duration = 500;}
@@ -144,38 +148,38 @@ mw.loader.using('mediawiki.util').then(function () {
 });
 */
 
-/*
+
 
 mw.hook( 'wikipage.content' ).add( function () {  // as soon as the relevant content has been loaded execute this function
-  $('.mw-headline').parent().each( function (num, ele) { ele.dataset.section=num+1; ele.title="Section number "+(num+1)+". Click to toggle visibility."; } );  // number the sections h_ elements
+
+  $('.mw-headline').parent().each( function (num, ele) { 
+    ele.dataset.section=num+1; 
+    ele.title="Section number "+(num+1)+". Click to toggle visibility.";   // number the sections h_ elements
+    // ele.title="Click to toggle visibility.";                            // UI hint for interaction of user      // TODO: for production only, not for development
+
+  });  
+
+
+  // clicking on the headline of a section toggles this sections visibility
   $('.mw-headline').on ('click', (e) => { 
     doToggleSection (e.target.parentNode.dataset.section );
     storeStatus ();
  })
 
   $('#firstHeading >span')
-    .longpress (  (e) => { console.log ("longpress");doShowAllLevels (); storeStatus();} , (e) => { console.log ("shortpress");doToggleAll (); storeStatus();} )   // longpress like this, NOT via .on handler; must have first longpress handler, then shortpress handler.
+    .longpress (  (e) => { 
+       console.log ("longpress");doShowAllLevels (); storeStatus();} , (e) => { console.log ("shortpress");doToggleAll (); storeStatus();} )   // longpress like this, NOT via .on handler; must have first longpress handler, then shortpress handler.
     .attr("title", "Click to toggle top-level section visibility, longpress to show entire page.");
 
   setStatus ();
 
-
-
 });
 
 
-*/
+
 
 
 }( jQuery, mediaWiki ) );
-
-
-/*
-console.log ("mediawiki", Object.keys (mediaWiki));
-console.log ("mw", Object.keys (mw));
-
-console.log ("mw.loader", Object.keys (mw.loader));
-*/
 
 
 

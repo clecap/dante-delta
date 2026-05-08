@@ -11,5 +11,17 @@ span.mw-headline {cursor:pointer;}
 
 
 span.DHSpan {display:none;}
+
+
+span.DHSpan {color:red; font-weight:bold;}
+
 [data-hidden="true"] span.DHSpan {display:inline-block;}
+
+
+/* [data-hidden="true"] {background-color: lightblue;} */
+
+[data-hidden="true"] .mw-headline {background-color: beige;}
+
+
+.mw-headline:hover {background-color:bisque;}
 
