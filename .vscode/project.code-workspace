@@ -1,6 +1,6 @@
 {
   "name": "Dante",
-	"folders": [
+	"folders": [ 
 	  {"path": "../"},
 	  {"path": "../extensions/Parsifal"}
 	],

@@ -7,5 +7,5 @@
   //"editor.suggest.showDetails": false,           // Disable big suggestion detail panel
   //"editor.suggest.showStatusBar": false,         // Disable suggestion documentation preview
   //"editor.suggest.showWords": false,
-  //"editor.suggestOnTriggerCharacters": false,    // Make autocomplete less aggressive
+  //"editor.suggestOnTriggerCharacters": false,    // Make autocomplete less aggressive 
 }
