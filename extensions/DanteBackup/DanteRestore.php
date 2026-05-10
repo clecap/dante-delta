@@ -108,20 +108,26 @@ protected function getSpecificCommands ( $formId ): mixed {
 }
 
 
-
-
-// analyze the suffix structure of a filename and return a boolean array
-// [db, enc, zip]
+/**
+ * 
+ * Analyze the suffix structure of a filename and return a boolean array [db, enc, zip]
+ * This is needed to understand requirements how to handle a file selected for restore
+ *
+ * @param mixed $fileName 
+ * @return array 
+ * @throws Exception 
+ */
 private static function checkName ($fileName) {
-  if     ( str_ends_with ($fileName, ".xml.gz.aes") ) { return [false, true,   true  ];}
-  elseif ( str_ends_with ($fileName, ".xml.aes") )    { return [false, true,   false  ];}
-  elseif ( str_ends_with ($fileName, ".xml.gz") )     { return [false, false,  true ];}
-  elseif ( str_ends_with ($fileName, ".xml") )        { return [false, false,  false ];}
-  elseif ( str_ends_with ($fileName, ".sql.gz.aes") ) { return [true,  true,   true  ];}
-  elseif ( str_ends_with ($fileName, ".sql.aes") )    { return [true,  true,   false  ];}
-  elseif ( str_ends_with ($fileName, ".sql.gz") )     { return [true,  false,  true ];}
-  elseif ( str_ends_with ($fileName, ".sql") )        { return [true,  false,  false ];}
-  else { throw new Exception ("incompatible file type found in file $fileName");}
+  if     ( str_ends_with ($fileName, ".xml.gz.aes") ) { $db=false;  $enc=true;   $zip=true;  }
+  elseif ( str_ends_with ($fileName, ".xml.aes") )    { $db=false;  $enc=true;   $zip=false; }
+  elseif ( str_ends_with ($fileName, ".xml.gz") )     { $db=false;  $enc=false;  $zip=true;  }
+  elseif ( str_ends_with ($fileName, ".xml") )        { $db=false;  $enc=false;  $zip=false; }
+  elseif ( str_ends_with ($fileName, ".sql.gz.aes") ) { $db=true;   $enc=true;   $zip=true;  }
+  elseif ( str_ends_with ($fileName, ".sql.aes") )    { $db=true;   $enc=true;   $zip=false; }
+  elseif ( str_ends_with ($fileName, ".sql.gz") )     { $db=true;   $enc=false;  $zip=true;  }
+  elseif ( str_ends_with ($fileName, ".sql") )        { $db=true;   $enc=false;  $zip=false; }
+  else { throw new Exception ("incompatible file extension found in file $fileName");}
+  return [$db, $enc, $zip];
 }
 
 
