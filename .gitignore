@@ -49,6 +49,9 @@ ERRORLOG
 *
 
 
+# we roll out own README.md file for the repository, overriding the one of MediaWiki
+!README.md
+
 !.github/
 !.github/**
 
