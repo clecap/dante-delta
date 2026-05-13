@@ -118,6 +118,10 @@ protected function getSpecificCommands ( $formId ): mixed {
  * @throws Exception 
  */
 private static function checkName ($fileName) {
+  $db = null;
+  $enc = null;
+  $zip = null;
+  
   if     ( str_ends_with ($fileName, ".xml.gz.aes") ) { $db=false;  $enc=true;   $zip=true;  }
   elseif ( str_ends_with ($fileName, ".xml.aes") )    { $db=false;  $enc=true;   $zip=false; }
   elseif ( str_ends_with ($fileName, ".xml.gz") )     { $db=false;  $enc=false;  $zip=true;  }
@@ -186,7 +190,7 @@ private function getCommandsAWS ($fileName) {
 
   $env = DanteCommon::getEnvironmentUser ($this->getUser());
   $bucketName = $env["AWS_BUCKET_NAME"];
-  danteLog ("DanteBackup", "getCommandsAWS: doImportAWS: $fileName, enc:" .$enc. " zip: ". $zip."\n");
+  danteLog ("DanteBackup", "getCommandsAWS: doImportAWS: $fileName, enc:" .print_r ($enc, true). " zip: ". print_r($zip,true)."\n");
 
   $arr = array ();
 
@@ -206,7 +210,7 @@ private function getCommandsAWS ($fileName) {
   }
   else {
 
-    danteLog ("DanteBackup", "environment in getCommandAWS is ".print_r ($env, true));
+//    danteLog ("DanteBackup", "environment in getCommandAWS is ".print_r ($env, true));
 
    array_push ($arr, "/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | openssl aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC > /tmp/DONE-ZWEI ");  // works
 
