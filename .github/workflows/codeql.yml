@@ -29,7 +29,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript-typescript', 'python' ]
+        include:
+          - language: javascript-typescript
+            continue-on-error: false
+          - language: python
+            continue-on-error: true   # no Python source yet; keep job in place for when it is added
+
+    continue-on-error: ${{ matrix.continue-on-error }}
 
     steps:
     - name: Harden Runner
