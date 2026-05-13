@@ -58,7 +58,7 @@ protected function showForm (): void {
   $text = ""; foreach ( $config as $value) {$text .= $value->label; $sumNum += $value->num; unlink ($value->filename); }  // format proper output text AND unlink intermediary individual collection files
 
   $uniqueNum = self::countUniqueNonEmptyLines ($manifest);
-
+ 
   
   $out->addHTML ("<h2>Dump System Pages</h2>");
   $out->addHTML ("<details><summary>Dumps Pages of the DanteWiki System but no User Pages to a Git Repository for System Development</summary>");
