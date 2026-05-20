@@ -190,7 +190,10 @@ private function getCommandsAWS ($fileName) {
 
   $env = DanteCommon::getEnvironmentUser ($this->getUser());
   $bucketName = $env["AWS_BUCKET_NAME"];
+
   danteLog ("DanteBackup", "getCommandsAWS: doImportAWS: $fileName, enc:" .print_r ($enc, true). " zip: ". print_r($zip,true)."\n");
+
+  danteLog ("DanteBackup", "we have " . ($enc ? "ENC " : " NO-ENC ") . "  "  . ($zip ? "ZIP" : " NO-ZIp" )  . "\n");
 
   $arr = array ();
 
@@ -212,7 +215,7 @@ private function getCommandsAWS ($fileName) {
 
 //    danteLog ("DanteBackup", "environment in getCommandAWS is ".print_r ($env, true));
 
-   array_push ($arr, "/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | openssl aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC > /tmp/DONE-ZWEI ");  // works
+   //array_push ($arr, "/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | openssl aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC > /tmp/DONE-ZWEI ");  // works
 
 
     array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/extensions/DanteBackup/countFilter.php ",                   $zip, $enc ) ); 
