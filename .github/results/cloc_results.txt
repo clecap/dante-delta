@@ -1,4 +1,4 @@
-github.com/AlDanial/cloc v 1.98  T=0.30 s (887.1 files/s, 162811.3 lines/s)
+github.com/AlDanial/cloc v 1.98  T=0.25 s (1070.1 files/s, 196398.1 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
