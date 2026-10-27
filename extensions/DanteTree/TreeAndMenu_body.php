@@ -54,8 +54,13 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
     
       // self::debugLog ( "catConfig array we got: \n".print_r ($catConfig, true));
 
+      // getCatConfig returns an error string if the config page is missing or not parsable: show the error instead of iterating
+      if (!is_array ($catConfig)) { $catConfig = [ ["error" => (is_string ($catConfig) ? $catConfig : "MediaWiki:Sidebar/Categories must contain a json array")] ]; }
+
       foreach ($catConfig as $obj) {       // iterate all objects in the configuration array
         if ($VERBOSE) {self::debugLog ("Loop looking at configuration object: ".print_r ($obj, true)."\n");}
+        if (!is_array ($obj)) { $cHtml .= "<li><span style='color:red;'>Invalid entry in MediaWiki:Sidebar/Categories: " . htmlspecialchars (json_encode ($obj)) . "</span></li>"; continue; }  // skip entries which are not objects
+        if (array_key_exists ("error", $obj)) { $cHtml .= "<li><span style='color:red;'>" . htmlspecialchars ($obj["error"]) . "</span></li>"; continue; }  // render configuration error message
         $style = ( array_key_exists ("style", $obj) ? $obj["style"]: "");
         if (array_key_exists ("name", $obj))  {    
           if ($VERBOSE) {self::debugLog ("\n\n Formatting link: " . self::buildLink ($obj["name"], $style).  "\n\n");}
@@ -67,7 +72,7 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
         }
       }
       $cHtml .= "</ul>";
-      if ($VERBOSE) {elf::debugLog ("The cHtml generated is: " .$cHtml);}
+      if ($VERBOSE) {self::debugLog ("The cHtml generated is: " .$cHtml);}
 
  //     $html  =    "<div class=\"fancytree todo\" id=\"sidebar-cattree\" style=\"display:none;\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
       $html  =    "<div class=\"fancytree todo\" style=\"display:none;\" id=\"sidebar-cattree\" >$cHtml </div>";  // style: show only after cats are adjusted; todo: MUST mark for later tree expansion  fancytree: MUST mark as being a fancytree base 
