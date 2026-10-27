@@ -36,5 +36,5 @@ $wgResourceLoaderMaxage = [
 $wgCacheDirectory = "$IP/cache";
 
 # report all errors except deprecated things 
-error_reporting( E_ALL &! E_DEPRECATED );  
+error_reporting( E_ALL &~ E_DEPRECATED );  
 ini_set( 'display_errors', 1 );
