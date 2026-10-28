@@ -14,8 +14,9 @@ public function execute( $par ): void {
   $this->outputHeader();
   $request = $this->getRequest();
   $action = $request->getVal( 'action', 'view' );  // Read `action` query parameter; if not present use 'view' as fallback value
-  if ( $action === 'submit' && $request->wasPosted() ) { $this->handleSubmission ( $request ); } 
-  else {$this->showForm();}
+  if     ( $action === 'submit' && $request->wasPosted() ) { $this->handleSubmission ( $request ); }
+  elseif ( $action === 'run' )                             { $this->getOutput()->addHTML ( ServiceEndpointHelper::getIframe () ); }  // result page reached via redirect after the POST
+  else                                                     { $this->showForm(); }
 }
 
 
@@ -52,17 +53,18 @@ protected function handleSubmission () {
 
 
 /**
- * Execute the commands in array $cmd and stream stdout and stderr by an event stream mechanism to the browser.
+ * Queue the commands in array $cmd in the session and redirect (POST/Redirect/GET) to the result page,
+ * which streams stdout and stderr by an event stream mechanism to the browser.
  *
  * @param [type] $cmd
  * @param [type] $env
  * @return void
  */
 protected function executeCommands ( $cmd, $env ): void {
-  $envJson = json_encode  ($env );                                          // convert PHP environment array into json text format                        
+  $envJson = json_encode  ($env );                                          // convert PHP environment array into json text format
   $cmdJson = json_encode ( $cmd );                                          // convert PHP command Array into json text format
   ServiceEndpointHelper::attachToSession ( $cmdJson, $envJson );         // attach command Array and environment in string form to the current session
-  $this->getOutput()->addHTML ( ServiceEndpointHelper::getIframe () );       // send a general html template which then contains javascript which activates a serviceEndpoint sending event streams 
+  $this->getOutput()->redirect ( $this->getPageTitle()->getLocalURL ( [ 'action' => 'run' ] ), '303' );  // POST/Redirect/GET: history holds a GET, so back/forward does not re-post; the action=run page shows the iframe
   return;
 }
 

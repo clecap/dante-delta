@@ -68,6 +68,16 @@ set_exception_handler(function (Throwable $e) {
 $cmdString = $session->get ( 'Dante_Cmd' );  // a string which encodes in JSON format the array of commands to be executed
 $envString = $session->get ( 'Dante_Env' );  // a string which encodes in JSON format the environment in which these commands shall be executed
 
+// one-shot: remove the queued commands so a revisited result page (back/forward, reload) does not execute them again
+$session->remove ( 'Dante_Cmd' );
+$session->remove ( 'Dante_Env' );
+$session->save ();  // persist removal now, since the script below may run for a long time
+
+require_once ( __DIR__ . "/ServiceEndpointHelper.php");  // need sendEvent below
+
+// nothing queued (already executed): tell the client and close the event stream
+if ( $cmdString === null ) { ServiceEndpointHelper::sendEvent ( 'close', 0, 'Nothing to execute (commands were already run).' ); exit; }
+
 
 // danteLog ("DanteBackup", "\n environment string in service endpoint ".print_r ($envString, true));  // should TODO log into serviceEndpoint log ?!?!
   
