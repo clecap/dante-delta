@@ -48,23 +48,20 @@ protected function showForm  (): void  {
            + [ 'scpUser' => [ 'type' => 'text', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
   self::standardForm ($form, $action, "SCP", "Restore via SCP");
 
-  $owner = "clecap";
-  $repository = "dante-wiki-contents";
-  $path="initial-contents";
-  $branch = "";    // TODO
-  $accessToken ="MISSING";
 
-  $out->addHTML ("<h2>Restore from GITHUB</h2>"); 
-  $form =    [ 'gitOwner' =>      [ 'type' => 'text', 'label-message' => 'label-owner',     'section' => 'restore-from-github', 'required' => true, 'default' => $owner    ] ]
-           + [ 'gitRepository' => [ 'type' => 'text', 'label-message' => 'label-repository', 'section' => 'restore-from-github', 'required' => true, 'default' =>  $repository   ] ]
-           + [ 'gitPath' =>       [ 'type' => 'text', 'label-message' => 'label-path',       'section' => 'restore-from-github', 'required' => true, 'default' => $path   ] ]
-           + [ 'gitAccess' =>     [ 'type' => 'text', 'label-message' => 'label-path',       'section' => 'restore-from-github', 'required' => true, 'default' => $accessToken          ] ];
+  $owner       = "clecap";
+  $repository  = "dante-wiki-contents";
+  $branch      = "master";   
+
+  $out->addHTML ("<h2>Restore from GITHUB (not yet fully operative)</h2>"); 
+  $form =    [ 'gitOwner'      =>  [ 'type' => 'text',  'name' => 'gitOwner',      'label' => 'Git Owner',      'section' => 'restore-from-github', 'required' => true, 'default' =>  $owner    ] ]
+           + [ 'gitRepository' =>  [ 'type' => 'text',  'name' => 'gitRepository', 'label' => 'Repository',     'section' => 'restore-from-github', 'required' => true, 'default' =>  $repository   ] ]
+           + [ 'gitBranch'     =>  [ 'type' => 'text',  'name' => 'gitBranch',     'label' => 'Branch',         'section' => 'restore-from-github', 'required' => true, 'default' =>  $branch   ] ];
   self::standardForm ($form, $action, "GITHUB", "Restore via GITHUB");
-
 }
 
 
-// returns the specific command required for executing the necessary functions
+// returns the specific command sequence required for executing the necessary functions
 protected function getSpecificCommands ( $formId ): mixed {
   global $IP;
   $request = $this->getRequest();
@@ -94,7 +91,11 @@ protected function getSpecificCommands ( $formId ): mixed {
       break;
 
     case 'formId_GITHUB':
-      $arr = $this->gitClone ();
+      $owner  = $request->getVal ( 'gitOwner' );  
+      $repo   = $request->getVal ( 'gitRepository' );  
+      $branch = $request->getVal ( 'gitBranch' );  
+      danteLog ("DanteBackup", "formId_GITHUB: " . $owner);
+      $arr = $this->gitClone ( $owner, $repo, $branch );
       break; 
 
     default: 
@@ -134,32 +135,6 @@ private static function checkName ($fileName) {
   return [$db, $enc, $zip];
 }
 
-
-
-private function getCommandsRestoreFiles () {
-
-// untar stuff
-
-// ensure proper permissions
-/*
-chown -R www-data:www-data "$UPLOAD_DIR"
-find "$UPLOAD_DIR" -type d -exec chmod 755 {} \;
-find "$UPLOAD_DIR" -type f -exec chmod 644 {} \;
-*/
-
-/*
-// clean up thumb nails
-rm -rf "$UPLOAD_DIR/thumb"
-mkdir -p "$UPLOAD_DIR/thumb"
-chown -R www-data:www-data "$UPLOAD_DIR/thumb"
-*/
-
-// regenerate all thumbs
-// php maintenance/rebuildImages.php
-// could also do this on a fault in base every time we look at a file....
-
-
-}
 
 
 
@@ -323,37 +298,22 @@ private static function addPostImport ( $cmd ) {
 }
 
 
-
 // returns commands to prepare a local git instance and place files in there from git
-// TODO: just a PoC not a full implementation
-// CAVE: need this in here since we need access to the current user name and the token stuff of it....
-private function gitClone () {
+private function gitClone ( $owner, $repo, $branch ) {
   global $IP;
-  $user = $this->getUser();
-  $token        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' ); // TODO: maybe later more flexible - enter or override
-
-  $repo = "dante-wiki-contents";
-  $owner ="clecap";
-  $branch = "master";  // TODO fix everywhere to Master also in generation of initial thing as well ie in backup
-
+  $user      = $this->getUser();  // needed to get access token
+  $token     = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' ); 
   $targetDir = InfoExtractor::makeTempDir ();
 
   $repoUrl = sprintf( 'https://%s:%s@github.com/%s/%s.git', rawurlencode($owner), rawurlencode($token), $owner, $repo );
 
-  $user = $this->getUser();
-  $userName = $user->getName();
-
   $cmds = [
-    "git clone --depth=1 --single-branch --branch $branch $repoUrl $targetDir",
-    "php $IP/extensions/DanteCommon/importDirectory.php --ddir $targetDir --slug --overwrite"
+    "git clone --depth=1 --single-branch --branch $branch $repoUrl $targetDir",                  // clone remote repository
+    "php $IP/extensions/DanteCommon/importDirectory.php --ddir $targetDir --slug --overwrite",   // import contents into wiki
+    "rm -Rf $targetDir"                                                                          // clean temporary directory
   ];
-
   return $cmds;
 }
-
-
-
-
 
 
 } // end class

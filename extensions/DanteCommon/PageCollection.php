@@ -54,9 +54,6 @@ class PageCollection {
 
 
 
-
-
-
   // TODO: DEPRECATE THIS together with DanteInitialStore.php
   public function execute ( $owner, $repository, $token, $path, $out=false ) {
     global $IP;

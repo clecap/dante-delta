@@ -590,12 +590,12 @@ private function fetchSubcategories($category) {
   $apiEndpoint =  wfScript( 'api' );  // 'https://your-mediawiki-site/api.php';    // MediaWiki API endpoint // TODO
   do {
     $queryParams = [
-      'action' => 'query',
-      'list' => 'categorymembers',
+      'action'  => 'query',
+      'list'    => 'categorymembers',
       'cmtitle' => 'Category:' . $category,
-      'cmtype' => 'subcat',
+      'cmtype'  => 'subcat',
       'cmlimit' => 'max',
-      'format' => 'json',
+      'format'  => 'json',
     ];
     if ($continue) {$queryParams['cmcontinue'] = $continue;}
 

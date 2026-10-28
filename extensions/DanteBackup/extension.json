@@ -13,7 +13,7 @@
     "DanteListBackups":         "DanteListBackups.php",
     "DanteBackupPreferences":   "DanteBackupPreferences.php",
     "DanteInitialStore":        "DanteInitialStore.php",
-    "DanteInitialLoad":         "DanteInitialStore.php"
+    "DanteInitialLoad":         "DanteInitialLoad.php"
 
   },
   "SpecialPages": {
