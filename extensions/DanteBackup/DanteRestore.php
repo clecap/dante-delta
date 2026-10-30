@@ -7,8 +7,10 @@ use MediaWiki\User\UserIdentity;
 require_once ("Executor.php");       // TODO: should move away from this
 require_once ("DanteCommon.php");    // TODO: really? check ?!
 
-require_once ("extensions/DanteCommon/ServiceEndpointHelper.php");
 
+
+require_once ("extensions/DanteCommon/ServiceEndpointHelper.php");
+require_once ("extensions/DanteCommon/ServiceExecutor.php");    
 
 class DanteRestore extends DanteSpecialPage {
 
@@ -24,36 +26,31 @@ protected function showForm  (): void  {
 
   $out    = $this->getOutput();
   $out->addModuleStyles ( ['ext.DanteBackup.specialpage.styles'] );  // this is a styles-only module which mediawiki loads early enough to prevent FOUC
-
   $out->addHTML (wfMessage ("dante-page-restore-intro"));
-
-  // provide a help link
   $out->addHelpLink( 'index.php?title=Help:DanteRestore', true );  // provide a help link   // TODO: must fill with contents
 
-  $out->addHTML ("<h2>From a local file on your computer</h2>"); 
+  $out->addHTML ("<h2>From a local file on your computer</h2>");                  // FORM PART: LOCAL FILE
   $form = [ 'xmlimport' => ['type' => 'file','name' => 'xmlimport', 'accept' => [ 'application/xml', 'text/xml', 'application/x-gzip-compressed', 'application/octet-stream' ], 'section' => 'select-local-file', 'required' => true, ] ];
   self::standardForm ($form, $action, "LOCAL", "Restore from file");
 
-  $out->addHTML ("<h2>From a file from the AWS S3 storage area</h2>"); 
+  $out->addHTML ("<h2>From a file from the AWS S3 storage area</h2>");          // FORM PART: AWS S3
   $out->addHTML ("The type (Pages, Database, Files) determines the restored elements.");
   $form = [ 'awsRadio'  => [ 'type' => 'radio', 'section' => 'restore-from-aws', 'options' => $this->getFileArray (),   'name' => 'awsRadio', 'required' => true  ] ];
   self::standardForm ($form, $action, "AWS", "Restore from AWS");
 
-  $out->addHTML ("<h2>From a file at an Internet URL (not operative?)</h2>"); 
+  $out->addHTML ("<h2>From a file at an Internet URL (not operative?)</h2>");   // FORM PART: Internet URL
   $form = [ 'url' => [ 'type' => 'text', 'name' => 'url', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
   self::standardForm ($form, $action, "URL", "Restore from URL");
 
-  $out->addHTML ("<h2>From a file at an SSH/SCP location (not yet operative)</h2>"); 
+  $out->addHTML ("<h2>From a file at an SSH/SCP location (not yet operative)</h2>");   // FORM PART SSH/SCP
   $form = [ 'scp' => [ 'type' => 'text', 'name' => 'url', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ]
            + [ 'scpUser' => [ 'type' => 'text', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
   self::standardForm ($form, $action, "SCP", "Restore via SCP");
 
-
-  $owner       = "clecap";
-  $repository  = "dante-wiki-contents";
-  $branch      = "master";   
-
-  $out->addHTML ("<h2>Restore from GITHUB (not yet fully operative)</h2>"); 
+  $out->addHTML ("<h2>Restore from GITHUB (not yet fully operative)</h2>");             // FORM PART: GITHUB
+  $owner       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-owner' );
+  $repository  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-repository' );
+  $branch      = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-branch' );
   $form =    [ 'gitOwner'      =>  [ 'type' => 'text',  'name' => 'gitOwner',      'label' => 'Git Owner',      'section' => 'restore-from-github', 'required' => true, 'default' =>  $owner    ] ]
            + [ 'gitRepository' =>  [ 'type' => 'text',  'name' => 'gitRepository', 'label' => 'Repository',     'section' => 'restore-from-github', 'required' => true, 'default' =>  $repository   ] ]
            + [ 'gitBranch'     =>  [ 'type' => 'text',  'name' => 'gitBranch',     'label' => 'Branch',         'section' => 'restore-from-github', 'required' => true, 'default' =>  $branch   ] ];
@@ -102,7 +99,6 @@ protected function getSpecificCommands ( $formId ): mixed {
     case 'formId_SCP':
      // TODO
        throw new Exception ("Not yet implemented case: ".$formId); // TODO     
-  
        break;
     }
     return $arr;
@@ -145,7 +141,6 @@ public function getCommandsFILE ($fileName, $info) {
   [$db, $enc, $zip] = self::checkName ($fileName);
 
    danteLog ("DanteBackup", "\n getCommandsFILE ");
-
   $arr = array ();
   array_push ( $arr, "echo $info" );
   array_push ( $arr, "cat $fileName | php $IP/extensions/DanteBackup/countFilter.php " );  // TODO LACKS unzp and decrypt 
@@ -155,6 +150,14 @@ public function getCommandsFILE ($fileName, $info) {
   $arr = self::addPostImport ( $arr );  // do maintenance stuff we need to do after every import
   return $arr;
 }
+
+
+
+
+
+
+
+
 
 
 // TODO: ALSO NEED a variant for Database files ........
@@ -167,7 +170,6 @@ private function getCommandsAWS ($fileName) {
   $bucketName = $env["AWS_BUCKET_NAME"];
 
   danteLog ("DanteBackup", "getCommandsAWS: doImportAWS: $fileName, enc:" .print_r ($enc, true). " zip: ". print_r($zip,true)."\n");
-
   danteLog ("DanteBackup", "we have " . ($enc ? "ENC " : " NO-ENC ") . "  "  . ($zip ? "ZIP" : " NO-ZIp" )  . "\n");
 
   $arr = array ();
@@ -178,26 +180,33 @@ private function getCommandsAWS ($fileName) {
   danteLog ("DanteBackup", "\n Selected file is $fileName \n");
 
   if ($fileName == "ERROR") {
-    array_push ( $arr, "echo 'The system signalled an error and so this option is not available'");
+    array_push ( $arr, "echo 'The system signalled an error and so this option is not available'");  // TODO: convert to new system
     return true;  // TODO: check if this is needed and if this works !!
   } 
 
   if ($db) {
  //   gunzip -c mediawiki_dump.sql.gz | mysql -u wikiuser -p wikidb
-  
+ 
   }
   else {
 
 //    danteLog ("DanteBackup", "environment in getCommandAWS is ".print_r ($env, true));
 
    //array_push ($arr, "/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | openssl aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC > /tmp/DONE-ZWEI ");  // works
-
-
     array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/extensions/DanteBackup/countFilter.php ",                   $zip, $enc ) ); 
     array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '8' ",  $zip, $enc ) ); 
     array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '10' ", $zip, $enc ) ); 
     array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --uploads ",         $zip, $enc ) ); 
     $arr = self::addPostImport ( $arr );
+
+    $cmd = [];
+    $cmd[] =  new DanteStringCommand ( DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/extensions/DanteBackup/countFilter.php ",                   $zip, $enc )  );
+    $cmd[] =  new DanteStringCommand ( DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '8' ",  $zip, $enc )  );
+    $cmd[] =  new DanteStringCommand ( DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '10' ", $zip, $enc )  ); 
+    $cmd[] =  new DanteStringCommand ( DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --uploads ",         $zip, $enc )  ); 
+
+    //return $cmd;
+
   }
   return $arr;
 }
@@ -236,7 +245,7 @@ public static function getCommandsSSH ($url) {
 
 
 
-// generates a prefix for the choice form
+// generates a prefix for the choice form with Database: Pages: or Files: as prefix
 private static function getPrefix ($name) {
   if (str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ) return "<b  class='prefix-database'>Database: </b>";
   if (str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ) return "<b  class='prefix-pages'>Pages: </b>";
@@ -296,6 +305,24 @@ private static function addPostImport ( $cmd ) {
   array_push ($cmd,  "php $IP/maintenance/refreshFileHeaders.php --verbose");
   return $cmd;
 }
+
+
+// service function: appends to the command array $cmd all those commands required after an import of an xml archive; return the new command array
+// this is the command version
+private static function addPostImportCommands ( $cmd ) {
+  global $IP;
+  // see https://www.mediawiki.org/wiki/Manual:ImportDump.php about how we must run this after an import // TODO: really all of this ????
+   
+  $cmd[]=  new DanteStringCommand ("php $IP/maintenance/rebuildrecentchanges.php") ; 
+  $cmd[]=  new DanteStringCommand ("php $IP/maintenance/initSiteStats.php --update ") ;
+  $cmd[]=  new DanteStringCommand ("php $IP/maintenance/rebuildImages.php") ; 
+  $cmd[]=  new DanteStringCommand ("php $IP/maintenance/rebuildall.php") ; 
+  $cmd[]=  new DanteStringCommand ("php $IP/maintenance/checkImages.php") ; 
+  $cmd[]=  new DanteStringCommand ("php $IP/maintenance/refreshFileHeaders.php --verbose") ;
+  return $cmd;
+}
+
+
 
 
 // returns commands to prepare a local git instance and place files in there from git

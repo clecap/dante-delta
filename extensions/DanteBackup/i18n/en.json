@@ -43,6 +43,7 @@
   "restore-from-url": "Enter a URL for restoring from the file it designates",
 
   "prefs-aws":         "Credentials for AWS Backup",
+  "prefs-dante-bu":    "DanteBackup",
 
   "aws-prefs-key":     "Access Key of an Amazon AWS IAM User with rights to write to S3. See [[Help:DanteBackup]].",
   "aws-prefs-skey":    "Secret Access Key of that Amazon AWS IAM User. Keep confidential. See [[Help:DanteBackup]].",
@@ -64,7 +65,11 @@
   "prefs-ssh-restore-user":  "User name for user on SSH backup host which provides the dumped data. See [[Help:DanteBackup]].",
   "prefs-ssh-restore-pw":    "Password for user on SSH backup host which provides the dumped data. See [[Help:DanteBackup]].",
   "prefs-ssh-encpw":         "Encryption password for user-controlled encryption before SSH upload. See [[Help:DanteBackup]].",
-  "prefs-git":               "Token to write initial contents to the respective github repository. For developer use only.",
+
+  "prefs-git":               "Credentials for GIT Backup",
+  "prefs-label-git-owner":      "Owner of repository",
+  "prefs-label-git-repository": "Name of repository",
+  "prefs-label-git-branch":     "Name of branch to be used",
 
   "prefs-label-ssh-host":          "SSH Backup Host",
   "prefs-label-ssh-dump-user":     "Dump User Name",
@@ -82,6 +87,7 @@
 
   "help-enc":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password used in the dump, as without it you cannot restore the contents of the dump file.",
 
+  "help-pass":  "Password as set in [[Special:Preferences]]. You can change it but must make sure to remember it in connection with the dump since without it you cannot restore the contents of the dump file.",
 
   "help-enc-db":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password used in the dump, as without it you cannot restore the contents of the dump file. If a password is set for the user and you do a database dump without encryption then the password is visible as part of the database dump.",
 

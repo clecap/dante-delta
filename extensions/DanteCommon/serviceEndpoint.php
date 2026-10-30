@@ -1,7 +1,7 @@
 <?php
 
 // serviceEndpoint implements a more general endpoint for executing long running scripts with error control possibilities for the user
-// ServiceendpointHelper attaches a script to the session and displays an HTML frame in which events can be displayed
+// ServiceEndpointHelper attaches a script to the session and displays an HTML frame in which events can be displayed
 
 // need to use MediaWiki session manager 
 require __DIR__ . '/../../includes/WebStart.php';
@@ -29,12 +29,7 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
   $userName = $user->getName();
   danteLog ("DanteCommon", "\n user is: $userName");
 
-  if ( $user->isRegistered() ) {
-    danteLog ("DanteCommon", "\n registered user is: $userName");
-  }
-
-
-danteLog ("DanteCommon", __DIR__);
+  if ( $user->isRegistered() ) { danteLog ("DanteCommon", "\n registered user is: $userName"); }
 
 // We need to change the error handlers, since the receiver of this endpoint expects an event stream format and
 // PHP sends errors and exceptions usually as HTML, to which the receiver cannot react properly
@@ -68,32 +63,33 @@ set_exception_handler(function (Throwable $e) {
 $cmdString = $session->get ( 'Dante_Cmd' );  // a string which encodes in JSON format the array of commands to be executed
 $envString = $session->get ( 'Dante_Env' );  // a string which encodes in JSON format the environment in which these commands shall be executed
 
-// one-shot: remove the queued commands so a revisited result page (back/forward, reload) does not execute them again
+// keep this one-shot: remove the queued commands so a revisited result page (back/forward, reload) does not execute them again
 $session->remove ( 'Dante_Cmd' );
 $session->remove ( 'Dante_Env' );
-$session->save ();  // persist removal now, since the script below may run for a long time
+$session->save ();                                          // persist the removal NOW, since the script below may run for a long time
 
-require_once ( __DIR__ . "/ServiceEndpointHelper.php");  // need sendEvent below
+require_once ( __DIR__ . "/ServiceEndpointHelper.php");     // need sendEvent below
 
 // nothing queued (already executed): tell the client and close the event stream
 if ( $cmdString === null ) { ServiceEndpointHelper::sendEvent ( 'close', 0, 'Nothing to execute (commands were already run).' ); exit; }
-
-
-// danteLog ("DanteBackup", "\n environment string in service endpoint ".print_r ($envString, true));  // should TODO log into serviceEndpoint log ?!?!
-  
 
 // convert json text into php array
 $cmdArray = json_decode ( $cmdString, true );
 $envArray = json_decode ( $envString, true);
 
+
+
 require_once ( __DIR__ . "/ServiceEndpointHelper.php");  // CAVE: MUST require this here, since the autoloader mechanism does not properly detect the callable below
-// require_once ( __DIR__ . "/ServiceExecutor.php");     // NOTE: THat ius not necessary, this is autoloaded properly
 
 $stdoutCollect = null; $stderrCollect = null;
 
 
-// danteLog ("DanteBackup", "\n environment array in service endpoint ".print_r ($envArray, true));
+$notifier = new WebNotifier ();   // sends notifications as server-sent events to the browser
 
+
+require_once ( __DIR__ . "/ServiceExecutor.php");   // for danteCommand
+
+// DanteCommand::executeCommandArray ($cmdArray, $envArray, $stdoutCollect, $stderrCollect, $notifier);
 
 ServiceExecutor::executeCommandArray ( $cmdArray, $envArray, $stdoutCollect, $stderrCollect, [ ServiceEndpointHelper::class, 'sendEvent' ] );
 

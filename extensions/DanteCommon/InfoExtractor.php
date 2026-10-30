@@ -69,6 +69,32 @@ public static function getTitlesOfCategory ( string $category ) {
 }
 
 
+/**
+ * Return the prefixed titles (e.g. "Help:Foo") of all pages in the wiki, in all namespaces, redirects included.
+ *
+ * @param int $batchSize Number of rows fetched from the page table per query
+ * @return string[] Array of prefixed page titles, ordered by page id
+ */
+public static function getAllTitles ( int $batchSize = 1000 ): array {
+  $dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
+
+  // loop through the page table in batches of increasing page ids until no more rows come back
+  $items  = [];
+  $lastId = 0;
+  while ( true ) {
+    $res = $dbr->select ( 'page', [ 'page_id', 'page_namespace', 'page_title' ], [ 'page_id > ' . $dbr->addQuotes( $lastId ) ], __METHOD__, [ 'ORDER BY' => 'page_id ASC', 'LIMIT' => $batchSize ] );
+    if ( $res->numRows() === 0 ) { break; }
+
+    // convert each row into its prefixed title text
+    foreach ( $res as $row ) {
+      $lastId = (int)$row->page_id;
+      array_push ( $items, Title::makeTitle( (int)$row->page_namespace, $row->page_title )->getPrefixedText () );
+    }
+  }
+  return $items;
+}
+
+
 
 
 

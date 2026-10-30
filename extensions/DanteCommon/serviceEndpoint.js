@@ -20,11 +20,7 @@ let maximalCallingsOfEventSourceLeft  = 20;  // set a default in case we forgot 
 
 
 
-
-
-
 function handler (e) {
-  // console.log (e);
   const log = document.getElementById('log');
  
   const down = (ele) => { if (ele) {ele.scrollTop = ele.scrollHeight;} window.scrollTo({  top: document.body.scrollHeight + 500 });} ;  // scroll down to show this element ele
@@ -46,6 +42,7 @@ function handler (e) {
   let obj;
   try {obj = JSON.parse (e.data);}  catch (exc) { alert ("Program error: Cannot convert json string ");  alert ("String was: " + e.data); return;}
 
+
   switch (obj.command) {
     case "log":  {doLog (obj.data); break;}  // log it under li log (as general log)
 
@@ -56,15 +53,14 @@ function handler (e) {
 
     // setup sets up another template for a command to receive further information updates  
 
+
     case "setup":  {
       if (maximalCallingsOfEventSourceLeft-- < 0 ) {
         source.close();  let ele=document.createElement ("h1"); ele.textContent = "Abnormally aborted loop. Error!!"; document.body.appendChild (ele); down (ele); break;}
       const fragment = 
         `<div id="container-${obj.num}" class="container">
            <h3 class="title"># ${obj.num} <span id="comment-${obj.num}">${obj.data}</span><span id="status-${obj.num}" class="status"></span> <span id="tick-${obj.num}" class="tick"></span> <span id="XXcmd-${obj.num}" class="cmd"></span></h3>
-           <details><summary>Details</summary> 
-              <span id="cmd-${obj.num}" class="cmd"></span>
-           </details>
+           <b>Command:</b> <span id="cmd-${obj.num}" class="cmd"></span>
            <details><summary><h4 style='display:inline' id="stdout-head-${obj.num}">Stdout: Output</h4></summary>
              <pre id="stdout-${obj.num}" class="stdout"></pre>
            </details>
@@ -83,9 +79,8 @@ function handler (e) {
     case "stderr":     { let ele =document.getElementById ("stderr-" + obj.num); ele.classList.add ("stderr-active"); ele.textContent += obj.data; down(ele);   bluelite ("stderr-head-" + obj.num); break; }
     case "stdout":     { let ele =document.getElementById ("stdout-" + obj.num); ele.classList.add ("stdout-active"); ele.textContent += obj.data;  down(ele);  bluelite ("stdout-head-" + obj.num); break; }
 
-
-    case "cmd":        { let ele =document.getElementById ("cmd-" + obj.num); ele.textContent += obj.data; down (ele); break;    }
-    case "status":     { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; break; }  // write in the closing status // TODO: can we deprecate this??
+    case "cmd":        { let ele =document.getElementById ("cmd-" + obj.num);    ele.textContent += obj.data; down (ele);                   break; }
+    case "status":     { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data;                                break; }  // write in the closing status // TODO: can we deprecate this??
     case "running":    { let ele =document.getElementById ("status-" + obj.num); ele.textContent = obj.data; ele.classList.add ("running"); break; }  // write in the closing status    
 
     // exit is called when a shell process is exiting, exitOk or exitErr depening on the return status

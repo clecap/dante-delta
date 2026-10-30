@@ -13,10 +13,6 @@ class ServiceEndpointHelper {
   // attach a command(list) and an environment to the current session
 public static function attachToSession ($cmd, $env) {
   $session = SessionManager::getGlobalSession();
-
-//  danteLog ("DanteBackup", "environment in attachToSession is ".print_r ($env, true));
-//  danteLog ("DanteBackup", "command in attachToSession is ".print_r ($cmd, true));
-
   $session->set( 'Dante_Cmd', $cmd );             
   $session->set( 'Dante_Env', $env );
 }
@@ -25,12 +21,13 @@ public static function attachToSession ($cmd, $env) {
 
 
 public static function getHeadHTML () {
+  global $wgExtensionAssetsPath;   // works with and without short URLs, unlike ./extensions
 return <<<END
 <!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="./extensions/DanteCommon/serviceEndpoint.css" />
+    <link rel="stylesheet" href="{$wgExtensionAssetsPath}/DanteCommon/serviceEndpoint.css" />
     <title>Server side Script</title>
   </head>
   <body class=''>
@@ -47,6 +44,7 @@ END;
 private static function getResizeJS () {
 return <<<END
 <script>
+{ // block scope, so the constants do not clash if this snippet appears twice on a page
   const frame = document.getElementById("myFrame");
 
   frame.addEventListener("load", () => {
@@ -58,22 +56,23 @@ return <<<END
       return Math.max ( body.scrollHeight, body.offsetHeight, body.clientHeight, html.scrollHeight, html.offsetHeight, html.clientHeight );
     };
 
-    const resizeAndScroll = () => {
-      const height = getDocHeight();
-      frame.style.height = height + "px";
+    const resizeAndScroll = (force) => {
+      const root     = document.documentElement;
+      const atBottom = window.innerHeight + window.scrollY >= Math.max( root.scrollHeight, document.body.scrollHeight) - 40;   // was the user following the output? checked before resizing, 40px tolerance
+      frame.style.height   = getDocHeight() + "px";
       frame.style.overflow = "hidden";
       body.style.overflow  = "hidden";
 
-      // Always keep the outer page scrolled to the bottom
-      const root = document.documentElement;
-      window.scrollTo({ top: Math.max( root.scrollHeight, document.body.scrollHeight), behavior: "auto" });
+      // follow new output only when the user was at the bottom, so scrolling up to read earlier output is not interrupted
+      if ( force === true || atBottom ) { window.scrollTo({ top: Math.max( root.scrollHeight, document.body.scrollHeight), behavior: "auto" }); }
     };
 
-    new ResizeObserver(resizeAndScroll).observe(body);
-    window.addEventListener("resize", resizeAndScroll);
+    new ResizeObserver( () => resizeAndScroll() ).observe(body);
+    window.addEventListener("resize", () => resizeAndScroll() );
 
-    resizeAndScroll();
+    resizeAndScroll(true);   // initially jump to the output, from then on follow only while at the bottom
   });
+}
 </script>
 END;
 }
@@ -88,6 +87,7 @@ public static function getIframe ( ) {
 
 
 public static function getGeneral ( $topInfo = "" ) {
+  global $wgExtensionAssetsPath;   // works with and without short URLs, unlike ./extensions
 return <<<END
 <h2>Script Execution</h2>
 The system is executing a script. This process may take some time. Do not close this window before we inform you about completion of all activities.<br><br>
@@ -96,7 +96,7 @@ The system is executing a script. This process may take some time. Do not close 
 <h3>Commands</h3>
 <div id="commands">
 </div>
-<script src="./extensions/DanteCommon/serviceEndpoint.js"></script>
+<script src="{$wgExtensionAssetsPath}/DanteCommon/serviceEndpoint.js"></script>
 END;
 }
 
@@ -112,16 +112,41 @@ END;
  */
 public static function sendEvent ( $x, $num, $chunk ): void {
   $phpJson = ["command" => $x, "data" => $chunk, "num"=> $num];
-  $msg = json_encode ($phpJson);
+  $msg = json_encode ($phpJson, JSON_INVALID_UTF8_SUBSTITUTE);   // substitute invalid UTF-8 (binary output, characters split at chunk borders), otherwise json_encode returns false and the client cannot parse the event
+  if ( $msg === false ) { $msg = json_encode ( ["command" => "log", "data" => "Program error: could not encode event '$x': " . json_last_error_msg(), "num" => $num] ); }   // other encoding failures (e.g. NAN): send a log message instead of an empty event
   echo "data: {$msg}\n\n";
   @ob_flush();
   @flush();
 }
 
 
-
-
-
-
-
 }  // end class
+
+
+
+
+
+// a notifier is an object which can send a notification command $cmd together with further $data as information
+// this can be implemented as a logger to a file but also to a client page in a browser receiveing web events from the server
+abstract class Notifier {
+  abstract public function notify ( $command, $data );
+}
+
+
+
+class WebNotifier extends Notifier {
+
+private int $num = 0; // identification to which command the notification will belong
+
+public function setNum ( int $number ): void {$this->num = $number; }
+
+public function notify ( $command, $data ): void {
+  $phpJson = ["command" => $command, "data" => $data, "num"=> $this->num];
+  $msg = json_encode ($phpJson, JSON_INVALID_UTF8_SUBSTITUTE);   // substitute invalid UTF-8 (binary output, characters split at chunk borders), otherwise json_encode returns false and the client cannot parse the event
+  if ( $msg === false ) { $msg = json_encode ( ["command" => "log", "data" => "Program error: could not encode event '$command': " . json_last_error_msg(), "num" => $this->num] ); }   // other encoding failures (e.g. NAN): send a log message instead of an empty event
+  echo "data: {$msg}\n\n";
+  @ob_flush();
+  @flush();
+}
+
+}

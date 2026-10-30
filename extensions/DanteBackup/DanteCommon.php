@@ -31,65 +31,6 @@ class DanteCommon {
 
 const DUMP_PATH = "/var/www/html/wiki-dir/dump";   
 
-
-// TODO: DEPRECATE SOON
-const FEATURES = [
-  'zip'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ],
-  'enc'    => [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc', 'default' => true ],
-];
-
-
-// TODO: deeprecate soon
-const SOURCE_FEATURES = [
-  'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
-    'options' => [ '<i>No pages</i> included in the pages archive'                                                                                                   => "nopages",
-                   '<b>Listed</b>: Only pages listed in page <a href="./index.php?title=MediaWiki:Backupfiles">MediaWiki:Backupfiles</a>'                            => "listed",
-                   '<b>Category</b>: Only pages belonging to <a href="./indx.php?title=Category:Backup">Category:Backup</a> (<a href="./cache/">dryrun</a>)'                                => "category",
-                   '<b>Categories</b>: Only pages belonging to a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories</a>'     => "categories",
-                   '<b>Categories Indirect</b>: Only pages belonging to a category or an arbitrarily deep subcategory of a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories Indirect</a>'     => "categories-indirect",
-                   '<b>All</b> pages'                                                                                                                                => "all", 
-                     ],   
-     'name' => 'srces',  'default' => 'all', 
-  ],
-  'radio33'  => [ 'section' => 'srcfeatures/ra' , 'type' => 'radio',  'label' => '', 
-        'options' => [ '<b>Current</b> versions only'                                   => "current",
-                       '<b>All revisions</b> included'                                  => "allrevisions", 
-                     ],   
-        'name' => 'srcFeatures',  'default' => 'allrevisions', 
- ],
-  'radio32'  => [ 'section' => 'srcfeatures/rf' , 'type' => 'radio',  'label' => '', 
-        'options' => [ '<i>Nofiles</i>: Do not dump uploaded file contents and do not dump metadata'                      => "nofiles",
-                       '<i>Metadata</i>: Dump metadata only, no file contents'                                            => "metadata",
-                       '<b>Separate</b>: Dump metadata (into page archive) and file contents into a separate file archive'               => "separate", 
-                       '<b>Include</b>: Dump metadata and file contens (both into one large page archive)'                  => "include", 
-                     ],   
-        'name' => 'files',  'default' => 'include', 
- ],
-];
-
-
-
-
-
-
-const SOURCE_FEATURES_OLD = [
-  'radio88'  => [ 'section' => 'srcfeatures/rb' , 'type' => 'radio',  'label' => '', 
-    'options' => [ 'Only pages listed in page <a href="./index.php?title=MediaWiki:Backupfiles">MediaWiki:Backupfiles</a>'                              => "backupfiles",
-                   'Only pages in <a href="./indx.php?title=Category:Backup">Category:Backup</a>'                                                       => "backupcategory",
-                   'Only pages in a category listed in <a href="./index.php?title=MediaWiki:Backupcategories">MediaWiki:Backupcategories</a>'           => "backupcategories",
-                    '<b>All</b> pages'                                                                                                                  => "all", 
-                     ],   
-     'name' => 'srces',  'default' => 'all', 
-  ],
-  'radio33'  => [ 'section' => 'srcfeatures/ra' , 'type' => 'radio',  'label' => '', 
-        'options' => [ '<b>Current</b> revision only'                         => "current",
-                       '<b>All</b> revisions'                                 => "all", 
-                     ],   
-        'name' => 'srcFeatures',  'default' => 'all', 
- ],
-];
-
-
 const DEBUG_FORM = [
   'showls'           => [ 'section' => 'debug',   'class' => 'HTMLCheckField',  'label' => 'Show AWS Bucket ls',             'name' => 'showls', 'type' => 'check'],
 ];
@@ -130,6 +71,7 @@ public static function cmdZipEncRestore ( $cmdGenerate, $cmdConsume, $zip, $enc 
 
 
 public static function getEnvironmentUser (User $user) {
+  global $wgDBpassword;
   $accessKey        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-accesskey' );
   $secretAccessKey  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-secretaccesskey' );
   $awsRegion        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-region' );
@@ -139,7 +81,8 @@ public static function getEnvironmentUser (User $user) {
                  "AWS_SECRET_ACCESS_KEY" => "$secretAccessKey", 
                  "AWS_REGION"            => "$awsRegion",
                  "AWS_BUCKET_NAME"       => "$awsBucketName",
-                 "LOCAL_FILE_ENC"        => "$awsEncPW"
+                 "LOCAL_FILE_ENC"        => "$awsEncPW",
+                 "MYSQL_PWD"             => "$wgDBpassword"     // read by mysqldump / mysql, keeps the password out of the process list
                );
 }
 
@@ -148,18 +91,21 @@ public static function getEnvironmentUser (User $user) {
 
 
 
+// ALL THE BELOW IS DEPRECATED
 
 /** An interface EnvironmentPreparator serves to prepare and clear an environment for the execution of shell commands
  *  It has to be implemented and instantiated by a (possibly stateful) class which knows how to do that.
  */
+ /*
 interface EnvironmentPreparator {
   public function prepare ();    // prepare the environment
   public function clear   ();    // clear the environment
 }
-
+*/
 
 /** An object of class AWSEnvironmentPreparator prepares and clears the environment for the execution of amazon AWS CLI calls
  */
+ /*
 class AWSEnvironmentPreparator implements EnvironmentPreparator {
   protected string $accessKey, $secretAccessKey, $awsRegion;
 
@@ -172,13 +118,13 @@ class AWSEnvironmentPreparator implements EnvironmentPreparator {
 
   public function clear   () { putenv ("AWS_ACCESS_KEY_ID=NIL"); putenv ("AWS_SECRET_ACCESS_KEY=NIL"); putenv ("AWS_REGION=NIL"); }
 }
-
+*/
 
 ///// TODO: deprecate the preparator everywhere !!
 
 /** An object of class AWSEnvironmentPreparatorUser obtains the necessary data from the preferences of a user in mediawiki
  */
-
+/*
 class AWSEnvironmentPreparatorUser extends AWSEnvironmentPreparator {
   function __construct (User $user) {
     $accessKey        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-accesskey' );
@@ -188,3 +134,4 @@ class AWSEnvironmentPreparatorUser extends AWSEnvironmentPreparator {
     parent::__construct( $accessKey, $secretAccessKey, $awsRegion );
   }
 }
+*/
