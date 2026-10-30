@@ -25,7 +25,6 @@ protected function adjustEnvironment ( array $env ): array {
   if ( $request->getVal ( 'scpUser' ) === null ) { return $env; }   // only for the SCP form
   $env['DANTE_SCP_USER'] = $request->getVal ( 'scpUser' );
   $env['DANTE_SCP_PW']   = $request->getVal ( 'scpPassword', '' );   // always entered manually, no fallback to a stored password
-  $env['HOME']           = DanteCommon::homeDir();                   // curl finds ~/.ssh/known_hosts through HOME, which PHP-FPM does not pass on
   return $env;
 }
 
@@ -46,7 +45,7 @@ public function execute ( $par ): void {
   // POST with a valid CSRF token only, since the request carries a password and makes the server connect to a host
   if ( !$request->wasPosted() || !$this->getContext()->getCsrfTokenSet()->matchToken ( $request->getVal ( 'token', '' ) ) ) { echo json_encode ( [ 'ok' => false, 'error' => 'Invalid or expired token, please reload the page' ] ); return; }
 
-  try   { echo json_encode ( [ 'ok' => true, 'files' => self::listScpDirectory ( $request->getVal ( 'scpUser', '' ), $request->getVal ( 'scpHost', '' ), $request->getVal ( 'scpPath', '' ), $request->getVal ( 'scpPassword', '' ) ) ] ); }
+  try   { echo json_encode ( [ 'ok' => true, 'files' => self::listScpDirectory ( $request->getVal ( 'scpUser', '' ), $request->getVal ( 'scpHost', '' ), $request->getVal ( 'scpPath', '' ), $request->getVal ( 'scpPassword', '' ), DanteCommon::hostKeyOption ( $this->getUser(), $request->getCheck ( 'scpSkipHostKey' ) ) ) ] ); }
   catch ( Exception $e ) { echo json_encode ( [ 'ok' => false, 'error' => $e->getMessage() ] ); }   // the password never appears in a message or in the log
 }
 
@@ -54,17 +53,18 @@ public function execute ( $par ): void {
  * List the dump files in a directory at an SCP host via SFTP, newest first.
  *
  * @param string $dir Absolute directory, or relative to the home directory of $user
+ * @param string $hostKeyOption curl option pinning the host key, from DanteCommon::hostKeyOption
  * @return array[] Each with name, type (Pages, Database or Files), time (Y-m-d H:i) and size in bytes
  * @throws Exception on an illegal host or when the listing fails
  */
-private static function listScpDirectory ( string $user, string $host, string $dir, string $pw ): array {
+private static function listScpDirectory ( string $user, string $host, string $dir, string $pw, string $hostKeyOption ): array {
   DanteCommon::checkScpHost ( $host );
   $url = DanteCommon::scpUrl ( "sftp", $host, $dir );
   if ( !str_ends_with ( $url, '/' ) ) { $url .= '/'; }   // trailing slash: curl lists the directory
 
   // credentials through the environment, as for the restore; short timeouts, since the page waits for the answer
-  $env  = [ 'DANTE_SCP_USER' => $user, 'DANTE_SCP_PW' => $pw, 'HOME' => DanteCommon::homeDir() ];
-  $proc = proc_open ( "curl -sS --fail --connect-timeout 5 --max-time 10 --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" " . escapeshellarg ( $url ), [ 1 => ['pipe', 'w'], 2 => ['pipe', 'w'] ], $pipes, null, $env );
+  $env  = [ 'DANTE_SCP_USER' => $user, 'DANTE_SCP_PW' => $pw ];
+  $proc = proc_open ( "curl -sS --fail --connect-timeout 5 --max-time 10 $hostKeyOption --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" " . escapeshellarg ( $url ), [ 1 => ['pipe', 'w'], 2 => ['pipe', 'w'] ], $pipes, null, $env );
   if ( $proc === false ) { throw new Exception ( "Could not start curl" ); }
   $out = stream_get_contents ( $pipes[1] );  $err = stream_get_contents ( $pipes[2] );   // both are small, reading one after the other cannot block
   fclose ( $pipes[1] );  fclose ( $pipes[2] );
@@ -131,6 +131,7 @@ protected function showForm  (): void  {
            + [ 'scpHost'     => [ 'type' => 'text',     'name' => 'scpHost',     'label' => 'SCP Host',     'section' => 'restore-from-scp', 'required' => true, 'default' => $sshHost ] ]
            + [ 'scpPath'     => [ 'type' => 'text',     'name' => 'scpPath',     'label' => 'SCP Path',     'section' => 'restore-from-scp', 'required' => true ] ]   // directory of the dumps
            + [ 'scpPassword' => [ 'type' => 'password', 'name' => 'scpPassword', 'label' => 'SCP Password', 'section' => 'restore-from-scp', 'required' => true, 'autocomplete' => 'new-password' ] ]   // entered every time, never stored or prefilled
+           + [ 'scpSkipHostKey' => [ 'type' => 'check', 'name' => 'scpSkipHostKey', 'label' => 'Skip Host Key Check', 'section' => 'restore-from-scp' ] ]   // applies to Load and to the restore; never checked by default
            + [ 'scpLoad'     => [ 'type' => 'info',     'raw' => true, 'section' => 'restore-from-scp',
                                   'default' => '<button type="button" id="dante-scp-load">Load</button><div id="dante-scp-list"></div>' ] ];   // ext.DanteBackup.restore fills the list with radio buttons named scpFile
   self::standardForm ($form, $action, "SCP", "Restore via SCP");
@@ -377,8 +378,8 @@ private function getCommandsSCP ( string $host, string $path ): array {
   $url = DanteCommon::scpUrl ( "scp", $host, $path );
 
   // curl speaks scp and takes the password; without -o it writes to stdout, so it is the start of the pipe
-  // credentials from the environment, so the displayed command does not contain them; the host key must be known in ~/.ssh/known_hosts   // TODO: host key issue still to be resolved / initialized
-  $source = "curl -sS --fail --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" " . escapeshellarg ( $url ) . " | ";
+  // credentials from the environment, so the displayed command does not contain them; host key pinned by the fingerprint from the preferences
+  $source = "curl -sS --fail " . DanteCommon::hostKeyOption ( $this->getUser(), $this->getRequest()->getCheck ( 'scpSkipHostKey' ) ) . " --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" " . escapeshellarg ( $url ) . " | ";
   $cmd    = [ new DanteStringCommand ( "echo " . escapeshellarg ( "Restoring from SCP: $host:$path" ) ) ];
   return array_merge ( $cmd, $tar ? self::getFilesRestoreCommands ( $source, $zip, $enc ) : self::getPagesRestoreCommands ( $source, $zip, $enc ) );
 }

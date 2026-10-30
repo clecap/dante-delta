@@ -50,6 +50,7 @@ async function loadListing ( button ) {
   const list = document.getElementById ( "dante-scp-list" );
   const data = new FormData ();
   [ "scpUser", "scpHost", "scpPath", "scpPassword" ].forEach ( name => data.append ( name, form.elements[name].value ) );
+  if ( form.elements.scpSkipHostKey.checked ) { data.append ( "scpSkipHostKey", "1" ); }   // like a submitted checkbox: present only when checked
   data.append ( "token", mw.user.tokens.get ( "csrfToken" ) );   // the server accepts the request only with a valid CSRF token
 
   button.disabled = true;

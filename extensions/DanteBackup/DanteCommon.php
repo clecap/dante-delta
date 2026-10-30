@@ -89,9 +89,23 @@ public static function getEnvironmentUser (User $user) {
 }
 
 
-// home directory of the user running PHP (www-data), where .ssh/known_hosts lives; curl finds it through HOME, which PHP-FPM does not pass on
-public static function homeDir (): string {
-  return posix_getpwuid ( posix_geteuid() )['dir'] ?? '/var/www';
+/**
+ * curl option pinning the SSH host key to the SHA256 fingerprint in the preference ssh-host-pubsha256, so no known_hosts file is needed.
+ * libssh2 negotiates the ECDSA host key if the server offers one, so this must be the fingerprint of /etc/ssh/ssh_host_ecdsa_key.pub on the server.
+ *
+ * @param \MediaWiki\User\UserIdentity $user User whose preference holds the fingerprint
+ * @param bool $skip True if the user checked Skip Host Key Check: curl then accepts any host key
+ * @return string --hostpubsha256 with the quoted fingerprint, or -k when skipping, for insertion into a curl command
+ * @throws Exception when not skipping and the preference is empty or not a SHA256 fingerprint
+ */
+public static function hostKeyOption ( \MediaWiki\User\UserIdentity $user, bool $skip ): string {
+  if ( $skip ) { return "-k"; }   // insecure: no host key check at all, neither fingerprint nor known_hosts
+  $fp = trim ( (string) MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'ssh-host-pubsha256' ) );
+  $fp = preg_replace ( '/^SHA256:/', '', $fp );   // as printed by ssh-keygen -l; curl does not accept the prefix
+  // base64 of 32 bytes: 43 characters plus optional padding
+  if ( $fp === '' )                                         { throw new Exception ( "No SSH host key fingerprint configured: set SSH Host Key Fingerprint in the preferences" ); }
+  if ( !preg_match ( '/^[A-Za-z0-9+\/]{43}=?$/', $fp ) )   { throw new Exception ( "SSH host key fingerprint in the preferences is not a SHA256 fingerprint" ); }
+  return "--hostpubsha256 " . escapeshellarg ( $fp );
 }
 
 // only a host name, optionally with :port; anything else could change the URL, e.g. user@other-host

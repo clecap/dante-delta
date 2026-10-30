@@ -21,7 +21,6 @@ protected function adjustEnvironment ( array $env ): array {
   if ( $this->getRequest()->getVal ( 'target' ) === 'ssh' ) {
     $env['DANTE_SCP_USER'] = $this->getRequest()->getVal ( 'scpUser', '' );
     $env['DANTE_SCP_PW']   = $this->getRequest()->getVal ( 'scpPassword', '' );   // always entered manually, no stored password
-    $env['HOME']           = DanteCommon::homeDir();                               // curl finds ~/.ssh/known_hosts through HOME
   }
   return $env;
 }
@@ -31,6 +30,7 @@ private function requireScpInput (): void {
   $request = $this->getRequest();
   if ( $request->getVal ( 'scpUser', '' ) === '' || $request->getVal ( 'scpPassword', '' ) === '' ) { throw new Exception ( "Target SSH / SCP needs SCP User and SCP Password" ); }
   DanteCommon::checkScpHost ( $request->getVal ( 'scpHost', '' ) );
+  DanteCommon::hostKeyOption ( $this->getUser(), $request->getCheck ( 'scpSkipHostKey' ) );   // throws if the host key fingerprint is missing in the preferences and the check is not skipped
 }
 
 // stop before any work if encryption is selected but no password is available: openssl would silently encrypt with the empty password
@@ -248,10 +248,12 @@ private function routeToTarget ( $cmd, $archiveName, $target, $zip, $enc, $bucke
     case "ssh":
       $this->requireScpInput ();
       $scpHost = $this->getRequest()->getVal ( 'scpHost' );
-      // upload into the home directory of the SCP user, streamed: curl reads the dump from stdin (-T -); sftp, since scp needs the file size in advance; credentials from the environment
-      $cmd .= " | curl -sS --fail --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" -T - " . escapeshellarg ( DanteCommon::scpUrl ( "sftp", $scpHost, $archiveName ) );
+      $scpDir  = $this->getRequest()->getVal ( 'scpPath', '' );
+      $scpFile = ( $scpDir === '' ? $archiveName : rtrim ( $scpDir, '/' ) . '/' . $archiveName );   // empty path: home directory of the SCP user; as for the restore, absolute or relative to that home directory
+      // upload streamed: curl reads the dump from stdin (-T -); sftp, since scp needs the file size in advance; credentials from the environment; host key pinned by fingerprint; --ftp-create-dirs creates missing directories of the path, also for sftp
+      $cmd .= " | curl -sS --fail " . DanteCommon::hostKeyOption ( $this->getUser(), $this->getRequest()->getCheck ( 'scpSkipHostKey' ) ) . " --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" --ftp-create-dirs -T - " . escapeshellarg ( DanteCommon::scpUrl ( "sftp", $scpHost, $scpFile ) );
       danteLog ("DanteBackup", "ssh command: $cmd\n");
-      return [ new DanteStringCommand ( $cmd, "<b>Dumping</b> to $scpHost as $archiveName" ) ];
+      return [ new DanteStringCommand ( $cmd, "<b>Dumping</b> to $scpHost as $scpFile" ) ];
 
     case "client":
       $this->getOutput()->disable();   
@@ -334,12 +336,14 @@ private function scpFields (): array {
   return [
     'scpUser'     => [ 'section' => 'target', 'type' => 'text',     'name' => 'scpUser',     'label' => 'SCP User',     'cssclass' => 'dante-scp-field', 'default' => $lookup->getOption ( $this->getUser(), 'ssh-dump-user' ) ],   // defaults from the preferences
     'scpHost'     => [ 'section' => 'target', 'type' => 'text',     'name' => 'scpHost',     'label' => 'SCP Host',     'cssclass' => 'dante-scp-field', 'default' => $lookup->getOption ( $this->getUser(), 'ssh-host' ) ],
+    'scpPath'     => [ 'section' => 'target', 'type' => 'text',     'name' => 'scpPath',     'label' => 'SCP Path',     'cssclass' => 'dante-scp-field' ],   // target directory; empty: home directory of the SCP user
     'scpPassword' => [ 'section' => 'target', 'type' => 'password', 'name' => 'scpPassword', 'label' => 'SCP Password', 'cssclass' => 'dante-scp-field', 'autocomplete' => 'new-password' ],   // entered every time, never stored or prefilled
+    'scpSkipHostKey' => [ 'section' => 'target', 'type' => 'check', 'name' => 'scpSkipHostKey', 'label' => 'Skip Host Key Check', 'cssclass' => 'dante-scp-field' ],   // never checked by default
   ];
 }
 
 
-const ZIP =  [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'help-message' => 'help-zip', 'default' => true ];
+const ZIP =  [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'default' => true ];
 const ENC =  [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc', 'default' => true ];
 const ENCPW = [ 'section' => 'features', 'type' => 'password', 'label' => 'Password', 'name' => 'encpw', 'size' => 30, 'help-message' => 'help-encpw', 'autocomplete' => 'new-password' ];   // empty: use the password from the preferences; never prefilled, so the stored password does not appear in the page source
 

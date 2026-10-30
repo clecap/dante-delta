@@ -76,6 +76,7 @@
   "prefs-ssh":         "Credentials for SSH Backup",
 
   "prefs-ssh-host":          "Name and domain (FQDN) of host used for SSH backup. See [[Help:DanteBackup]].",
+  "prefs-ssh-host-pubsha256": "SHA256 fingerprint of the ECDSA host key of the SSH backup host, as printed by <code>ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub</code> on that host (with or without the SHA256: prefix). Obtain it on the host itself, not over the network. SSH backup and restore refuse to connect without it. See [[Help:DanteBackup]].",
   "prefs-ssh-dump-user":     "User name for user on SSH backup host which receives the dump. See [[Help:DanteBackup]].",
   "prefs-ssh-dump-pw":       "Password for user on SSH backup host which receives the dump. See [[Help:DanteBackup]].",
   "prefs-ssh-restore-user":  "User name for user on SSH backup host which provides the dumped data. See [[Help:DanteBackup]].",
@@ -91,6 +92,7 @@
   "prefs-git-branch":           "Branch of the repository, for example master. Used as default by Restore from GITHUB in [[Special:DanteRestore]].",
 
   "prefs-label-ssh-host":          "SSH Backup Host",
+  "prefs-label-ssh-host-pubsha256": "SSH Host Key Fingerprint",
   "prefs-label-ssh-dump-user":     "Dump User Name",
   "prefs-label-ssh-dump-pw":       "Dump User Password",
   "prefs-label-ssh-restore-user":  "Restore User Name",
@@ -104,7 +106,6 @@
 
   "help-filter": "Removes all hidden contents. See [[Help:Hidden Contents]]",
 
-  "help-zip":    "Compression with gzip makes the dump file considerably smaller. A restore recognizes compressed files by the .gz suffix and decompresses them automatically.",
 
   "help-enc":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password used in the dump, as without it you cannot restore the contents of the dump file.",
 
