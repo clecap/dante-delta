@@ -4,3 +4,13 @@
   cursor: not-allowed;
 }
 
+/* AWS S3 file selection in DanteRestore: time stamp and size set off from the file name */
+.table-stamp { color: blue; }
+.table-size  { color: red; }
+
+/* SSH / SCP fields in DanteDump, shown by the JS only while that target is selected; !important, since skins may set display on form rows */
+.dante-scp-field[hidden] { display: none !important; }
+
+/* error line in the SCP listing of DanteRestore */
+.dante-scp-error { color: red; }
+

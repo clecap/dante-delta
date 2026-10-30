@@ -5,25 +5,75 @@ require_once ("extensions/DanteCommon/ServiceEndpointHelper.php");
 require_once ("extensions/DanteCommon/PageCollection.php");
 
 
-global $IP;
-
 class DanteDump extends DanteSpecialPage {
-
-public static $SPEC_PREFIX;  // initialized at end of class
 
 public function __construct () { parent::__construct( 'DanteDump', 'dante-dump' ); }
 
 // page provides hint to read-only mode engine that it will not write
 public function doesWrites():bool {return false;}
 
+// a password entered in the form replaces the encryption password from the preferences for this dump
+protected function adjustEnvironment ( array $env ): array {
+  $pw = $this->getRequest()->getVal ( 'encpw', '' );
+  if ( $pw !== '' ) { $env['LOCAL_FILE_ENC'] = $pw; }
+
+  // target SSH / SCP: credentials go into the environment, not into the command, so they are neither shown in the progress display nor visible in the process list
+  if ( $this->getRequest()->getVal ( 'target' ) === 'ssh' ) {
+    $env['DANTE_SCP_USER'] = $this->getRequest()->getVal ( 'scpUser', '' );
+    $env['DANTE_SCP_PW']   = $this->getRequest()->getVal ( 'scpPassword', '' );   // always entered manually, no stored password
+    $env['HOME']           = DanteCommon::homeDir();                               // curl finds ~/.ssh/known_hosts through HOME
+  }
+  return $env;
+}
+
+// target SSH / SCP: user, host and password must be given; checked before any work, since the fields are not required in the form (they are hidden for the other targets)
+private function requireScpInput (): void {
+  $request = $this->getRequest();
+  if ( $request->getVal ( 'scpUser', '' ) === '' || $request->getVal ( 'scpPassword', '' ) === '' ) { throw new Exception ( "Target SSH / SCP needs SCP User and SCP Password" ); }
+  DanteCommon::checkScpHost ( $request->getVal ( 'scpHost', '' ) );
+}
+
+// stop before any work if encryption is selected but no password is available: openssl would silently encrypt with the empty password
+private function requireEncryptionPassword ( $enc ): void {
+  if ( !$enc ) { return; }
+  $env = $this->adjustEnvironment ( DanteCommon::getEnvironmentUser ( $this->getUser() ) );
+  if ( ( $env['LOCAL_FILE_ENC'] ?? '' ) === '' ) { throw new Exception ( "Encryption is selected, but there is no password: enter one in the form or set it in Special:Preferences, tab DanteWiki" ); }
+}
+
+// true only for our own manifests: a pc_ file directly in the temp directory, as written by PageCollection::makeManifest; form input naming other files is rejected
+private static function isOwnManifest ( string $path ): bool {
+  return dirname ( $path ) === sys_get_temp_dir() && preg_match ( '/^pc_[A-Za-z0-9]+$/', basename ( $path ) ) && is_file ( $path );
+}
+
+/**
+ * Additionally to the standard behaviour, serve a manifest file as plain text for ?action=manifest&name=pc_...
+ *
+ * @param string|null $par
+ * @return void
+ */
+public function execute ( $par ): void {
+  $request = $this->getRequest();
+  if ( $request->getVal ( 'action' ) !== 'manifest' ) { parent::execute ( $par ); return; }
+
+  $this->checkPermissions();   // same right as for the page itself
+  $name = $request->getVal ( 'name', '' );
+
+  $path = sys_get_temp_dir() . "/" . basename ( $name );
+  if ( !self::isOwnManifest ( $path ) ) { throw new HttpError ( 404, "No such manifest file" ); }   // prevents reading arbitrary files via the URL
+
+  $this->getOutput()->disable();
+  header ( "Content-Type: text/plain; charset=utf-8" );
+  readfile ( $path );
+}
+
 protected function showForm (): void {
- // send post data to THIS url and add action=submit to the URL so we can distinguish showing this page from submitting data to it
+  // send post data to THIS url and add action=submit to the URL so we can distinguish showing this page from submitting data to it
   $action = $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] );  
   $out    = $this->getOutput();
-  $out->addModuleStyles ( ['ext.DanteBackup.specialpage.styles'] );  // this is a styles-only module which mediawiki loads early enough to prevent FOUC
-  $out->addModules      ( ['ext.DanteBackup.specialpage' ] );        // this loads JS, later
+  $out->addModuleStyles ( ['ext.DanteBackup.specialpage.styles'] );          // this is a styles-only module which mediawiki loads early enough to prevent FOUC
+  $out->addModules      ( ['ext.DanteBackup.specialpage' ] );                // this loads JS, later
 
-  $out->addHTML (wfMessage ("dante-page-dump-intro"));             // show some intro text
+  $out->addHTML (wfMessage ("dante-page-dump-intro"));                    // show some intro text
   $out->addHelpLink( 'index.php?title=Help:DanteDump', true );  // provide a help link   // TODO: must fill with contents
 
   self::maskSystem         ( $out, $action);
@@ -43,15 +93,18 @@ private function commandPagesFiles () {
   $srces       = $request->getVal ( 'srces' );                  danteLog ("DanteBackup", "srces $srces \n");
   $srcFeatures = $request->getVal ( 'srcFeatures' );            danteLog ("DanteBackup", "srcFeatures $srcFeatures \n");  // currentversion  allrevisions
   $files       = $request->getVal ( 'files' );                  danteLog ("DanteBackup", "files $files \n");              // nofiles metadata separate include
-  $target      = $request->getVal ( 'target' );                 danteLog ("DanteBackup", "target $target \n");            // aws ssh client server
-  $zip         = $request->getVal ( 'compressed' ) ?? false;    danteLog ("DanteBackup", "zip $zip \n");                  // true  false
-  $enc         = $request->getVal ( 'encrypted' )  ?? false;    danteLog ("DanteBackup", "enc $enc \n");                  // true false
-     
+  $target      = $request->getVal ( 'target' );                 danteLog ("DanteBackup", "target $target \n");            // aws ssh client window server
+  $zip         = $request->getVal ( 'compressed' ) ?? false;    danteLog ("DanteBackup", "zip $zip \n");                  // "1" if checked, null otherwise
+  $enc         = $request->getVal ( 'encrypted' )  ?? false;    danteLog ("DanteBackup", "enc $enc \n");                  // "1" if checked, null otherwise
+  $this->requireEncryptionPassword ( $enc );
+
+  // check the target and its input before the spec file is created, so a wrong target or incomplete SCP data leaves no temporary file behind
+  if ( !in_array ( $target, [ "aws", "ssh", "client", "window", "server" ], true ) ) { throw new Exception ( "Target '$target' is not supported" ); }
+  if ( $target === "ssh" ) { $this->requireScpInput (); }
+
   // get the values stored in the preferences
   $bucketName       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
   danteLog ("DanteBackup", "bucketName $bucketName\n");
-
-  // build production commands, TODO: ??? prepend with a pipefail so we do not mask error condistions along the pipe and append compression and encryption
 
   switch ( $srcFeatures ) {
     case     "currentversion":    $fullOpt = "--current"; break;
@@ -68,18 +121,19 @@ private function commandPagesFiles () {
     default:                   throw new Exception ("Illegal value for parameter files: $files");
   }
 
-  self::generateSpecFile  ( $srces );  // generate a file containing all the names of files to be dumped  // TODO: must cleanup later
+  $archiveName = $this->archiveName ( $tag, "-$srces-$srcFeatures-$files", "xml", $zip, $enc );   // checks the tag, so do this before any work is done
+  $specFile    = self::generateSpecFile ( $srces );                                                    // temporary file with the titles of the selected pages
 
-  $pageCommand = " php $IP/maintenance/dumpBackup.php $fullOpt $filesOpt";     danteLog ("DanteBackup", "\nDanteDump: pageCommand for dumping is: " . $pageCommand);
+  $pageCommand = " php $IP/maintenance/dumpBackup.php $fullOpt $filesOpt --pagelist=" . escapeshellarg ( $specFile );     danteLog ("DanteBackup", "\nDanteDump: pageCommand for dumping is: " . $pageCommand);   // --pagelist restricts the dump to the selected pages
   $generatePages =  self::wrap ($pageCommand , $zip, $enc );   danteLog ("DanteBackup", "\nDanteDump: generatePages for dumping is: " . $generatePages);
 
-  // name of the archive: wiki name followed by the identifying tag; whitespace replaced since the name ends up in a shell command
-  global $wgSitename;
-  $archiveName = preg_replace ( '/\s+/', '_', $wgSitename . "-" . $tag . "-" . date ( 'Y-m-d-\a\t-H-i' ) ) . "-".$srces."-".$srcFeatures."-".$files. ".xml" . ( $zip ? ".gz" : "" ) . ( $enc ? ".aes" : "" );   
-  danteLog ("DanteBackup", "archiveName $archiveName \n");
+  $cmds = $this->routeToTarget ( $generatePages, $archiveName, $target, $zip, $enc, $bucketName );   // send the dump to the selected destination
 
-  return $this->routeToTarget ( $generatePages, $archiveName, $target, $zip, $enc, $bucketName );   // send the dump to the selected destination
- 
+  // remove the temporary spec file: client and window have already dumped (null), aws and server dump later from the session, so they get a final cleanup command
+  // NOTE: if the dump fails and stopOnError skips the cleanup, the file stays in the system temp directory
+  if ( $cmds === null ) { @unlink ( $specFile ); }
+  else                  { $cmds[] = new DanteStringCommand ( "rm -f " . escapeshellarg ( $specFile ), "Removing temporary page list" ); }
+  return $cmds;
 }
 
 
@@ -88,9 +142,10 @@ private function commandDB () {
   $request = $this->getRequest();
 
   $tag         = $request->getVal ( 'tag' );                    danteLog ("DanteBackup", "tag $tag \n");                  // identifying tag
-  $target      = $request->getVal ( 'target' );                 danteLog ("DanteBackup", "target $target \n");            // aws ssh client server
-  $zip         = $request->getVal ( 'compressed' ) ?? false;    danteLog ("DanteBackup", "zip $zip \n");                  // true  false
-  $enc         = $request->getVal ( 'encrypted' )  ?? false;    danteLog ("DanteBackup", "enc $enc \n");                  // true false
+  $target      = $request->getVal ( 'target' );                 danteLog ("DanteBackup", "target $target \n");            // aws ssh client window server
+  $zip         = $request->getVal ( 'compressed' ) ?? false;    danteLog ("DanteBackup", "zip $zip \n");                  // "1" if checked, null otherwise
+  $enc         = $request->getVal ( 'encrypted' )  ?? false;    danteLog ("DanteBackup", "enc $enc \n");                  // "1" if checked, null otherwise
+  $this->requireEncryptionPassword ( $enc );
 
   // dump the complete MediaWiki database; --single-transaction gives a consistent snapshot without locking InnoDB tables, --default-character-set=binary keeps text bytes unchanged
   global $wgDBname, $wgDBserver, $wgDBuser;
@@ -98,10 +153,7 @@ private function commandDB () {
   $dumpCommand = self::wrap ($dumpCommand, $zip, $enc );   
   danteLog ("DanteBackup", "\nDanteDump: wrapped dumpCommand is: " . $dumpCommand);   // add pipefail, compression and encryption as selected
 
-  // name of the archive: wiki name, tag and date; the .sql suffix lets DanteListBackups and DanteRestore recognize it as database dump
-  global $wgSitename;
-  $archiveName = preg_replace ( '/\s+/', '_', $wgSitename . "-" . $tag . "-" . date ( 'Y-m-d-\a\t-H-i' ) ) . ".sql" . ( $zip ? ".gz" : "" ) . ( $enc ? ".aes" : "" );
-  danteLog ("DanteBackup", "archiveName $archiveName \n");
+  $archiveName = $this->archiveName ( $tag, "", "sql", $zip, $enc );   // the .sql suffix lets DanteListBackups and DanteRestore recognize it as database dump
   $bucketName  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
 
   // --skip-ssl
@@ -113,14 +165,73 @@ private function commandDB () {
 }
 
 
+// generate the commands for dumping the uploaded files as tar archive; target, compression and encryption as for the other dumps
+private function commandFiles () {
+  $request = $this->getRequest();
+  $tag     = $request->getVal ( 'tag' );                    danteLog ("DanteBackup", "tag $tag \n");                  // identifying tag
+  $target  = $request->getVal ( 'target' );                 danteLog ("DanteBackup", "target $target \n");            // aws ssh client window server
+  $zip     = $request->getVal ( 'compressed' ) ?? false;    danteLog ("DanteBackup", "zip $zip \n");                  // "1" if checked, null otherwise
+  $enc     = $request->getVal ( 'encrypted' )  ?? false;    danteLog ("DanteBackup", "enc $enc \n");                  // "1" if checked, null otherwise
+  $this->requireEncryptionPassword ( $enc );
+
+  $archiveName = $this->archiveName ( $tag, "", "tar", $zip, $enc );   // checks the tag; .tar suffix marks a file archive
+  $bucketName  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
+  $cmd         = self::wrap ( $this->getFilesCommand (), $zip, $enc );   // compression and encryption by the same pipe as for pages and database
+  danteLog ("DanteBackup", "\nDanteDump: wrapped files command is: " . $cmd);
+
+  return $this->routeToTarget ( $cmd, $archiveName, $target, $zip, $enc, $bucketName );
+}
+
+
+/**
+ * Build the archive name: wiki name, tag, date, an optional middle part, extension and the suffixes for compression and encryption.
+ *
+ * @return string e.g. Dantewiki-dump-2026-05-07-at-22-44-07-all-allrevisions-include.xml.gz.aes
+ * @throws Exception if the tag contains other characters than letters, digits, _ and -
+ */
+private function archiveName ( ?string $tag, string $middle, string $ext, $zip, $enc ): string {
+  global $wgSitename;
+  // server-side check: the form pattern is enforced only by the browser; a posted tag like ../../x would let target "server" write outside the dump directory
+  if ( !preg_match ( '/^[A-Za-z0-9_-]+$/', $tag ?? '' ) ) { throw new Exception ( "Illegal tag '$tag': only letters, digits, _ and - are allowed" ); }
+  $name = preg_replace ( '/[^A-Za-z0-9_-]+/', '_', $wgSitename ) . "-" . $tag . "-" . date ( 'Y-m-d-\a\t-H-i-s' ) . $middle . "." . $ext . ( $zip ? ".gz" : "" ) . ( $enc ? ".aes" : "" );   // wiki name reduced to safe characters as well, since it ends up in paths and shell commands
+  danteLog ("DanteBackup", "archiveName $name \n");
+  return $name;
+}
+
+
+/**
+ * Run $cmd with the same environment as targets aws and server get (preferences plus form input) and copy its stdout to the browser.
+ * passthru cannot be given an environment, and PHP-FPM clears its own, so openssl and mysqldump would miss LOCAL_FILE_ENC and MYSQL_PWD.
+ *
+ * @param string $cmd Dump command, already wrapped for compression and encryption
+ * @return int Exit code of the command
+ */
+private function streamToBrowser ( string $cmd ): int {
+  $env    = $this->adjustEnvironment ( DanteCommon::getEnvironmentUser ( $this->getUser() ) );   // same environment as aws and server get through the session
+  $errLog = tempnam ( sys_get_temp_dir(), "dante_err_" );                                        // stderr into a file, so a full stderr pipe cannot block the dump
+  $proc   = proc_open ( $cmd, [ 1 => ['pipe', 'w'], 2 => ['file', $errLog, 'w'] ], $pipes, null, $env );
+  if ( $proc === false ) { @unlink ( $errLog ); throw new Exception ( "Could not start dump command" ); }
+
+  while ( ob_get_level() > 0 ) { ob_end_clean(); }                                 // stream directly instead of collecting a possibly huge dump in output buffers
+  while ( !feof ( $pipes[1] ) ) { echo fread ( $pipes[1], 65536 ); flush(); }      // copy stdout to the browser as it comes
+  fclose ( $pipes[1] );
+  $exitCode = proc_close ( $proc );
+
+  // headers and data are already sent, so errors can only be logged
+  $err = file_get_contents ( $errLog );  @unlink ( $errLog );
+  if ( $exitCode !== 0 || $err !== '' ) { danteLog ( "DanteBackup", "streamToBrowser: exit=$exitCode stderr: $err\n" ); }
+  return $exitCode;
+}
+
+
 /**
  * Send the output of a (wrapped) dump command to the selected target.
- * For aws and server it returns the commands to be executed via the service endpoint;
+ * For aws, ssh and server it returns the commands to be executed via the service endpoint;
  * for client and window it streams the output directly to the browser and returns null.
  *
  * @param string $cmd         Dump command, already wrapped for compression and encryption
  * @param string $archiveName File name of the archive, including suffix
- * @param string $target      One of aws, client, window, server
+ * @param string $target      One of aws, ssh, client, window, server
  * @param mixed  $zip         Whether compression was selected (sets content type for client)
  * @param mixed  $enc         Whether encryption was selected (sets content type for client)
  * @param string $bucketName  AWS bucket, used for target aws
@@ -132,23 +243,28 @@ private function routeToTarget ( $cmd, $archiveName, $target, $zip, $enc, $bucke
     case "aws":      
       $cmd .= " | /opt/myenv/bin/aws s3 cp -  " . escapeshellarg ( "s3://{$bucketName}/{$archiveName}" );  // quoted, since the tag is user input
       danteLog ("DanteBackup", "aws command: $cmd\n");
-      return [$cmd];  // Command to be executed, wrapped into an array
+      return [ new DanteStringCommand ( $cmd, "<b>Dumping</b> to AWS S3 as $archiveName" ) ];  // Command to be executed, wrapped into an array
 
-//    case "ssh":           /*  $txt = DanteCommon::dumpToAWS_FG  ( $this); */  break; // TODO: missing still
-    case "client":    
+    case "ssh":
+      $this->requireScpInput ();
+      $scpHost = $this->getRequest()->getVal ( 'scpHost' );
+      // upload into the home directory of the SCP user, streamed: curl reads the dump from stdin (-T -); sftp, since scp needs the file size in advance; credentials from the environment
+      $cmd .= " | curl -sS --fail --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" -T - " . escapeshellarg ( DanteCommon::scpUrl ( "sftp", $scpHost, $archiveName ) );
+      danteLog ("DanteBackup", "ssh command: $cmd\n");
+      return [ new DanteStringCommand ( $cmd, "<b>Dumping</b> to $scpHost as $archiveName" ) ];
+
+    case "client":
       $this->getOutput()->disable();   
-      DanteCommon::contentTypeHeader ($zip, $enc);
+      DanteCommon::contentTypeHeader ( $zip, $enc, preg_match ( '/\.(tar|sql)(\.|$)/', $archiveName, $m ) ? $m[1] : "xml" );   // type of the archive before compression and encryption
       header( "Content-disposition: attachment;filename={$archiveName}" ); // attachment: do a download
-      $result = 0; 
-      passthru ($cmd, $result);
+      $this->streamToBrowser ( $cmd );
       return null;
 
     case "window":
       $this->getOutput()->disable();
       header( "Content-Type: text/plain; charset=utf-8" );
       header( "Content-Disposition: inline; filename={$archiveName}" );   // inline: display, do not download
-      $result = 0;
-      passthru ($cmd, $result);                   // same output as for client (wrap already sets pipefail), including compression and encryption if selected
+      $this->streamToBrowser ( $cmd );            // same output as for client, including compression and encryption if selected
       return null;
 
     case "server":     
@@ -156,7 +272,7 @@ private function routeToTarget ( $cmd, $archiveName, $target, $zip, $enc, $bucke
       if ( !is_writable (DanteCommon::DUMP_PATH) ) { if ( !chmod(DanteCommon::DUMP_PATH, 0777) ) { throw new Exception("Directory is not writable and chmod failed: ".DanteCommon::DUMP_PATH); } }
       $cmd .= " > " . escapeshellarg ( DanteCommon::DUMP_PATH . "/" . $archiveName );
       $doLs = "ls -l " . escapeshellarg ( DanteCommon::DUMP_PATH . "/" . $archiveName );
-      return [$cmd, $doLs];   // Commands to be executed
+      return [ new DanteStringCommand ( $cmd, "<b>Dumping</b> to server as $archiveName" ), new DanteStringCommand ( $doLs, "Listing the dump file" ) ];   // Commands to be executed
 
     default:              throw new Exception ("Illegal value found for target: $target This should not happen");
   }
@@ -178,7 +294,8 @@ private function maskSystem ($out, $action) : void {
   $out->addHTML ("<h2>Dump System Pages</h2>");
   $out->addHTML ("<details><summary>Dumps Pages of the DanteWiki System but no User Pages to a Git Repository for System Development</summary>");
 
-  $text = "<details><summary>Total number of Files mentioned: <b>" . $sumNum . "  of which " .$uniqueNum . " unique ones</b></summary> " .$text . "<p><b>Manifest:</b> $manifest</details>";
+  $manifestUrl = htmlspecialchars ( $this->getPageTitle()->getLocalURL ( [ 'action' => 'manifest', 'name' => basename ( $manifest ) ] ) );   // served by execute(), since /tmp is not reachable from the web
+  $text = "<details><summary>Total number of Files mentioned: <b>" . $sumNum . "  of which " .$uniqueNum . " unique ones</b></summary> " .$text . "<p><b>Manifest:</b> <a href=\"$manifestUrl\" target=\"_blank\" rel=\"noopener\">" . htmlspecialchars ( $manifest ) . "</a></details>";
 
   $user = $this->getUser();
   $GIT_TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' ); 
@@ -190,8 +307,8 @@ private function maskSystem ($out, $action) : void {
      'GIT_BRANCH'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Branch',          'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'master' ],
      'GIT_COMMIT'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Commit Message',  'name' => 'GIT_COMMIT',  'type' => 'text',  'default' => 'Commit by DanteDump for initial contents'],
      'GIT_TOKEN'       => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Access Token',    'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => $GIT_TOKEN],
-     'MANIFEST_FILE'   => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright dante-readonly',   'size' => 80,  'label' => 'Manifest File',    'name' => 'MANIFEST_FILE',   'type' => 'text',  'default' => $manifest, "readonly" => true],
-   ];  // need to send manifest file name in the request, maybe no need to display it here as well
+     'MANIFEST_FILE'   => [ 'type' => 'hidden', 'name' => 'MANIFEST_FILE', 'default' => $manifest ],   // not displayed, but still sent with the request for the git dump
+   ];
   
    self::standardForm ($header, $action, "git", "Dump System Files");
    $out->addHTML ("</details>");
@@ -207,18 +324,28 @@ const TARGET_SELECTOR = [ 'section' => 'target' , 'type' => 'radio',  'label' =>
            "Window (show it in the browser window - for debug)"                                                                                              => "window",
            '<b>Server</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                                         => "server",
         ], 
-        'name' => 'target',  'default' => 'aws', 
+        'name' => 'target',  'default' => 'aws',
 ];
+
+// fields for target SSH / SCP; cssclass dante-scp-field lets ext.DanteBackup.specialpage.js show them only while this target is selected
+// not required in the form, since hidden fields would block the submit for the other targets; requireScpInput checks them on the server
+private function scpFields (): array {
+  $lookup = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup();
+  return [
+    'scpUser'     => [ 'section' => 'target', 'type' => 'text',     'name' => 'scpUser',     'label' => 'SCP User',     'cssclass' => 'dante-scp-field', 'default' => $lookup->getOption ( $this->getUser(), 'ssh-dump-user' ) ],   // defaults from the preferences
+    'scpHost'     => [ 'section' => 'target', 'type' => 'text',     'name' => 'scpHost',     'label' => 'SCP Host',     'cssclass' => 'dante-scp-field', 'default' => $lookup->getOption ( $this->getUser(), 'ssh-host' ) ],
+    'scpPassword' => [ 'section' => 'target', 'type' => 'password', 'name' => 'scpPassword', 'label' => 'SCP Password', 'cssclass' => 'dante-scp-field', 'autocomplete' => 'new-password' ],   // entered every time, never stored or prefilled
+  ];
+}
 
 
 const ZIP =  [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Compress',   'name' => 'compressed', 'type' => 'check' , 'help-message' => 'help-zip', 'default' => true ];
 const ENC =  [ 'section' => 'features',  'class' => 'HTMLCheckField',  'label' => 'Encrypt',    'name' => 'encrypted',  'type' => 'check' , 'help-message' => 'help-enc', 'default' => true ];
+const ENCPW = [ 'section' => 'features', 'type' => 'password', 'label' => 'Password', 'name' => 'encpw', 'size' => 30, 'help-message' => 'help-encpw', 'autocomplete' => 'new-password' ];   // empty: use the password from the preferences; never prefilled, so the stored password does not appear in the page source
 
 
 // MASK for the PAGES and FILES dump action
 private function maskPages ($out, $action) {
-
-  $aesPW            = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-encpw' );  // the password stored in preferences
 
   $out->addHTML ("<h2>Dump Pages &amp; Files</h2>");
   $out->addHTML ("<details><summary>Dumps Pages and Possibly Files as Single Archive</summary>");
@@ -251,8 +378,10 @@ private function maskPages ($out, $action) {
                      ],   
         'name' => 'files',  'default' => 'include', 
    ], 'radio' => self::TARGET_SELECTOR,
+  ...$this->scpFields (),
   'zip'       => self::ZIP,
-  'enc'       => self::ENC
+  'enc'       => self::ENC,
+  'encpw'     => self::ENCPW
   ];
 
   self::standardForm ($form, $action, "pages", "Do the dump");
@@ -270,7 +399,9 @@ private function maskFiles ( $out, $action ) {
        'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
      'zip'    => self::ZIP,
      'enc'    => self::ENC,
-    'radio'  => self::TARGET_SELECTOR
+     'encpw'  => self::ENCPW,
+    'radio'   => self::TARGET_SELECTOR,
+    ...$this->scpFields ()
   ];
   
   self::standardForm ($form, $action, "dump", "Dump Files");
@@ -286,10 +417,11 @@ private function maskDatabaseTables ( $out, $action ) {
   $form = [
     'tag'      => [ 'section' => 'header', 'class' => 'HTMLTextField', 'size' => 20, 'label' => 'Identifying Tag', 'name' => 'tag', 'type' => 'text', 'default' => 'dump',
                     'pattern' => '[A-Za-z0-9_-]+', 'title' => 'Enter a tag which shows up as part of the name of the dump' ],
-    'tarname'  => [ 'section' => 'header', 'class' => 'HTMLTextField', 'cssclass' => 'headright dante-readonly', 'size' => 80, 'label' => 'File Archive',  'name' => 'tarName',   'type' => 'text', 'readonly' => true ],
     'radio'    =>  self::TARGET_SELECTOR,
+    ...$this->scpFields (),
     'zip'      =>  self::ZIP,
-    'enc'      => self::ENC
+    'enc'      =>  self::ENC,
+    'encpw'    =>  self::ENCPW
   ];
 
   self::standardForm ($form, $action, "dumpDB", "Dump Database Tables");
@@ -300,28 +432,24 @@ private function maskDatabaseTables ( $out, $action ) {
 
 // get the specific commands depending on the form whose submit button was pressed
 protected function getSpecificCommands ( $formId ): mixed {
-  global $DUMP_PATH;
-
   $request = $this->getRequest();
   switch ($formId) {
     case "formId_git":
+      $manifestFile = $request->getVal ( 'MANIFEST_FILE', '' );
+      if ( !self::isOwnManifest ( $manifestFile ) ) { throw new Exception ( "Invalid manifest file" ); }   // the hidden field can be changed in the request; accept only our own manifests
       $gitDir = InfoExtractor::makeTempDir ();  // make a temporary directory in which all this will take place
       // export articles in manifest file to the temporary git directiry
-      $generate = ["command" => [InfoExtractor::class, 'exportManifestToTextFiles'], 
-                   "args"    => [ "manifestFile" => $request->getVal ( 'MANIFEST_FILE' ), "outDir" => "$gitDir", "clean" => false],
-                   "comment" => "<b>Exporting</b> files in manifest"
-                  ];
-      $cmd = self::gitPrepare ( $request->getVal ('GIT_OWNER'),  $request->getVal ('GIT_REPO'),  $request->getVal ('GIT_BRANCH'),  $request->getVal ('GIT_COMMIT'),  $request->getVal ('GIT_TOKEN') , $generate);
+      $generate = new DanteCallableCommand ( [InfoExtractor::class, 'exportManifestToTextFiles'], [ "manifestFile" => $manifestFile, "outDir" => "$gitDir", "clean" => false], "<b>Exporting</b> files in manifest" );
+      $cmd = self::gitPrepare ( $request->getVal ('GIT_OWNER'),  $request->getVal ('GIT_REPO'),  $request->getVal ('GIT_BRANCH'),  $request->getVal ('GIT_COMMIT'),  $request->getVal ('GIT_TOKEN') , $generate, $gitDir, $manifestFile );
       return $cmd;
 
-    case "formId_pages":    $cmd = self::commandPagesFiles (); return $cmd;
-    case "formId_dumpDB":   $cmd = self::commandDB ();         return $cmd;
+    case "formId_pages":    $cmd = $this->commandPagesFiles (); return $cmd;
+    case "formId_dump":     $cmd = $this->commandFiles ();     return $cmd;
+    case "formId_dumpDB":   $cmd = $this->commandDB ();         return $cmd;
 
     default:
-      throw new Exception ("Not yet implemented or illegal form id: $formId");  
+      throw new Exception ("Not yet implemented or illegal form id: $formId");
   }
-
-  return [];  // should not happen
 }
 
 
@@ -332,81 +460,72 @@ protected function getSpecificCommands ( $formId ): mixed {
 /** wraps a command with
  *    1) a leading pipefail to prevent errors along the pipe to be masked
  *    2) piping into first compression and then encryption
- *
- *  @parameter ?bool If present and true then we must omit the gzip stuff, independently of what $this says. Needed for the tar file
  */
-private function wrap ( $cmd, $zip, $enc, $omitZip = false ) {
+private function wrap ( $cmd, $zip, $enc ) {
   if ( $cmd === "" ) {return "";}
   $retval  = "set -o pipefail; " . $cmd;          // return in a pipe sequence the exit code of the first failing command
-  if ( !$omitZip ) {$retval .= ($zip ? " | gzip " : " ");}       // compress unless explicitly told to omit it
-  $retval .= ($enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC " : " ") ; 
-  return $retval; 
-}
-
-
-
-// TODO: deprecate this in favor of wrap
-// command decorator for a command $cmd which produces a stream while dumping; result then gets piped/redirected into different sinks
-private static function cmdZipEncDump ( $cmd, $zip, $enc ) {
-  return "set -o pipefail; " . $cmd . ($zip ? " | gzip " : " ") . ($enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC " : " ") ; 
+  $retval .= ($zip ? " | gzip " : " ");
+  $retval .= ($enc ? " | openssl aes-256-cbc -e -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC " : " ") ;
+  return $retval;
 }
 
 
 
 // returns commands to prepare a local git instance and place files in there
-private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string $GIT_BRANCH, string $GIT_COMMIT, string $GIT_TOKEN, $generate ) {
+private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string $GIT_BRANCH, string $GIT_COMMIT, string $GIT_TOKEN, DanteCommand $generate, string $myOutputDir, string $manifestFile ) {
 
-  $GITMAIL = "dante-himself@dante.wiki"; 
+  $GITMAIL = "dante-himself@dante.wiki";
   $GITUSER = "Dante Wiki System";
-  $REPO    = "https://$GIT_OWNER:$GIT_TOKEN@github.com/$GIT_OWNER/$GIT_REPO.git";
 
-  $myOutputDir  = $generate["args"]["outDir"];          // pick up from generation command
-  $manifestFile = $generate["args"]["manifestFile"];
+  // all form inputs end up in shell commands: URL-encode the URL parts and shell-quote every argument, so quotes or $(...) in them cannot inject commands
+  $REPO    = escapeshellarg ( "https://" . rawurlencode ($GIT_OWNER) . ":" . rawurlencode ($GIT_TOKEN) . "@github.com/" . rawurlencode ($GIT_OWNER) . "/" . rawurlencode ($GIT_REPO) . ".git" );
+  $BRANCH  = escapeshellarg ( $GIT_BRANCH );
+  $COMMIT  = escapeshellarg ( $GIT_COMMIT );
 
   $git    = "/usr/bin/git";  // use original binary, not a possibly VS-code-patched wrapper
 
-  $prune = ["command" => [InfoExtractor::class, 'pruneToManifest'], "args"    => [ "manifestFile" => $manifestFile, "outDir" => $myOutputDir ], "comment" => "Pruning files which were deleted in Wiki"];
+  $prune = new DanteCallableCommand ( [InfoExtractor::class, 'pruneToManifest'], [ "manifestFile" => $manifestFile, "outDir" => $myOutputDir ], "Pruning files which were deleted in Wiki" );
 
 // check if the specified REPO has a specified BRANCH and if it has not, generate one at the remote; finally clone the branch, existing or freshly generated
 // some git providers only allow generation of a BRANCH upon a non-empty commit, so to cater for this situation we provide for a minimal upload as well
 $initBranch = <<<BASH
-  git ls-remote --exit-code --heads {$REPO} {$GIT_BRANCH} || (
+  git ls-remote --exit-code --heads {$REPO} {$BRANCH} || (
     tmp=\$(mktemp -d) &&
-    git -C "\$tmp" init --initial-branch={$GIT_BRANCH} &&
+    git -C "\$tmp" init --initial-branch={$BRANCH} &&
     git -C "\$tmp" config user.name "{$GITUSER}" &&
     git -C "\$tmp" config user.email "{$GITMAIL}" &&
     git -C "\$tmp" commit --allow-empty -m init &&
     git -C "\$tmp" remote add origin {$REPO} &&
-    git -C "\$tmp" push -q origin {$GIT_BRANCH} &&
+    git -C "\$tmp" push -q origin {$BRANCH} &&
     rm -rf "\$tmp"
   ) 
 BASH;
 
-  $showGitStatus = ["command" => "$git -C $myOutputDir status",  "comment" => "<b>Git Status</b>"];
+  $showGitStatus = new DanteStringCommand ( "$git -C $myOutputDir status", "<b>Git Status</b>" );
 
 
 // NOTE: git -C allows to specify a directory and spares us the cd to the directory
 
   $cmds = [
   //  [ "command" => "git ls-remote --exit-code --heads {$REPO} {$GIT_BRANCH}" ,               "comment" => "<b>Testing existence of branch</b> $GIT_BRANCH at $GIT_OWNER/$GIT_REPO" ],
-    [ "command" => $initBranch,                                                              "comment" => "<b>Conditionally generating branch</b> $GIT_BRANCH in case it is misssing"],
-    [ "command" =>  "git clone --depth 1 --branch {$GIT_BRANCH} {$REPO} {$myOutputDir}",     "comment" => "<b>Git Cloning</b> from $GIT_BRANCH at $GIT_OWNER/$GIT_REPO"],
-    [ "command" =>  "$git -C $myOutputDir config user.name \"$GITUSER\"",                    "comment" => "Set git commit user.name to $GITUSER"],
-    [ "command" => "$git -C $myOutputDir config user.email \"$GITMAIL\"",                    "comment" => "Set git commit user.email to $GITMAIL" ],
+    new DanteStringCommand ( $initBranch,                                                              "<b>Conditionally generating branch</b> $GIT_BRANCH in case it is misssing" ),
+    new DanteStringCommand ( "git clone --depth 1 --branch {$BRANCH} {$REPO} {$myOutputDir}",          "<b>Git Cloning</b> from $GIT_BRANCH at $GIT_OWNER/$GIT_REPO" ),
+    new DanteStringCommand ( "$git -C $myOutputDir config user.name \"$GITUSER\"",                     "Set git commit user.name to $GITUSER" ),
+    new DanteStringCommand ( "$git -C $myOutputDir config user.email \"$GITMAIL\"",                    "Set git commit user.email to $GITMAIL" ),
     $showGitStatus,
     $generate,                                                  // export wiki pages into the local clone 
     $showGitStatus,
     $prune,                                                            // TODO: does it ????? deletes .git/HEAD  
     $showGitStatus,
-    [ "command" => "$git -C $myOutputDir add . " ,           "comment" => "Staging git files"],                    
+    new DanteStringCommand ( "$git -C $myOutputDir add . ",           "Staging git files" ),
     $showGitStatus,
 
-    [ "command" => "$git -C $myOutputDir diff --cached --name-status ",  "comment" => "List staged files"],
+    new DanteStringCommand ( "$git -C $myOutputDir diff --cached --name-status ",  "List staged files" ),
 
     // commit only when staged changes exist (git diff --cached exits 1 when changes are present) - otherwise we get an error status when there is nothing to commit
-    [ "command" => "{ if $git -C $myOutputDir diff --cached --quiet; then echo 'Nothing to commit'; else $git -C $myOutputDir commit -m \"$GIT_COMMIT\"; fi; }", "comment" => "<b>Git Commit</b>"],   
+    new DanteStringCommand ( "{ if $git -C $myOutputDir diff --cached --quiet; then echo 'Nothing to commit'; else $git -C $myOutputDir commit -m $COMMIT; fi; }", "<b>Git Commit</b>" ),
     $showGitStatus,  
-    [ "command" => "$git -C $myOutputDir push --verbose $REPO $GIT_BRANCH",                  "comment" => "Pushing to $GIT_BRANCH at $GIT_OWNER/$GIT_REPO" ],
+    new DanteStringCommand ( "$git -C $myOutputDir push --verbose $REPO $BRANCH",                      "Pushing to $GIT_BRANCH at $GIT_OWNER/$GIT_REPO" ),
     $showGitStatus,
   //  [ "command" => "rm -Rf $myOutputDir",                                                    "comment" => "Remove temp directory"]
   ];
@@ -432,20 +551,21 @@ private static function writeSpecFile ( string $name, array $titles ): void {
 
 
 /**
- * Given a srces specification for files to dump, build a file containing the specified file names under a standardized name
+ * Given a srces specification for pages to dump, build a temporary file with their titles, one per line, for dumpBackup.php --pagelist
  *
- * @param string $spec Permissible are: "listed", "category", "categories", "categories-indirect" 
- *                     
- * @return void
+ * @param string $spec Permissible are: "nopages", "listed", "category", "categories", "categories-indirect", "all"
+ * @return string Path of the temporary spec file; the caller must remove it after the dump
  */
-private static function generateSpecFile ( $spec ) {
-  $NAME = self::$SPEC_PREFIX . $spec;
-
-  // make sure the target directory exists, since file_put_contents does not create directories
-  if ( !is_dir ( self::$SPEC_PREFIX ) && !mkdir ( self::$SPEC_PREFIX, 0775, true ) ) { throw new Exception ("Cannot create directory " . self::$SPEC_PREFIX); }
+private static function generateSpecFile ( $spec ): string {
+  // a fresh temporary file per dump, so parallel dumps do not overwrite each other's list and nothing is written into the extension directory
+  $NAME = tempnam ( sys_get_temp_dir(), "dante_spec_" );
+  if ( $NAME === false ) { throw new Exception ("Cannot create temporary spec file"); }
 
   switch ( $spec ) {
-    case "listed":             
+    case "nopages":
+      self::writeSpecFile ( $NAME, [] );   // empty list: dumpBackup.php then dumps no pages at all (and therefore also no uploaded files)
+      break;
+    case "listed":
       InfoExtractor::articleExtract ("MediaWiki:Backupfiles", true, $NAME);  
       break; 
     case "category":          
@@ -474,30 +594,26 @@ private static function generateSpecFile ( $spec ) {
   }
 
   danteLog ("DanteBackup", "\nDanteDump: generated spec file by name of " . $NAME);
-
-
-
+  return $NAME;
 }
 
 
-// TODO: fix or deprecate
-private function getFilesCommand () {
+// tar command writing all uploaded files to stdout; compression and encryption are added by wrap, so plain tar without -z here
+private function getFilesCommand (): string {
   global $wgUploadDirectory;
-  $tarOptions = ( $this->enc ? "-cvzf" : "-cvf" );    // encryption is done by tar itself, decryption is automagic when doing tar -x
-  $cmd = "tar $tarOptions - --exclude='thumb' \"$wgUploadDirectory\" ";  // TODO Test this. Do we really want -v (lists all files ??)  and what about -z ... is this not doubling the compression thingie???
-  return $cmd;
+  $dir  = rtrim ( $wgUploadDirectory, '/' );
+  $base = basename ( $dir );
+  // -C: paths in the archive relative to the parent, e.g. images/a/ab/File.png; thumbnails, temporary files and locks are regenerated by MediaWiki and need no backup
+  // -v: lists every archived file; since the archive itself goes to stdout, tar writes this list to stderr, which the progress display shows
+  // .htaccess (at any depth) is left out: it is part of the installation, not of the uploads, and the restore must never take it from an archive
+  return "tar -cvf - -C " . escapeshellarg ( dirname ( $dir ) ) . " --exclude=" . escapeshellarg ( "$base/thumb" ) . " --exclude=" . escapeshellarg ( "$base/temp" ) . " --exclude=" . escapeshellarg ( "$base/lockdir" ) . " --exclude='.htaccess' " . escapeshellarg ( $base );
 }
 
 
-// TODO: if the command execution fails - we need a more prominent, red error message at the end produced by the javascript for the serviceEndpoint
 
-// TODO: List Backups should also report tar files.
-// TODO: Restore should also apply to tar files 
 
 // TODO: getConfigFile and makeLongList and makeCatFileList  should be moved into DanteCommon extension since we need that for other stuff timezone_offset_get
 // TODO: extension.json of DanteBackup should declare that we need DanteCommon installed as prerequistite.  The others maybe as well !!
-// TODO factor some stuff from Parsifal into DanteCommon
-// TODO: remove that branch in Parsifal .... github
 
 
 
@@ -584,8 +700,3 @@ private static function countUniqueNonEmptyLines( string $filePath ): int {
 }
 
 }  // end of class
-
-
-
-
-DanteDump::$SPEC_PREFIX = $IP."/extensions/DanteBackup/lists/"; 

@@ -26,11 +26,13 @@ class PageCollection {
   }
 
 
-// writes all $contents of the given PageCollection array into a temp manifest file; returns the file name
+// writes all $contents of the given PageCollection array into a temp manifest file, sorted, unique and without empty lines; returns the file name
   public static function makeManifest ( array $collections ): string {
     $tmpFile = tempnam ( sys_get_temp_dir(), 'pc_' );
-    $combined = implode ( "\n", array_map ( fn($c) => $c->contents, $collections ) );
-    file_put_contents ( $tmpFile, $combined );
+    $titles  = explode ( "\n", implode ( "\n", array_map ( fn($c) => $c->contents, $collections ) ) );   // one title per line, across all collections
+    $titles  = array_unique ( array_filter ( array_map ( 'trim', $titles ), fn($t) => $t !== '' ) );     // a page may belong to several collections
+    sort ( $titles, SORT_STRING );
+    file_put_contents ( $tmpFile, implode ( "\n", $titles ) . "\n" );
     return $tmpFile;
   }
 

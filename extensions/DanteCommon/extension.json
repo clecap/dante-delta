@@ -9,6 +9,9 @@
   "AutoloadClasses": {
     "DanteSpecialPage":     "DanteSpecialPages.php",
     "ServiceExecutor":      "ServiceExecutor.php",
+    "DanteCommand":         "ServiceExecutor.php",
+    "DanteStringCommand":   "ServiceExecutor.php",
+    "DanteCallableCommand": "ServiceExecutor.php",
     "InfoExtractor":        "InfoExtractor.php",
     "OperatingMode":        "OperatingMode.php"
   },

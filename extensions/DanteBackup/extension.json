@@ -38,6 +38,13 @@
       "position":     "top",
       "targets": [ "desktop", "mobile" ]
     } , 
+   "ext.DanteBackup.restore": {
+      "localBasePath":       "modules",
+      "remoteExtPath":       "DanteBackup/modules",
+      "packageFiles": [ "ext.DanteBackup.restore.js" ],
+      "dependencies": [ "mediawiki.util", "mediawiki.user" ],
+      "targets": [ "desktop", "mobile" ]
+    } ,
    "ext.DanteBackup.specialpage.styles": {
       "localBasePath":       "modules",
       "remoteExtPath":       "DanteBackup/modules",

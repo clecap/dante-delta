@@ -39,6 +39,7 @@ protected function handleSubmission () {
 
     $arr = $this->getSpecificCommands ( $formId );                     // now that we know which form was used, dispatch the execution of the forms submission
     $env = DanteCommon::getEnvironmentUser ($this->getUser());           // get the environment for the user (needed for execution)  // TODO: might want to improve structure
+    $env = $this->adjustEnvironment ( $env );                             // let the page adapt it to form input, e.g. an encryption password entered in place
 
 //    danteLog ("DanteBackup", "environment in handleSubmission is ".print_r ($env, true));
 
@@ -62,11 +63,15 @@ protected function handleSubmission () {
  */
 protected function executeCommands ( $cmd, $env ): void {
   $envJson = json_encode  ($env );                                          // convert PHP environment array into json text format
-  $cmdJson = json_encode ( $cmd );                                          // convert PHP command Array into json text format
-  ServiceEndpointHelper::attachToSession ( $cmdJson, $envJson );         // attach command Array and environment in string form to the current session
+  $cmdSer  = serialize ( $cmd );                                            // serialize the array of DanteCommand objects; unlike JSON this keeps their classes
+  ServiceEndpointHelper::attachToSession ( $cmdSer, $envJson );          // attach command Array and environment in string form to the current session
   $this->getOutput()->redirect ( $this->getPageTitle()->getLocalURL ( [ 'action' => 'run' ] ), '303' );  // POST/Redirect/GET: history holds a GET, so back/forward does not re-post; the action=run page shows the iframe
   return;
 }
+
+
+// hook for subclasses: adapt the execution environment to the submitted form; default: unchanged
+protected function adjustEnvironment ( array $env ): array { return $env; }
 
 
 /** Helper function for generating standard forms */

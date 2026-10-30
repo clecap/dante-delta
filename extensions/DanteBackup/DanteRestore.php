@@ -19,6 +19,88 @@ public function __construct() {parent::__construct( 'DanteRestore', 'dante-resto
 // page provides hint to read-only mode engine that it might do a write
 public function doesWrites() {return true;}
 
+// SCP credentials go into the environment, not into the command, so they are neither shown in the progress display nor visible in the process list
+protected function adjustEnvironment ( array $env ): array {
+  $request = $this->getRequest();
+  if ( $request->getVal ( 'scpUser' ) === null ) { return $env; }   // only for the SCP form
+  $env['DANTE_SCP_USER'] = $request->getVal ( 'scpUser' );
+  $env['DANTE_SCP_PW']   = $request->getVal ( 'scpPassword', '' );   // always entered manually, no fallback to a stored password
+  $env['HOME']           = DanteCommon::homeDir();                   // curl finds ~/.ssh/known_hosts through HOME, which PHP-FPM does not pass on
+  return $env;
+}
+
+/**
+ * Additionally to the standard behaviour, answer the AJAX request ?action=scplist of the Load button with a JSON listing of the dump files in the SCP directory.
+ *
+ * @param string|null $par
+ * @return void
+ */
+public function execute ( $par ): void {
+  $request = $this->getRequest();
+  if ( $request->getVal ( 'action' ) !== 'scplist' ) { parent::execute ( $par ); return; }
+
+  $this->checkPermissions();   // same right as for the page itself
+  $this->getOutput()->disable();
+  header ( "Content-Type: application/json; charset=utf-8" );
+
+  // POST with a valid CSRF token only, since the request carries a password and makes the server connect to a host
+  if ( !$request->wasPosted() || !$this->getContext()->getCsrfTokenSet()->matchToken ( $request->getVal ( 'token', '' ) ) ) { echo json_encode ( [ 'ok' => false, 'error' => 'Invalid or expired token, please reload the page' ] ); return; }
+
+  try   { echo json_encode ( [ 'ok' => true, 'files' => self::listScpDirectory ( $request->getVal ( 'scpUser', '' ), $request->getVal ( 'scpHost', '' ), $request->getVal ( 'scpPath', '' ), $request->getVal ( 'scpPassword', '' ) ) ] ); }
+  catch ( Exception $e ) { echo json_encode ( [ 'ok' => false, 'error' => $e->getMessage() ] ); }   // the password never appears in a message or in the log
+}
+
+/**
+ * List the dump files in a directory at an SCP host via SFTP, newest first.
+ *
+ * @param string $dir Absolute directory, or relative to the home directory of $user
+ * @return array[] Each with name, type (Pages, Database or Files), time (Y-m-d H:i) and size in bytes
+ * @throws Exception on an illegal host or when the listing fails
+ */
+private static function listScpDirectory ( string $user, string $host, string $dir, string $pw ): array {
+  DanteCommon::checkScpHost ( $host );
+  $url = DanteCommon::scpUrl ( "sftp", $host, $dir );
+  if ( !str_ends_with ( $url, '/' ) ) { $url .= '/'; }   // trailing slash: curl lists the directory
+
+  // credentials through the environment, as for the restore; short timeouts, since the page waits for the answer
+  $env  = [ 'DANTE_SCP_USER' => $user, 'DANTE_SCP_PW' => $pw, 'HOME' => DanteCommon::homeDir() ];
+  $proc = proc_open ( "curl -sS --fail --connect-timeout 5 --max-time 10 --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" " . escapeshellarg ( $url ), [ 1 => ['pipe', 'w'], 2 => ['pipe', 'w'] ], $pipes, null, $env );
+  if ( $proc === false ) { throw new Exception ( "Could not start curl" ); }
+  $out = stream_get_contents ( $pipes[1] );  $err = stream_get_contents ( $pipes[2] );   // both are small, reading one after the other cannot block
+  fclose ( $pipes[1] );  fclose ( $pipes[2] );
+  if ( proc_close ( $proc ) !== 0 ) { throw new Exception ( "Listing $host:$dir failed: " . trim ( $err ) ); }
+  return self::parseSftpListing ( $out );
+}
+
+/**
+ * Turn the ls -l style listing curl returns for an sftp:// directory into the dump files it contains, newest first.
+ *
+ * @param string $listing Lines like "-rw-r--r--  1 user group  1234 Oct 30 17:39 name"
+ * @return array[] Each with name, type, time and size
+ */
+private static function parseSftpListing ( string $listing ): array {
+  $files = [];
+  foreach ( explode ( "\n", $listing ) as $line ) {
+    $p = preg_split ( '/\s+/', trim ( $line ), 9 );                                // permissions links owner group size month day time-or-year name
+    if ( count ( $p ) < 9 || $p[0][0] !== '-' ) { continue; }                     // regular files only
+    [ , , , , $size, $mon, $day, $timeOrYear, $name ] = $p;
+    if ( ( $type = self::dumpType ( $name ) ) === null ) { continue; }            // dump files only, as in the AWS list
+    $recent = str_contains ( $timeOrYear, ':' );                                  // ls shows the time for recent files, the year for older ones
+    $ts     = strtotime ( "$mon $day " . ( $recent ? date ( 'Y' ) . " $timeOrYear" : "$timeOrYear 00:00" ) );
+    if ( $recent && $ts > time() + 86400 ) { $ts = strtotime ( "-1 year", $ts ); }   // e.g. a December file listed in January belongs to the previous year
+    $files[] = [ 'name' => $name, 'type' => $type, 'time' => date ( 'Y-m-d H:i', $ts ), 'size' => (int) $size, 'ts' => $ts ];
+  }
+  usort ( $files, fn ( $a, $b ) => $b['ts'] <=> $a['ts'] );                        // newest first
+  return array_map ( function ( $f ) { unset ( $f['ts'] ); return $f; }, $files );
+}
+
+// Pages, Database or Files for a dump file name, null for any other file
+private static function dumpType ( string $name ): ?string {
+  try { [$db, $enc, $zip, $tar] = self::checkName ( $name ); } catch ( Exception $e ) { return null; }
+  return $tar ? "Files" : ( $db ? "Database" : "Pages" );
+}
+
+
 
 protected function showForm  (): void  {
   // send post data to THIS url and add action=submit to the URL so we can distinguish showing this page from submitting data to it
@@ -30,7 +112,7 @@ protected function showForm  (): void  {
   $out->addHelpLink( 'index.php?title=Help:DanteRestore', true );  // provide a help link   // TODO: must fill with contents
 
   $out->addHTML ("<h2>From a local file on your computer</h2>");                  // FORM PART: LOCAL FILE
-  $form = [ 'xmlimport' => ['type' => 'file','name' => 'xmlimport', 'accept' => [ 'application/xml', 'text/xml', 'application/x-gzip-compressed', 'application/octet-stream' ], 'section' => 'select-local-file', 'required' => true, ] ];
+  $form = [ 'xmlimport' => ['type' => 'file','name' => 'xmlimport', 'accept' => [ 'application/xml', 'text/xml', 'application/x-gzip-compressed', 'application/gzip', 'application/x-tar', 'application/octet-stream' ], 'section' => 'select-local-file', 'required' => true, ] ];
   self::standardForm ($form, $action, "LOCAL", "Restore from file");
 
   $out->addHTML ("<h2>From a file from the AWS S3 storage area</h2>");          // FORM PART: AWS S3
@@ -42,18 +124,27 @@ protected function showForm  (): void  {
   $form = [ 'url' => [ 'type' => 'text', 'name' => 'url', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
   self::standardForm ($form, $action, "URL", "Restore from URL");
 
-  $out->addHTML ("<h2>From a file at an SSH/SCP location (not yet operative)</h2>");   // FORM PART SSH/SCP
-  $form = [ 'scp' => [ 'type' => 'text', 'name' => 'url', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ]
-           + [ 'scpUser' => [ 'type' => 'text', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
+  $out->addHTML ("<h2>From a file at an SSH/SCP location</h2>");   // FORM PART SSH/SCP
+  $sshUser     = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'ssh-restore-user' );   // defaults from the preferences, tab DanteWiki
+  $sshHost     = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'ssh-host' );
+  $form =    [ 'scpUser'     => [ 'type' => 'text',     'name' => 'scpUser',     'label' => 'SCP User',     'section' => 'restore-from-scp', 'required' => true, 'default' => $sshUser ] ]
+           + [ 'scpHost'     => [ 'type' => 'text',     'name' => 'scpHost',     'label' => 'SCP Host',     'section' => 'restore-from-scp', 'required' => true, 'default' => $sshHost ] ]
+           + [ 'scpPath'     => [ 'type' => 'text',     'name' => 'scpPath',     'label' => 'SCP Path',     'section' => 'restore-from-scp', 'required' => true ] ]   // directory of the dumps
+           + [ 'scpPassword' => [ 'type' => 'password', 'name' => 'scpPassword', 'label' => 'SCP Password', 'section' => 'restore-from-scp', 'required' => true, 'autocomplete' => 'new-password' ] ]   // entered every time, never stored or prefilled
+           + [ 'scpLoad'     => [ 'type' => 'info',     'raw' => true, 'section' => 'restore-from-scp',
+                                  'default' => '<button type="button" id="dante-scp-load">Load</button><div id="dante-scp-list"></div>' ] ];   // ext.DanteBackup.restore fills the list with radio buttons named scpFile
   self::standardForm ($form, $action, "SCP", "Restore via SCP");
+  $out->addModules ( [ 'ext.DanteBackup.restore' ] );   // JS for the Load button
 
   $out->addHTML ("<h2>Restore from GITHUB (not yet fully operative)</h2>");             // FORM PART: GITHUB
   $owner       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-owner' );
   $repository  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-repository' );
   $branch      = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-branch' );
+  $token       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'github-dante-wiki-contents' );   // as in DanteDump
   $form =    [ 'gitOwner'      =>  [ 'type' => 'text',  'name' => 'gitOwner',      'label' => 'Git Owner',      'section' => 'restore-from-github', 'required' => true, 'default' =>  $owner    ] ]
            + [ 'gitRepository' =>  [ 'type' => 'text',  'name' => 'gitRepository', 'label' => 'Repository',     'section' => 'restore-from-github', 'required' => true, 'default' =>  $repository   ] ]
-           + [ 'gitBranch'     =>  [ 'type' => 'text',  'name' => 'gitBranch',     'label' => 'Branch',         'section' => 'restore-from-github', 'required' => true, 'default' =>  $branch   ] ];
+           + [ 'gitBranch'     =>  [ 'type' => 'text',  'name' => 'gitBranch',     'label' => 'Branch',         'section' => 'restore-from-github', 'required' => true, 'default' =>  $branch   ] ]
+           + [ 'gitToken'      =>  [ 'type' => 'text',  'name' => 'gitToken',      'label' => 'Access Token',   'section' => 'restore-from-github', 'required' => true, 'default' =>  $token   ] ];
   self::standardForm ($form, $action, "GITHUB", "Restore via GITHUB");
 }
 
@@ -71,14 +162,17 @@ protected function getSpecificCommands ( $formId ): mixed {
       danteLog ("DanteBackup", "tmp name " . $_FILES['xmlimport']['tmp_name'] . "\n");      
       danteLog ("DanteBackup", "error " . $_FILES['xmlimport']['error'] . "\n");
       $info = "Name: ". $_FILES['xmlimport']['name']. " Size " . number_format (floatval ( $_FILES['xmlimport']['size'] ) / (1024 * 1024), 2) . "[MB]";  // TODO: MAYBE OFR OUTPUT - but where and when ???
-      $fileName = $_FILES['xmlimport']['tmp_name'];
-      $arr = self::getCommandsFILE ($fileName, $info);                                 // get an array of commands
+      // keep the upload: PHP deletes tmp_name at the end of this request, but the commands run later in serviceEndpoint.php
+      $fileName = tempnam ( sys_get_temp_dir(), "dante_restore_" );
+      if ( $fileName === false || !move_uploaded_file ( $_FILES['xmlimport']['tmp_name'], $fileName ) ) { throw new Exception ( "Could not keep the uploaded file" ); }
+      $arr   = $this->getCommandsFILE ( $fileName, $info, $_FILES['xmlimport']['name'] );   // type from the original name, since the temporary name has no suffix
+      $arr[] = new DanteStringCommand ( "rm -f " . escapeshellarg ( $fileName ), "Removing uploaded file" );   // NOTE: skipped if a command before fails; then the file stays in the temp directory
       break;
 
     case 'formId_AWS':
       $fileName = $request->getVal ("awsRadio");                                           // pick up the selected file name
       // danteLog ("DanteBackup", "radio selected file is: ".$fileName. "\n");     // log the relevant data if needed
-      $arr = self::getCommandsAWS ($fileName);                                          // get an array of commands
+      $arr = $this->getCommandsAWS ($fileName);                                          // get an array of commands
       break;
 
     case 'formId_URL':
@@ -90,15 +184,21 @@ protected function getSpecificCommands ( $formId ): mixed {
     case 'formId_GITHUB':
       $owner  = $request->getVal ( 'gitOwner' );  
       $repo   = $request->getVal ( 'gitRepository' );  
-      $branch = $request->getVal ( 'gitBranch' );  
+      $branch = $request->getVal ( 'gitBranch' );
+      $token  = $request->getVal ( 'gitToken' );
       danteLog ("DanteBackup", "formId_GITHUB: " . $owner);
-      $arr = $this->gitClone ( $owner, $repo, $branch );
+      $arr = $this->gitClone ( $owner, $repo, $branch, $token );
       break; 
 
-    default: 
     case 'formId_SCP':
-     // TODO
-       throw new Exception ("Not yet implemented case: ".$formId); // TODO     
+      $dir  = $request->getVal ( 'scpPath', '' );
+      $file = $request->getVal ( 'scpFile', '' );
+      if ( $file === '' || str_contains ( $file, '/' ) ) { throw new Exception ( "Please press Load and select a file from the list" ); }   // a plain name from the listing, so it cannot leave the directory
+      $arr = $this->getCommandsSCP ( $request->getVal ( 'scpHost', '' ), ( $dir === '' ? $file : rtrim ( $dir, '/' ) . '/' . $file ) );   // user and password come through the environment, see adjustEnvironment
+      break;
+
+    default:
+       throw new Exception ("Not yet implemented case: ".$formId);
        break;
     }
     return $arr;
@@ -106,20 +206,25 @@ protected function getSpecificCommands ( $formId ): mixed {
 
 
 /**
- * 
- * Analyze the suffix structure of a filename and return a boolean array [db, enc, zip]
+ *
+ * Analyze the suffix structure of a filename and return a boolean array [db, enc, zip, tar]
  * This is needed to understand requirements how to handle a file selected for restore
  *
- * @param mixed $fileName 
- * @return array 
- * @throws Exception 
+ * @param mixed $fileName
+ * @return array [db, enc, zip, tar]; tar is true for a file archive of the uploaded files
+ * @throws Exception
  */
 private static function checkName ($fileName) {
   $db = null;
   $enc = null;
   $zip = null;
-  
-  if     ( str_ends_with ($fileName, ".xml.gz.aes") ) { $db=false;  $enc=true;   $zip=true;  }
+  $tar = false;
+
+  if     ( str_ends_with ($fileName, ".tar.gz.aes") ) { $db=false;  $enc=true;   $zip=true;   $tar=true; }
+  elseif ( str_ends_with ($fileName, ".tar.aes") )    { $db=false;  $enc=true;   $zip=false;  $tar=true; }
+  elseif ( str_ends_with ($fileName, ".tar.gz") )     { $db=false;  $enc=false;  $zip=true;   $tar=true; }
+  elseif ( str_ends_with ($fileName, ".tar") )        { $db=false;  $enc=false;  $zip=false;  $tar=true; }
+  elseif ( str_ends_with ($fileName, ".xml.gz.aes") ) { $db=false;  $enc=true;   $zip=true;  }
   elseif ( str_ends_with ($fileName, ".xml.aes") )    { $db=false;  $enc=true;   $zip=false; }
   elseif ( str_ends_with ($fileName, ".xml.gz") )     { $db=false;  $enc=false;  $zip=true;  }
   elseif ( str_ends_with ($fileName, ".xml") )        { $db=false;  $enc=false;  $zip=false; }
@@ -128,7 +233,43 @@ private static function checkName ($fileName) {
   elseif ( str_ends_with ($fileName, ".sql.gz") )     { $db=true;   $enc=false;  $zip=true;  }
   elseif ( str_ends_with ($fileName, ".sql") )        { $db=true;   $enc=false;  $zip=false; }
   else { throw new Exception ("incompatible file extension found in file $fileName");}
-  return [$db, $enc, $zip];
+  return [$db, $enc, $zip, $tar];
+}
+
+
+/**
+ * Commands for restoring a page archive streamed from $source: each step reads the archive anew, MediaWiki: and Template: pages first, since the other pages need them.
+ *
+ * @param string $source Shell command writing the archive to stdout, ending in a pipe, e.g. "curl -L 'https://...' | "
+ * @return DanteCommand[]
+ */
+private static function getPagesRestoreCommands ( string $source, $zip, $enc ): array {
+  global $IP;
+  $cmd = [];
+  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( $source, " php $IP/extensions/DanteBackup/countFilter.php ",                   $zip, $enc ) );
+  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( $source, " php $IP/maintenance/importDump.php --report=10 --namespaces '8' ",  $zip, $enc ) );
+  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( $source, " php $IP/maintenance/importDump.php --report=10 --namespaces '10' ", $zip, $enc ) );
+  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( $source, " php $IP/maintenance/importDump.php --report=10 --uploads ",         $zip, $enc ) );
+  return self::addPostImportCommands ( $cmd );   // do maintenance stuff we need to do after every import
+}
+
+
+/**
+ * Commands for restoring a file archive (as made by DanteDump "Dump Files Only") into the upload directory.
+ *
+ * @param string $source Shell command writing the archive to stdout, ending in a pipe, e.g. "cat 'x.tar.gz' | "
+ * @return DanteCommand[]
+ */
+private static function getFilesRestoreCommands ( string $source, $zip, $enc ): array {
+  global $IP, $wgUploadDirectory;
+  $parent = dirname ( rtrim ( $wgUploadDirectory, '/' ) );   // archive paths start with the name of the upload directory, e.g. images/a/ab/File.png
+  $cmd = [];
+  // decrypt and decompress as for the other archives; -v lists every restored file; existing files are overwritten
+  // never restore .htaccess (at any depth): it keeps Apache from executing uploads, and a crafted one from a foreign archive could enable e.g. PHP in the upload directory
+  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( $source, " tar -xvf - -C " . escapeshellarg ( $parent ) . " --exclude='.htaccess'", $zip, $enc ), "<b>Restoring</b> uploaded files" );
+  // files without a database record (e.g. when no pages dump with uploads was restored) get one, so the wiki knows them
+  $cmd[] = new DanteStringCommand ( "php $IP/maintenance/rebuildImages.php --missing", "Registering files without database record" );
+  return $cmd;
 }
 
 
@@ -136,19 +277,20 @@ private static function checkName ($fileName) {
 
 // TODO: also need sql variant of this
 // generate the commands for restoring from local file
-public function getCommandsFILE ($fileName, $info) {
+public function getCommandsFILE ($fileName, $info, $originalName = null) {
   global $IP;
-  [$db, $enc, $zip] = self::checkName ($fileName);
+  [$db, $enc, $zip, $tar] = self::checkName ( $originalName ?? $fileName );
 
    danteLog ("DanteBackup", "\n getCommandsFILE ");
-  $arr = array ();
-  array_push ( $arr, "echo $info" );
-  array_push ( $arr, "cat $fileName | php $IP/extensions/DanteBackup/countFilter.php " );  // TODO LACKS unzp and decrypt 
-  array_push ( $arr,  DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --report=10  --namespaces '8'  ", $zip, $enc ) );    // get MediaWiki: namespace (need Parsifal templates on board first)
-  array_push ( $arr,  DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --report=10  --namespaces '10' ", $zip, $enc ) );    // get Template: namespace
-  array_push ( $arr,  DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --report=10  --uploads         ", $zip, $enc ) );    // TODO: can we really merge this into "all the rest" ?????
-  $arr = self::addPostImport ( $arr );  // do maintenance stuff we need to do after every import
-  return $arr;
+  $cmd = [];
+  $cmd[] = new DanteStringCommand ( "echo " . escapeshellarg ( $info ) );   // quoted, since the uploaded file name is user input
+  if ( $tar ) { return array_merge ( $cmd, self::getFilesRestoreCommands ( "cat " . escapeshellarg ( $fileName ) . " | ", $zip, $enc ) ); }   // file archive
+  $cmd[] = new DanteStringCommand ( "cat $fileName | php $IP/extensions/DanteBackup/countFilter.php " );  // TODO LACKS unzp and decrypt
+  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --report=10  --namespaces '8'  ", $zip, $enc ) );    // get MediaWiki: namespace (need Parsifal templates on board first)
+  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --report=10  --namespaces '10' ", $zip, $enc ) );    // get Template: namespace
+  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --report=10  --uploads         ", $zip, $enc ) );    // TODO: can we really merge this into "all the rest" ?????
+  $cmd = self::addPostImportCommands ( $cmd );  // do maintenance stuff we need to do after every import
+  return $cmd;
 }
 
 
@@ -164,7 +306,7 @@ public function getCommandsFILE ($fileName, $info) {
 // generate the commands for restoring from $file from AWS S3 instance
 private function getCommandsAWS ($fileName) {
   global $IP;
-  [$db, $enc, $zip] = self::checkName ($fileName);
+  [$db, $enc, $zip, $tar] = self::checkName ($fileName);
 
   $env = DanteCommon::getEnvironmentUser ($this->getUser());
   $bucketName = $env["AWS_BUCKET_NAME"];
@@ -172,7 +314,7 @@ private function getCommandsAWS ($fileName) {
   danteLog ("DanteBackup", "getCommandsAWS: doImportAWS: $fileName, enc:" .print_r ($enc, true). " zip: ". print_r($zip,true)."\n");
   danteLog ("DanteBackup", "we have " . ($enc ? "ENC " : " NO-ENC ") . "  "  . ($zip ? "ZIP" : " NO-ZIp" )  . "\n");
 
-  $arr = array ();
+  $cmd = [];
 
   // TODO aesPassword !!!!!!
   //  cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | ", " php $IP/maintenance/importDump.php --namespaces '8' --debug 2>&1 ", $zip, $enc);
@@ -180,65 +322,65 @@ private function getCommandsAWS ($fileName) {
   danteLog ("DanteBackup", "\n Selected file is $fileName \n");
 
   if ($fileName == "ERROR") {
-    array_push ( $arr, "echo 'The system signalled an error and so this option is not available'");  // TODO: convert to new system
-    return true;  // TODO: check if this is needed and if this works !!
-  } 
+    $cmd[] = new DanteStringCommand ( "echo 'The system signalled an error and so this option is not available'" );
+    return $cmd;
+  }
 
-  if ($db) {
+  if ($tar) {   // file archive; bucket and file name quoted, since the selected name comes from the request
+    $cmd = self::getFilesRestoreCommands ( "/opt/myenv/bin/aws s3 cp " . escapeshellarg ( "s3://$bucketName/$fileName" ) . " - | ", $zip, $enc );
+  }
+  elseif ($db) {
  //   gunzip -c mediawiki_dump.sql.gz | mysql -u wikiuser -p wikidb
- 
+
   }
   else {
 
 //    danteLog ("DanteBackup", "environment in getCommandAWS is ".print_r ($env, true));
 
    //array_push ($arr, "/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | openssl aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC > /tmp/DONE-ZWEI ");  // works
-    array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/extensions/DanteBackup/countFilter.php ",                   $zip, $enc ) ); 
-    array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '8' ",  $zip, $enc ) ); 
-    array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '10' ", $zip, $enc ) ); 
-    array_push ($arr,  DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --uploads ",         $zip, $enc ) ); 
-    $arr = self::addPostImport ( $arr );
-
-    $cmd = [];
-    $cmd[] =  new DanteStringCommand ( DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/extensions/DanteBackup/countFilter.php ",                   $zip, $enc )  );
-    $cmd[] =  new DanteStringCommand ( DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '8' ",  $zip, $enc )  );
-    $cmd[] =  new DanteStringCommand ( DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '10' ", $zip, $enc )  ); 
-    $cmd[] =  new DanteStringCommand ( DanteCommon::cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName -  | ", " php $IP/maintenance/importDump.php --report=10 --uploads ",         $zip, $enc )  ); 
-
-    //return $cmd;
-
+    $source = "/opt/myenv/bin/aws s3 cp " . escapeshellarg ( "s3://$bucketName/$fileName" ) . " - | ";   // quoted, since the selected file name comes from the request
+    $cmd    = self::getPagesRestoreCommands ( $source, $zip, $enc );
   }
-  return $arr;
+  return $cmd;
 }
 
 
 // TODO: ALSO NEED a variant for Database files ........
 public static function getCommandsURL ($url, $user) {
   global $IP;
-  [$db, $enc, $zip] = self::checkName ($url);
+  [$db, $enc, $zip, $tar] = self::checkName ($url);
 
   $env = DanteCommon::getEnvironmentUser ( $user ); // TODO: needed ?? password ???  // TODO: hopefully not. CAVE: DanteInitialStore.php uses this as well
 
-  $arr = array ();
-  array_push ( $arr, "echo $url");
-
-  array_push ($arr,  DanteCommon::cmdZipEncRestore ("curl -L $url  | ", " php $IP/extensions/DanteBackup/countFilter.php ",                   $zip, $enc ) );   
-  array_push ($arr,  DanteCommon::cmdZipEncRestore ("curl -L $url  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '8' ",  $zip, $enc ) ); 
-  array_push ($arr,  DanteCommon::cmdZipEncRestore ("curl -L $url  | ", " php $IP/maintenance/importDump.php --report=10 --namespaces '10' ", $zip, $enc ) ); 
-  array_push ($arr,  DanteCommon::cmdZipEncRestore ("curl -L $url  | ", " php $IP/maintenance/importDump.php --report=10 --uploads ",         $zip, $enc ) ); 
-  $arr = self::addPostImport ( $arr );
-  return $arr;
+  $cmd = [];
+  $cmd[] = new DanteStringCommand ( "echo " . escapeshellarg ( $url ) );
+  if ( $tar ) { return array_merge ( $cmd, self::getFilesRestoreCommands ( "curl -L " . escapeshellarg ( $url ) . " | ", $zip, $enc ) ); }   // file archive
+  $source = "curl -L " . escapeshellarg ( $url ) . " | ";   // quoted, since the URL comes from the request
+  $cmd    = array_merge ( $cmd, self::getPagesRestoreCommands ( $source, $zip, $enc ) );
+  return $cmd;
 }
 
 
-// TODO: ALSO NEED a variant for Database files ........
-// TODO: fehlt noch
-public static function getCommandsSSH ($url) {
-  global $IP;
-  [$db, $enc, $zip] = self::checkName ($url);
-  
-// TODO: still stuff missing
+/**
+ * Commands for restoring from a file at an SCP location, streamed without local storage, as for AWS S3.
+ * A file archive is read once; a page archive is fetched anew for each import step.
+ *
+ * @param string $host Host name, optionally with :port
+ * @param string $path Absolute path, or relative to the home directory of the SCP user
+ * @return DanteCommand[]
+ * @throws Exception on an illegal host or an unsupported file type
+ */
+private function getCommandsSCP ( string $host, string $path ): array {
+  DanteCommon::checkScpHost ( $host );
+  [$db, $enc, $zip, $tar] = self::checkName ( $path );                                                                                     // fail early on an unknown file type
+  if ( $db ) { throw new Exception ( "Restoring database dumps is not implemented yet" ); }    // TODO: fix
+  $url = DanteCommon::scpUrl ( "scp", $host, $path );
 
+  // curl speaks scp and takes the password; without -o it writes to stdout, so it is the start of the pipe
+  // credentials from the environment, so the displayed command does not contain them; the host key must be known in ~/.ssh/known_hosts   // TODO: host key issue still to be resolved / initialized
+  $source = "curl -sS --fail --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" " . escapeshellarg ( $url ) . " | ";
+  $cmd    = [ new DanteStringCommand ( "echo " . escapeshellarg ( "Restoring from SCP: $host:$path" ) ) ];
+  return array_merge ( $cmd, $tar ? self::getFilesRestoreCommands ( $source, $zip, $enc ) : self::getPagesRestoreCommands ( $source, $zip, $enc ) );
 }
 
 
@@ -249,7 +391,7 @@ public static function getCommandsSSH ($url) {
 private static function getPrefix ($name) {
   if (str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ) return "<b  class='prefix-database'>Database: </b>";
   if (str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ) return "<b  class='prefix-pages'>Pages: </b>";
-  if (str_ends_with ($name, ".tar") || str_ends_with ($name, ".tar.aes") ) return "<b class='prefix-files'>Files:    </b>";
+  if (str_ends_with ($name, ".tar.gz.aes") || str_ends_with ($name, ".tar.aes") || str_ends_with ($name, ".tar.gz") || str_ends_with ($name, ".tar") ) return "<b class='prefix-files'>Files:    </b>";
 }
 
 
@@ -272,15 +414,15 @@ private function getFileArray () {
         return 
           str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ||
           str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ||
-          str_ends_with ( $name, ".tar") || str_ends_with ($name, ".tar.aes");
+          str_ends_with ($name, ".tar.gz.aes") || str_ends_with ($name, ".tar.aes") || str_ends_with ($name, ".tar.gz") || str_ends_with ($name, ".tar");
       });
       $filtered = array_values ( $filtered );
 
       usort($filtered, function ($a, $b) {return strtotime($b[1]) - strtotime($a[1]);});    // Sort the objects by LastModified in descending order
 
       foreach ($filtered as $object) {
-        $retArray[  "<span class='table-name'  >". self::getPrefix($object[0]). trim($object[0])."</span>".
-                    "<span class='table-stamp' >". $object[1] . "</span>".
+        $retArray[  "<span class='table-name'  >". self::getPrefix($object[0]). trim($object[0])."</span> ".     // blanks between the spans, since no CSS rule separates them
+                    "<span class='table-stamp' >". $object[1] . "</span> ".
                     "<span class='table-size'  >". number_format ($object[2]/ (1024*1024), 2)  . "[MB] </span>"]   = $object[0];
        }  // foreach
     }
@@ -290,20 +432,6 @@ private function getFileArray () {
     $retArray["<div style='color:red;'><p>ERROR: An error occured while processing the following aws listing command:</p/><code>$cmd</code><p>The stderr contained this information: $error.</p><p>The command exit code was $retCode</p></div>"] = "ERROR";
   }
   return $retArray;
-}
-
-
-// service function: appends to the command array $cmd all those commands required after an import of an xml archive; return the new command array
-private static function addPostImport ( $cmd ) {
-  global $IP;
-  // see https://www.mediawiki.org/wiki/Manual:ImportDump.php about how we must run this after an import // TODO: really all of this ????
-  array_push ($cmd,  "php $IP/maintenance/rebuildrecentchanges.php"); 
-  array_push ($cmd,  "php $IP/maintenance/initSiteStats.php --update ");
-  array_push ($cmd,  "php $IP/maintenance/rebuildImages.php"); 
-  array_push ($cmd,  "php $IP/maintenance/rebuildall.php"); 
-  array_push ($cmd,  "php $IP/maintenance/checkImages.php"); 
-  array_push ($cmd,  "php $IP/maintenance/refreshFileHeaders.php --verbose");
-  return $cmd;
 }
 
 
@@ -326,18 +454,19 @@ private static function addPostImportCommands ( $cmd ) {
 
 
 // returns commands to prepare a local git instance and place files in there from git
-private function gitClone ( $owner, $repo, $branch ) {
+private function gitClone ( $owner, $repo, $branch, $token ) {
   global $IP;
-  $user      = $this->getUser();  // needed to get access token
-  $token     = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' ); 
   $targetDir = InfoExtractor::makeTempDir ();
 
-  $repoUrl = sprintf( 'https://%s:%s@github.com/%s/%s.git', rawurlencode($owner), rawurlencode($token), $owner, $repo );
+  // all form inputs end up in shell commands: URL-encode the URL parts and shell-quote every argument, so quotes or $(...) in them cannot inject commands
+  $repoUrl   = escapeshellarg ( sprintf( 'https://%s:%s@github.com/%s/%s.git', rawurlencode($owner), rawurlencode($token), rawurlencode($owner), rawurlencode($repo) ) );
+  $branchArg = escapeshellarg ( $branch );
+  $dirArg    = escapeshellarg ( $targetDir );
 
   $cmds = [
-    "git clone --depth=1 --single-branch --branch $branch $repoUrl $targetDir",                  // clone remote repository
-    "php $IP/extensions/DanteCommon/importDirectory.php --ddir $targetDir --slug --overwrite",   // import contents into wiki
-    "rm -Rf $targetDir"                                                                          // clean temporary directory
+    new DanteStringCommand ( "git clone --depth=1 --single-branch --branch $branchArg $repoUrl $dirArg",                  "<b>Cloning</b> $owner/$repo branch $branch" ),   // clone remote repository
+    new DanteStringCommand ( "php $IP/extensions/DanteCommon/importDirectory.php --ddir $dirArg --slug --overwrite",      "<b>Importing</b> into the wiki" ),               // import contents into wiki
+    new DanteStringCommand ( "rm -Rf $dirArg",                                                                            "Removing temporary directory" )                  // clean temporary directory
   ];
   return $cmds;
 }

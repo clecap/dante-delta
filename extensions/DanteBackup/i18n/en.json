@@ -8,6 +8,16 @@
   "danteinitialstore":    "Dante Initial Store",
   "danteinitialload":     "Dante Initial Load",
 
+  "action-dante-dump":      "dump the contents of this wiki",
+  "action-dante-restore":   "restore contents into this wiki",
+  "action-dante-dbdump":    "dump the database of this wiki",
+  "action-dante-dbrestore": "restore the database of this wiki",
+
+  "right-dante-dump":       "Dump pages, uploaded files and the database of the wiki",
+  "right-dante-restore":    "Restore pages and uploaded files into the wiki",
+  "right-dante-dbdump":     "Dump the database of the wiki",
+  "right-dante-dbrestore":  "Restore the database of the wiki",
+
   "myform2-section1":  "Amazon S3 Bucket Data",
   "myform2-section2":  "Features of the dump",
 
@@ -41,9 +51,15 @@
 
   "restform-restore-from-s3": "Select a page dump file for restoring",
   "restore-from-url": "Enter a URL for restoring from the file it designates",
+  "restore-from-github": "GitHub repository from which the contents are restored",
 
+  "label-textfield":    "URL",
+  "restore-from-scp":   "SCP location from which the file is restored",
+
+  "prefs-dante":       "DanteWiki",
   "prefs-aws":         "Credentials for AWS Backup",
   "prefs-dante-bu":    "DanteBackup",
+  "prefs-keys":        "Access Tokens",
 
   "aws-prefs-key":     "Access Key of an Amazon AWS IAM User with rights to write to S3. See [[Help:DanteBackup]].",
   "aws-prefs-skey":    "Secret Access Key of that Amazon AWS IAM User. Keep confidential. See [[Help:DanteBackup]].",
@@ -70,6 +86,9 @@
   "prefs-label-git-owner":      "Owner of repository",
   "prefs-label-git-repository": "Name of repository",
   "prefs-label-git-branch":     "Name of branch to be used",
+  "prefs-git-owner":            "GitHub user or organization owning the repository. Used as default by Restore from GITHUB in [[Special:DanteRestore]].",
+  "prefs-git-repository":       "Name of the GitHub repository. Used as default by Restore from GITHUB in [[Special:DanteRestore]].",
+  "prefs-git-branch":           "Branch of the repository, for example master. Used as default by Restore from GITHUB in [[Special:DanteRestore]].",
 
   "prefs-label-ssh-host":          "SSH Backup Host",
   "prefs-label-ssh-dump-user":     "Dump User Name",
@@ -85,7 +104,11 @@
 
   "help-filter": "Removes all hidden contents. See [[Help:Hidden Contents]]",
 
+  "help-zip":    "Compression with gzip makes the dump file considerably smaller. A restore recognizes compressed files by the .gz suffix and decompresses them automatically.",
+
   "help-enc":    "Encryption ensures privacy of content on dump storage media. Set password in [[Special:Preferences]] in tab DanteWiki. Make sure to remember the password used in the dump, as without it you cannot restore the contents of the dump file.",
+
+  "help-encpw": "Password for encrypting this dump. Leave empty to use the password set in [[Special:Preferences]] in tab DanteWiki. Remember the password used, as without it you cannot restore the contents of the dump file.",
 
   "help-pass":  "Password as set in [[Special:Preferences]]. You can change it but must make sure to remember it in connection with the dump since without it you cannot restore the contents of the dump file.",
 

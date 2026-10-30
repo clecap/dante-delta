@@ -274,7 +274,6 @@ public static function captureOutput (callable $fn, ...$args): array {
 
 
 
-// NOTE FOR ME:  args are still missing
 
 
 
@@ -321,6 +320,7 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
     $count++;
     danteLog ("DanteCommon", "*** entered loop for number $count \n");
 
+    $notifier ? $notifier->setNum ( $count ) : null;                               // all notifications from here on belong to command number $count
     $notifier ? $notifier->notify ( "setup", $obj->getComment() ) : null;      // setup a logging area for this command if necessary
     $notifier ? $notifier->notify ( "cmd",   $obj->getString() )  : null;      // log the command itself
 
@@ -345,6 +345,7 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
 
   $notifier ? $notifier->notify ( "close", ( $didHaveError ?  "Please check: There were $errorCount errors "  . ($stopOnError ? " and we stopped on the error " : " and we continued after the error" )   : "Completed. You may now leave this window."  )) : null;
   if ($didHaveError) {
+    $notifier ? $notifier->setNum ( 0 ) : null;                                    // overall error marker uses number 0, as in the old loop
     $notifier ? $notifier->notify ( "in-error", "" ) : null;
   }
 
@@ -361,16 +362,18 @@ public static function executeCommandArray ( $arr, $env = array(), &$stdoutColle
 class DanteCallableCommand extends DanteCommand {
 
   private string|array $callableCmd;   // "Class::method" or [class, method]; callable is not allowed as property type, and closures could not be stored in the session
+  private array        $args;          // arguments for the call; string keys are passed as named arguments
 
-  public function __construct ( string|array $callableCmd, ?string $comment = "", ?int $timeout = null ) {
+  public function __construct ( string|array $callableCmd, array $args = [], ?string $comment = "", ?int $timeout = null ) {
     if ( !is_callable ( $callableCmd ) ) { throw new InvalidArgumentException ( "Not a callable: " . print_r ( $callableCmd, true ) ); }   // reject anything PHP cannot call
     parent::__construct ( $comment, $timeout );
     $this->callableCmd = $callableCmd;
+    $this->args        = $args;
   }
 
   public function execute ( ?Notifier $notifier, array $env = [], &$stdoutCollect = null, &$stderrCollect = null ): bool {
       $startTime = time();   // memorize time the callable was started
-      ['result' =>$fcnResult, 'stdout' => $fcnStdout, 'stderr' => $fcnStderr, 'exception' => $fcnException ] = ServiceExecutor::captureOutput ( $this->callableCmd, ...$args );  // capture the output of the call to the callable, including possible exceptions
+      ['result' =>$fcnResult, 'stdout' => $fcnStdout, 'stderr' => $fcnStderr, 'exception' => $fcnException ] = ServiceExecutor::captureOutput ( $this->callableCmd, ...$this->args );  // capture the output of the call to the callable, including possible exceptions
       $fcnStdout = trim ($fcnStdout);  $fcnStderr = trim ($fcnStderr);
 
       if (!empty($fcnStdout))  {$notifier ? $notifier->notify ( "stdout", $fcnStdout) : null;  }                   // sets the stdout field

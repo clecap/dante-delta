@@ -129,16 +129,15 @@ public static function sendEvent ( $x, $num, $chunk ): void {
 // a notifier is an object which can send a notification command $cmd together with further $data as information
 // this can be implemented as a logger to a file but also to a client page in a browser receiveing web events from the server
 abstract class Notifier {
+  protected int $num = 0;   // identification to which command the notification will belong
+
+  public function setNum ( int $number ): void { $this->num = $number; }   // set before notifying about a command
   abstract public function notify ( $command, $data );
 }
 
 
 
 class WebNotifier extends Notifier {
-
-private int $num = 0; // identification to which command the notification will belong
-
-public function setNum ( int $number ): void {$this->num = $number; }
 
 public function notify ( $command, $data ): void {
   $phpJson = ["command" => $command, "data" => $data, "num"=> $this->num];

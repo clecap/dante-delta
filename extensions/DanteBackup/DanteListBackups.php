@@ -65,7 +65,7 @@ function sortByDate(array $items): array {
   $num = 0;
   foreach ($expo as $line) {                        // iterate these lines
     $line = preg_replace ('/\s\s+/', " ", $line );  
-    if ( strlen ($line) == 0 ) {break;}
+    if ( strlen ($line) == 0 ) {continue;}   // skip empty lines, do not stop the listing
     $data = explode (" ", $line);           // expands the line into date, time, size, unit, name
     // MWDebug::log ( print_r ($data, true));
     //  if (count ($item) ) {break;}
@@ -76,13 +76,15 @@ function sortByDate(array $items): array {
     $name=$data[4];
     if ( str_ends_with ($name, ".sql.gz.aes") || str_ends_with ($name, ".sql.aes") || str_ends_with ($name, ".sql.gz") || str_ends_with ($name, ".sql") ) 
       { $item["type"] = "Data Base";}
-    elseif ( str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") ) 
+    elseif ( str_ends_with ($name, ".xml.gz.aes") || str_ends_with ($name, ".xml.aes") || str_ends_with ($name, ".xml.gz") || str_ends_with ($name, ".xml") )
       { $item["type"] = "File";}
-    else { break;}
+    elseif ( str_ends_with ($name, ".tar.gz.aes") || str_ends_with ($name, ".tar.aes") || str_ends_with ($name, ".tar.gz") || str_ends_with ($name, ".tar") )
+      { $item["type"] = "File Archive";}
+    else { continue;}   // skip files of unknown type, the following ones must still be listed
     $item["key"] = "<span style='display:inline-block;width:600px;'>".$item["name"]."</span> <span style=''>".$item["date"]."  ".$item["time"]." [UTC]</span> <span style='text-align:right;display:inline-block;width:100px;'>".$item["size"]."[".$item["unit"]."]</span>";
     $item["val"] =  $item["name"]; // $num++;
     MWDebug::log ( print_r ($item, true));
-    if (strlen ($item["name"]) == 0) {break;}
+    if (strlen ($item["name"]) == 0) {continue;}
     array_push( $arr, $item);
   }
   MWDebug::log ( print_r ($arr, true)) ;

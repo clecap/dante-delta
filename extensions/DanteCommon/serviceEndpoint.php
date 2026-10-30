@@ -60,7 +60,7 @@ set_exception_handler(function (Throwable $e) {
 // echo "event: exception\n"; echo "data: exception test is Stream started\n\n"; @ob_flush(); flush(); // development debug
 
 // Read/write MediaWiki session data
-$cmdString = $session->get ( 'Dante_Cmd' );  // a string which encodes in JSON format the array of commands to be executed
+$cmdString = $session->get ( 'Dante_Cmd' );  // a string which encodes in PHP serialize format the array of DanteCommand objects to be executed
 $envString = $session->get ( 'Dante_Env' );  // a string which encodes in JSON format the environment in which these commands shall be executed
 
 // keep this one-shot: remove the queued commands so a revisited result page (back/forward, reload) does not execute them again
@@ -73,8 +73,10 @@ require_once ( __DIR__ . "/ServiceEndpointHelper.php");     // need sendEvent be
 // nothing queued (already executed): tell the client and close the event stream
 if ( $cmdString === null ) { ServiceEndpointHelper::sendEvent ( 'close', 0, 'Nothing to execute (commands were already run).' ); exit; }
 
-// convert json text into php array
-$cmdArray = json_decode ( $cmdString, true );
+require_once ( __DIR__ . "/ServiceExecutor.php");   // command classes must be known before unserialize
+
+// restore the array of command objects; only our command classes may be instantiated, anything else becomes __PHP_Incomplete_Class
+$cmdArray = unserialize ( $cmdString, [ 'allowed_classes' => [ 'DanteStringCommand', 'DanteCallableCommand' ] ] );
 $envArray = json_decode ( $envString, true);
 
 
@@ -89,8 +91,8 @@ $notifier = new WebNotifier ();   // sends notifications as server-sent events t
 
 require_once ( __DIR__ . "/ServiceExecutor.php");   // for danteCommand
 
-// DanteCommand::executeCommandArray ($cmdArray, $envArray, $stdoutCollect, $stderrCollect, $notifier);
+DanteCommand::executeCommandArray ($cmdArray, $envArray, $stdoutCollect, $stderrCollect, $notifier);   // session now holds DanteCommand objects, which only the new loop understands
 
-ServiceExecutor::executeCommandArray ( $cmdArray, $envArray, $stdoutCollect, $stderrCollect, [ ServiceEndpointHelper::class, 'sendEvent' ] );
+// ServiceExecutor::executeCommandArray ( $cmdArray, $envArray, $stdoutCollect, $stderrCollect, [ ServiceEndpointHelper::class, 'sendEvent' ] );
 
 ?>

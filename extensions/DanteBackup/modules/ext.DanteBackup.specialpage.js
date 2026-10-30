@@ -6,7 +6,7 @@ var siteName = mw.config.get('wgSiteName');
 
 function timestamp () {
   const d = new Date();
-  return ( d.getFullYear().toString() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + "-at-" + String(d.getHours()).padStart(2, "0") + "-" + String(d.getMinutes()).padStart(2, "0")
+  return ( d.getFullYear().toString() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + "-at-" + String(d.getHours()).padStart(2, "0") + "-" + String(d.getMinutes()).padStart(2, "0") + "-" + String(d.getSeconds()).padStart(2, "0")   // seconds, as in DanteDump::archiveName
   );
 }
 
@@ -69,20 +69,25 @@ function initialize () {
   let eleTag = document.getElementById ("mw-input-tag");      
   let eleFinalName = document.getElementById ("mw-input-archiveName");
 
-  let separate   = document.getElementById ("mw-input-files-separate").checked;
-  let nofiles    = document.getElementById ("mw-input-files-nofiles").checked;
-  let metadata   = document.getElementById ("mw-input-files-metadata").checked;
-
   eleFinalName.value = siteName + "-" + eleTag.value + "-" +timestamp () + "-" + getSrces() + "-" + getSrcFeatures() + "-" + getFiles() + ".xml" + getSuffix();
-  let eletarName = document.getElementById ("mw-input-tarName");
-  eletarName.value = siteName + "-" + eleTag.value  + "-" + timestamp ();
-
-  if (nodb) {eleDbName.value = " *** NO DATABASE DUMP DONE *** ";}
-
-  if (separate) {eletarName.value = siteName + "-" + timestamp () + ".tar" + getSuffix (true);}
-   else {eletarName.value = " *** NO FILE ARCHIVE GENERATED *** ";}
-
 }
+
+/**
+ * Show the SSH / SCP fields of a form only while its target SSH / SCP is selected.
+ *
+ * @param {HTMLFormElement} form A dump form containing the target radio buttons
+ */
+function toggleScpFields ( form ) {
+  const ssh = form.querySelector ( "input[name='target'][value='ssh']" );
+  form.querySelectorAll ( ".dante-scp-field" ).forEach ( ele => { ele.hidden = !( ssh && ssh.checked ); } );
+}
+
+// wire up every dump form with target radio buttons; done before wireup, so a failure there cannot prevent it
+document.querySelectorAll ( "form" ).forEach ( form => {
+  if ( !form.querySelector ( "input[name='target']" ) ) { return; }
+  form.querySelectorAll ( "input[name='target']" ).forEach ( radio => radio.addEventListener ( "change", () => toggleScpFields ( form ) ) );
+  toggleScpFields ( form );
+} );
 
 wireup();
 initialize ();

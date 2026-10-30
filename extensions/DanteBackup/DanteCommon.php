@@ -53,9 +53,11 @@ const DEBUG_FORM = [
   }
 
 
-  public static function contentTypeHeader ($zip, $enc) {
-    if ($enc) { header( "Content-type: application/octet-stream" );} 
-    else      { if ($zip) { header( "Content-type: application/x-gzip" );  } else { header( "Content-type: application/xml; charset=utf-8" );}  }
+  // $ext: archive type before compression and encryption, one of xml, sql, tar
+  public static function contentTypeHeader ($zip, $enc, $ext = "xml") {
+    $plain = [ "xml" => "application/xml; charset=utf-8", "sql" => "application/sql; charset=utf-8", "tar" => "application/x-tar" ];
+    if ($enc) { header( "Content-type: application/octet-stream" );}
+    else      { if ($zip) { header( "Content-type: application/x-gzip" );  } else { header( "Content-type: " . ( $plain[$ext] ?? "application/octet-stream" ) );}  }
   }
 
 
@@ -84,6 +86,23 @@ public static function getEnvironmentUser (User $user) {
                  "LOCAL_FILE_ENC"        => "$awsEncPW",
                  "MYSQL_PWD"             => "$wgDBpassword"     // read by mysqldump / mysql, keeps the password out of the process list
                );
+}
+
+
+// home directory of the user running PHP (www-data), where .ssh/known_hosts lives; curl finds it through HOME, which PHP-FPM does not pass on
+public static function homeDir (): string {
+  return posix_getpwuid ( posix_geteuid() )['dir'] ?? '/var/www';
+}
+
+// only a host name, optionally with :port; anything else could change the URL, e.g. user@other-host
+public static function checkScpHost ( string $host ): void {
+  if ( !preg_match ( '/^[A-Za-z0-9.-]+(:[0-9]+)?$/', $host ) ) { throw new Exception ( "Illegal SCP host '$host'" ); }
+}
+
+// URL for curl (scp:// or sftp://): an absolute path stays absolute, a relative one is taken relative to the home directory (/~/); every path segment URL-encoded
+public static function scpUrl ( string $scheme, string $host, string $path ): string {
+  $urlPath = implode ( '/', array_map ( 'rawurlencode', explode ( '/', ltrim ( $path, '/' ) ) ) );
+  return "$scheme://$host" . ( str_starts_with ( $path, '/' ) ? "/" : "/~/" ) . $urlPath;
 }
 
 
