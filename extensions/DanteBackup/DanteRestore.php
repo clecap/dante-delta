@@ -111,20 +111,31 @@ protected function showForm  (): void  {
   $out->addHTML (wfMessage ("dante-page-restore-intro"));
   $out->addHelpLink( 'index.php?title=Help:DanteRestore', true );  // provide a help link   // TODO: must fill with contents
 
-  $out->addHTML ("<h2>From a local file on your computer</h2>");                  // FORM PART: LOCAL FILE
+  // FORM PART: LOCAL FILE
+  $out->addHTML ("<h2>Restore from Local File</h2>");   
+  $out->addHTML ("<details><summary>Restore by selecting a local file on your computer</summary>"); 
   $form = [ 'xmlimport' => ['type' => 'file','name' => 'xmlimport', 'accept' => [ 'application/xml', 'text/xml', 'application/x-gzip-compressed', 'application/gzip', 'application/x-tar', 'application/octet-stream' ], 'section' => 'select-local-file', 'required' => true, ] ];
   self::standardForm ($form, $action, "LOCAL", "Restore from file");
+  $out->addHTML ("</details>");
 
-  $out->addHTML ("<h2>From a file from the AWS S3 storage area</h2>");          // FORM PART: AWS S3
+  // FORM PART: AWS S3
+  $out->addHTML ("<h2>Restore from AWS S3</h2>");          
+  $out->addHTML ("<details><summary>Restore by selecting a file from the configured AWS S3 storage</summary>");  
   $out->addHTML ("The type (Pages, Database, Files) determines the restored elements.");
   $form = [ 'awsRadio'  => [ 'type' => 'radio', 'section' => 'restore-from-aws', 'options' => $this->getFileArray (),   'name' => 'awsRadio', 'required' => true  ] ];
   self::standardForm ($form, $action, "AWS", "Restore from AWS");
+  $out->addHTML ("</details>");
 
-  $out->addHTML ("<h2>From a file at an Internet URL (not operative?)</h2>");   // FORM PART: Internet URL
+  // FORM PART: Internet URL
+  $out->addHTML ("<h2>Restore from an Internet URL</h2>");   
+  $out->addHTML ("<details><summary>Restore from a file defined by an Internet URL</summary>"); 
   $form = [ 'url' => [ 'type' => 'text', 'name' => 'url', 'label-message' => 'label-textfield', 'section' => 'restore-from-url',  'required' => true,  ] ];
   self::standardForm ($form, $action, "URL", "Restore from URL");
+   $out->addHTML ("</details>");
 
-  $out->addHTML ("<h2>From a file at an SSH/SCP location</h2>");   // FORM PART SSH/SCP
+  // FORM PART SSH/SCP
+  $out->addHTML ("<h2>Restore from an SSH/SCP location</h2>");   
+  $out->addHTML ("<details><summary>Restore by selecting a file residing on an ssh/scp accessible location</summary>");   
   $sshUser     = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'ssh-restore-user' );   // defaults from the preferences, tab DanteWiki
   $sshHost     = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'ssh-host' );
   $form =    [ 'scpUser'     => [ 'type' => 'text',     'name' => 'scpUser',     'label' => 'SCP User',     'section' => 'restore-from-scp', 'required' => true, 'default' => $sshUser ] ]
@@ -136,8 +147,11 @@ protected function showForm  (): void  {
                                   'default' => '<button type="button" id="dante-scp-load">Load</button><div id="dante-scp-list"></div>' ] ];   // ext.DanteBackup.restore fills the list with radio buttons named scpFile
   self::standardForm ($form, $action, "SCP", "Restore via SCP");
   $out->addModules ( [ 'ext.DanteBackup.restore' ] );   // JS for the Load button
+  $out->addHTML ("</details>");
 
-  $out->addHTML ("<h2>Restore from GITHUB (not yet fully operative)</h2>");             // FORM PART: GITHUB
+  // FORM PART: GITHUB
+  $out->addHTML ("<h2>Restore from GITHUB (System files only)</h2>");             
+  $out->addHTML ("<details><summary>Restore all system files stored on the configured github. System files only.</summary>"); 
   $owner       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-owner' );
   $repository  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-repository' );
   $branch      = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-branch' );
@@ -147,40 +161,27 @@ protected function showForm  (): void  {
            + [ 'gitBranch'     =>  [ 'type' => 'text',  'name' => 'gitBranch',     'label' => 'Branch',         'section' => 'restore-from-github', 'required' => true, 'default' =>  $branch   ] ]
            + [ 'gitToken'      =>  [ 'type' => 'text',  'name' => 'gitToken',      'label' => 'Access Token',   'section' => 'restore-from-github', 'required' => true, 'default' =>  $token   ] ];
   self::standardForm ($form, $action, "GITHUB", "Restore via GITHUB");
+  $out->addHTML ("</details>");
+
 }
 
 
-// returns the specific command sequence required for executing the necessary functions
+// returns the specific command sequence required for executing the necessary functions in dependence of the selected form
 protected function getSpecificCommands ( $formId ): mixed {
-  global $IP;
   $request = $this->getRequest();
   switch ($formId) {
     case 'formId_LOCAL':
-      // danteLog ("DanteBackup", "ALL: " . print_r ($_FILES, true) . "\n");
-      danteLog ("DanteBackup", "name " . $_FILES['xmlimport']['name'] . "\n");
-      danteLog ("DanteBackup", "mime: " . $_FILES['xmlimport']['type'] . "\n");
-      danteLog ("DanteBackup", "size " . $_FILES['xmlimport']['size'] . "\n"); 
-      danteLog ("DanteBackup", "tmp name " . $_FILES['xmlimport']['tmp_name'] . "\n");      
-      danteLog ("DanteBackup", "error " . $_FILES['xmlimport']['error'] . "\n");
-      $info = "Name: ". $_FILES['xmlimport']['name']. " Size " . number_format (floatval ( $_FILES['xmlimport']['size'] ) / (1024 * 1024), 2) . "[MB]";  // TODO: MAYBE OFR OUTPUT - but where and when ???
-      [$db] = self::checkName ( $_FILES['xmlimport']['name'] );  self::requireDbRestoreRight ( $db, $this->getUser() );   // before keeping the upload, so a refused upload leaves no file behind
-      // keep the upload: PHP deletes tmp_name at the end of this request, but the commands run later in serviceEndpoint.php
-      $fileName = tempnam ( sys_get_temp_dir(), "dante_restore_" );
-      if ( $fileName === false || !move_uploaded_file ( $_FILES['xmlimport']['tmp_name'], $fileName ) ) { throw new Exception ( "Could not keep the uploaded file" ); }
-      $arr   = $this->getCommandsFILE ( $fileName, $info, $_FILES['xmlimport']['name'] );   // type from the original name, since the temporary name has no suffix
-      $arr[] = new DanteStringCommand ( "rm -f " . escapeshellarg ( $fileName ), "Removing uploaded file" );   // NOTE: skipped if a command before fails; then the file stays in the temp directory
+      $arr = $this->getCommandsLOCAL ( $_FILES['xmlimport'] );   
       break;
 
     case 'formId_AWS':
-      $fileName = $request->getVal ("awsRadio");                                           // pick up the selected file name
-      // danteLog ("DanteBackup", "radio selected file is: ".$fileName. "\n");     // log the relevant data if needed
-      $arr = $this->getCommandsAWS ($fileName);                                          // get an array of commands
+      $fileName = $request->getVal ("awsRadio");                                         
+      $arr = $this->getCommandsAWS ($fileName);                                         
       break;
 
     case 'formId_URL':
       $url = $request->getVal ("url");
-      $this->doImportURL ( $url, $this->getUser() ); // TODO: missing function ???
-
+      $arr = self::getCommandsURL ( $url, $this->getUser() );   
       break;
 
     case 'formId_GITHUB':
@@ -188,7 +189,6 @@ protected function getSpecificCommands ( $formId ): mixed {
       $repo   = $request->getVal ( 'gitRepository' );  
       $branch = $request->getVal ( 'gitBranch' );
       $token  = $request->getVal ( 'gitToken' );
-      danteLog ("DanteBackup", "formId_GITHUB: " . $owner);
       $arr = $this->gitClone ( $owner, $repo, $branch, $token );
       break; 
 
@@ -276,128 +276,158 @@ private static function getPagesRestoreCommands ( string $source, $zip, $enc ): 
  */
 private static function getFilesRestoreCommands ( string $source, $zip, $enc ): array {
   global $IP, $wgUploadDirectory;
-  $parent = dirname ( rtrim ( $wgUploadDirectory, '/' ) );   // archive paths start with the name of the upload directory, e.g. images/a/ab/File.png
+  /** @var string $wgUploadDirectory */   // for the IDE only: includes/config-vars.php is a stub declaring all $wg settings as null; at runtime Setup.php makes this a string, by default "$IP/images"
+  $parent =dirname ( rtrim ( $wgUploadDirectory, '/' ) );   // archive paths start with the name of the upload directory, e.g. images/a/ab/File.png
   $cmd = [];
   // decrypt and decompress as for the other archives; -v lists every restored file; existing files are overwritten
   // never restore .htaccess (at any depth): it keeps Apache from executing uploads, and a crafted one from a foreign archive could enable e.g. PHP in the upload directory
   $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( $source, " tar -xvf - -C " . escapeshellarg ( $parent ) . " --exclude='.htaccess'", $zip, $enc ), "<b>Restoring</b> uploaded files" );
-  // files without a database record (e.g. when no pages dump with uploads was restored) get one, so the wiki knows them
-  $cmd[] = new DanteStringCommand ( "php $IP/maintenance/rebuildImages.php --missing", "Registering files without database record" );
+  $cmd[] = new DanteStringCommand ( "php $IP/maintenance/rebuildImages.php --missing", "Registering files which did not yet have a database record" );
   return $cmd;
 }
 
 
-
-
-// TODO: also need sql variant of this
-// generate the commands for restoring from local file
-public function getCommandsFILE ($fileName, $info, $originalName = null) {
-  global $IP;
-  [$db, $enc, $zip, $tar] = self::checkName ( $originalName ?? $fileName );
-
-   danteLog ("DanteBackup", "\n getCommandsFILE ");
+/**
+ * Commands for restoring a database dump (as made by DanteDump "Dump Database Tables") into the wiki database; replaces all tables contained in the dump.
+ *
+ * @param string $source Shell command writing the dump to stdout, ending in a pipe, e.g. "cat 'x.sql.gz' | "
+ * @return DanteCommand[]
+ */
+private static function getDBRestoreCommands ( string $source, $zip, $enc ): array {
+  global $wgDBname, $wgDBserver, $wgDBuser;
+  // same options as the mysqldump in DanteDump::commandDB; password comes from MYSQL_PWD in the environment, see DanteCommon::getEnvironmentUser
+  $consume = " mysql --skip-ssl --default-character-set=binary --host=" . escapeshellarg ($wgDBserver) . " --user=" . escapeshellarg ($wgDBuser) . " " . escapeshellarg ($wgDBname);
   $cmd = [];
-  $cmd[] = new DanteStringCommand ( "echo " . escapeshellarg ( $info ) );   // quoted, since the uploaded file name is user input
-  if ( $tar ) { return array_merge ( $cmd, self::getFilesRestoreCommands ( "cat " . escapeshellarg ( $fileName ) . " | ", $zip, $enc ) ); }   // file archive
-  $cmd[] = new DanteStringCommand ( "cat $fileName | php $IP/extensions/DanteBackup/countFilter.php " );  // TODO LACKS unzp and decrypt
-  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --report=10  --namespaces '8'  ", $zip, $enc ) );    // get MediaWiki: namespace (need Parsifal templates on board first)
-  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --report=10  --namespaces '10' ", $zip, $enc ) );    // get Template: namespace
-  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( "cat $fileName | ",  " php $IP/maintenance/importDump.php --report=10  --uploads         ", $zip, $enc ) );    // TODO: can we really merge this into "all the rest" ?????
-  $cmd = self::addPostImportCommands ( $cmd );  // do maintenance stuff we need to do after every import
+  $cmd[] = new DanteStringCommand ( DanteCommon::cmdZipEncRestore ( $source, $consume, $zip, $enc ), "<b>Restoring</b> the database" );
   return $cmd;
 }
 
 
+/**
+ * Commands for restoring from a file uploaded from the local machine of the user.
+ * The upload is kept in the temp directory, since PHP deletes it at the end of this request but the commands run later in serviceEndpoint.php; the last command removes it.
+ *
+ * @param array $upload Entry of $_FILES for the uploaded file, with keys name, type, size, tmp_name, error
+ * @return DanteCommand[]
+ * @throws PermissionsError if a database dump is to be restored without the right dante-dbrestore
+ * @throws Exception if the upload cannot be kept
+ */
+private function getCommandsLOCAL ( array $upload ): array {
 
+  /*
+  danteLog ("DanteBackup", "name " . $upload['name'] . "\n");
+  danteLog ("DanteBackup", "mime: " . $upload['type'] . "\n");
+  danteLog ("DanteBackup", "size " . $upload['size'] . "\n");
+  danteLog ("DanteBackup", "tmp name " . $upload['tmp_name'] . "\n");
+  danteLog ("DanteBackup", "error " . $upload['error'] . "\n");
+  */
 
-
-
-
-
-
-
-// TODO: ALSO NEED a variant for Database files ........
-// generate the commands for restoring from $file from AWS S3 instance
-private function getCommandsAWS ($fileName) {
-  global $IP;
-  [$db, $enc, $zip, $tar] = self::checkName ($fileName);
+  try { [$db, $enc, $zip, $tar] = self::checkName ( $upload['name'] ); }
+  catch ( Exception $x ) { return [ new DanteStringCommand ( "echo " . escapeshellarg ( "Incorrect file extension found for file " . $upload['name'] ) ) ]; }  
   self::requireDbRestoreRight ( $db, $this->getUser() );
 
+  // keep the upload under a fresh name
+  $fileName = tempnam ( sys_get_temp_dir(), "dante_restore_" );
+  if ( $fileName === false || !move_uploaded_file ( $upload['tmp_name'], $fileName ) ) { throw new Exception ( "Could not keep the uploaded file" ); }
+
+  // define the command array, starting with the information on the uploaded file
+  $info   = "Name: " . $upload['name'] . " Size " . number_format ( floatval ( $upload['size'] ) / (1024 * 1024), 2 ) . "[MB]";
+  $cmd    = [];
+  $cmd[]  = new DanteStringCommand ( "echo " . escapeshellarg ( $info ) );   // quoted, since the uploaded file name is user input
+  $source = "cat " . escapeshellarg ( $fileName ) . " | ";
+
+  // generate the restore commands according to the type of the file
+  if     ( $tar ) { $cmd = array_merge ( $cmd, self::getFilesRestoreCommands ( $source, $zip, $enc ) ); }   // file archive
+  elseif ( $db )  { $cmd = array_merge ( $cmd, self::getDBRestoreCommands    ( $source, $zip, $enc ) ); }   // database dump
+  else            { $cmd = array_merge ( $cmd, self::getPagesRestoreCommands ( $source, $zip, $enc ) ); }   // page archive
+
+  // remove the kept upload; NOTE: skipped if a command before fails; then the file stays in the temp directory
+  $cmd[] = new DanteStringCommand ( "rm -f " . escapeshellarg ( $fileName ), "Removing uploaded file" );
+
+  return $cmd;
+}
+
+
+// generate the commands for restoring from $file from AWS S3 instance
+private function getCommandsAWS ($fileName) {
+  try { [$db, $enc, $zip, $tar] = self::checkName ($fileName); }  
+  catch ( Exception $x ) { return [ new DanteStringCommand ( "echo " . escapeshellarg ( "Incorrect file extension found for file " . $fileName ) ) ]; }   
+
+  self::requireDbRestoreRight ( $db, $this->getUser() );
   $env = DanteCommon::getEnvironmentUser ($this->getUser());
-  $bucketName = $env["AWS_BUCKET_NAME"];
+
+  $bucketName = $env["AWS_BUCKET_NAME"];  // TODO: move to a configurable preference which may override. needs similar stuff as in scp for listing this
 
   danteLog ("DanteBackup", "getCommandsAWS: doImportAWS: $fileName, enc:" .print_r ($enc, true). " zip: ". print_r($zip,true)."\n");
   danteLog ("DanteBackup", "we have " . ($enc ? "ENC " : " NO-ENC ") . "  "  . ($zip ? "ZIP" : " NO-ZIp" )  . "\n");
-
-  $cmd = [];
 
   // TODO aesPassword !!!!!!
   //  cmdZipEncRestore ("/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | ", " php $IP/maintenance/importDump.php --namespaces '8' --debug 2>&1 ", $zip, $enc);
 
   danteLog ("DanteBackup", "\n Selected file is $fileName \n");
 
-  if ($fileName == "ERROR") {
-    $cmd[] = new DanteStringCommand ( "echo 'The system signalled an error and so this option is not available'" );
-    return $cmd;
-  }
 
-  if ($tar) {   // file archive; bucket and file name quoted, since the selected name comes from the request
-    $cmd = self::getFilesRestoreCommands ( "/opt/myenv/bin/aws s3 cp " . escapeshellarg ( "s3://$bucketName/$fileName" ) . " - | ", $zip, $enc );
-  }
-  elseif ($db) {
- //   gunzip -c mediawiki_dump.sql.gz | mysql -u wikiuser -p wikidb
+  $cmd    = [];
+  $source = "/opt/myenv/bin/aws s3 cp " . escapeshellarg ( "s3://$bucketName/$fileName" ) . " - | ";   // quoted for injection security
 
-  }
-  else {
+  // generate the restore commands according to the type of the file
+  if     ( $tar ) { $cmd = self::getFilesRestoreCommands ( $source, $zip, $enc ); }   // file archive
+  elseif ( $db )  { $cmd = self::getDBRestoreCommands    ( $source, $zip, $enc ); }   // database dump
+  else            { $cmd = self::getPagesRestoreCommands ( $source, $zip, $enc ); }   // page archive
 
-//    danteLog ("DanteBackup", "environment in getCommandAWS is ".print_r ($env, true));
-
-   //array_push ($arr, "/opt/myenv/bin/aws s3 cp s3://$bucketName/$fileName - | openssl aes-256-cbc -d -salt -pbkdf2 -iter 100000 -pass env:LOCAL_FILE_ENC > /tmp/DONE-ZWEI ");  // works
-    $source = "/opt/myenv/bin/aws s3 cp " . escapeshellarg ( "s3://$bucketName/$fileName" ) . " - | ";   // quoted, since the selected file name comes from the request
-    $cmd    = self::getPagesRestoreCommands ( $source, $zip, $enc );
-  }
   return $cmd;
 }
 
 
-// TODO: ALSO NEED a variant for Database files ........
+
+// generate the commands for restoring from the file at $url
 public static function getCommandsURL ($url, $user) {
-  global $IP;
-  [$db, $enc, $zip, $tar] = self::checkName ($url);
+  try { [$db, $enc, $zip, $tar] = self::checkName ($url); }  
+  catch ( Exception $x ) { return [ new DanteStringCommand ( "echo " . escapeshellarg ( "Incorrect file extension found for file " . $url ) ) ]; }  
   self::requireDbRestoreRight ( $db, $user );
 
-  $env = DanteCommon::getEnvironmentUser ( $user ); // TODO: needed ?? password ???  // TODO: hopefully not.
+  $cmd    = [];
+  $cmd[]  = new DanteStringCommand ( "echo " . escapeshellarg ( $url ) );
+  $source = "curl -sS -L --fail " . escapeshellarg ( $url ) . " | ";
+  // -L follows redirects; --fail makes an HTTP error fail the step (exit code via pipefail) instead of feeding the error page into the restore; -sS hides the progress meter but still shows errors; URL quoted, since it comes from the request
 
-  $cmd = [];
-  $cmd[] = new DanteStringCommand ( "echo " . escapeshellarg ( $url ) );
-  if ( $tar ) { return array_merge ( $cmd, self::getFilesRestoreCommands ( "curl -L " . escapeshellarg ( $url ) . " | ", $zip, $enc ) ); }   // file archive
-  $source = "curl -L " . escapeshellarg ( $url ) . " | ";   // quoted, since the URL comes from the request
-  $cmd    = array_merge ( $cmd, self::getPagesRestoreCommands ( $source, $zip, $enc ) );
+  // generate the restore commands according to the type of the file
+  if     ( $tar ) { $cmd = array_merge ( $cmd, self::getFilesRestoreCommands ( $source, $zip, $enc ) ); }   // file archive
+  elseif ( $db )  { $cmd = array_merge ( $cmd, self::getDBRestoreCommands    ( $source, $zip, $enc ) ); }   // database dump
+  else            { $cmd = array_merge ( $cmd, self::getPagesRestoreCommands ( $source, $zip, $enc ) ); }   // page archive
+
   return $cmd;
 }
 
 
 /**
  * Commands for restoring from a file at an SCP location, streamed without local storage, as for AWS S3.
- * A file archive is read once; a page archive is fetched anew for each import step.
+ * A file archive or database dump is read once; a page archive is fetched anew for each import step.
  *
  * @param string $host Host name, optionally with :port
  * @param string $path Absolute path, or relative to the home directory of the SCP user
  * @return DanteCommand[]
- * @throws Exception on an illegal host or an unsupported file type
+ * @throws Exception on an illegal host; an unsupported file type is reported by an echo command
  */
 private function getCommandsSCP ( string $host, string $path ): array {
   DanteCommon::checkScpHost ( $host );
-  [$db, $enc, $zip, $tar] = self::checkName ( $path );                                                                                     // fail early on an unknown file type
+  try { [$db, $enc, $zip, $tar] = self::checkName ( $path ); }  // throws exception if incompatible file selected
+  catch ( Exception $x ) { return [ new DanteStringCommand ( "echo " . escapeshellarg ( "Incorrect file extension found for file " . $path ) ) ]; }   
   self::requireDbRestoreRight ( $db, $this->getUser() );
-  if ( $db ) { throw new Exception ( "Restoring database dumps is not implemented yet" ); }    // TODO: fix
-  $url = DanteCommon::scpUrl ( "scp", $host, $path );
+  $url =DanteCommon::scpUrl ( "scp", $host, $path );
+
+  $cmd    = [ new DanteStringCommand ( "echo " . escapeshellarg ( "Restoring from SCP: $host:$path" ) ) ];
 
   // curl speaks scp and takes the password; without -o it writes to stdout, so it is the start of the pipe
   // credentials from the environment, so the displayed command does not contain them; host key pinned by the fingerprint from the preferences
   $source = "curl -sS --fail " . DanteCommon::hostKeyOption ( $this->getUser(), $this->getRequest()->getCheck ( 'scpSkipHostKey' ) ) . " --user \"\$DANTE_SCP_USER:\$DANTE_SCP_PW\" " . escapeshellarg ( $url ) . " | ";
-  $cmd    = [ new DanteStringCommand ( "echo " . escapeshellarg ( "Restoring from SCP: $host:$path" ) ) ];
-  return array_merge ( $cmd, $tar ? self::getFilesRestoreCommands ( $source, $zip, $enc ) : self::getPagesRestoreCommands ( $source, $zip, $enc ) );
+  
+  // generate the restore commands according to the type of the file
+  if     ( $tar ) { $cmd = array_merge ( $cmd, self::getFilesRestoreCommands ( $source, $zip, $enc ) ); }   // file archive
+  elseif ( $db )  { $cmd = array_merge ( $cmd, self::getDBRestoreCommands    ( $source, $zip, $enc ) ); }   // database dump
+  else            { $cmd = array_merge ( $cmd, self::getPagesRestoreCommands ( $source, $zip, $enc ) ); }   // page archive
+
+  return $cmd;
 }
 
 

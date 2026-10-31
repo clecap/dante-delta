@@ -5,7 +5,7 @@
 	"url":                  "https://github.com/clecap",
 	"description":          "Dumping pages and MySQL/Maria database via Special Pages to local files or Amazon AWS S3 buckets",
 	"license-name":         "GPL-2.0-or-later",
-	"requires":             {"MediaWiki": ">= 1.35.6"},
+	"requires":             {"MediaWiki": ">= 1.35.6", "extensions": {"DanteCommon": "*"}},
 	"type":                 "other",
   "AutoloadClasses":      {
     "DanteDump":                "DanteDump.php",

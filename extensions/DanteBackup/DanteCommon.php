@@ -31,27 +31,6 @@ class DanteCommon {
 
 const DUMP_PATH = "/var/www/html/wiki-dir/dump";   
 
-const DEBUG_FORM = [
-  'showls'           => [ 'section' => 'debug',   'class' => 'HTMLCheckField',  'label' => 'Show AWS Bucket ls',             'name' => 'showls', 'type' => 'check'],
-];
-
-
-// TODO: DEPRECATE THIS
-  public static function getTARGET_FORM () {
-   return  [
-    'radio'  => [ 'section' => 'target' , 'type' => 'radio',  'label' => '', 
-        'options' => [ 
-           '<b>AWS S3</b> (shows error messages; may take minutes to hours)'                                                                                 => "aws",
-           '<b>SSH / SCP</b> (shows error messages; may take minutes to hours)'                                                                              => "ssh",
-           "<b>Client</b> (save as file on the client using the browser)"                                                                                    => "client",
-           '<b>Server</b> (shows error messages; may take minutes to hours; only testing or when server accessible)'                                         => "server",
-        ], 
-        'name' => 'target',  'default' => 'aws', 
- ]  ,
-  ];
-
-  }
-
 
   // $ext: archive type before compression and encryption, one of xml, sql, tar
   public static function contentTypeHeader ($zip, $enc, $ext = "xml") {

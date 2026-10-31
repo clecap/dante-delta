@@ -9,15 +9,11 @@
 $specialPageAliases = [];
 
 $specialPageAliases['en'] = [
-  'DanteDump' => [ 'DanteDump', 'Dante Dump' ], 
-  'DanteRestore' => [ 'DanteRestore', 'Dante Restore' ],
-  'DanteDBDump' => [ 'DanteDBDump', 'Dante DB Dump' ], 
-  'DanteDBRestore' => [ 'DanteDBRestore', 'Dante DB Restore' ]
+  'DanteDump'    => [ 'DanteDump', 'Dante Dump' ],
+  'DanteRestore' => [ 'DanteRestore', 'Dante Restore' ]
 ];
 
 $specialPageAliases['de'] = [
-  'DanteDump' => [ 'DanteDump', 'Dante Dump' ], 
-  'DanteRestore' => [ 'DanteRestore', 'Dante Restore' ],
-  'DanteDBDump' => [ 'DanteDBDump', 'Dante DB Dump' ], 
-  'DanteDBRestore' => [ 'DanteDBRestore', 'Dante DB Restore' ]
+  'DanteDump'    => [ 'DanteDump', 'Dante Dump' ],
+  'DanteRestore' => [ 'DanteRestore', 'Dante Restore' ]
 ];
