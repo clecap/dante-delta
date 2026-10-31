@@ -98,10 +98,31 @@ ERRORLOG
 ### Directories which we want to include 
 
 
+!extensions/DanteBackup
+!extensions/DanteBackup/**
+extensions/DanteBackup/LOGFILE
+
+!extensions/DanteBread
+!extensions/DanteBread/**
+extensions/DanteBread/LOGFILE
 
 !extensions/DanteCommon
 !extensions/DanteCommon/**
 extensions/DanteCommon/LOGFILE
+
+!extensions/DanteExperiments
+!extensions/DanteExperiments/**
+
+!extensions/DantePresentations
+!extensions/DantePresentations/**
+extensions/DantePresentations/LOGFILE
+extensions/DantePresentations/endpoints/ENDPOINT_LOG
+
+
+!extensions/DanteSnippets
+!extensions/DanteSnippets/**
+extensions/DanteSnippets/LOGFILE
+extensions/DanteSnippets/LOG
 
 !extensions/DanteSynch
 !extensions/DanteSynch/**
@@ -111,32 +132,9 @@ extensions/DanteSynch/LOGFILE
 !extensions/DanteHideSection/**
 extensions/DanteHideSection/LOGFILE
 
-!extensions/DanteBread
-!extensions/DanteBread/**
-extensions/DanteBread/LOGFILE
-
 !extensions/DanteLinks
 !extensions/DanteLinks/**
 extensions/DanteLinks/DANTELINKS-LOGFILE
-
-!extensions/DanteSnippets
-!extensions/DanteSnippets/**
-extensions/DanteSnippets/LOGFILE
-extensions/DanteSnippets/LOG
-
-!extensions/DanteTree
-!extensions/DanteTree/**
-extensions/DanteTree/.DS_Store
-extensions/DanteTree/LOGFILE
-
-!extensions/DantePresentations
-!extensions/DantePresentations/**
-extensions/DantePresentations/LOGFILE
-extensions/DantePresentations/endpoints/ENDPOINT_LOG
-
-!extensions/DanteBackup
-!extensions/DanteBackup/**
-extensions/DanteBackup/LOGFILE
 
 !extensions/DanteSyntax
 !extensions/DanteSyntax/**
@@ -146,6 +144,10 @@ extensions/DanteSyntax/LOGFILE
 !extensions/DanteTabs/**
 extensions/DanteTabs/LOGFILE
 
+!extensions/DanteTree
+!extensions/DanteTree/**
+extensions/DanteTree/.DS_Store
+extensions/DanteTree/LOGFILE
 
 !skins/skinny
 !skins/skinny/*
