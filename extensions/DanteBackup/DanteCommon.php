@@ -51,6 +51,25 @@ public static function cmdZipEncRestore ( $cmdGenerate, $cmdConsume, $zip, $enc 
 }
 
 
+/**
+ * Builds the authenticated git URL for a repository given by its full https URL by inserting the access token as credentials.
+ *
+ * @param string $url    full https URL of the repository, e.g. https://github.com/owner/repository.git
+ * @param string $token  access token for the repository
+ * @return string        URL with credentials, not yet shell-quoted
+ * @throws Exception     when the URL is not a plain https URL
+ */
+public static function gitAuthUrl ( string $url, string $token ): string {
+  // accept only a plain https URL; credentials come from the token, not from the URL
+  $parts = parse_url ( trim ( $url ) );
+  if ( $parts === false || strtolower ( $parts['scheme'] ?? '' ) !== 'https' || empty ( $parts['host'] ) || isset ( $parts['user'] ) || isset ( $parts['query'] ) || isset ( $parts['fragment'] ) ) { throw new Exception ( "Repository URL must be of the form https://host/owner/repository.git" ); }
+
+  // insert the URL-encoded token; GitHub accepts any user name together with a token
+  $hostPath = $parts['host'] . ( isset ( $parts['port'] ) ? ':' . $parts['port'] : '' ) . ( $parts['path'] ?? '' );
+  return 'https://x-access-token:' . rawurlencode ( $token ) . '@' . $hostPath;
+}
+
+
 public static function getEnvironmentUser (User $user) {
   global $wgDBpassword;
   $accessKey        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'aws-accesskey' );

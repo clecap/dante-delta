@@ -78,12 +78,10 @@
   "prefs-ssh-encpw":         "Encryption password for user-controlled encryption before SSH upload. See [[Help:DanteBackup]].",
 
   "prefs-git":               "Credentials for GIT Backup",
-  "prefs-label-git-owner":      "Owner of repository",
-  "prefs-label-git-repository": "Name of repository",
+  "prefs-label-git-repository": "Repository URL",
   "prefs-label-git-branch":     "Name of branch to be used",
-  "prefs-git-owner":            "GitHub user or organization owning the repository. Used as default by Restore from GITHUB in [[Special:DanteRestore]].",
-  "prefs-git-repository":       "Name of the GitHub repository. Used as default by Restore from GITHUB in [[Special:DanteRestore]].",
-  "prefs-git-branch":           "Branch of the repository, for example master. Used as default by Restore from GITHUB in [[Special:DanteRestore]].",
+  "prefs-git-repository":       "Full https URL of the repository, e.g. https://github.com/owner/repository.git. Used as default by Restore from GITHUB in [[Special:DanteRestore]] and by the git dump in [[Special:DanteDump]].",
+  "prefs-git-branch":           "Branch of the repository, for example master. Used as default by Restore from GITHUB in [[Special:DanteRestore]] and by the git dump in [[Special:DanteDump]].",
 
   "prefs-label-ssh-host":          "SSH Backup Host",
   "prefs-label-ssh-host-pubsha256": "SSH Host Key Fingerprint",

@@ -152,12 +152,10 @@ protected function showForm  (): void  {
   // FORM PART: GITHUB
   $out->addHTML ("<h2>Restore from GITHUB (System files only)</h2>");             
   $out->addHTML ("<details><summary>Restore all system files stored on the configured github. System files only.</summary>"); 
-  $owner       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-owner' );
   $repository  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-repository' );
   $branch      = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-branch' );
   $token       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'github-dante-wiki-contents' );   // as in DanteDump
-  $form =    [ 'gitOwner'      =>  [ 'type' => 'text',  'name' => 'gitOwner',      'label' => 'Git Owner',      'section' => 'restore-from-github', 'required' => true, 'default' =>  $owner    ] ]
-           + [ 'gitRepository' =>  [ 'type' => 'text',  'name' => 'gitRepository', 'label' => 'Repository',     'section' => 'restore-from-github', 'required' => true, 'default' =>  $repository   ] ]
+  $form =    [ 'gitRepository' =>  [ 'type' => 'text',  'name' => 'gitRepository', 'label' => 'Repository URL', 'section' => 'restore-from-github', 'required' => true, 'default' =>  $repository   ] ]
            + [ 'gitBranch'     =>  [ 'type' => 'text',  'name' => 'gitBranch',     'label' => 'Branch',         'section' => 'restore-from-github', 'required' => true, 'default' =>  $branch   ] ]
            + [ 'gitToken'      =>  [ 'type' => 'text',  'name' => 'gitToken',      'label' => 'Access Token',   'section' => 'restore-from-github', 'required' => true, 'default' =>  $token   ] ];
   self::standardForm ($form, $action, "GITHUB", "Restore via GITHUB");
@@ -185,11 +183,10 @@ protected function getSpecificCommands ( $formId ): mixed {
       break;
 
     case 'formId_GITHUB':
-      $owner  = $request->getVal ( 'gitOwner' );  
-      $repo   = $request->getVal ( 'gitRepository' );  
+      $url    = $request->getVal ( 'gitRepository' );
       $branch = $request->getVal ( 'gitBranch' );
       $token  = $request->getVal ( 'gitToken' );
-      $arr = $this->gitClone ( $owner, $repo, $branch, $token );
+      $arr = $this->gitClone ( $url, $branch, $token );
       break; 
 
     case 'formId_SCP':
@@ -501,17 +498,18 @@ private static function addPostImportCommands ( $cmd ) {
 
 
 // returns commands to prepare a local git instance and place files in there from git
-private function gitClone ( $owner, $repo, $branch, $token ) {
+private function gitClone ( $url, $branch, $token ) {
   global $IP;
-  $targetDir = InfoExtractor::makeTempDir ();
 
-  // all form inputs end up in shell commands: URL-encode the URL parts and shell-quote every argument, so quotes or $(...) in them cannot inject commands
-  $repoUrl   = escapeshellarg ( sprintf( 'https://%s:%s@github.com/%s/%s.git', rawurlencode($owner), rawurlencode($token), rawurlencode($owner), rawurlencode($repo) ) );
+  // all form inputs end up in shell commands: URL-encode the token and shell-quote every argument, so quotes or $(...) in them cannot inject commands
+  $repoUrl   = escapeshellarg ( DanteCommon::gitAuthUrl ( $url, $token ) );
+  $targetDir = InfoExtractor::makeTempDir ();
   $branchArg = escapeshellarg ( $branch );
   $dirArg    = escapeshellarg ( $targetDir );
+  $urlHtml   = htmlspecialchars ( $url );
 
   $cmds = [
-    new DanteStringCommand ( "git clone --depth=1 --single-branch --branch $branchArg $repoUrl $dirArg",                  "<b>Cloning</b> $owner/$repo branch $branch" ),   // clone remote repository
+    new DanteStringCommand ( "git clone --depth=1 --single-branch --branch $branchArg $repoUrl $dirArg",                  "<b>Cloning</b> $urlHtml branch " . htmlspecialchars ( $branch ) ),   // clone remote repository
     new DanteStringCommand ( "php $IP/extensions/DanteCommon/importDirectory.php --ddir $dirArg --slug --overwrite",      "<b>Importing</b> into the wiki" ),               // import contents into wiki
     new DanteStringCommand ( "rm -Rf $dirArg",                                                                            "Removing temporary directory" )                  // clean temporary directory
   ];

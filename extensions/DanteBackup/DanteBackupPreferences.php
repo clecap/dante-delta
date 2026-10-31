@@ -26,7 +26,6 @@ public static function onGetPreferences ( $user, &$preferences ) {
 
     $preferences['github-dante-wiki-contents']  = ['type' => 'text',  'section' => 'dante/keys', 'label-message' => 'prefs-label-git',        'help-message' => 'prefs-git'];
 
-    $preferences['git-owner']            = ['type' => 'text',  'section' => 'dante-bu/git', 'label-message' => 'prefs-label-git-owner',         'help-message' => 'prefs-git-owner'];
     $preferences['git-repository']       = ['type' => 'text',  'section' => 'dante-bu/git', 'label-message' => 'prefs-label-git-repository',    'help-message' => 'prefs-git-repository'];
     $preferences['git-branch']           = ['type' => 'text',  'section' => 'dante-bu/git', 'label-message' => 'prefs-label-git-branch',        'help-message' => 'prefs-git-branch'];
   

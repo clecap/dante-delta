@@ -300,13 +300,14 @@ private function maskSystem ($out, $action) : void {
   $text = "<details><summary>Total number of Files mentioned: <b>" . $sumNum . "  of which " .$uniqueNum . " unique ones</b></summary> " .$text . "<p><b>Manifest:</b> <a href=\"$manifestUrl\" target=\"_blank\" rel=\"noopener\">" . htmlspecialchars ( $manifest ) . "</a></details>";
 
   $user = $this->getUser();
-  $GIT_TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' ); 
+  $GIT_TOKEN        = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'github-dante-wiki-contents' );
+  $GIT_REPO         = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'git-repository' ) ?: 'https://github.com/clecap/dante-wiki-contents.git';   // preference, as in DanteRestore
+  $GIT_BRANCH       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption ( $user, 'git-branch' )     ?: 'master';
 
    $header = [
      'araw_info'       => [ 'section' => 'selected-files', 'class' => 'HTMLInfoField', 'raw' => true, 'default' => $text ],  // only displays the affected files
-     'GIT_OWNER'       => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Git Owner',      'name' => 'GIT_OWNER',   'type' => 'text',  'default' => 'clecap' ],
-     'GIT_REPO'        => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Repository',     'name' => 'GIT_REPO',    'type' => 'text',  'default' => 'dante-wiki-contents' ],
-     'GIT_BRANCH'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Branch',          'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => 'master' ],
+     'GIT_REPO'        => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Repository URL',  'name' => 'GIT_REPO',    'type' => 'text',  'default' => $GIT_REPO ],
+     'GIT_BRANCH'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Branch',          'name' => 'GIT_BRANCH',  'type' => 'text',  'default' => $GIT_BRANCH ],
      'GIT_COMMIT'      => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Commit Message',  'name' => 'GIT_COMMIT',  'type' => 'text',  'default' => 'Commit by DanteDump for initial contents'],
      'GIT_TOKEN'       => [ 'section' => 'git-data', 'class' => 'HTMLTextField', 'cssclass' => 'headright',   'size' => 80,  'label' => 'Access Token',    'name' => 'GIT_TOKEN',   'type' => 'text',  'default' => $GIT_TOKEN],
      'MANIFEST_FILE'   => [ 'type' => 'hidden', 'name' => 'MANIFEST_FILE', 'default' => $manifest ],   // not displayed, but still sent with the request for the git dump
@@ -443,7 +444,7 @@ protected function getSpecificCommands ( $formId ): mixed {
       $gitDir = InfoExtractor::makeTempDir ();  // make a temporary directory in which all this will take place
       // export articles in manifest file to the temporary git directiry
       $generate = new DanteCallableCommand ( [InfoExtractor::class, 'exportManifestToTextFiles'], [ "manifestFile" => $manifestFile, "outDir" => "$gitDir", "clean" => false], "<b>Exporting</b> files in manifest" );
-      $cmd = self::gitPrepare ( $request->getVal ('GIT_OWNER'),  $request->getVal ('GIT_REPO'),  $request->getVal ('GIT_BRANCH'),  $request->getVal ('GIT_COMMIT'),  $request->getVal ('GIT_TOKEN') , $generate, $gitDir, $manifestFile );
+      $cmd = self::gitPrepare ( $request->getVal ('GIT_REPO'),  $request->getVal ('GIT_BRANCH'),  $request->getVal ('GIT_COMMIT'),  $request->getVal ('GIT_TOKEN') , $generate, $gitDir, $manifestFile );
       return $cmd;
 
     case "formId_pages":    $cmd = $this->commandPagesFiles (); return $cmd;
@@ -477,15 +478,16 @@ private function wrap ( $cmd, $zip, $enc ) {
 
 
 // returns commands to prepare a local git instance and place files in there
-private static function gitPrepare ( string $GIT_OWNER, string $GIT_REPO, string $GIT_BRANCH, string $GIT_COMMIT, string $GIT_TOKEN, DanteCommand $generate, string $myOutputDir, string $manifestFile ) {
+private static function gitPrepare ( string $GIT_REPO, string $GIT_BRANCH, string $GIT_COMMIT, string $GIT_TOKEN, DanteCommand $generate, string $myOutputDir, string $manifestFile ) {
 
   $GITMAIL = "dante-himself@dante.wiki";
   $GITUSER = "Dante Wiki System";
 
-  // all form inputs end up in shell commands: URL-encode the URL parts and shell-quote every argument, so quotes or $(...) in them cannot inject commands
-  $REPO    = escapeshellarg ( "https://" . rawurlencode ($GIT_OWNER) . ":" . rawurlencode ($GIT_TOKEN) . "@github.com/" . rawurlencode ($GIT_OWNER) . "/" . rawurlencode ($GIT_REPO) . ".git" );
+  // all form inputs end up in shell commands: URL-encode the token and shell-quote every argument, so quotes or $(...) in them cannot inject commands
+  $REPO    = escapeshellarg ( DanteCommon::gitAuthUrl ( $GIT_REPO, $GIT_TOKEN ) );
   $BRANCH  = escapeshellarg ( $GIT_BRANCH );
   $COMMIT  = escapeshellarg ( $GIT_COMMIT );
+  $WHERE   = htmlspecialchars ( "$GIT_BRANCH at " . trim ( $GIT_REPO ) );   // for display in comments only
 
   $git    = "/usr/bin/git";  // use original binary, not a possibly VS-code-patched wrapper
 
@@ -512,9 +514,9 @@ BASH;
 // NOTE: git -C allows to specify a directory and spares us the cd to the directory
 
   $cmds = [
-  //  [ "command" => "git ls-remote --exit-code --heads {$REPO} {$GIT_BRANCH}" ,               "comment" => "<b>Testing existence of branch</b> $GIT_BRANCH at $GIT_OWNER/$GIT_REPO" ],
+  //  [ "command" => "git ls-remote --exit-code --heads {$REPO} {$GIT_BRANCH}" ,               "comment" => "<b>Testing existence of branch</b> $WHERE" ],
     new DanteStringCommand ( $initBranch,                                                              "<b>Conditionally generating branch</b> $GIT_BRANCH in case it is misssing" ),
-    new DanteStringCommand ( "git clone --depth 1 --branch {$BRANCH} {$REPO} {$myOutputDir}",          "<b>Git Cloning</b> from $GIT_BRANCH at $GIT_OWNER/$GIT_REPO" ),
+    new DanteStringCommand ( "git clone --depth 1 --branch {$BRANCH} {$REPO} {$myOutputDir}",          "<b>Git Cloning</b> from $WHERE" ),
     new DanteStringCommand ( "$git -C $myOutputDir config user.name \"$GITUSER\"",                     "Set git commit user.name to $GITUSER" ),
     new DanteStringCommand ( "$git -C $myOutputDir config user.email \"$GITMAIL\"",                    "Set git commit user.email to $GITMAIL" ),
     $showGitStatus,
@@ -530,7 +532,7 @@ BASH;
     // commit only when staged changes exist (git diff --cached exits 1 when changes are present) - otherwise we get an error status when there is nothing to commit
     new DanteStringCommand ( "{ if $git -C $myOutputDir diff --cached --quiet; then echo 'Nothing to commit'; else $git -C $myOutputDir commit -m $COMMIT; fi; }", "<b>Git Commit</b>" ),
     $showGitStatus,  
-    new DanteStringCommand ( "$git -C $myOutputDir push --verbose $REPO $BRANCH",                      "Pushing to $GIT_BRANCH at $GIT_OWNER/$GIT_REPO" ),
+    new DanteStringCommand ( "$git -C $myOutputDir push --verbose $REPO $BRANCH",                      "Pushing to $WHERE" ),
     $showGitStatus,
   //  [ "command" => "rm -Rf $myOutputDir",                                                    "comment" => "Remove temp directory"]
   ];
