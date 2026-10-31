@@ -5,14 +5,14 @@ on:
     paths:
       - 'extensions/**'         
       - 'includes/**'
-      - 'skins/**'                        
-  pull_request:
+      - 'skins/**'
+      - '*.php'                 # PHP files in the main directory only; * does not match /
+  pull_request:            # run on proposed changes before they are merged
     paths:
-      - 'extensions/**'         
+      - 'extensions/**'
       - 'includes/**'
-      - 'skins/**'                        
-  schedule:
-    - cron: '0 0 * * *'
+      - 'skins/**'
+      - '*.php'                 # PHP files in the main directory only; * does not match /
 
 permissions:
   contents: read
@@ -32,8 +32,7 @@ jobs:
         include:
           - language: javascript-typescript
             continue-on-error: false
-          - language: python
-            continue-on-error: true   # no Python source yet; keep job in place for when it is added
+          # add further languages here, e.g. "- language: python", once the repository contains such source code
 
     continue-on-error: ${{ matrix.continue-on-error }}
 

@@ -1,0 +1,83 @@
+# Taint analysis (security) of the PHP files of this repository with Psalm, configured in psalm.xml
+# Results will be available at Github: Security / Code Scanning Alerts
+#
+# This repository holds only the Dante delta; MediaWiki core is checked out next to it, so Psalm knows the core classes
+
+name: Psalm to Security / Code Scanning Alerts
+
+on:
+  push:
+    paths:
+      - 'extensions/**'
+      - 'includes/**'
+      - 'skins/**'
+      - '*.php'                 # PHP files in the main directory only; * does not match /
+      - 'psalm.xml'
+      - '.github/workflows/psalm.yml'
+  pull_request:                 # run on proposed changes before they are merged
+    paths:
+      - 'extensions/**'
+      - 'includes/**'
+      - 'skins/**'
+      - '*.php'
+      - 'psalm.xml'
+      - '.github/workflows/psalm.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  psalm:
+    name: Run Psalm taint analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      # MediaWiki core in the version we patch (see MW_VERSION in includes/Defines.php)
+      - name: Checkout MediaWiki core
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          repository: wikimedia/mediawiki
+          ref: '1.39.0'
+          path: mw-core
+
+      # add core files around our delta, without overwriting our patched core files, so the layout is the same as in a local installation
+      - name: Merge MediaWiki core into the workspace
+        run: |
+          rsync -a --ignore-existing --exclude .git mw-core/ ./
+          rm -rf mw-core
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.4'
+          tools: composer
+          coverage: none
+
+      # libraries of core, so Psalm also knows their classes; no scripts, since we only need the source; Psalm in its own directory, so it does not mix with core's dependencies
+      - name: Install core libraries and Psalm
+        run: |
+          composer install --no-dev --no-scripts --no-interaction --no-progress --ignore-platform-reqs
+          mkdir ../psalm-tool
+          composer require --working-dir=../psalm-tool --no-interaction --no-progress vimeo/psalm:6.20.0
+
+      - name: Run Psalm
+        run: ../psalm-tool/vendor/bin/psalm --config=psalm.xml --taint-analysis --no-cache --no-progress --report=psalm-results.sarif
+        continue-on-error: true   # findings make Psalm exit with an error; they are reported by the upload below
+
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@429e1977040da7a23b6822b13c129cd1ba93dbb2 # v3.26.2
+        with:
+          sarif_file: psalm-results.sarif
+          category: psalm
+          wait-for-processing: true

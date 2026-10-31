@@ -43,49 +43,6 @@ function danteLog ($extension, $text) {
 class DanteUtil {
 
 
-/** Store content to github
- * $owner    Repository owner name (in my case clecap)
- * $repo     Name of repository (in my case dante-wiki)
- * $path     Path of the filename to be uploaded
- * $token    Access token for github
- * $content  Content to be uploaded
- */
-static public function storeToGithub ($owner, $repo, $path, $token, $content) {
-   $apiUrl = "https://api.github.com/repos/$owner/$repo/contents/$path";    // GitHub API URL to create/update a file
-
-
-// TODO: must trhow an exception if something goes wrong wrt storing so the user is informed !
-
-  // Get the current contents of the file (need the SHA for updating)
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $apiUrl);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_USERAGENT, $owner);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: token ' . $token));
-  $response = curl_exec($ch);
-  curl_close($ch);
-  $responseData = json_decode($response, true);
-  $fileSha = isset($responseData['sha']) ? $responseData['sha'] : null;
-
-  // Prepare data for GitHub API
-  $data = ['message' => "Updating $path with new data", 'content' => base64_encode($content), 'sha' => $fileSha, ];
-
-  // Send the data to GitHub
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $apiUrl);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_USERAGENT, $owner);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: token ' . $token, 'Content-Type: application/json'));
-  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-  $response = curl_exec($ch);
-  curl_close($ch);
-
-  return $response;
-}
-
-
-
 /**
  * Given the name $cat of a category, return the name of a temporary file listing all files belonging to this category (this includes category files)
  */
@@ -102,7 +59,7 @@ static public function catList ( $cat ) {
       __METHOD__
     );
 
-  $filepath = tempnam ("/tmp", "DanteInitialStore");   // getting a fresh file name helps us to avoid race conditions of parallel invocations; so we do not need locks
+  $filepath = tempnam ("/tmp", "DantePageList");   // getting a fresh file name helps us to avoid race conditions of parallel invocations; so we do not need locks
   $file = fopen( $filepath, 'w' );
   foreach ( $res as $row ) {
     $title = Title::makeTitle( $row->page_namespace, $row->page_title );
@@ -130,7 +87,7 @@ static public function listOfListed ($name) {
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
     $contentText = ContentHandler::getContentText( $contentObject );    
     $contentText = extractPreContents ($contentText);
-    $filepath = tempnam ("/tmp", "DanteInitialStore");
+    $filepath = tempnam ("/tmp", "DantePageList");
     file_put_contents ($filepath, $contentText); 
     return $filepath;
   }
@@ -156,7 +113,7 @@ static public function getPagesInNamespace( $namespaceIndex ) {
 
 // returns name of a temporary file containing all parges contained in the given namespace
 static public function listOfNamespace ( $nsIndex ) {
-  $filepath = tempnam ("/tmp", "DanteInitialStore");
+  $filepath = tempnam ("/tmp", "DantePageList");
   $arr = DanteUtil::getPagesInNamespace ( $nsIndex );
   file_put_contents ($filepath, implode ("\n",$arr)."\n");
   return $filepath;
@@ -164,7 +121,7 @@ static public function listOfNamespace ( $nsIndex ) {
 
 // returns name of a temporary file
 static public function singleList ( $name ) {
-  $filepath = tempnam ("/tmp", "DanteInitialStore");
+  $filepath = tempnam ("/tmp", "DantePageList");
   file_put_contents ( $filepath, $name . "\n");
   return $filepath;
 }

@@ -1,0 +1,60 @@
+# Pattern based security scanning of the files of this repository with Semgrep, using the public PHP and security-audit rule sets
+# Results will be available at Github: Security / Code Scanning Alerts
+#
+
+name: Semgrep to Security / Code Scanning Alerts
+
+on:
+  push:
+    paths:
+      - 'extensions/**'
+      - 'includes/**'
+      - 'skins/**'
+      - '*.php'                 # PHP files in the main directory only; * does not match /
+      - '.github/workflows/semgrep.yml'
+  pull_request:                 # run on proposed changes before they are merged
+    paths:
+      - 'extensions/**'
+      - 'includes/**'
+      - 'skins/**'
+      - '*.php'
+      - '.github/workflows/semgrep.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: Run Semgrep scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Install Semgrep
+        run: pip install semgrep==1.180.0
+
+      # rule sets are fetched from the public Semgrep registry; no account and no metrics needed
+      - name: Run Semgrep
+        run: semgrep scan
+          --config p/php
+          --config p/security-audit
+          --metrics=off
+          --sarif
+          --output semgrep-results.sarif
+
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@429e1977040da7a23b6822b13c129cd1ba93dbb2 # v3.26.2
+        with:
+          sarif_file: semgrep-results.sarif
+          category: semgrep
+          wait-for-processing: true

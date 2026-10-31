@@ -10,18 +10,11 @@
   "AutoloadClasses":      {
     "DanteDump":                "DanteDump.php",
     "DanteRestore":             "DanteRestore.php",
-    "DanteListBackups":         "DanteListBackups.php",
-    "DanteBackupPreferences":   "DanteBackupPreferences.php",
-    "DanteInitialStore":        "DanteInitialStore.php",
-    "DanteInitialLoad":         "DanteInitialLoad.php"
-
+    "DanteBackupPreferences":   "DanteBackupPreferences.php"
   },
   "SpecialPages": {
     "DanteDump":          { "class": "DanteDump"  },
-    "DanteRestore":       { "class": "DanteRestore"  },
-    "DanteListBackups":   { "class": "DanteListBackups"},
-    "DanteInitialStore":  { "class": "DanteInitialStore"},
-    "DanteInitialLoad":   { "class": "DanteInitialLoad"}
+    "DanteRestore":       { "class": "DanteRestore"  }
   },
   "ExtensionMessagesFiles": {"DanteDumpAlias": "DanteDumpAlias.i18n.alias.php"},
   "Hooks": {

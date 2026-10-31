@@ -81,6 +81,9 @@ ERRORLOG
 
 
 !DantePolyfill.php
+!psalm.xml
+!.phan/
+!.phan/config.php
 !DanteSettings.php
 !DanteSettings-production.php
 !DanteSettings-development.php

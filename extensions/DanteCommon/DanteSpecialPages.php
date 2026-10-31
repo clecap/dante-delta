@@ -46,6 +46,8 @@ protected function handleSubmission () {
     // The following now does the dispatching via the html code generated below in ServiceEndpointHelper
     $this->executeCommands ( $arr, $env );                           // finally dispatch the execution of these commands
 
+  } catch ( ErrorPageError $x ) {
+    throw $x;   // e.g. PermissionsError for a missing additional right: let MediaWiki show its usual error page
   } catch ( Exception $x) {
     $this->getOutput()->addWikiTextAsContent("Exception occured: ". $x);
   }

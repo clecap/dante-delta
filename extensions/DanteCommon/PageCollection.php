@@ -54,30 +54,4 @@ class PageCollection {
     @unlink ( $this->filename );
   }
 
-
-
-  // TODO: DEPRECATE THIS together with DanteInitialStore.php
-  public function execute ( $owner, $repository, $token, $path, $out=false ) {
-    global $IP;
-
-    // generate a manifest file and upload that manifest file
-    $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->filename-manifest.txt", $token, $this->contents);
-    if ($out) $out->addHTML( '<h3>got filepath:</h3><p><pre>' . $this->filename . '</pre></p>' );
-
-    // dump the contents as requested into into variable $output
-    $cmd = "php  $IP/maintenance/dumpBackup.php --current --uploads  --include-files  --pagelist=$this->filename";
-    $ret = Executor::execute ( $cmd, $output, $error, $duration );
-
-    if ($out) $out->addHTML ( "<h3>dumpBackup wrote to stderr:</h3><p><pre>" .$error. "</pre></p>");
-    $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml.gz",  $token,   gzencode ($output) );   // upload a .xml.gz variant
-    $response = DanteUtil::storeToGithub ($owner, $repository, "$path/$this->name.xml",    $token,   $output );                      // upload a .xml variant
-
-    $json = json_decode ($response);
-    // if ($json->status != 200) { throw new Exception ("PROBLEM");}  // TODO: fix ?!?
-    $json_indented_by_4 = json_encode($json, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
-    $json_indented_by_2 = preg_replace('/^(  +?)\\1(?=[^ ])/m', '$1', $json_indented_by_4);
-    if ($out) $out->addHTML( '<h3>Github server replied to API call:</h3><p><pre>' . $json_indented_by_2 . '</pre></p>' );
-    @unlink ($filepath);
-  }
-
 } // end class PageCollection

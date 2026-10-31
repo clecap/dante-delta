@@ -79,7 +79,7 @@ protected function showForm (): void {
   self::maskSystem         ( $out, $action);
   self::maskPages          ( $out, $action );
   self::maskFiles          ( $out, $action );
-  self::maskDatabaseTables ( $out, $action );  
+  self::maskDatabaseTables ( $out, $action );  // shown to all; the right dante-dbdump is checked on execution, see getSpecificCommands
 }
 
 
@@ -153,7 +153,7 @@ private function commandDB () {
   $dumpCommand = self::wrap ($dumpCommand, $zip, $enc );   
   danteLog ("DanteBackup", "\nDanteDump: wrapped dumpCommand is: " . $dumpCommand);   // add pipefail, compression and encryption as selected
 
-  $archiveName = $this->archiveName ( $tag, "", "sql", $zip, $enc );   // the .sql suffix lets DanteListBackups and DanteRestore recognize it as database dump
+  $archiveName = $this->archiveName ( $tag, "", "sql", $zip, $enc );   // the .sql suffix lets DanteRestore recognize it as database dump
   $bucketName  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'aws-bucketname' );
 
   // --skip-ssl
@@ -312,7 +312,7 @@ private function maskSystem ($out, $action) : void {
      'MANIFEST_FILE'   => [ 'type' => 'hidden', 'name' => 'MANIFEST_FILE', 'default' => $manifest ],   // not displayed, but still sent with the request for the git dump
    ];
   
-   self::standardForm ($header, $action, "git", "Dump System Files");
+   self::standardForm ($header, $action, "sys", "Dump System Pages");
    $out->addHTML ("</details>");
 }
 
@@ -438,7 +438,7 @@ private function maskDatabaseTables ( $out, $action ) {
 protected function getSpecificCommands ( $formId ): mixed {
   $request = $this->getRequest();
   switch ($formId) {
-    case "formId_git":
+    case "formId_sys":
       $manifestFile = $request->getVal ( 'MANIFEST_FILE', '' );
       if ( !self::isOwnManifest ( $manifestFile ) ) { throw new Exception ( "Invalid manifest file" ); }   // the hidden field can be changed in the request; accept only our own manifests
       $gitDir = InfoExtractor::makeTempDir ();  // make a temporary directory in which all this will take place
@@ -449,7 +449,9 @@ protected function getSpecificCommands ( $formId ): mixed {
 
     case "formId_pages":    $cmd = $this->commandPagesFiles (); return $cmd;
     case "formId_dump":     $cmd = $this->commandFiles ();     return $cmd;
-    case "formId_dumpDB":   $cmd = $this->commandDB ();         return $cmd;
+    case "formId_dumpDB":
+      if ( !$this->getUser()->isAllowed ( 'dante-dbdump' ) ) { throw new PermissionsError ( 'dante-dbdump' ); }   // the form is shown to all; only the execution needs the right
+      $cmd = $this->commandDB ();         return $cmd;
 
     default:
       throw new Exception ("Not yet implemented or illegal form id: $formId");
@@ -519,7 +521,7 @@ BASH;
     $showGitStatus,
     $generate,                                                  // export wiki pages into the local clone 
     $showGitStatus,
-    $prune,                                                            // TODO: does it ????? deletes .git/HEAD  
+    $prune,                                                     // TODO: does it ????? deletes .git/HEAD  
     $showGitStatus,
     new DanteStringCommand ( "$git -C $myOutputDir add . ",           "Staging git files" ),
     $showGitStatus,

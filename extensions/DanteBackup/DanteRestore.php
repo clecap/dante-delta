@@ -163,6 +163,7 @@ protected function getSpecificCommands ( $formId ): mixed {
       danteLog ("DanteBackup", "tmp name " . $_FILES['xmlimport']['tmp_name'] . "\n");      
       danteLog ("DanteBackup", "error " . $_FILES['xmlimport']['error'] . "\n");
       $info = "Name: ". $_FILES['xmlimport']['name']. " Size " . number_format (floatval ( $_FILES['xmlimport']['size'] ) / (1024 * 1024), 2) . "[MB]";  // TODO: MAYBE OFR OUTPUT - but where and when ???
+      [$db] = self::checkName ( $_FILES['xmlimport']['name'] );  self::requireDbRestoreRight ( $db, $this->getUser() );   // before keeping the upload, so a refused upload leaves no file behind
       // keep the upload: PHP deletes tmp_name at the end of this request, but the commands run later in serviceEndpoint.php
       $fileName = tempnam ( sys_get_temp_dir(), "dante_restore_" );
       if ( $fileName === false || !move_uploaded_file ( $_FILES['xmlimport']['tmp_name'], $fileName ) ) { throw new Exception ( "Could not keep the uploaded file" ); }
@@ -239,6 +240,18 @@ private static function checkName ($fileName) {
 
 
 /**
+ * Database dumps replace the whole database, including user accounts; restoring them needs the separate right dante-dbrestore in addition to dante-restore.
+ *
+ * @param bool $db   Whether the file to be restored is a database dump, as determined by checkName
+ * @param User $user User who requests the restore
+ * @throws PermissionsError if a database dump is to be restored without the right; MediaWiki shows its usual permission error page
+ */
+private static function requireDbRestoreRight ( bool $db, User $user ): void {
+  if ( $db && !$user->isAllowed ( 'dante-dbrestore' ) ) { throw new PermissionsError ( 'dante-dbrestore' ); }
+}
+
+
+/**
  * Commands for restoring a page archive streamed from $source: each step reads the archive anew, MediaWiki: and Template: pages first, since the other pages need them.
  *
  * @param string $source Shell command writing the archive to stdout, ending in a pipe, e.g. "curl -L 'https://...' | "
@@ -308,6 +321,7 @@ public function getCommandsFILE ($fileName, $info, $originalName = null) {
 private function getCommandsAWS ($fileName) {
   global $IP;
   [$db, $enc, $zip, $tar] = self::checkName ($fileName);
+  self::requireDbRestoreRight ( $db, $this->getUser() );
 
   $env = DanteCommon::getEnvironmentUser ($this->getUser());
   $bucketName = $env["AWS_BUCKET_NAME"];
@@ -350,8 +364,9 @@ private function getCommandsAWS ($fileName) {
 public static function getCommandsURL ($url, $user) {
   global $IP;
   [$db, $enc, $zip, $tar] = self::checkName ($url);
+  self::requireDbRestoreRight ( $db, $user );
 
-  $env = DanteCommon::getEnvironmentUser ( $user ); // TODO: needed ?? password ???  // TODO: hopefully not. CAVE: DanteInitialStore.php uses this as well
+  $env = DanteCommon::getEnvironmentUser ( $user ); // TODO: needed ?? password ???  // TODO: hopefully not.
 
   $cmd = [];
   $cmd[] = new DanteStringCommand ( "echo " . escapeshellarg ( $url ) );
@@ -374,6 +389,7 @@ public static function getCommandsURL ($url, $user) {
 private function getCommandsSCP ( string $host, string $path ): array {
   DanteCommon::checkScpHost ( $host );
   [$db, $enc, $zip, $tar] = self::checkName ( $path );                                                                                     // fail early on an unknown file type
+  self::requireDbRestoreRight ( $db, $this->getUser() );
   if ( $db ) { throw new Exception ( "Restoring database dumps is not implemented yet" ); }    // TODO: fix
   $url = DanteCommon::scpUrl ( "scp", $host, $path );
 

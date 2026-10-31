@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<psalm
+  errorLevel="8"
+  phpVersion="8.4"
+  findUnusedCode="false"
+  findUnusedBaselineEntry="false"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="https://getpsalm.org/schema/config"
+  xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+  <!--
+    Psalm configuration for the dante-delta code, used for taint analysis (security), see .github/workflows/psalm.yml for the command line
+    Analyzed: only our own code (projectFiles). Scanned for types only: MediaWiki core (extraFiles), which in CI is checked out next to our files.
+  -->
+
+  <!-- our own code: extensions, skins, patched core files and settings in the main directory -->
+  <projectFiles>
+    <directory name="extensions/DanteBackup" />
+    <directory name="extensions/DanteBread" />
+    <directory name="extensions/DanteCommon" />
+    <directory name="extensions/DanteHideSection" />
+    <directory name="extensions/DanteLinks" />
+    <directory name="extensions/DantePresentations" />
+    <directory name="extensions/DanteSnippets" />
+    <directory name="extensions/DanteSynch" />
+    <directory name="extensions/DanteSyntax" />
+    <directory name="extensions/DanteTabs" />
+    <directory name="extensions/DanteTree" />
+    <directory name="skins/skinny" />
+    <directory name="skins/DantePresentationSkin" />
+    <file name="includes/import/WikiImporter.php" />
+    <file name="includes/media/SVGReader.php" />
+    <file name="DantePolyfill.php" />
+    <file name="DanteSettings.php" />
+    <file name="DanteSettings-production.php" />
+    <file name="DanteSettings-development.php" />
+    <!-- third party code bundled in our extensions, and files kept only for reference -->
+    <ignoreFiles allowMissingFiles="true">
+      <directory name="extensions/*/vendor" />
+      <directory name="extensions/*/node_modules" />
+      <file name="extensions/*/*-deprecate.php" />
+      <file name="DanteSettings-development-deprec.php" />
+    </ignoreFiles>
+  </projectFiles>
+
+  <!-- MediaWiki core: only scanned, so Psalm knows its classes and can follow tainted data through them -->
+  <extraFiles>
+    <directory name="includes" />
+  </extraFiles>
+</psalm>

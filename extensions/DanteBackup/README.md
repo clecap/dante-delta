@@ -15,27 +15,6 @@ DanteDiv adds diverse convenience features to MediaWiki
 
 
 
-
-/*
-  $descriptorspec = array( 0 => array("pipe", "r"), 1 => array("pipe", "w"), 2 => array("pipe", "w") );
-  $cwd = getcwd();
-  $env = null;
-
-  $proc = proc_open($cmd, $descriptorspec, $pipes, $cwd, $env);
-  if (is_resource($proc)) {
-    // Output test:
-    echo "STDOUT:<br />";
-    echo "<pre>".stream_get_contents($pipes[1])."</pre>";
-    echo "STDERR:<br />";
-    echo "<pre>".stream_get_contents($pipes[2])."</pre>";
-    $return_value = proc_close($proc);
-    echo "Exited with status: {$return_value}";
-  }
-
-*/
-
-
-
 # Prepare for AWS S3 use
 
 1) Bucket must have a specific policy
