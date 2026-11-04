@@ -30,6 +30,10 @@ $wgUrlProtocols = [
 ];
 
 
+$wgDanteVersion = is_readable ("/etc/dante-version") ? mb_substr (trim (file_get_contents ("/etc/dante-version")), 0, 10) : "version-file-not-found";   // Dante version string from /etc/dante-version, at most 10 characters; fallback marker if file is missing or unreadable
+
+
+
 $wgLogo="/dante-assets/logo-180x180.png";
 
 $wgRightsText=  "Copyright";   // This variable must be non-empty in order that the contents of MediaWiki:Copyright is shown 

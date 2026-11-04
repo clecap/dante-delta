@@ -173,34 +173,13 @@ public static function onOutputPageBeforeHTML( OutputPage &$out, &$text ) {
 
 
 
-/*
-public static function todo ( $input, array $args, Parser $parser, PPFrame $frame ) {
-
-
-  $parsed = $parser->recursiveTagParse( $input, $frame );
-  // Since this can span different parses, we need to take account of the fact recursiveTagParse only half parses the text. or strip tags
-  // (UNIQ's) will be exposed. (Alternative would be to just call $parser->replaceLinkHolders() and $parser->mStripState->unstripBoth() right here right now.
-  $serialized = serialize( $parser->serializeHalfParsedText( $parsed ) );
-  $parser->getOutput()->setPageProperty( 'tdoProperty', $serialized );
-
-  $currentValue ="";
-  $prop = unserialize( $parser->getOutput()->getPageProperty( 'tdoProperty' ) );
-  if ( !$parser->isValidHalfParsedText( $prop ) ) { $currentValue = '<span class="error">Error retrieving prop</span>';} 
-  else { $currentValue = $parser->unserializeHalfParsedText( $prop );}
-
-  return "";     
-
-;}
-
-*/
-
 
 
 public static function onSkinAddFooterLinks( Skin $skin, string $key, array &$footerlinks ) {
-  global $wgDanteOperatingMode, $wgServer, $wgScriptPath;
+  global $wgDanteOperatingMode, $wgServer, $wgScriptPath, $wgDanteVersion;
   if ( strcmp ($key, 'places') == 0 ) {
     $footerlinks['imprint']       = Html::element( 'a', ['href' => $wgServer.$wgScriptPath."/index.php/"."Project:Imprint", 'rel' => 'noreferrer noopener' ], "Imprint");
-    $footerlinks['dantedevelopment'] = Html::element( 'a',  ['href' => $wgServer.$wgScriptPath."/index.php/"."Special:DanteDevelopment", 'rel' => 'noreferrer noopener' ], "Mode: " . $wgDanteOperatingMode);
+    $footerlinks['dantedevelopment'] = Html::element( 'a',  ['href' => $wgServer.$wgScriptPath."/index.php/"."Special:DanteDevelopment", 'rel' => 'noreferrer noopener' ], "Mode: " . $wgDanteOperatingMode. "(".$wgDanteVersion. ")");
 
     $freeSpace = "Free Space: " . floor ( disk_free_space ("/var/www/html") / 1000000000 ) . " GB";
     $footerlinks['space'] = Html::element( 'a',  ['href' =>   $wgServer. $wgScriptPath . "/index.php/" .  "Special:ParsifalReset", 'rel' => 'noreferrer noopener'], $freeSpace);
