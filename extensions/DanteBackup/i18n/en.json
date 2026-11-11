@@ -45,7 +45,8 @@
 
   "restform-restore-from-s3": "Select a page dump file for restoring",
   "restore-from-url": "Enter a URL for restoring from the file it designates",
-  "restore-from-github": "GitHub repository from which the contents are restored",
+  "restore-from-github": "Git repository from which the contents are restored",
+  "restore-from-github-dante":"Git repository from which system contents are restored",
 
   "label-textfield":    "URL",
   "restore-from-scp":   "SCP location from which the file is restored",
@@ -78,10 +79,19 @@
   "prefs-ssh-encpw":         "Encryption password for user-controlled encryption before SSH upload. See [[Help:DanteBackup]].",
 
   "prefs-git":               "Credentials for GIT Backup",
+
+  "prefs-git-dante":     "Credentials for GIT for Dante System Files",
+
   "prefs-label-git-repository": "Repository URL",
   "prefs-label-git-branch":     "Name of branch to be used",
-  "prefs-git-repository":       "Full https URL of the repository, e.g. https://github.com/owner/repository.git. Used as default by Restore from GITHUB in [[Special:DanteRestore]] and by the git dump in [[Special:DanteDump]].",
-  "prefs-git-branch":           "Branch of the repository, for example master. Used as default by Restore from GITHUB in [[Special:DanteRestore]] and by the git dump in [[Special:DanteDump]].",
+  "prefs-label-git-write-token":     "Write token",
+    "prefs-label-git-read-token":     "Read token, if any",
+
+ "prefs-label-git-dante-repository": "Repository URL",
+ "prefs-label-git-dante-branch":  "Name of branch to be used",
+ "prefs-label-git-dante-read-token": "Write token",
+ "prefs-label-git-dante-write-token": "Read token, if any",
+
 
   "prefs-label-ssh-host":          "SSH Backup Host",
   "prefs-label-ssh-host-pubsha256": "SSH Host Key Fingerprint",

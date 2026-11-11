@@ -24,11 +24,15 @@ public static function onGetPreferences ( $user, &$preferences ) {
     $preferences['ssh-restore-pw']      = ['type' => 'text',  'section' => 'dante-bu/ssh', 'label-message' => 'prefs-label-ssh-restore-pw',   'help-message' => 'prefs-ssh-restore-pw'];
     $preferences['ssh-encpw']           = ['type' => 'text',  'section' => 'dante-bu/ssh', 'label-message' => 'prefs-label-ssh-encpw',        'help-message' => 'prefs-ssh-encpw'];
 
-    $preferences['github-dante-wiki-contents']  = ['type' => 'text',  'section' => 'dante/keys', 'label-message' => 'prefs-label-git',        'help-message' => 'prefs-git'];
-
     $preferences['git-repository']       = ['type' => 'text',  'section' => 'dante-bu/git', 'label-message' => 'prefs-label-git-repository',    'help-message' => 'prefs-git-repository'];
     $preferences['git-branch']           = ['type' => 'text',  'section' => 'dante-bu/git', 'label-message' => 'prefs-label-git-branch',        'help-message' => 'prefs-git-branch'];
-  
+    $preferences['git-write-token']      = ['type' => 'text',  'section' => 'dante-bu/git', 'label-message' => 'prefs-label-git-write-token',        'help-message' => 'prefs-git-branch'];
+    $preferences['git-read-token']       = ['type' => 'text',  'section' => 'dante-bu/git', 'label-message' => 'prefs-label-git-read-token',        'help-message' => 'prefs-git-branch'];
+
+    $preferences['git-dante-system-repository']   = ['type' => 'text',  'section' => 'dante-bu/git-dante', 'label-message' => 'prefs-label-git-dante-repository',        'help-message' => 'prefs-git'];
+    $preferences['git-dante-system-branch']       = ['type' => 'text',  'section' => 'dante-bu/git-dante', 'label-message' => 'prefs-label-git-dante-branch',        'help-message' => 'prefs-git'];
+    $preferences['git-dante-system-read-token']   = ['type' => 'text',  'section' => 'dante-bu/git-dante', 'label-message' => 'prefs-label-git-dante-read-token',        'help-message' => 'prefs-git'];
+    $preferences['git-dante-system-write-token']  = ['type' => 'text',  'section' => 'dante-bu/git-dante', 'label-message' => 'prefs-label-git-dante-write-token',        'help-message' => 'prefs-git'];
 
     // NOTE: secretaccesskey should stay text and not be password. It looks like mediawiki does not fill the field in when opening the dialogue (which is more secure) but then
     //       a subsequent store also stores an empty password. This is a problem. 

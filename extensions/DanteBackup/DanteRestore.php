@@ -150,15 +150,27 @@ protected function showForm  (): void  {
   $out->addHTML ("</details>");
 
   // FORM PART: GITHUB
-  $out->addHTML ("<h2>Restore from GITHUB (System files only)</h2>");             
-  $out->addHTML ("<details><summary>Restore all system files stored on the configured github. System files only.</summary>"); 
+  $out->addHTML ("<h2>Restore from GIT</h2>");             
+  $out->addHTML ("<details><summary>Restore all files stored in the provided git.</summary>"); 
   $repository  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-repository' );
   $branch      = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-branch' );
-  $token       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'github-dante-wiki-contents' );   // as in DanteDump
-  $form =    [ 'gitRepository' =>  [ 'type' => 'text',  'name' => 'gitRepository', 'label' => 'Repository URL', 'section' => 'restore-from-github', 'required' => true, 'default' =>  $repository   ] ]
-           + [ 'gitBranch'     =>  [ 'type' => 'text',  'name' => 'gitBranch',     'label' => 'Branch',         'section' => 'restore-from-github', 'required' => true, 'default' =>  $branch   ] ]
-           + [ 'gitToken'      =>  [ 'type' => 'text',  'name' => 'gitToken',      'label' => 'Access Token',   'section' => 'restore-from-github', 'required' => true, 'default' =>  $token   ] ];
+  $token       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-read-token' );   // as in DanteDump
+  $form =    [ 'gitRepository'    =>  [ 'type' => 'text',  'name' => 'gitRepository', 'label' => 'Repository URL', 'section' => 'restore-from-github', 'required' => true, 'default' =>  $repository   ] ]
+           + [ 'gitBranch'        =>  [ 'type' => 'text',  'name' => 'gitBranch',     'label' => 'Branch',         'section' => 'restore-from-github', 'required' => true, 'default' =>  $branch       ] ]
+           + [ 'gitReadToken'     =>  [ 'type' => 'text',  'name' => 'gitToken',      'label' => 'Read Token',   'section' => 'restore-from-github', 'required' => true, 'default' =>  $token        ] ];
   self::standardForm ($form, $action, "GITHUB", "Restore via GITHUB");
+  $out->addHTML ("</details>");
+
+   // FORM PART: GITHUB
+  $out->addHTML ("<h2>Restore System Files</h2>");             
+  $out->addHTML ("<details><summary>Restore all system files stored on the configured github. System files only.</summary>"); 
+  $danteRepository  = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-dante-system-repository' );
+  $danteBranch      = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-dante-system-repository-branch' );
+  $danteReadToken       = MediaWiki\MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption( $this->getUser(), 'git-dante-system-read-token' );  
+  $form =    [ 'gitDanteSystemRepository'           =>  [ 'type' => 'text',  'name' => 'gitDanteSystemRepository',   'label' => 'Repository URL',          'section' => 'restore-from-github-dante', 'required' => true, 'default' =>  $danteRepository   ] ]
+           + [ 'gitDanteSystemRepositoryBranch'     =>  [ 'type' => 'text',  'name' => 'gitDanteSystemBranch',       'label' => 'Branch',                         'section' => 'restore-from-github-dante', 'required' => true, 'default' =>  $danteBranch       ] ]
+           + [ 'gitDanteSystemReadToken'            =>  [ 'type' => 'text',  'name' => 'gitDanteSystemReadToken',    'label' => 'Read Token',     'section' => 'restore-from-github-dante', 'required' => true, 'default' =>  $danteReadToken   ] ];
+  self::standardForm ($form, $action, "GITHUBSYSTEM", "Restore via GITHUB");
   $out->addHTML ("</details>");
 
 }
@@ -188,6 +200,13 @@ protected function getSpecificCommands ( $formId ): mixed {
       $url    = $request->getVal ( 'gitRepository' );
       $branch = $request->getVal ( 'gitBranch' );
       $token  = $request->getVal ( 'gitToken' );
+      $arr = $this->gitClone ( $url, $branch, $token );
+      break; 
+
+    case 'formId_GITHUBSYSTEM':
+      $url    = $request->getVal ( 'gitDanteSystemRepository' );
+      $branch = $request->getVal ( 'gitDanteSystemBranch' );
+      $token  = $request->getVal ( 'gitDanteSystemReadToken' );
       $arr = $this->gitClone ( $url, $branch, $token );
       break; 
 
