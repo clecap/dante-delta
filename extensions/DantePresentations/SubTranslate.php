@@ -212,7 +212,7 @@ public static function getSubpages( $title, $limit = -1 ) {
 			->caller( __METHOD__ );
 
 
-  $result = TitleArray::newFromResult( $query->fetchResultSet() );
+  $result = MediaWikiServices::getInstance()->getTitleFactory()->newTitleArrayFromResult( $query->fetchResultSet() );  // TitleArray was removed from core; TitleFactory replaces it
 		return $result;
 
 
@@ -236,7 +236,7 @@ public static function getSubpages( $title, $limit = -1 ) {
 			->options( $options )
 			->caller( __METHOD__ );
 
-		return TitleArray::newFromResult( $query->fetchResultSet() );
+		return MediaWikiServices::getInstance()->getTitleFactory()->newTitleArrayFromResult( $query->fetchResultSet() );
 
 
 	}
