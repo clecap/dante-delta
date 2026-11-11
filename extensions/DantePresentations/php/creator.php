@@ -19,7 +19,7 @@ class CreateTestPage extends Maintenance {
       return;
     }
 
-    $wikiPage = WikiPage::factory($title);
+    $wikiPage = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
     $content = ContentHandler::makeContent($contentText, $title);
     $summary = "Creating a new page via maintenance script";
 

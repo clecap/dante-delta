@@ -48,7 +48,7 @@ class DanteUtil {
  */
 static public function catList ( $cat ) {
   // Get the list of pages which are in the given category $cat
-  $dbr           = wfGetDB( DB_REPLICA );
+  $dbr           = \MediaWiki\MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();  // replaces deprecated wfGetDB( DB_REPLICA )
   $categoryTitle = Title::newFromText( $cat, NS_CATEGORY );
   if ( !$categoryTitle ) { throw new Exception ("Cannot find category $cat"); }
 
@@ -85,7 +85,7 @@ static public function listOfListed ($name) {
   if ($wikipage == null) { throw new Exception ("Could not generate Wikipage for title $name");}                                   // signal the caller that we did not get a WikiPage
   $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
-    $contentText = ContentHandler::getContentText( $contentObject );    
+    $contentText = ($contentObject instanceof \MediaWiki\Content\TextContent) ? $contentObject->getText() : '';  // replaces deprecated ContentHandler::getContentText
     $contentText = extractPreContents ($contentText);
     $filepath = tempnam ("/tmp", "DantePageList");
     file_put_contents ($filepath, $contentText); 
@@ -98,7 +98,7 @@ static public function listOfListed ($name) {
 // given a namespace index such as NS_TEST, return an arrayy of pages in the namespace
 static public function getPagesInNamespace( $namespaceIndex ) {
   // Query to get all pages in the specified namespace
-  $dbr = wfGetDB( DB_REPLICA );
+  $dbr = \MediaWiki\MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();  // replaces deprecated wfGetDB( DB_REPLICA )
   $res = $dbr->select(
     'page',  // The table to select from
     'page_title',  // The column to select

@@ -424,7 +424,7 @@ public static function onArticleViewHeaderSUBTRANSLATE( &$article, &$outputDone,
 
 
     /* create WikiPage of basepage */
-    $page = WikiPage::factory( $basetitle );
+    $page = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $basetitle );
     if( $page === null or !$page->exists() ) { danteLog ("DantePresentations", "SubTranslate: could not make wiki page of base \n");return; }
 
     $out = $article->getContext()->getOutput();
@@ -439,7 +439,7 @@ public static function onArticleViewHeaderSUBTRANSLATE( &$article, &$outputDone,
       danteLog ("DantePresentations", "SubTranslate: cache failure on cachekey $cachekey \n");
 
       $content = $page->getContent();
-      $text    = ContentHandler::getContentText( $content );
+      $text    = ($content instanceof \MediaWiki\Content\TextContent) ? $content->getText() : '';  // replaces deprecated ContentHandler::getContentText
       danteLog ("DantePresentations", "SubTranslate: content of base page is as follows: ---------------------------------------------- \n");
       danteLog ("DantePresentations", $text . " \n\n ----------------------------------------------------------\n");
 

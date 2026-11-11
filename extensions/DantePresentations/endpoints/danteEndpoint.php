@@ -276,7 +276,7 @@ protected function getInputNSKey () {
 
   $wikipage    = new WikiPage ($title);                              // get the WikiPage for that title
   $contob      = $wikipage->getContent();                            // and obtain the content object for that
-  $contenttext = ContentHandler::getContentText( $contob );
+  $contenttext = ($contob instanceof \MediaWiki\Content\TextContent) ? $contob->getText() : '';  // replaces deprecated ContentHandler::getContentText
   return $contenttext;
 }
 
@@ -287,7 +287,7 @@ protected function getInputTitle () {
   $pageIdentity      =  Title::newFromDBkey ( $this->title );
   $wikipage    = new WikiPage ($pageIdentity);                              // get the WikiPage for that title
   $contob      = $wikipage->getContent();                            // and obtain the content object for that
-  $contenttext = ContentHandler::getContentText( $contob );
+  $contenttext = ($contob instanceof \MediaWiki\Content\TextContent) ? $contob->getText() : '';  // replaces deprecated ContentHandler::getContentText
   return $contenttext;
 }
 

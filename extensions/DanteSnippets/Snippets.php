@@ -123,7 +123,7 @@ class Snippets extends Job {
     
 /*    
     if ( !is_null( $title ) && !$title->isKnown() && $title->canExist() ){
-      $wpage   = WikiPage::factory( $title );
+      $wpage   = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
       $pageContent = ContentHandler::makeContent( $this->params['content'], $title );
       $wpage->doEditContent( $pageContent, "Page created automatically by parser function on page [[$sourceTitleText]]" ); //TODO i18n
     }
@@ -230,7 +230,7 @@ class Snippets extends Job {
   // returns true (or false) if a snippet of the given name exists already in the snippet namespace
   public static function doesSnippetExist ( $name ) {
     $title   = Title::newFromText ( $name, NS_SNIP );
-    $wpage = WikiPage::factory( $title );
+    $wpage = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
     return $wpage->exists ();
   }
 

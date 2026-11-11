@@ -23,10 +23,10 @@ public static function articleExtract ( string $titleName, ?bool $filter = null,
   $title = Title::newFromText($titleName);
   if (!$title || !$title->exists()) { throw new Exception ("Title $title not given or nor existent"); }
 
-  $page = WikiPage::factory($title);
+  $page = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
   $content = $page->getContent();
   if (!$content) { throw new Exception ("Content obtained from $title is null");}
-  $text = ContentHandler::getContentText($content);
+  $text = ($content instanceof \MediaWiki\Content\TextContent) ? $content->getText() : '';  // replaces deprecated ContentHandler::getContentText
   if ($filter) {
     if (preg_match('/^<pre>\R?(.*?)^<\/pre>/ms', $text, $m)) {$text = $m[1];} else {$text = '';}
   }
@@ -209,14 +209,14 @@ public static function exportAllToTextFiles ( string $outDir = "/tmp/gitDump",  
       if ( !$title ) { throw new Exception ("Failed to make title for " . $row->page_title ); }
       if ( !$title->exists() ) {throw new Exception ("Title does not exist for " . $row->page_title); }
 
-      $page = WikiPage::factory( $title );
+      $page = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
       $rev = $page->getRevisionRecord();
       if ( !$rev ) { throw new Exception ("Could not get revision record for " . $row->page_title);}
 
       $content = $rev->getContent( 'main' );
       if ( !$content ) { throw new Exception ("Could not get content for " . $row->page_title);}
 
-      $text = ContentHandler::getContentText( $content ); // TODO: modernize this to content models !!
+      $text = ($content instanceof \MediaWiki\Content\TextContent) ? $content->getText() : '';  // replaces deprecated ContentHandler::getContentText
 
       $relPath = self::makeRelPath( $title, 'txt' );
       $fullPath = rtrim( $outDir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR . $relPath;
