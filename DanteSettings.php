@@ -138,10 +138,6 @@ wfLoadExtension ('SyntaxHighlight_GeSHi');       // adds <syntaxhighlight> tag f
 # produces an error in load.php under php8.2 
 ## wfLoadExtension ('WikiMarkdown');                // adds <markdown> to include markdown syntax into the wiki
 
-wfLoadExtension ('DynamicPageList3');
-
-
-
 
 ## configure drwaio
 
@@ -187,6 +183,9 @@ wfLoadExtension ('DanteHideSection');                 // allows to hide/collapse
 ## Skins
 wfLoadSkin( 'skinny' );
 wfLoadSkin( 'DantePresentationSkin' );
+
+// use legacy Vector as default skin; overrides the "vector-2022" written into LocalSettings.php by the installer
+$wgDefaultSkin = "vector";
 
 
 # include stuff generated dynamically by scripts

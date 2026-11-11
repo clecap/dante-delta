@@ -222,7 +222,8 @@ $.ui.fancytree.registerExtension({
 			instOpts = this.options.persist;
 
 		// For 'auto' or 'cookie' mode, the cookie plugin must be available
-		_assert(instOpts.store === "localStore" || cookieGetter, "Missing required plugin for 'persist' extension: js.cookie.js or jquery.cookie.js");
+		// CHC: also accept "local" and "session" (no cookie plugin needed; jquery.cookie was removed from MediaWiki 1.42)
+		_assert(instOpts.store === "localStore" || instOpts.store === "local" || instOpts.store === "session" || cookieGetter,"Missing required plugin for 'persist' extension: js.cookie.js or jquery.cookie.js");
 
 		local.cookiePrefix = instOpts.cookiePrefix || ("fancytree-" + tree._id + "-");
 		local.storeActive = instOpts.types.indexOf(ACTIVE) >= 0;

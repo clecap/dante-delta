@@ -343,7 +343,7 @@ static function sidebarSkinPatch ($name) {    // $name: id of the element below 
     }
     else {
       $allCats = array();  // init return value
-      $dbObj = wfGetDB(DB_MASTER);  // Get a database object   // CHC: changed to DB_MASTER  for freshness
+      $dbObj = MediaWikiServices::getInstance()->getConnectionProvider()->getPrimaryDatabase();  // primary database for freshness (DB_MASTER and wfGetDB are gone/deprecated in MW 1.43)
       $tblCatLink = $dbObj->tableName('categorylinks');  // Get table names to access them in SQL query
       $tblPage = $dbObj->tableName('page');
 
@@ -356,11 +356,11 @@ WHERE tmpSelectCat2.cl_from IS NULL GROUP BY tmpSelectCat1.cl_to";
 
       $res = $dbObj->query($sql, __METHOD__);   // Run the query
 
-      while ($row = $dbObj->fetchRow($res)) {
+      while ($row = $res->fetchRow()) {
         $allCats += array($row['title'] => 0);
         $allCats += self::getChildren($row['title']);
       }
-      $dbObj->freeResult($res);   // Free result object
+      $res->free();   // Free result object (Database::freeResult no longer exists)
     }
     return $allCats;
   }
@@ -371,7 +371,7 @@ WHERE tmpSelectCat2.cl_from IS NULL GROUP BY tmpSelectCat1.cl_to";
   public static function getChildren($root, $depth = 1) {
     $allCats    = array();                                                 // Initialize return value
     $lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
-    $dbr = $lb->getConnection ( DB_MASTER );                              // instance of IDatabase
+    $dbr = $lb->getConnection ( DB_PRIMARY );                             // instance of IDatabase (DB_MASTER was removed in MW 1.43)
     $CATEGORYLINKS = $dbr->tableName('categorylinks');    // Get table names to access them in SQL query
     $PAGE    = $dbr->tableName('page');
 

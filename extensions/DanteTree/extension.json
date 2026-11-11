@@ -23,7 +23,7 @@
   "ResourceModules": {
     "ext.fancytree": {
       "scripts":       ["fancytree/jquery.fancytree.js", "fancytree/jquery.fancytree.persist.js", "fancytree/jquery.fancytree.mediawiki.js", "fancytree/fancytree.js"],
-      "dependencies":  ["jquery.ui", "jquery.cookie"],
+      "dependencies":  ["jquery.ui"],
       "styles":         []
     },
     "ext.suckerfish": {
