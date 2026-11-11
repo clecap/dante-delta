@@ -3,6 +3,7 @@
 
 /** NOTE: we use a cache for the Sidebar. Files is fine, since it also provides a cached Sidebar in a cold start, which ACPu would not */
 
+use MediaWiki\Content\TextContent;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
@@ -124,7 +125,8 @@ public static function onEditPageattemptSaveafter( EditPage $editPage, Status $s
     $titleText = $editPage->getTitle()->getText();
     //danteLog ("DanteTree", "oneditpageattempt: ".$titleText."\n" );
     if ($titleText == "Main Page") {
-      $textData = $editPage->getArticle()->getPage()->getContent()->getNativeData();
+      $content  = $editPage->getArticle()->getPage()->getContent();                                // content object of the saved page
+      $textData = ($content instanceof TextContent) ? $content->getText() : '';                     // replaces deprecated getNativeData
       //danteLog ("DanteTree", "oneditpageattempt: ".$titleText." with " . $textData."\n" );
       $retVal = file_put_contents ($IP."/assets/Main Page", $textData);
       //danteLog ("DanteTree", "oneditpageattempt:stored:  ". print_r ($retVal, true).  "  type " .gettype($retVal)."\n" );
@@ -133,7 +135,8 @@ public static function onEditPageattemptSaveafter( EditPage $editPage, Status $s
   else if ( $editPage->getTitle()->getNamespace() == NS_MEDIAWIKI) {            // only if the edit takes place in the MediaWiki namespace
     $titleText = $editPage->getTitle()->getText();
     if ( $titleText == "Sidebar" ) {
-      $textData = $editPage->getArticle()->getPage()->getContent()->getNativeData();
+      $content  = $editPage->getArticle()->getPage()->getContent();                                // content object of the saved page
+      $textData = ($content instanceof TextContent) ? $content->getText() : '';                     // replaces deprecated getNativeData
       file_put_contents ($IP."/assets/Sidebar", $textData);
     }
   }  
@@ -175,7 +178,7 @@ private static function overrideSidebar ($name) {
   if ($wikipage == null) {return false;}                                                      // signal the caller that we did not get a WikiPage
   $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
-    $contentText = ContentHandler::getContentText( $contentObject );    
+    $contentText = ($contentObject instanceof TextContent) ? $contentObject->getText() : '';  // replaces deprecated ContentHandler::getContentText
     $contentText = extractPreContents ($contentText);
     $html = "<div class='noglossary\' id='wikitext-sidebar'>" . $wgOut-> parseInlineAsInterface( $contentText ) . "</div>"; 
     return $html; }   
@@ -193,7 +196,7 @@ private static function getCatConfig () {
   $wikipage   = new WikiPage ($title);                                                        // get the WikiPage for that title
   $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
-    $code    = ContentHandler::getContentText ( $contentObject );
+    $code    = ($contentObject instanceof TextContent) ? $contentObject->getText() : '';       // replaces deprecated ContentHandler::getContentText
     if ($VERBOSE) {self::debugLog ("\n\n Categories configuration text before scanning is: " . $code . "  \n\n");}      
     $code = extractPreContents ($code);
     if ($VERBOSE) {self::debugLog ("\n\n Categories configuration text is: " . $code . "  \n\n");}
