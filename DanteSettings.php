@@ -141,10 +141,7 @@ wfLoadExtension ('SyntaxHighlight_GeSHi');       // adds <syntaxhighlight> tag f
 
 ## configure drwaio
 
-$wgDrawioEditorBackendUrl=$wgServer.$wgScriptPath. "/external-services/draw-io/drawio-dev/src/main/webapp/index.html";
-
-// index.html";  // http://localhost:8080/experiments/drawio-dev/src/main/webapp/
-// TODO:  MUST MAKE THIS MORE FLEXIBLE - THIS IS HARDCODED AND tHIS IS BAD !
+$wgDrawioEditorBackendUrl=$wgServer.$wgScriptPath. "/external-services/draw-io/drawio-dev/src/main/webapp";
 
 
 ###
