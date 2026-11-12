@@ -100,7 +100,7 @@ HERE;
     // if we are still here then it probably is an override case
 
     // for the rest, we do not have a special treatment but do an override mechanism by our own
-    $override = self::overrideSidebar ( $key );
+    $override = self::overrideSidebar ( $key, $skin->getOutput() );  // pass the skin's OutputPage instead of relying on global $wgOut
     if ($override) {$bar[$key] = [ ['html' => $override ]];}
 
   }  // end FOR loop
@@ -168,19 +168,24 @@ private static function invalidateSidebarCache () {
 
 
 
-// generate the html text for the additional, overridden sidebar portions
-private static function overrideSidebar ($name) {
-  global $wgOut;
+/**
+ * Generate the html text for the additional, overridden sidebar portions.
+ *
+ * @param string     $name name of the sidebar portlet, selects the configuration page MediaWiki:Sidebar/$name
+ * @param OutputPage $out  output page of the current request, used to parse the wikitext of the configuration page
+ * @return string|false    the html for the portlet, or false if there is no configuration page or content
+ */
+private static function overrideSidebar ($name, OutputPage $out) {
   $configPage = "Sidebar/$name";                                                              // name of the MediaWiki:Sidebar$name configuration page of this portlet
   $title      = Title::newFromText( $configPage, NS_MEDIAWIKI );                              // build title object for MediaWiki:SidebarTree
   if ($title == null) {return false;}                                                         // signal the caller that we did not find a configuration page for this portlet
-  $wikipage   = new WikiPage ($title);                                                        // get the WikiPage for that title
+  $wikipage   = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // get the WikiPage for that title via factory
   if ($wikipage == null) {return false;}                                                      // signal the caller that we did not get a WikiPage
   $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
     $contentText = ($contentObject instanceof TextContent) ? $contentObject->getText() : '';  // replaces deprecated ContentHandler::getContentText
     $contentText = extractPreContents ($contentText);
-    $html = "<div class='noglossary\' id='wikitext-sidebar'>" . $wgOut-> parseInlineAsInterface( $contentText ) . "</div>"; 
+    $html = "<div class='noglossary\' id='wikitext-sidebar'>" . $out->parseInlineAsInterface( $contentText ) . "</div>"; 
     return $html; }   
   else { return false;}                      // signal the caller that we did not find a config object
 }
@@ -193,7 +198,7 @@ private static function getCatConfig () {
   global $wgAllowVerbose; $VERBOSE = false && $wgAllowVerbose;
   $configPage = "Sidebar/Categories";                                                         // name of the MediaWiki:Sidebar$name configuration page of this treelet
   $title      = Title::newFromText( $configPage, NS_MEDIAWIKI );                              // build title object for MediaWiki:SidebarTree
-  $wikipage   = new WikiPage ($title);                                                        // get the WikiPage for that title
+  $wikipage   = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // get the WikiPage for that title via factory
   $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
     $code    = ($contentObject instanceof TextContent) ? $contentObject->getText() : '';       // replaces deprecated ContentHandler::getContentText

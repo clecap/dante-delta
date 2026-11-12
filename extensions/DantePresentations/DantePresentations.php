@@ -319,7 +319,7 @@ private static function generateSideChick (string $name, string $longName) {
     $title     = $title->createFragmentTarget( '' );
     
     if ( $title instanceof Title && $title->canExist() ) {
-      $values = PageProps::getInstance()->getProperties( $title, 'displaytitle' );
+      $values = MediaWikiServices::getInstance()->getPageProps()->getProperties( $title, 'displaytitle' );  // PageProps via service container (PageProps::getInstance() is deprecated)
       $id = $title->getArticleID();
       if ( array_key_exists( $id, $values ) ) {
         $value = $values[$id];

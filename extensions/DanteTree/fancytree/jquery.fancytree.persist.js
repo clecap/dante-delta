@@ -38,10 +38,34 @@ if( typeof Cookies === "function" ) {
 	cookieSetter = Cookies.set;
 	cookieGetter = Cookies.get;
 	cookieRemover = Cookies.remove;
-} else {
+} else if( typeof $.cookie === "function" ) {
 	// Fall back to https://github.com/carhartl/jquery-cookie
 	cookieSetter = cookieGetter = $.cookie;
 	cookieRemover = $.removeCookie;
+} else {
+  // CHC: no cookie plugin (jquery.cookie was removed in MW 1.42): use no-ops, so persisting is skipped silently instead of throwing a TypeError
+  cookieGetter  = function() { return undefined; };  // nothing stored, so nothing to restore
+  cookieSetter  = function() {};                      // skip saving
+  cookieRemover = function() {};                      // nothing to remove
+}
+
+/**
+ * CHC: Return the requested Web Storage object if it is usable, else null.
+ * Accessing or writing storage can throw (e.g. blocked site data, some private modes), so probe it inside try/catch.
+ *
+ * @param {string} name - "localStorage" or "sessionStorage"
+ * @return {Storage|null} the usable storage object, or null if unavailable
+ */
+function _getStorage( name ) {
+  try {
+    var store = window[name];                            // may throw a SecurityError when site data is blocked
+    if( !store ) { return null; }                        // storage not supported
+    store.setItem( "fancytree-probe", "1" );           // may throw when storage is read-only or full
+    store.removeItem( "fancytree-probe" );             // clean up probe entry
+    return store;
+  } catch( e ) {
+    return null;                                         // unusable: caller falls back to (no-op) cookie functions
+  }
 }
 
 /* Recursively load lazy nodes
@@ -230,11 +254,12 @@ $.ui.fancytree.registerExtension({
 		local.storeExpanded = instOpts.types.indexOf(EXPANDED) >= 0;
 		local.storeSelected = instOpts.types.indexOf(SELECTED) >= 0;
 		local.storeFocus = instOpts.types.indexOf(FOCUS) >= 0;
-		if( instOpts.store === "cookie" || !window.localStorage ) {
-			local.localStorage = null;
-		} else {
-			local.localStorage = (instOpts.store === "local") ? window.localStorage : window.sessionStorage;
-		}
+    // CHC: pick a usable Web Storage; null means fall back to cookie functions, which are no-ops when no cookie plugin is loaded (so saving is skipped)
+    if( instOpts.store === "cookie" ) {
+      local.localStorage = null;
+    } else {
+      local.localStorage = _getStorage( (instOpts.store === "local") ? "localStorage" : "sessionStorage" );
+    }
 
    // console.error ("persisting technique is ", instOpts);
 

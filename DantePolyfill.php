@@ -81,7 +81,7 @@ static public function catList ( $cat ) {
 static public function listOfListed ($name) {
   $title      = Title::newFromText( $name  );                             
   if ($title == null) { throw new Exception ("Title $name not found");}       
-  $wikipage   = new WikiPage ($title);                                                      
+  $wikipage   = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // WikiPage via factory instead of new WikiPage()
   if ($wikipage == null) { throw new Exception ("Could not generate Wikipage for title $name");}                                   // signal the caller that we did not get a WikiPage
   $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing

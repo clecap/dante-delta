@@ -165,9 +165,6 @@ wfLoadExtension( 'DanteBackup' );
 
 wfLoadExtension( 'DanteSnippets' );
 
-
-# $wgParserCacheType       = CACHE_DB;
-
 $wgTopDante = new stdClass();  // a generic top level object helper for parsifal and dante, must be defined here, before loading Parsifal
 
 

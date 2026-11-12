@@ -222,7 +222,7 @@ public static function getSubpages( $title, $limit = -1 ) {
 
 // this is my DANTE version !
 public static function onArticleViewHeader ( &$article, &$outputDone, bool &$pcache ) {
-  global $wgOut;
+  $out = $article->getContext()->getOutput();  // OutputPage of the current request, replaces the fragile global $wgOut
   $title = $article->getTitle();           // danteLog ("DantePresentations", "onArticleViewHeader found title:  " .$title." \n");
   $titleSubs = $title->getSubpages();
   $titleSubsNum = count ($titleSubs);      //  danteLog ("DantePresentations", "title subs:" . $titleSubsNum . "\n");
@@ -272,7 +272,7 @@ public static function onArticleViewHeader ( &$article, &$outputDone, bool &$pca
   danteLog ("DantePresentations", " DeepL  BABEL object" . print_r ($BABEL, true) . "\n\n");
  danteLog ("DantePresentations", " DeepL  BABEL object as json " . $json . "\n\n");
 
-  $wgOut->addInlineScript ("window.BABEL_LANGUAGES=" . $json . ";");
+  $out->addInlineScript ("window.BABEL_LANGUAGES=" . $json . ";");
 
   return true;  // continue with normal page rendering
 } // onArticleViewHeader
