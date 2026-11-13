@@ -111,8 +111,9 @@ function _loadLazyNodes(tree, local, keyList, mode, dfd) {
 			if( missingKeyList.length ) {
 				tree.warn("_loadLazyNodes: could not load those keys: ", missingKeyList);
 				for( i=0, l=missingKeyList.length; i<l; i++ ) {
-					key = keyList[i];
-					local._appendKey(EXPANDED, keyList[i], false);
+					// CHC: was keyList[i], which removed the first n VALID keys instead of the n missing ones (bug in upstream 2.10)
+					key = missingKeyList[i];
+					local._appendKey(EXPANDED, key, false);
 				}
 			}
 			dfd.resolve();

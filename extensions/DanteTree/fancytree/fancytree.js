@@ -258,6 +258,27 @@ function instrumentCatCheckBoxes () {
 var treeRegister = [];
 
 
+/**
+ * Compute a stable key for a fancytree node from the path of node texts leading to it (fancytree option defaultKey).
+ * Fancytree otherwise uses a global counter ("_1", "_2", ...) which depends on how many trees and nodes were built before,
+ * so the expanded keys persisted in localStorage would point to different nodes on the next page view.
+ * Siblings with identical text get a suffix "#2", "#3", ... in their order of creation.
+ *
+ * @param {FancytreeNode} node - node under construction; title and parent are already set
+ * @return {string} key unique within the tree
+ */
+function stableNodeKey (node) {
+  const text      = $("<div/>").html(node.title || "").text().trim().replace(/~/g, "-");   // plain text of the title; "~" is the delimiter of the persist extension
+  const parent    = node.parent;
+  const parentKey = (parent && parent.parent) ? parent.key : "";                         // top level nodes: parent is the root node, whose key contains the volatile tree id
+  const base      = parentKey + "/" + text;
+  if (!parent) { return base; }
+  parent._stableKeyCount = parent._stableKeyCount || {};                                 // count siblings with identical text
+  const n = parent._stableKeyCount[base] = (parent._stableKeyCount[base] || 0) + 1;
+  return n == 1 ? base : base + "#" + n;
+}
+
+
 // This can be called again later and any unprepared trees and menus will get prepared - this was done so that trees and menus can work when received via Ajax  such as in a live preview
 window.prepareTAMX = function prepareTAMX (id) {
   const VERBOSE = false;
@@ -281,7 +302,11 @@ window.prepareTAMX = function prepareTAMX (id) {
     if (typeof opts.extensions == "undefined")   {opts.extensions = ['mediawiki'];}
     if (!opts.extensions.includes ('mediawiki')) {opts.extensions.push ('mediawiki');}
     
-    if (id == "p-catus") {opts['extensions'] = ['persist'];  opts['checkbox'] = true; opts['icons'] = false;} 
+    if (id == "p-catus") {opts['extensions'] = ['persist'];  opts['checkbox'] = true; opts['icons'] = false;}
+
+    // make persisted state independent of the number and order of trees on the page
+    opts.defaultKey = stableNodeKey;                                                                                     // stable node keys instead of global counter
+    if (ele.id) { opts.persist = Object.assign ({cookiePrefix: "fancytree-" + ele.id + "-"}, opts.persist || {}); }     // storage key from element id instead of volatile tree counter
 
     opts.toggleEffect = false; // as above: we MUST not have toggleEffect active in the current moment
     if (opts.icons=="false") {opts.icons=false;}  // the mediawiki parse function delivers "false" in string form and tree expects it in boolean form, so we must adjust here  // CAVE: newer versions of fancytree uses .icon instead of .icons
@@ -330,8 +355,9 @@ const installPortletToggle = () => {
   const toggleSidebar = (name) => {    // function which toggles the visibility of an entire area; called with string such as   switcher-p-catus-label
       // console.log ("fancytree.js: toggleSidebar function called on element with id=", name);
       var shortName = name.substring (9);    // removes the prefix "switcher-"  and delivers  p-catus-label
-      var flag = localStorage.getItem (shortName);
-      var newFlag = (flag == "open" ? "close" : "open");       // console.log ("toggleSidebar function setting name=", name, " to ",  newFlag);
+      // derive new state from the displayed state (img-negative marks a closed portlet), NOT by inverting the stored flag: that flag is null initially and would then be stored inverted forever
+      var isClosed = $("#"+name).hasClass ("img-negative");
+      var newFlag = (isClosed ? "open" : "close");       // console.log ("toggleSidebar function setting name=", name, " to ",  newFlag);
       localStorage.setItem (shortName, newFlag);                                                                                                          // make area visibility persistant across reloads
       // console.log ("fancytree.js: setting ", shortName, "to ", flag);
 
