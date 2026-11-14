@@ -1,0 +1,6 @@
+# Project-wide git settings, shared via the repository.
+# Activate once per clone with:  git config include.path ../.gitconfig
+
+# git pull merges instead of rebasing
+[pull]
+  rebase = false

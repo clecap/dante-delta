@@ -24,7 +24,7 @@ public function execute() {
 
   // if ($title->exists()) {$this->output("Page already exists.\n"); return;}
 
-  $wikiPage = WikiPage::factory($title);
+  $wikiPage = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
   $content = ContentHandler::makeContent($contentText, $title);
   $summary = "Created by a DanteWiki ai or translation script";
 

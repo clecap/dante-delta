@@ -56,6 +56,36 @@
 			"subpages": true,
 			"content": true,
 			"defaultcontentmodel": "wikitext"
+		},
+		{
+			"id": 3001,
+			"constant": "NS_TEST_TALK",
+			"name": "Test_talk"
+		},
+		{
+			"id": 3003,
+			"constant": "NS_LIT_TALK",
+			"name": "Lit_talk"
+		},
+		{
+			"id": 3005,
+			"constant": "NS_TODO_TALK",
+			"name": "Todo_talk"
+		},
+		{
+			"id": 3007,
+			"constant": "NS_FAQ_TALK",
+			"name": "Faq_talk"
+		},
+		{
+			"id": 3009,
+			"constant": "NS_EX_TALK",
+			"name": "Ex_talk"
+		},
+		{
+			"id": 3011,
+			"constant": "NS_DRAFT_TALK",
+			"name": "Draft_talk"
 		}
 	],
 	"Hooks": {

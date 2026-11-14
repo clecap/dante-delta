@@ -178,8 +178,6 @@ protected function showForm  (): void  {
 
 // returns the specific command sequence required for executing the necessary functions in dependence of the selected form
 protected function getSpecificCommands ( $formId ): mixed {
-  global $IP; $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); }  // restoring often changes sidebar so invalidate the sidebarcache
-
   $request = $this->getRequest();
   switch ($formId) {
     case 'formId_LOCAL':
@@ -222,10 +220,13 @@ protected function getSpecificCommands ( $formId ): mixed {
        break;
     }
 
+    $arr[] = new DanteCallableCommand ( [ TreeAndMenu::class, 'invalidateSidebarCache' ], [], "Clearing the sidebar cache" );   // restore may have changed MediaWiki:Sidebar, so drop the cache after all restore commands ran
+
 
 
     return $arr;
 }
+
 
 
 /**

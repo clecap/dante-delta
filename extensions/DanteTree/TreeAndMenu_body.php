@@ -3,6 +3,7 @@
 
 /** NOTE: we use a cache for the Sidebar. Files is fine, since it also provides a cached Sidebar in a cold start, which ACPu would not */
 
+use MediaWiki\Content\TextContent;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
@@ -99,7 +100,7 @@ HERE;
     // if we are still here then it probably is an override case
 
     // for the rest, we do not have a special treatment but do an override mechanism by our own
-    $override = self::overrideSidebar ( $key );
+    $override = self::overrideSidebar ( $key, $skin->getOutput() );  // pass the skin's OutputPage instead of relying on global $wgOut
     if ($override) {$bar[$key] = [ ['html' => $override ]];}
 
   }  // end FOR loop
@@ -117,14 +118,15 @@ public static function onEditPageattemptSaveafter( EditPage $editPage, Status $s
 
   // ensure that when a page is saved, the sidebar cache is invalidated. we need this because a page has now been created and thus a link cached in the
   // sidebar might no longer be a new link (preseted in red) but an existant link (presented in blue)
-  $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); }
+  self::invalidateSidebarCache ();
 
   // danteLog ("DanteTree", "oneditpageattempt \n" );
   if ( $editPage->getTitle()->getNamespace() == NS_MAIN) {     
     $titleText = $editPage->getTitle()->getText();
     //danteLog ("DanteTree", "oneditpageattempt: ".$titleText."\n" );
     if ($titleText == "Main Page") {
-      $textData = $editPage->getArticle()->getPage()->getContent()->getNativeData();
+      $content  = $editPage->getArticle()->getPage()->getContent();                                // content object of the saved page
+      $textData = ($content instanceof TextContent) ? $content->getText() : '';                     // replaces deprecated getNativeData
       //danteLog ("DanteTree", "oneditpageattempt: ".$titleText." with " . $textData."\n" );
       $retVal = file_put_contents ($IP."/assets/Main Page", $textData);
       //danteLog ("DanteTree", "oneditpageattempt:stored:  ". print_r ($retVal, true).  "  type " .gettype($retVal)."\n" );
@@ -133,7 +135,8 @@ public static function onEditPageattemptSaveafter( EditPage $editPage, Status $s
   else if ( $editPage->getTitle()->getNamespace() == NS_MEDIAWIKI) {            // only if the edit takes place in the MediaWiki namespace
     $titleText = $editPage->getTitle()->getText();
     if ( $titleText == "Sidebar" ) {
-      $textData = $editPage->getArticle()->getPage()->getContent()->getNativeData();
+      $content  = $editPage->getArticle()->getPage()->getContent();                                // content object of the saved page
+      $textData = ($content instanceof TextContent) ? $content->getText() : '';                     // replaces deprecated getNativeData
       file_put_contents ($IP."/assets/Sidebar", $textData);
     }
   }  
@@ -159,25 +162,39 @@ public static function onPageDeleteComplete( ProperPageIdentity $page,  Authorit
 
 
 
-private static function invalidateSidebarCache () {
-  global $IP; $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); }
+/**
+ * Delete the sidebar cache file so that the sidebar is regenerated on the next page view.
+ * Single place for invalidating the cache; also used by DanteBackup (as a DanteCallableCommand) and Parsifal (reset page).
+ *
+ * @return bool true if a cache file was removed, false if there was none
+ */
+public static function invalidateSidebarCache (): bool {
+  global $IP;
+  $name = $IP . '/sidebarcache';                                   // location of the cache file
+  if ( file_exists ( $name ) ) { return unlink ( $name ); }        // remove it if present
+  return false;
 }
 
 
 
-// generate the html text for the additional, overridden sidebar portions
-private static function overrideSidebar ($name) {
-  global $wgOut;
+/**
+ * Generate the html text for the additional, overridden sidebar portions.
+ *
+ * @param string     $name name of the sidebar portlet, selects the configuration page MediaWiki:Sidebar/$name
+ * @param OutputPage $out  output page of the current request, used to parse the wikitext of the configuration page
+ * @return string|false    the html for the portlet, or false if there is no configuration page or content
+ */
+private static function overrideSidebar ($name, OutputPage $out) {
   $configPage = "Sidebar/$name";                                                              // name of the MediaWiki:Sidebar$name configuration page of this portlet
   $title      = Title::newFromText( $configPage, NS_MEDIAWIKI );                              // build title object for MediaWiki:SidebarTree
   if ($title == null) {return false;}                                                         // signal the caller that we did not find a configuration page for this portlet
-  $wikipage   = new WikiPage ($title);                                                        // get the WikiPage for that title
+  $wikipage   = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // get the WikiPage for that title via factory
   if ($wikipage == null) {return false;}                                                      // signal the caller that we did not get a WikiPage
   $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
-    $contentText = ContentHandler::getContentText( $contentObject );    
+    $contentText = ($contentObject instanceof TextContent) ? $contentObject->getText() : '';  // replaces deprecated ContentHandler::getContentText
     $contentText = extractPreContents ($contentText);
-    $html = "<div class='noglossary\' id='wikitext-sidebar'>" . $wgOut-> parseInlineAsInterface( $contentText ) . "</div>"; 
+    $html = "<div class='noglossary\' id='wikitext-sidebar'>" . $out->parseInlineAsInterface( $contentText ) . "</div>"; 
     return $html; }   
   else { return false;}                      // signal the caller that we did not find a config object
 }
@@ -190,10 +207,10 @@ private static function getCatConfig () {
   global $wgAllowVerbose; $VERBOSE = false && $wgAllowVerbose;
   $configPage = "Sidebar/Categories";                                                         // name of the MediaWiki:Sidebar$name configuration page of this treelet
   $title      = Title::newFromText( $configPage, NS_MEDIAWIKI );                              // build title object for MediaWiki:SidebarTree
-  $wikipage   = new WikiPage ($title);                                                        // get the WikiPage for that title
+  $wikipage   = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // get the WikiPage for that title via factory
   $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
-    $code    = ContentHandler::getContentText ( $contentObject );
+    $code    = ($contentObject instanceof TextContent) ? $contentObject->getText() : '';       // replaces deprecated ContentHandler::getContentText
     if ($VERBOSE) {self::debugLog ("\n\n Categories configuration text before scanning is: " . $code . "  \n\n");}      
     $code = extractPreContents ($code);
     if ($VERBOSE) {self::debugLog ("\n\n Categories configuration text is: " . $code . "  \n\n");}
@@ -343,7 +360,7 @@ static function sidebarSkinPatch ($name) {    // $name: id of the element below 
     }
     else {
       $allCats = array();  // init return value
-      $dbObj = wfGetDB(DB_MASTER);  // Get a database object   // CHC: changed to DB_MASTER  for freshness
+      $dbObj = MediaWikiServices::getInstance()->getConnectionProvider()->getPrimaryDatabase();  // primary database for freshness (DB_MASTER and wfGetDB are gone/deprecated in MW 1.43)
       $tblCatLink = $dbObj->tableName('categorylinks');  // Get table names to access them in SQL query
       $tblPage = $dbObj->tableName('page');
 
@@ -356,11 +373,11 @@ WHERE tmpSelectCat2.cl_from IS NULL GROUP BY tmpSelectCat1.cl_to";
 
       $res = $dbObj->query($sql, __METHOD__);   // Run the query
 
-      while ($row = $dbObj->fetchRow($res)) {
+      while ($row = $res->fetchRow()) {
         $allCats += array($row['title'] => 0);
         $allCats += self::getChildren($row['title']);
       }
-      $dbObj->freeResult($res);   // Free result object
+      $res->free();   // Free result object (Database::freeResult no longer exists)
     }
     return $allCats;
   }
@@ -371,7 +388,7 @@ WHERE tmpSelectCat2.cl_from IS NULL GROUP BY tmpSelectCat1.cl_to";
   public static function getChildren($root, $depth = 1) {
     $allCats    = array();                                                 // Initialize return value
     $lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
-    $dbr = $lb->getConnection ( DB_MASTER );                              // instance of IDatabase
+    $dbr = $lb->getConnection ( DB_PRIMARY );                             // instance of IDatabase (DB_MASTER was removed in MW 1.43)
     $CATEGORYLINKS = $dbr->tableName('categorylinks');    // Get table names to access them in SQL query
     $PAGE    = $dbr->tableName('page');
 

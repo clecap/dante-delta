@@ -190,23 +190,38 @@ public static function onSkinAddFooterLinks( Skin $skin, string $key, array &$fo
 
 
 
-// when we edit a page, intercept the edit process via javascript and insert an edit preview (if appropriate)
-public static function onEditPageshowEditForminitial ( EditPage &$editPage, OutputPage $output) {
-  $output->addHeadItem ("preview", "<script src='extensions/DantePresentations/preview.js'></script>");  // TODO: go to preview-min.js
+// returns the code, JS and CSS, for loading a code mirror instance
+private static function loadCodeMirror () {
 
-  $codeMirror  =  "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/lib/codemirror.js'></script>";
-  $codeMirror .=  "<link rel='stylesheet' href='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/lib/codemirror.css'></script>";
-  $codeMirror .=  "<link rel='stylesheet' href='extensions/Parsifal/codemirror/codemirror-parsifal.css'></script>";      
-  $codeMirror .=  "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/mode/stex/stex.js'></script>";
-  $codeMirror .=  "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/addon/edit/matchbrackets.js'></script>";   
+  $iniPath = "vendor/codemirror";  // was extensions/Parsifal/vendor/codemirror/codemirror-5.65.3
+
+  $codeMirror  =  "<script src='$iniPath/lib/codemirror.js'></script>";
+  $codeMirror .=  "<script src='$iniPath/mode/stex/stex.js'></script>";
+  $codeMirror .=  "<script src='$iniPath/addon/edit/matchbrackets.js'></script>";   
 
   $codeMirror .=  "<script src='extensions/Parsifal/codemirror/search.js'></script>";   
-  $codeMirror .=  "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/addon/search/searchcursor.js'></script>"; 
-  $codeMirror .=  "<script src='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/addon/dialog/dialog.js'></script>"; 
-  $codeMirror .=  "<link rel='stylesheet' href='extensions/Parsifal/vendor/codemirror/codemirror-5.65.3/addon/dialog/dialog.css'></script>";  
 
-   $editPage->editFormTextBottom  = $codeMirror . "<script data-src='DantePresentations.php'>DPRES.editPreviewPatch();</script>";
+  $codeMirror .=  "<script src='$iniPath/addon/search/searchcursor.js'></script>"; 
+  $codeMirror .=  "<script src='$iniPath/addon/dialog/dialog.js'></script>"; 
 
+  $codeMirror .=  "<link rel='stylesheet' href='$iniPath/lib/codemirror.css'>";
+  $codeMirror .=  "<link rel='stylesheet' href='extensions/Parsifal/codemirror/codemirror-parsifal.css'>";      
+  $codeMirror .=  "<link rel='stylesheet' href='$iniPath/addon/dialog/dialog.css'>";  
+
+  return $codeMirror;
+}
+
+
+
+
+
+
+
+// when we edit a page, intercept the edit process via javascript and insert an edit preview (if appropriate)
+public static function onEditPageshowEditForminitial ( EditPage &$editPage, OutputPage $output) {
+   $output->addHeadItem ("preview", "<script src='extensions/DantePresentations/preview.js'></script>");  
+
+   $editPage->editFormTextBottom  = self::loadCodeMirror () . "<script data-src='DantePresentations.php'>DPRES.editPreviewPatch();</script>";
  }
 
 
@@ -319,7 +334,7 @@ private static function generateSideChick (string $name, string $longName) {
     $title     = $title->createFragmentTarget( '' );
     
     if ( $title instanceof Title && $title->canExist() ) {
-      $values = PageProps::getInstance()->getProperties( $title, 'displaytitle' );
+      $values = MediaWikiServices::getInstance()->getPageProps()->getProperties( $title, 'displaytitle' );  // PageProps via service container (PageProps::getInstance() is deprecated)
       $id = $title->getArticleID();
       if ( array_key_exists( $id, $values ) ) {
         $value = $values[$id];

@@ -274,9 +274,9 @@ protected function getInputNSKey () {
     throw new Exception ("ShowEndpoint: could not generate title from dbkey: (" . $this->dbkey . ")\n");
   }
 
-  $wikipage    = new WikiPage ($title);                              // get the WikiPage for that title
+  $wikipage    = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // get the WikiPage for that title via factory
   $contob      = $wikipage->getContent();                            // and obtain the content object for that
-  $contenttext = ContentHandler::getContentText( $contob );
+  $contenttext = ($contob instanceof \MediaWiki\Content\TextContent) ? $contob->getText() : '';  // replaces deprecated ContentHandler::getContentText
   return $contenttext;
 }
 
@@ -285,9 +285,9 @@ protected function getInputNSKey () {
 
 protected function getInputTitle () {
   $pageIdentity      =  Title::newFromDBkey ( $this->title );
-  $wikipage    = new WikiPage ($pageIdentity);                              // get the WikiPage for that title
+  $wikipage    = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $pageIdentity );  // get the WikiPage for that title via factory
   $contob      = $wikipage->getContent();                            // and obtain the content object for that
-  $contenttext = ContentHandler::getContentText( $contob );
+  $contenttext = ($contob instanceof \MediaWiki\Content\TextContent) ? $contob->getText() : '';  // replaces deprecated ContentHandler::getContentText
   return $contenttext;
 }
 

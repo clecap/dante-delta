@@ -212,7 +212,7 @@ public static function getSubpages( $title, $limit = -1 ) {
 			->caller( __METHOD__ );
 
 
-  $result = TitleArray::newFromResult( $query->fetchResultSet() );
+  $result = MediaWikiServices::getInstance()->getTitleFactory()->newTitleArrayFromResult( $query->fetchResultSet() );  // TitleArray was removed from core; TitleFactory replaces it
 		return $result;
 
 
@@ -236,7 +236,7 @@ public static function getSubpages( $title, $limit = -1 ) {
 			->options( $options )
 			->caller( __METHOD__ );
 
-		return TitleArray::newFromResult( $query->fetchResultSet() );
+		return MediaWikiServices::getInstance()->getTitleFactory()->newTitleArrayFromResult( $query->fetchResultSet() );
 
 
 	}
@@ -247,7 +247,7 @@ public static function getSubpages( $title, $limit = -1 ) {
 
 // this is my DANTE version !
 public static function onArticleViewHeader ( &$article, &$outputDone, bool &$pcache ) {
-  global $wgOut;
+  $out = $article->getContext()->getOutput();  // OutputPage of the current request, replaces the fragile global $wgOut
   $title = $article->getTitle();           // danteLog ("DantePresentations", "onArticleViewHeader found title:  " .$title." \n");
   $titleSubs = $title->getSubpages();
   $titleSubsNum = count ($titleSubs);      //  danteLog ("DantePresentations", "title subs:" . $titleSubsNum . "\n");
@@ -297,7 +297,7 @@ public static function onArticleViewHeader ( &$article, &$outputDone, bool &$pca
   danteLog ("DantePresentations", " DeepL  BABEL object" . print_r ($BABEL, true) . "\n\n");
  danteLog ("DantePresentations", " DeepL  BABEL object as json " . $json . "\n\n");
 
-  $wgOut->addInlineScript ("window.BABEL_LANGUAGES=" . $json . ";");
+  $out->addInlineScript ("window.BABEL_LANGUAGES=" . $json . ";");
 
   return true;  // continue with normal page rendering
 } // onArticleViewHeader
@@ -424,7 +424,7 @@ public static function onArticleViewHeaderSUBTRANSLATE( &$article, &$outputDone,
 
 
     /* create WikiPage of basepage */
-    $page = WikiPage::factory( $basetitle );
+    $page = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $basetitle );
     if( $page === null or !$page->exists() ) { danteLog ("DantePresentations", "SubTranslate: could not make wiki page of base \n");return; }
 
     $out = $article->getContext()->getOutput();
@@ -439,7 +439,7 @@ public static function onArticleViewHeaderSUBTRANSLATE( &$article, &$outputDone,
       danteLog ("DantePresentations", "SubTranslate: cache failure on cachekey $cachekey \n");
 
       $content = $page->getContent();
-      $text    = ContentHandler::getContentText( $content );
+      $text    = ($content instanceof \MediaWiki\Content\TextContent) ? $content->getText() : '';  // replaces deprecated ContentHandler::getContentText
       danteLog ("DantePresentations", "SubTranslate: content of base page is as follows: ---------------------------------------------- \n");
       danteLog ("DantePresentations", $text . " \n\n ----------------------------------------------------------\n");
 

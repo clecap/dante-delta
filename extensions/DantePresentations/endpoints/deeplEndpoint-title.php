@@ -74,7 +74,7 @@ public function runIt () {
 
   $titleObject = Title::newFromText( $this->title );              // Create a Title object from the text of the title
   if ( $titleObject instanceof Title ) {                          // Get the WikiPage object for the given title
-    $wikiPage = WikiPage::factory( $titleObject );
+    $wikiPage = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $titleObject );
     $content = $wikiPage->getContent();                           // Get the wikitext content of the page
     if ( $content instanceof TextContent ) { $wikiText = $content->getText(); } 
     else {$wikiText = 'Content is not text';}

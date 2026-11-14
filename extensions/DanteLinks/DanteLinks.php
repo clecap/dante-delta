@@ -187,7 +187,7 @@ private static function doesExist ( $myTarget ) {
      return false;
   }
   else {                             if ($VERBOSE) {self::debugLog ("DanteLinks: Title found for: " . $myTarget. "\n");}
-    $targetWP =  WikiPage::factory( $targetTitle );
+    $targetWP =  \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $targetTitle );
     if ($targetWP->exists ()) {      if ($VERBOSE) {self::debugLog ("DanteLinks: WikiPage found for: " . $myTarget. "\n");}
       return true;}
     else {                           if ($VERBOSE) {self::debugLog ("DanteLinks: WikiPage not found for: " . $myTarget. "\n");}

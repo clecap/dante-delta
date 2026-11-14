@@ -18,7 +18,7 @@ function getSubPagesFor( $titleText, $namespace ) {
   $options = [];
   $result = $dbr->select( 'page', [ 'page_id', 'page_namespace', 'page_title', 'page_is_redirect' ], $conditions, __METHOD__, $options);
   
-  $titleIterator = TitleArray::newFromResult ( $result );
+  $titleIterator = MediaWikiServices::getInstance()->getTitleFactory()->newTitleArrayFromResult( $result );  // TitleArray was removed from core; TitleFactory replaces it
   $titleArray    = iterator_to_array( $titleIterator );
   $func = function($title) {    return $title->getDBKey(); };
   $mapped = array_map ( $func, $titleArray );

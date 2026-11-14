@@ -29,7 +29,7 @@
 	"MessagesDirs": {"DantePresentationSkin": ["i18n"]},
 	"ResourceModules": {
 		"skins.example.styles": {
-			"class":     "ResourceLoaderSkinModule",
+			"class":     "MediaWiki\\ResourceLoader\\SkinModule",
 			"features":  {"normalize": true, "elements": true, "content-tables": true, "content-links": false, "content-media": false, "content-links-external": false, "interface-message-box": true, "interface-category": false, "toc": true},
 			"targets": ["desktop", "mobile"],
 			"styles": ["TAKETHISOXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXUTresources/skin.less", "danteReveal.css"]
