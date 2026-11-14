@@ -2,6 +2,7 @@ name: Count Lines of Code
 
 on:
   push:
+    branches: [master]  # Only count on the master branch to avoid bot commits on feature branches
   schedule:
     - cron: '0 0 * * *'  # Runs every day at midnight
 
