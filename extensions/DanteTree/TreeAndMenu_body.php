@@ -118,7 +118,7 @@ public static function onEditPageattemptSaveafter( EditPage $editPage, Status $s
 
   // ensure that when a page is saved, the sidebar cache is invalidated. we need this because a page has now been created and thus a link cached in the
   // sidebar might no longer be a new link (preseted in red) but an existant link (presented in blue)
-  $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); }
+  self::invalidateSidebarCache ();
 
   // danteLog ("DanteTree", "oneditpageattempt \n" );
   if ( $editPage->getTitle()->getNamespace() == NS_MAIN) {     
@@ -162,8 +162,17 @@ public static function onPageDeleteComplete( ProperPageIdentity $page,  Authorit
 
 
 
-private static function invalidateSidebarCache () {
-  global $IP; $name = $IP.'/sidebarcache'; if(file_exists($name)) {unlink($name); }
+/**
+ * Delete the sidebar cache file so that the sidebar is regenerated on the next page view.
+ * Single place for invalidating the cache; also used by DanteBackup (as a DanteCallableCommand) and Parsifal (reset page).
+ *
+ * @return bool true if a cache file was removed, false if there was none
+ */
+public static function invalidateSidebarCache (): bool {
+  global $IP;
+  $name = $IP . '/sidebarcache';                                   // location of the cache file
+  if ( file_exists ( $name ) ) { return unlink ( $name ); }        // remove it if present
+  return false;
 }
 
 
