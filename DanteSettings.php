@@ -2,11 +2,13 @@
 
 require_once ("DantePolyfill.php");                          // fill in some common functions for Dante and otherwise to keep config file clean from common function definitions.
 
-#require_once ("DanteSettings-development.php");
-#require_once ("DanteSettings-production.php");
-require_once ("DanteSettings-used.php");
 
-require ("mediawiki-PRIVATE.php");
+#require_once ("DanteSettings-development.php");             // load configuration specifics for development
+#require_once ("DanteSettings-production.php");              // load configuration specifics for production
+require_once ("DanteSettings-used.php");                     // loads one of development or production as selected in the system based switch
+
+require ("mediawiki-PRIVATE.php");                           // loads the secrets of the docker file and injects them into mediawiki
+
 
 // Check the password "remember me" box by default (sitewide)
 $wgHooks['AuthChangeFormFields'][] = function ($requests, $fieldInfo, &$formDescriptor, $action) {
@@ -15,11 +17,9 @@ $wgHooks['AuthChangeFormFields'][] = function ($requests, $fieldInfo, &$formDesc
     return true;
 };
 
+date_default_timezone_set( $wgLocaltimezone );  // causes all time zone functions to adhere to the value of $wgLocaltimezone, as it was set in mediawiki-PRIVATE.php
 
-date_default_timezone_set( $wgLocaltimezone );
-
-// protocol specifiers which are accepted for external links
-// adjusted, since we want to have javascript: included for activating scripts
+// protocol specifiers which are accepted for external links; adjusted, since we want to have javascript: included for activating scripts
 $wgUrlProtocols = [
 'bitcoin:', 'ftp://', 'ftps://', 'geo:', 'git://', 'gopher://', 'http://',
 'https://', 'irc://', 'ircs://', 'magnet:', 'mailto:', 'matrix:', 'mms://',
@@ -32,9 +32,13 @@ $wgUrlProtocols = [
 
 $wgDanteVersion = is_readable ("/etc/dante-version") ? mb_substr (trim (file_get_contents ("/etc/dante-version")), 0, 10) : "version-file-not-found";   // Dante version string from /etc/dante-version, at most 10 characters; fallback marker if file is missing or unreadable
 
-
-
+##
+## adjust look-and-feel
+##
 $wgLogo="/dante-assets/logo-180x180.png";
+$wgLogos = false;
+$wgFavicon = "/favicon.ico";
+
 
 $wgRightsText=  "Copyright";   // This variable must be non-empty in order that the contents of MediaWiki:Copyright is shown 
 
@@ -69,59 +73,30 @@ $wgFooterIcons = [
 
 
 
-// Remove the patrol right from all user groups - this clears the 
-$wgGroupPermissions['*']['patrol'] = false;
-$wgGroupPermissions['user']['patrol'] = false;
-$wgGroupPermissions['autoconfirmed']['patrol'] = false;
-$wgGroupPermissions['bot']['patrol'] = false;
-$wgGroupPermissions['sysop']['patrol'] = false;
-$wgGroupPermissions['bureaucrat']['patrol'] = false;
-
-
-
-
 
 
 $wgEnableUploads         = true;                     // allow uploads
 $wgMaxUploadSize         = 100 * 1024 * 1024;        // allow large uploads of up to 100 MB
 $wgAllowExternalImages   = true;                     // allow extenal images to be used 
-$wgFileExtensions[] = 'svg';                         // add svg to list of permitted file types
+$wgFileExtensions[]      = 'svg';                    // add svg to list of permitted file types
+
 
 
 $wgJobRunRate = 10;             ## Job queue run rate
 
 
-
-// TODO: we are no longer using subtranslate - deprecate all this stuff
-// MAIN must allow namespaces or no translation will work
+// MAIN must allow subpages
 $wgNamespacesWithSubpages[NS_MAIN] = true;
 
-/* if you use DeepL API Free plan */ // TODO: deprecate this stuff
-// $wgSubTranslateAPIKey['api-free.deepl.com'] = $DEEPL_API_KEY;
-/* if you use DeepL API Pro plan */
-// $wgSubTranslateAPIKey['api.deepl.com'] = "<your auth-key here>";
 
-//$wgSubTranslateCaching      = true;
-//$wgSubTranslateCachingTime  = 604800;	/* 60(s) * 60(m) * 24(h) * 7 days */
-
-// $wgSubTranslateRobotPolicy  = "noindex,nofollow";  // TODO: IMPLEMENT THIS IN OUR OWN SYSTEM
-
-
-/* configure permissions */
-$wgGroupPermissions['*']['edit'] = false;             # No anonymous editing
-$wgGroupPermissions['docent']['edit'] = true;         # only used to generate the group docent
-$wgGroupPermissions['*']['createaccount'] = false;    # currently prevent account creation
 
 
 $wgEditPageFrameOptions ="SAMEORIGIN";                // required to allow the preview iframe in the edit view to navigate to pages of the same 
 
-$wgLogos = false;
-$wgFavicon = "/favicon.ico";
 
-# include installations of all skins which we did install here
-if ( file_exists('DanteSkinsInstalled.php') ) {include ("DanteSkinsInstalled.php");}
 
-# wfLoadSkin('SkinJson');
+
+
 
 wfLoadExtension( 'CategoryTree' );
 wfLoadExtension( 'Gadgets' );                    // allows access to CSS and JS resources in MediaWiki namespace
@@ -135,38 +110,28 @@ wfLoadextension ('ImageMap');                    // adds <imagemap> tag for HTML
 wfLoadExtension ('Interwiki');                   // adds interwiki link formats
 wfLoadExtension ('SyntaxHighlight_GeSHi');       // adds <syntaxhighlight> tag for syntax highlighting
 
-# produces an error in load.php under php8.2 
-## wfLoadExtension ('WikiMarkdown');                // adds <markdown> to include markdown syntax into the wiki
 
-
-## configure drwaio
-
+##
+## Complicated extensions: Manual configuration of extensions loaded in dockerfile but needing special adjustments
+##
+## 
 $wgDrawioEditorBackendUrl=$wgServer.$wgScriptPath. "/external-services/draw-io/drawio-dev/src/main/webapp";
+
+# fix default values in extension NativeMarkdown
+$wgNativeMarkdownEverywhere=false;         // new pages do not default to markdown
+$wgNativeMarkdownSuffixDetection=true;     // new pages whose title ends in .md default to Markdown, except in the Template and MediaWiki namespaces
 
 
 ###
 ### Dante Extensions: Configure and Load
 ###
-wfLoadExtension ( ext: 'DanteCommon' ); // core part for all dante extensions
+wfLoadExtension( ext: 'DanteCommon' ); // core part for all dante extensions
 wfLoadExtension( 'DanteBread' );
 wfLoadExtension( 'DanteLinks' );
 wfLoadExtension( 'DanteTree' );
 wfLoadExtension( 'DanteTabs' );
-
 wfLoadExtension( 'DanteSyntax' );
-
-
-$wgGroupPermissions['sysop']['dante-restore'] = true;  // TODO: this should go into the registration function of the extension as a default somehow and not be required here. // NOTE: here: it must be before loading the extension 
-$wgGroupPermissions['sysop']['dante-dump'] = true;
-$wgGroupPermissions['sysop']['dante-dbrestore'] = true;
-$wgGroupPermissions['sysop']['dante-dbdump'] = true;
-wfLoadExtension( 'DanteBackup' );
-
-
 wfLoadExtension( 'DanteSnippets' );
-
-$wgTopDante = new stdClass();  // a generic top level object helper for parsifal and dante, must be defined here, before loading Parsifal
-
 
 // the sequence of loading should be:  1) Parsifal  2) DantePresentations  3) DanteHideSection  -  this influences the sequence of interaction possibilities in the edit links part of the page
 wfLoadExtension( 'Parsifal' );
@@ -174,12 +139,44 @@ wfLoadExtension( 'DantePresentations' );
 wfLoadExtension ('DanteHideSection');                 // allows to hide/collapse individual sections
 
 
+
+##
+## Permission system
+##
+$wgGroupPermissions['*']['edit'] = false;             # No anonymous editing
+$wgGroupPermissions['docent']['edit'] = true;         # only used to generate the group docent
+$wgGroupPermissions['*']['createaccount'] = false;    # currently prevent account creation
+
+$wgGroupPermissions['sysop']['dante-restore']   = true;  // TODO: this should go into the registration function of the extension as a default somehow and not be required here. // NOTE: here: it must be before loading the extension 
+$wgGroupPermissions['sysop']['dante-dump']      = true;
+$wgGroupPermissions['sysop']['dante-dbrestore'] = true;
+$wgGroupPermissions['sysop']['dante-dbdump']    = true;
+
+wfLoadExtension( 'DanteBackup' );
+
+
+// Switch off patrolling completely: no patrol links, no unpatrolled markers in recent changes, new pages and uploads; this also covers groups which would otherwise get the patrol right
+$wgUseRCPatrol   = false;   // patrolling of edits in recent changes
+$wgUseNPPatrol   = false;   // patrolling of new pages
+$wgUseFilePatrol = false;   // patrolling of file uploads
+
+
+
+
+
+
+$wgTopDante = new stdClass();  // a generic top level object helper for parsifal and dante, must be defined here, before loading Parsifal
+
+##
 ## Skins
+##
 wfLoadSkin( 'skinny' );
 wfLoadSkin( 'DantePresentationSkin' );
+$wgDefaultSkin = "vector";       // use legacy Vector as default skin; overrides the "vector-2022" written into LocalSettings.php by the installer
 
-// use legacy Vector as default skin; overrides the "vector-2022" written into LocalSettings.php by the installer
-$wgDefaultSkin = "vector";
+
+# include installations of all skins which we did install here
+if ( file_exists('DanteSkinsInstalled.php') ) {include ("DanteSkinsInstalled.php");}
 
 
 # include stuff generated dynamically by scripts
@@ -194,8 +191,7 @@ require ("DanteDynamicInstalls.php");
 
 
 
-## setting for graphviz dot  
-$danteDotPath="/usr/bin/dot";
+
 
 ##
 ## Configuring Extension wikEdDiff
@@ -217,9 +213,6 @@ $wgWikEdDiffDebug = false;                # Show debug infos and stats (block, g
 $wgWikEdDiffTimer = false;                # Show timing results in debug console (false)
 $wgWikEdDiffUnitTesting = false;          # Run unit tests to prove correct working, display results in debug console (false)
 
-
-
-
 ##
 ## COnfigure interwiki and transwiki
 ##
@@ -227,8 +220,6 @@ $wgWikEdDiffUnitTesting = false;          # Run unit tests to prove correct work
 wfLoadExtension( 'Interwiki' );
 $wgGroupPermissions['sysop']['interwiki'] = true;    // To grant sysops permissions to edit interwiki data
 $wgImportSources = [ 'sourcewiki', 'commons', 'arxiv' ];
-
-
 
 
 
