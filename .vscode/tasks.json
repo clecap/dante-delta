@@ -1,0 +1,16 @@
+{
+  // Tasks for this workspace; checked into the repository so every attached VS Code instance picks them up
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // On folder open (e.g. after attaching to the container), switch this window to the multi-root workspace with wiki-dir, Parsifal and /var/www; if the workspace is already open, VS Code only focuses it
+      "label": "Open Dante workspace",
+      "type": "shell",
+      "command": "code -r /var/www/html/wiki-dir/.vscode/project.code-workspace",
+      "options": { "cwd": "${workspaceFolder}" },
+      "runOptions": { "runOn": "folderOpen" },
+      "presentation": { "reveal": "never", "close": true, "echo": false, "showReuseMessage": false },
+      "problemMatcher": []
+    }
+  ]
+}

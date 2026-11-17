@@ -1,5 +1,8 @@
 {
   "workbench.tree.indent": 24,                   // Configure a more reasonable indentation in the editor
+  // Show ALL files in the explorer: switch off every built-in default exclude and do not hide git-ignored files
+  "files.exclude": { "**/.git": false, "**/.svn": false, "**/.hg": false, "**/CVS": false, "**/.DS_Store": false, "**/Thumbs.db": false },
+  "explorer.excludeGitIgnore": false,
   //"editor.inlineSuggest.enabled": false,         // Disable inline ghost text suggestions
   //"editor.parameterHints.enabled": false,        // Disable the parameter hints popup
   //"editor.lightbulb.enabled": "off",             // Disable the code-action lightbulb hover
