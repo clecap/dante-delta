@@ -1,0 +1,60 @@
+name: Count Lines of Code
+
+# runs only upon a git push
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # for pushing the results to branch cloc-results
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install cloc
+        run: sudo apt-get update && sudo apt-get install -y cloc
+
+      # Write results outside the checkout, so cloc does not count its own output files.
+      # Exclude .github/results, which holds large generated files (e.g. the SBOM json) and is not our code.
+      - name: Run cloc (txt, md, json)
+        run: |
+          OUT="$RUNNER_TEMP/cloc-results"
+          mkdir -p "$OUT"
+          cloc --exclude-dir=.git,results .        > "$OUT/cloc_results.txt"
+          cloc --exclude-dir=.git,results --md .   > "$OUT/cloc_results.md"
+          cloc --exclude-dir=.git,results --json . > "$OUT/cloc_results.json"
+          cat "$OUT/cloc_results.txt"
+          # show the markdown table directly on the run page
+          cat "$OUT/cloc_results.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload cloc results
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: cloc-results
+          path: ${{ runner.temp }}/cloc-results/
+
+      # The README badges and links read the results from branch cloc-results.
+      # The branch is force-pushed as a single commit, so it does not accumulate history and master stays free of bot commits.
+      - name: Publish cloc results to branch cloc-results
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd "$RUNNER_TEMP/cloc-results"
+          git init -q -b cloc-results
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -q -m "cloc results for ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" cloc-results

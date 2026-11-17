@@ -12,8 +12,10 @@
 //   1) Configuration files, usually in the MediaWiki namespace, show their content in preview
 //   2) Allow some comments on the purpose and the format of these files as part of these files (before and after the pre tags)
 function extractPreContents ($code) {
-  $start = strpos ($code, "<pre>") + 5;
+  $start = strpos ($code, "<pre>");
   $end   = strpos ($code, "</pre>");
+  if ($start === false || $end === false || $end < $start) { return ""; }                // no complete <pre> block: treat as empty list
+  $start += 5;                                                                           // skip the <pre> tag itself
   $code  = substr ($code, $start, $end - $start);
   $code  = trim   ($code);                                                               // removes white space at the beginning and at the end
   $lines = explode("\n", $code);                                                         // Split the string into an array of lines
@@ -111,6 +113,7 @@ static public function listOfListed ($name) {
   if ($title == null) { throw new Exception ("Title $name not found");}       
   $wikipage   = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // WikiPage via factory instead of new WikiPage()
   if ($wikipage == null) { throw new Exception ("Could not generate Wikipage for title $name");}                                   // signal the caller that we did not get a WikiPage
+  if (!$wikipage->exists()) { return DanteUtil::emptyList (); }                              // a missing list page is an empty list, like a missing category in catList
   $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
   if ($contentObject ) {                                                                      // IF we have found a content object for this thing
     $contentText = ($contentObject instanceof \MediaWiki\Content\TextContent) ? $contentObject->getText() : '';  // replaces deprecated ContentHandler::getContentText
@@ -144,6 +147,16 @@ static public function listOfNamespace ( $nsIndex ) {
   $filepath = tempnam ("/tmp", "DantePageList");
   $arr = DanteUtil::getPagesInNamespace ( $nsIndex );
   file_put_contents ($filepath, implode ("\n",$arr)."\n");
+  return $filepath;
+}
+
+/**
+ * Return the name of a fresh, empty temporary page list file.
+ *
+ * @return string  path of the temporary file
+ */
+static public function emptyList () {
+  $filepath = tempnam ("/tmp", "DantePageList");   // tempnam creates the file with zero length
   return $filepath;
 }
 

@@ -1,11 +1,9 @@
 #
-# This is the .gitignore file inside of wiki-dir
+# This is the .gitignore file living inside of wiki-dir and responsible for repository dante-delta
 #
-# It is connected with repository dante-delta 
 
-#
+
 # no apple artefacts
-#
 .DS_Store
 deprecated/  
 
@@ -42,9 +40,11 @@ ERRORLOG
 
 .git/
 
-######### IMPORTANT !!
-# we ignore everything, which is essentially all the mediawiki stuff
+
+#
+# MAIN RULE: we ignore everything, which is essentially all the mediawiki stuff
 # and we re-add what we need later
+#
 
 *
 
@@ -62,28 +62,20 @@ ERRORLOG
 !.vsccode/**
 
 
-!extensions/
 
-##
-## When we change this here we must also change git-files-EDIT-THIS-FILE.sh
-##
+
+
 
 ### Files which we must include
 
 !README-dantepatch.md
-
-##
-## Files we patched in the mediawiki core
-##
-!includes/import/WikiImporter.php
-!includes/media/SVGReader.php
-
 
 
 !DantePolyfill.php
 !psalm.xml
 !.phan/
 !.phan/config.php
+!.eslintrc.js
 !DanteSettings.php
 !DanteSettings-production.php
 !DanteSettings-development.php
@@ -99,8 +91,12 @@ ERRORLOG
 !.gitignore
 !.gitconfig
 
+#
 ### Directories which we want to include 
+#
 
+# We want to look inside of some extensions.
+!extensions/
 
 !extensions/DanteBackup
 !extensions/DanteBackup/**
@@ -153,9 +149,10 @@ extensions/DanteTabs/LOGFILE
 extensions/DanteTree/.DS_Store
 extensions/DanteTree/LOGFILE
 
-!skins/skinny
-!skins/skinny/*
 
+
+!skins/skinny
+!skins/skinny/**
 !skins/DantePresentationSkin
 !skins/DantePresentationSkin/**
 skins/DantePresentationSkin/LOGFILE

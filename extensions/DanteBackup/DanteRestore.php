@@ -220,9 +220,9 @@ protected function getSpecificCommands ( $formId ): mixed {
        break;
     }
 
+    // clear the sidebar cache before and after the restore: the first step always runs, so even a restore that fails midway cannot leave a cache from before the restore
+    array_unshift ( $arr, new DanteCallableCommand ( [ TreeAndMenu::class, 'invalidateSidebarCache' ], [], "Clearing the sidebar cache before the restore" ) );
     $arr[] = new DanteCallableCommand ( [ TreeAndMenu::class, 'invalidateSidebarCache' ], [], "Clearing the sidebar cache" );   // restore may have changed MediaWiki:Sidebar, so drop the cache after all restore commands ran
-
-
 
     return $arr;
 }
