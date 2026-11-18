@@ -19,6 +19,24 @@ let maximalCallingsOfEventSourceLeft  = 20;  // set a default in case we forgot 
 */
 
 
+/**
+ * Append a link to the main page of the wiki to the given element.
+ * The URL is provided by ServiceEndpointHelper::getGeneral in the data-url attribute of #main-page-url.
+ * The link targets _top, since this page lives in an iframe and the user should leave the frame.
+ *
+ * @param {HTMLElement} ele - element to which the link is appended
+ * @returns {void}
+ */
+function appendMainPageLink (ele) {
+  const holder = document.getElementById ("main-page-url");  // carrier of the main page URL
+  if ( !holder || !holder.dataset.url ) { return; }           // no URL known: just show the message
+  const a = document.createElement ("a");                     // build the link
+  a.href = holder.dataset.url; a.target = "_top"; a.textContent = "Go to the main page";
+  ele.appendChild (document.createTextNode (" "));            // separate link from message text
+  ele.appendChild (a);
+}
+
+
 
 function handler (e) {
   const log = document.getElementById('log');
@@ -97,7 +115,7 @@ function handler (e) {
 
     case "was-ok":     { let ele =document.getElementById ("container-" + obj.num); ele.classList.add ("was-ok");   break;}
     case "tick":       { let ele=document.getElementById ("tick-" + obj.num); ele.textContent = obj.data; break;;}      // we want to update the total running time (wall clock)
-    case "close":      { source.close();  let ele=document.createElement ("h2"); ele.textContent = obj.data; document.body.appendChild (ele); down (ele); break;}
+    case "close":      { source.close();  let ele=document.createElement ("h2"); ele.textContent = obj.data; appendMainPageLink (ele); document.body.appendChild (ele); down (ele); break;}
 
     // ret: this is a notification when we did not call a script but a PHP callable - in this case there is no exit value but a return value
     // retOk    is called when everything was fine.  

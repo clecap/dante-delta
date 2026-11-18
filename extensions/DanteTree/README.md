@@ -4,8 +4,7 @@ This repository is a branch of the TreeAndMenu mediawiki extension originally at
 * https://www.mediawiki.org/wiki/Extension:TreeAndMenu
 * https://gitlab.com/organicdesign/TreeAndMenu/
 
-Years ago I started to hack the original extension a bit without properly documenting it.
-Then somehow the original was updated and this branch made it difficult for me to keep up with it. This repository helps me keep my version somehow stable and available without having the need to completely reengineer it.
+
 
 
 ## Patches Made
@@ -20,3 +19,71 @@ Currently alpha and incomplete.
 
 
 
+
+## TODO Patches:
+
+* Hilite a category in the tree if below that category there is a marking, hidden inside of the collapsed tree.
+
+
+## Category Editor Functionality ##
+
+We have a category tree showing sub categories of category root
+  TODO: make more flexible, not necessariy root bur rather "sidebar"
+The categories of a page are ticked.
+
+When viewing pages: Changing the checkboxes is disabled.
+
+When editing a page: Changing them is enabled
+When saving a page:  We have to check which of them are clicked
+  PROBLEM: How do we solve a discrepancy between 1) text in the wiki page using category links and 2) settings in the tree?
+  PROBLEM: How do we ensure that category links are at the end of a wiki page text and not somewhere in the middle?
+
+
+
+
+## Patches done by CHC ##
+
+Adapt to the new mediawiki extension loading mechanism.
+
+Streamlined the code in many places.
+
+Removed unnecessary animation, which only serves as eye candy and does not convey essential UI information.
+
+Compressed the layout to have more efficient use of available screen real estate.
+
+Combined several extension functions into one.
+
+Optimized code in various places.
+
+Reduced flicker while loading.
+
+fancytree has been patched as well ?!?
+
+
+## Features ##
+
+### Link Modification Features ###
+
+A link which is descendant of a <span> with class
+* "removeTargetClass" has its target removed
+* "blankTargetClass"  opens in target _blank
+
+* "showReferrer" is explicitely allowed to show referrers
+
+This allows us to define the opening mode in the sidebar tree menus.
+
+Links with target _blank are dotted red, not underlined.
+
+
+### Main / Side hide feature ###
+If we add to the URL a specode=side to the URL then we only get the sidebar
+If we add specode=main then we only get the main contents
+
+
+
+
+## Why a multi functional extension ? ##
+
+A multi functional extension is counter the design principle of separation of concerns. However,
+* a larger number of independent extensions is not practical since they are not on a common maintenance standard and with
+a change in an interface of the core functions all would have to be maintained individually
