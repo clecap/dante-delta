@@ -7,7 +7,7 @@ require_once ("DantePolyfill.php");                          // fill in some com
 #require_once ("DanteSettings-production.php");              // load configuration specifics for production
 require_once ("DanteSettings-used.php");                     // loads one of development or production as selected in the system based switch
 
-require ("mediawiki-PRIVATE.php");                           // loads the secrets of the docker file and injects them into mediawiki
+## require ("mediawiki-PRIVATE.php");                           // loads the secrets of the docker file and injects them into mediawiki
 
 
 // Check the password "remember me" box by default (sitewide)
