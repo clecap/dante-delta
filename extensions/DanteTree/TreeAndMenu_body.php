@@ -2,6 +2,7 @@
 
 /** NOTE: we use a cache for the Sidebar. Files is fine, since it also provides a cached Sidebar in a cold start, which ACPu would not */
 
+use MediaWiki\Config\Config;
 use MediaWiki\Content\TextContent;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
@@ -267,6 +268,23 @@ EOT);
   $out->addStyle("../extensions/DanteTree/suckerfish/suckerfish.css");
 
  }
+
+
+/**
+ * Export the site-wide DanteWiki index settings from LocalSettings.php to mw.config (delivered via the cached startup module).
+ * Unset globals are exported as null so the client can test with === null.
+ *
+ * @param array  &$vars  config vars delivered to the client; modified in place
+ * @param string $skin   name of the skin in use (unused)
+ * @param Config $config site configuration (unused)
+ * @return void
+ */
+public static function onResourceLoaderGetConfigVars( array &$vars, $skin, Config $config ): void {
+  global $wgWikiIndex, $wgWikiIndexClass, $wgWikiIndexSuffix;                                  // optional settings from LocalSettings.php
+  $vars['wgWikiIndex']       = $wgWikiIndex       ?? null;                                     // index number of this wiki variant
+  $vars['wgWikiIndexClass']  = $wgWikiIndexClass  ?? null;                                     // additional CSS class for the wiki name in the logo
+  $vars['wgWikiIndexSuffix'] = $wgWikiIndexSuffix ?? null;                                     // suffix shown next to the wiki name in the logo
+}
 
 
 // format the $name of a category in an <a> and <span> for fancy tree

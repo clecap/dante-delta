@@ -1,6 +1,7 @@
 <?php
 
-require_once '/var/www/html/wiki-dir/maintenance/Maintenance.php';
+
+require_once __DIR__ . '/../../../maintenance/Maintenance.php';  // load MediaWiki maintenance base class from the wiki root, three levels up (extensions/DantePresentations/php)
 
 class CreateTestPage extends Maintenance {
 

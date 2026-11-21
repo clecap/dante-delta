@@ -10,6 +10,7 @@
     "ParserFirstCallInit":        "TreeAndMenu::onParserFirstCallInit",
     "SkinBuildSidebar":           "TreeAndMenu::onSkinBuildSidebar",
     "BeforePageDisplay":          "TreeAndMenu::onBeforePageDisplay",
+    "ResourceLoaderGetConfigVars": "TreeAndMenu::onResourceLoaderGetConfigVars",
     "CategoryAfterPageAdded":     "TreeAndMenu::onCategoryAfterPageAdded",
     "CategoryAfterPageRemoved":   "TreeAndMenu::onCategoryAfterPageRemoved",
     "PageDeleteComplete":         "TreeAndMenu::onPageDeleteComplete",
