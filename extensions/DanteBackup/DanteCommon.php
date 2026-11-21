@@ -29,7 +29,8 @@ function getSubPagesFor( $titleText, $namespace ) {
 
 class DanteCommon {
 
-const DUMP_PATH = "/var/www/html/wiki-dir/dump";   
+
+  const DUMP_PATH = __DIR__ . "/../../dump";  // dump directory below the wiki root, resolved relative to this file (extensions/DanteBackup)
 
 
   // $ext: archive type before compression and encryption, one of xml, sql, tar

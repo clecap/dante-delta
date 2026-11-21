@@ -16,17 +16,8 @@ class OperatingMode extends SpecialPage {
       return;
     }
 
-
-
-
     $this->showOperatingModeForm();
-    $this->showSecondForm();
     $this->showThirdForm();
-
-    $out = $this->getOutput();
-    $out->addHTML ( '<p><a href="' . $wgServer . $wgScriptPath . '?title=Special:SpecialPages">Special Pages</a></p>' );
-
-
   }
 
 
@@ -64,22 +55,7 @@ class OperatingMode extends SpecialPage {
     return true;
   }
 
-  // ---------------------------------------------------------------------------
-  // Form 2: boilerplate — replace with actual fields and logic
-  // ---------------------------------------------------------------------------
-
-  private function showSecondForm() {
-    $out = $this->getOutput();
-    $out->addHTML( "<h2>Build and Show Documentation</h2>" );
-
-    $out->addHTML( "<a href='../docs/html'>Build and Show Documentation</a>" );
-
-    $form = HTMLForm::factory( 'table', $formDescriptor, $this->getContext() );
-    $form->setFormIdentifier( 'secondForm' );
-    $form->setSubmitText( 'Submit' );
-    $form->setSubmitCallback( [ $this, 'processSecondForm' ] );
-    $form->show();
-  }
+ 
 
 
 
@@ -88,8 +64,9 @@ private function showThirdForm() {
     $out = $this->getOutput();
     $out->addHTML( "<h2>Provide Links to Analytic Test Pages</h2>" );
     $out->addHTML( "<ul>" );
-    $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/extensions/DanteCommon/html/Clipboard.html'>Analyze Clipboard Contents (OLD)</a></li>" );
-    $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/extensions/DanteCommon/html/DragDrop.html'>Data Transfer Inspector</a></li>" );
+    $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/extensions/DanteExperiments/Clipboard.html'>Analyze Clipboard Contents</a></li>" );
+    $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/extensions/DanteExperiments/DragDrop.html'>Data Transfer Inspector</a></li>" );
+     $out->addHTML( "<li><a href='$wgServer/$wgScriptPath/docs/html/index.html'>Doxygen Docs (if generated)</a></li>" );   
     $out->addHTML( "<ul>" );
   
   }

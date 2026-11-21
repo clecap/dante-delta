@@ -149,7 +149,7 @@ let slots = new Array (null, null, null, null, null, null, null, null, null, nul
 // implement proper opening of links by the user
 //
 // target=_window    opens in a new window, similar size as opener
-// target=_sside      opens on the left side in a reasonable small sizehttps://localhost:4443/wiki-dir/index.php?title=Special:RecentChanges
+// target=_sside      opens on the left side in a reasonable small size 
 // target=_lside      open in a larger window
 // CAVE: attributes are not case sensitive in html!
 // CAVE: we need the Math.random below since otherwise we have the same name for the target window and this may lead to some spurous "about:" window opening somewhere else. do not know why.
