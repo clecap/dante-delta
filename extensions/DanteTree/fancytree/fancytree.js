@@ -415,7 +415,7 @@ const logoPatcher = () => {     //** patches the logo a bit so as to show the na
   var ele = document.createElement ('a');
 
   var wgWikiIndex       = mw.config.get ('wgWikiIndex', null);
-  var wgWIkiIndexClass  = mw.config.get ('wgWikiIndexClass');
+  var wgWikiIndexClass  = mw.config.get ('wgWikiIndexClass');
   var wgWikiIndexSuffix = mw.config.get ('wgWikiIndexSuffix');
 
   ele.innerHTML = mw.config.get('wgSiteName') +  ( wgWikiIndex === null ? "" :    "(" +wgWikiIndexSuffix + " / " + wgWikiIndex + ")"  ); 
