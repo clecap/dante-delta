@@ -373,7 +373,7 @@ const installPortletToggle = () => {
         console.log (e.target.textContent);
        let url = mw.config.get("wgServer") + mw.config.get( 'wgScript')+"?title=MediaWiki:Sidebar/"+e.target.textContent+"&action=edit";
         console.log ( url );
-        window.open ("https://localhost:4443/wiki-dir/index.php?title=MediaWiki:Sidebar/"+e.target.textContent+"&action=edit", "_self");
+        window.open (url, "_self");
         e.preventDefault(); e.stopPropagation();
 
      } else {
@@ -413,9 +413,15 @@ const installPropagate = () => {
 const logoPatcher = () => {     //** patches the logo a bit so as to show the name of the specific DanteWIki */
   const logo = document.getElementById ("p-logo");   
   var ele = document.createElement ('a');
-  ele.innerHTML = mw.config.get('wgSiteName'); 
-  ele.className='personal-wiki-name-logo'; 
-  ele.setAttribute ('title', 'Name of the specific dantewiki to distinguish multiple variants');
+
+  var wgWikiIndex       = mw.config.get ('wgWikiIndex', null);
+  var wgWikiIndexClass  = mw.config.get ('wgWikiIndexClass');
+  var wgWikiIndexSuffix = mw.config.get ('wgWikiIndexSuffix');
+
+  ele.innerHTML = mw.config.get('wgSiteName') +  ( wgWikiIndex === null ? "" :    "(" +wgWikiIndexSuffix + " / " + wgWikiIndex + ")"  ); 
+
+  ele.className='personal-wiki-name-logo'  +  (wgWikiIndexClass === null ? "" :  " " + wgWikiIndexClass ); 
+  ele.setAttribute ('title', 'Name of the dantewiki ');
   logo.appendChild (ele);
 };
 

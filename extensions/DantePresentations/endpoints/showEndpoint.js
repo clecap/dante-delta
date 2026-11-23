@@ -4,9 +4,13 @@
 (function() {  // trick suggested by https://chatgpt.com/c/677ee8a0-0dec-800f-b236-341faf304fd9
 
 
-return;
+return; // TODO !!
 
-  const LOADER_URL = '/wiki-dir/load.php?modules=startup&only=scripts';
+  // we must obtain the loading path without hardcoding it
+  const SCRIPT_PATH = new URL(document.currentScript.src).pathname.replace(/\/extensions\/.*$/, '');  // e.g. "/wiki-dir"
+  const LOADER_URL  = SCRIPT_PATH + '/load.php?modules=startup&only=scripts';
+
+
 
   function loadStartupModule (callback) {
     const script = document.createElement('script');

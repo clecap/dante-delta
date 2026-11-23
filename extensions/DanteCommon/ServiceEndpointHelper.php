@@ -88,7 +88,9 @@ public static function getIframe ( ) {
 
 public static function getGeneral ( $topInfo = "" ) {
   global $wgExtensionAssetsPath;   // works with and without short URLs, unlike ./extensions
+  $mainPageUrl = htmlspecialchars ( \Title::newMainPage()->getFullURL() );   // link target offered to the user after completion, read by serviceEndpoint.js
 return <<<END
+<div id="main-page-url" data-url="{$mainPageUrl}" hidden></div>
 <h2>Script Execution</h2>
 The system is executing a script. This process may take some time. Do not close this window before we inform you about completion of all activities.<br><br>
 <h3>General Log</h3>

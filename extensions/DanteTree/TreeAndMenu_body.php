@@ -1,8 +1,8 @@
 <?php
 
-
 /** NOTE: we use a cache for the Sidebar. Files is fine, since it also provides a cached Sidebar in a cold start, which ACPu would not */
 
+use MediaWiki\Config\Config;
 use MediaWiki\Content\TextContent;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
@@ -44,6 +44,7 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
   }
   // ELSE: if the file does not exist, construct the sidebar and store it in the cache
 
+
   foreach ($arrKeys as $key) {
     if (in_array ( $key,  array ("SEARCH", "TOOLBOX", "LANGUAGES") ) )  { continue; }  // ignore these standard sidebar items 
 
@@ -63,7 +64,9 @@ public static function onSkinBuildSidebar ($skin, &$bar ) {
         if (!is_array ($obj)) { $cHtml .= "<li><span style='color:red;'>Invalid entry in MediaWiki:Sidebar/Categories: " . htmlspecialchars (json_encode ($obj)) . "</span></li>"; continue; }  // skip entries which are not objects
         if (array_key_exists ("error", $obj)) { $cHtml .= "<li><span style='color:red;'>" . htmlspecialchars ($obj["error"]) . "</span></li>"; continue; }  // render configuration error message
         $style = ( array_key_exists ("style", $obj) ? $obj["style"]: "");
-        if (array_key_exists ("name", $obj))  {    
+
+        if (array_key_exists ("name", $obj))  {
+         
           if ($VERBOSE) {self::debugLog ("\n\n Formatting link: " . self::buildLink ($obj["name"], $style).  "\n\n");}
           $cHtml = $cHtml . "<li>".self::buildLink($obj["name"], $style)."</li>";
          }
@@ -109,6 +112,9 @@ HERE;
   // echo "" . (hrtime(true)-$entryTime)/1000 . " mu-sec";  // development: measuring cache miss time
   return true;
 }
+
+
+
 
 // ensure that editing the page Sidebar (and Mainpage) also generates a copy of it in directory assets so we can later pick it up again
 // ensure that after editing a sidebar relevant page in the MediaWiki namespace, the sidebar cache is deleted
@@ -205,12 +211,12 @@ private static function overrideSidebar ($name, OutputPage $out) {
 // get the JSON config object for categories
 private static function getCatConfig () {
   global $wgAllowVerbose; $VERBOSE = false && $wgAllowVerbose;
-  $configPage = "Sidebar/Categories";                                                         // name of the MediaWiki:Sidebar$name configuration page of this treelet
+  $configPage = "Sidebar/Categories";                                                                          // name of the MediaWiki:Sidebar$name configuration page of this treelet
   $title      = Title::newFromText( $configPage, NS_MEDIAWIKI );                              // build title object for MediaWiki:SidebarTree
   $wikipage   = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );  // get the WikiPage for that title via factory
-  $contentObject = $wikipage->getContent();                                                   // and obtain the content object for that
-  if ($contentObject ) {                                                                      // IF we have found a content object for this thing
-    $code    = ($contentObject instanceof TextContent) ? $contentObject->getText() : '';       // replaces deprecated ContentHandler::getContentText
+  $contentObject = $wikipage->getContent();                                                                    // and obtain the content object for that
+  if ($contentObject ) {                                                                                       // IF we have found a content object for this thing
+    $code    = ($contentObject instanceof TextContent) ? $contentObject->getText() : '';     
     if ($VERBOSE) {self::debugLog ("\n\n Categories configuration text before scanning is: " . $code . "  \n\n");}      
     $code = extractPreContents ($code);
     if ($VERBOSE) {self::debugLog ("\n\n Categories configuration text is: " . $code . "  \n\n");}
@@ -258,10 +264,27 @@ EOT);
 
   $out->addJsConfigVars('fancytree_path', $wgExtensionAssetsPath . "/DanteTree/fancytree");  // define the preload path for preloading some icons; not sure if really needed and an advantage // TODO: currently still need this wgExtensionsassetsPath here
     // Suckerfish menu script and styles
-    $out->addModules('ext.suckerfish');
-    $out->addStyle("../extensions/DanteTree/suckerfish/suckerfish.css");
+  $out->addModules('ext.suckerfish');
+  $out->addStyle("../extensions/DanteTree/suckerfish/suckerfish.css");
 
  }
+
+
+/**
+ * Export the site-wide DanteWiki index settings from LocalSettings.php to mw.config (delivered via the cached startup module).
+ * Unset globals are exported as null so the client can test with === null.
+ *
+ * @param array  &$vars  config vars delivered to the client; modified in place
+ * @param string $skin   name of the skin in use (unused)
+ * @param Config $config site configuration (unused)
+ * @return void
+ */
+public static function onResourceLoaderGetConfigVars( array &$vars, $skin, Config $config ): void {
+  global $wgWikiIndex, $wgWikiIndexClass, $wgWikiIndexSuffix;                                  // optional settings from LocalSettings.php
+  $vars['wgWikiIndex']       = $wgWikiIndex       ?? null;                                     // index number of this wiki variant
+  $vars['wgWikiIndexClass']  = $wgWikiIndexClass  ?? null;                                     // additional CSS class for the wiki name in the logo
+  $vars['wgWikiIndexSuffix'] = $wgWikiIndexSuffix ?? null;                                     // suffix shown next to the wiki name in the logo
+}
 
 
 // format the $name of a category in an <a> and <span> for fancy tree
@@ -495,9 +518,6 @@ WHERE tmpSelectCat2.cl_from IS NULL GROUP BY tmpSelectCat1.cl_to";
     else { $html = preg_replace('|<ul>|', "<ul class=\"$class todo\"$id>", $html, 1); }
     return array($html, 'isHTML' => true,  'noparse' => true );
   }
-
-
-
 
 
 
